@@ -1,0 +1,76 @@
+version: "3"
+services:
+  prisoner-offender-search:
+    image: quay.io/hmpps/prisoner-offender-search:latest
+    networks:
+      - hmpps
+    container_name: prisoner-offender-search
+    depends_on:
+      - localstack
+      - nomis-api
+    ports:
+      - "8084:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - API_BASE_URL_OAUTH=http://localhost:9090/auth
+      - API_BASE_URL_NOMIS=http://localhost:8093
+      - SQS_ENDPOINT_URL=http://localhost:4576
+      - SQS_PROVIDER=localstack
+      - SQS_AWS_ACCESS_KEY_ID=foobar
+      - SQS_AWS_SECRET_ACCESS_KEY=foobar
+      - SQS_DEFAULT_REGION=eu-west-2
+      - OAUTH_CLIENT_SECRET=clientsecret
+      - OAUTH_CLIENT_ID=prisoner-offender-search-client
+
+  nomis-api:
+    image: mojdigitalstudio/elite2-api:latest
+    container_name: nomis-api
+    depends_on:
+      - oauth
+    ports:
+      - "8093:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=nomis-hsqldb
+
+  oauth:
+    image: mojdigitalstudio/nomis-oauth2-server:latest
+    networks:
+      - hmpps
+    container_name: oauth
+    ports:
+      - "9090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  localstack:
+    image: localstack/localstack:0.10.5
+    networks:
+      - hmpps
+    container_name: localstack
+    ports:
+      - "4567-4597:4567-4597"
+      - 8999:8080
+    environment:
+      - SERVICES=es
+      - ES_PORT_EXTERNAL=4571
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - AWS_EXECUTION_ENV=True
+      - DEFAULT_REGION=eu-west-2
+      - TMPDIR=/private
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+networks:
+  hmpps:

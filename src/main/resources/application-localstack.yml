@@ -1,0 +1,20 @@
+sqs:
+  endpoint.url: http://localhost:4576
+  provider: localstack
+
+api:
+  base:
+    url:
+      oauth: http://localhost:8090/auth
+      nomis: http://localhost:8093
+
+graceful:
+  shutdown.enabled: false
+
+
+elasticsearch:
+  provider: localstack
+  port: 4571
+  scheme: http
+  host: localhost
+  aws.signrequests: false

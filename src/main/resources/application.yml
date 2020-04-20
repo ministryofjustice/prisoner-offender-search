@@ -1,0 +1,84 @@
+info.app:
+  name: HMPPS Prisoner Search
+  version: 1.0
+
+spring:
+  application:
+    name: prisoner-offender-search
+
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    default-property-inclusion: non_null
+
+  codec:
+    max-in-memory-size: 10MB
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${api.base.url.oauth}/issuer
+          jwk-set-uri: ${api.base.url.oauth}/.well-known/jwks.json
+
+      client:
+        registration:
+          nomis-api:
+            provider: hmpps-auth
+            client-id: ${oauth.client.id}
+            client-secret: ${oauth.client.secret}
+            authorization-grant-type: client_credentials
+            scope: read
+        provider:
+          hmpps-auth:
+            token-uri: ${api.base.url.oauth}/oauth/token
+server:
+  port: 8082
+  servlet:
+    context-path: /
+  forward-headers-strategy: native
+  tomcat:
+    remote-ip-header: x-forwarded-for
+    protocol_header: x-forwarded-proto
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: 'info, health'
+  endpoint:
+    health:
+      cache:
+        time-to-live: 2000ms
+      show-components: always
+      show-details: always
+    info:
+      cache:
+        time-to-live: 2000ms
+
+graceful:
+  shutdown.enabled: false
+
+azure:
+  application-insights.web.enable-W3C: true
+
+api:
+  base:
+    url:
+      oauth: http://localhost:8090/auth
+      nomis: http://localhost:8093
+
+elasticsearch:
+  provider: localstack
+  port: 4571
+  scheme: http
+  host: localhost
+  aws.signrequests: false
+
+#sqs:
+#  provider: aws
+#  queue.name: prison_to_nhs_queue
+#  dlq.name: prison_to_nhs_dlq
+#  endpoint.region: eu-west-2

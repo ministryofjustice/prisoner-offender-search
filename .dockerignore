@@ -1,0 +1,10 @@
+.circleci
+.dockerignore
+.gitignore
+.gradle
+.idea
+build
+docker-compose.yml
+helm_deploy
+src/test
+README.md
