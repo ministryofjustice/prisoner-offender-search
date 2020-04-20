@@ -1,48 +1,76 @@
 package uk.org.justice.digital.hmpps.prisonersearch.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
+import org.springframework.core.convert.converter.Converter
+import org.springframework.core.convert.support.DefaultConversionService
+import org.springframework.data.convert.ReadingConverter
+import org.springframework.data.convert.WritingConverter
 import org.springframework.data.elasticsearch.client.ClientConfiguration
 import org.springframework.data.elasticsearch.client.RestClients
+import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration
+import org.springframework.data.elasticsearch.core.ElasticsearchEntityMapper
+import org.springframework.data.elasticsearch.core.EntityMapper
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchCustomConversions
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @Configuration
 @EnableElasticsearchRepositories(basePackages = ["uk.org.justice.digital.hmpps.prisonersearch.repository"])
-class ElasticSearchConfiguration {
+class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
 
     @Value("\${elasticsearch.port}")
     private val port = 0
+
     @Value("\${elasticsearch.host}")
     private val host: String? = null
+
     @Value("\${elasticsearch.scheme}")
     private val scheme: String? = null
+
     @Value("\${elasticsearch.aws.signrequests}")
     private val shouldSignRequests = false
+
     @Value("\${aws.region:eu-west-2}")
     private val awsRegion: String? = null
 
     @Bean
-    fun elasticsearchClient(): RestHighLevelClient {
+    override fun elasticsearchClient(): RestHighLevelClient {
         return RestClients.create(ClientConfiguration.create("$host:$port")).rest()
     }
 
     @Bean
-    @Primary
-    fun objectMapper(builder: Jackson2ObjectMapperBuilder): ObjectMapper? {
-        val objectMapper: ObjectMapper = builder.build()
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        objectMapper.registerModule(JavaTimeModule())
-        objectMapper.registerModule(KotlinModule())
-        return objectMapper
+    override fun entityMapper(): EntityMapper? {
+        val entityMapper = ElasticsearchEntityMapper(elasticsearchMappingContext(), DefaultConversionService())
+        entityMapper.setConversions(elasticsearchCustomConversions())
+        return entityMapper
+    }
+
+    override fun elasticsearchCustomConversions(): ElasticsearchCustomConversions? {
+        return ElasticsearchCustomConversions(
+            listOf(
+                DateToStringConverter(),
+                StringToDateConverter()
+            )
+        )
+    }
+
+    @WritingConverter
+    class DateToStringConverter : Converter<LocalDate, String> {
+        override fun convert(localDate: LocalDate): String {
+            return localDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+        }
+    }
+
+    @ReadingConverter
+    class StringToDateConverter : Converter<String, LocalDate> {
+        override fun convert(dateStr: String): LocalDate {
+            return LocalDate.parse(dateStr);
+        }
     }
 
 }
