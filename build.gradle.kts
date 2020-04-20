@@ -84,7 +84,6 @@ dependencyManagement {
 dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.data:spring-data-elasticsearch")
@@ -96,16 +95,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.security:spring-security-oauth2-jose")
-
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
-    implementation("com.sun.xml.bind:jaxb-impl:2.3.2")
-    implementation("com.sun.xml.bind:jaxb-core:2.3.0.1")
-    implementation("javax.activation:activation:1.1.1")
-    implementation("javax.transaction:javax.transaction-api:1.3")
-
-    implementation("org.apache.commons:commons-lang3:3.10")
-    implementation("org.apache.commons:commons-text:1.8")
 
     implementation("org.springframework:spring-webflux")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")

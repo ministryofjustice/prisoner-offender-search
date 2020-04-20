@@ -25,15 +25,15 @@ class PrisonerSearchResource(val prisonerIndexService: PrisonerIndexService){
     fun index(): Map<String, String> {
 
         val prisoner1 = Prisoner("A1234AA", 123, "B1213",
-            "Mike", "Willis", LocalDate.of(1970,1,1).toString(), "MDI", true)
+            "Mike", "Willis", LocalDate.of(1970,1,1), "MDI", true)
         val prisoner2 = Prisoner("A1234AB", 124, "B1214",
-            "Rosie", "Willis", LocalDate.of(1998,8,28).toString(), "LPI", true)
+            "Rosie", "Willis", LocalDate.of(1998,8,28), "LPI", true)
         val prisoner3 = Prisoner("A1234AC", 125, "B1215",
-            "Molly", "Willis", LocalDate.of(1999,10,27).toString(), "PVI", true)
+            "Molly", "Willis", LocalDate.of(1999,10,27), "PVI", true)
         val prisoner4 = Prisoner("A1234AD", 126, "B1216",
-            "David", "Symons", LocalDate.of(1970,6,4).toString(), "LEI", true)
+            "David", "Symons", LocalDate.of(1970,6,4), "LEI", true)
         val prisoner5= Prisoner("A1234AE", 127, "B1217",
-            "Trevor", "Smith", LocalDate.of(2003,6,4).toString(), "LEI", true)
+            "Trevor", "Smith", LocalDate.of(2003,6,4), "LEI", true)
 
         prisonerIndexService.save(prisoner1)
         prisonerIndexService.save(prisoner2)
