@@ -3,13 +3,16 @@ package uk.org.justice.digital.hmpps.prisonersearch.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.codec.ClientCodecConfigurer
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
+import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+
 
 @Configuration
 class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: String) {
@@ -18,9 +21,15 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
   fun prisonWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("nomis-api")
+
+    val exchangeStrategies = ExchangeStrategies.builder()
+        .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
+        .build()
+
     return WebClient.builder()
             .baseUrl(baseUri)
             .apply(oauth2Client.oauth2Configuration())
+            .exchangeStrategies(exchangeStrategies)
             .build()
   }
 

@@ -1,23 +1,52 @@
 package uk.org.justice.digital.hmpps.prisonersearch.services
 
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.org.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.org.justice.digital.hmpps.prisonersearch.model.translate
 import uk.org.justice.digital.hmpps.prisonersearch.repository.PrisonerRepository
 
 @Service
-class PrisonerIndexService(val prisonerRepository: PrisonerRepository) {
+class PrisonerIndexService(val nomisService: NomisService,
+                           val prisonerRepository: PrisonerRepository) {
+    companion object {
+        val log: Logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     fun save(prisoner : Prisoner) : Prisoner {
         return prisonerRepository.save(prisoner)
     }
 
-    fun findByPrisonerId(prisonerId : String) : Prisoner {
-        return prisonerRepository.findByPrisonerId(prisonerId)
+    fun indexActivePrisonersInPrison(prisonId : String) : Int {
+        log.debug("Indexing Active Prisoner in {}", prisonId)
+
+        var count = 0
+        nomisService.getOffendersByPrison(prisonId)?.forEach {
+            prisonerRepository.save(translate(it))
+            count += 1
+        }
+        log.debug("Indexed {} prisoners", count)
+        return count
     }
 
-    fun findByLastAndFirstName(lastName : String, firstName : String) : Page<Prisoner> {
-        return prisonerRepository.findByLastNameAndFirstName(lastName, firstName, Pageable.unpaged())
+    fun indexAll() : Int {
+        log.debug("Indexing All prisoners")
+
+        var count = 0
+        var page = 0
+        do {
+            var pageCount = 0
+            nomisService.getOffendersIds(page, 100)?.forEach {
+                nomisService.getOffender(it.offenderNumber)?.let { ob ->
+                    prisonerRepository.save(translate(ob))
+                    count += 1
+                }
+                pageCount += 1
+            }
+            page += 1
+        } while (pageCount > 0)
+        return count
     }
+
 }

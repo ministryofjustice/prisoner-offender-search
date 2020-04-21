@@ -4,7 +4,7 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.org.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.org.justice.digital.hmpps.prisonersearch.model.translate
 
 @Service
 class PrisonerSyncService(
@@ -20,7 +20,7 @@ class PrisonerSyncService(
         log.debug("Offender Movement [booking ID {}]", message.bookingId)
 
         nomisService.getOffender(message.bookingId)?.let {
-            prisonerIndexService.save(mapPrisonerRecord(it))
+            prisonerIndexService.save(translate(it))
         }
     }
 
@@ -28,7 +28,7 @@ class PrisonerSyncService(
         log.debug("Offender Booking Change [booking ID {}]", message.bookingId)
 
         nomisService.getOffender(message.bookingId)?.let {
-            prisonerIndexService.save(mapPrisonerRecord(it))
+            prisonerIndexService.save(translate(it))
         }
     }
 
@@ -36,20 +36,10 @@ class PrisonerSyncService(
         log.debug("Offender Change [Noms ID {}]", message.offenderIdDisplay)
 
         nomisService.getOffender(message.offenderIdDisplay)?.let {
-            prisonerIndexService.save(mapPrisonerRecord(it))
+            prisonerIndexService.save(translate(it))
         }
     }
 
-    private fun mapPrisonerRecord(it: OffenderBooking) =
-        Prisoner(
-            it.offenderNo,
-            it.bookingId,
-            it.bookingNo,
-            it.firstName,
-            it.lastName,
-            it.dateOfBirth,
-            it.agencyId,
-            it.active
-        )
+
 
 }
