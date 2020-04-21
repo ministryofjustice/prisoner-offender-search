@@ -22,7 +22,7 @@ RUN addgroup --gid 2000 --system appgroup && \
 
 WORKDIR /app
 
-COPY --from=builder --chown=appuser:appgroup /app/build/libs/prison-to-nhs-update*.jar /app/app.jar
+COPY --from=builder --chown=appuser:appgroup /app/build/libs/prisoner-offender-search*.jar /app/app.jar
 COPY --from=builder --chown=appuser:appgroup /app/build/libs/applicationinsights-agent*.jar /app/agent.jar
 COPY --from=builder --chown=appuser:appgroup /app/AI-Agent.xml /app
 
