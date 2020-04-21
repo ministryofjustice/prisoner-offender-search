@@ -1,5 +1,5 @@
 info.app:
-  name: HMPPS Prisoner Search
+  name: HMPPS Prisoner Offender Search
   version: 1.0
 
 spring:
@@ -59,26 +59,23 @@ management:
         time-to-live: 2000ms
 
 graceful:
-  shutdown.enabled: false
+  shutdown.enabled: true
 
 azure:
   application-insights.web.enable-W3C: true
 
-api:
-  base:
-    url:
-      oauth: http://localhost:8090/auth
-      nomis: http://localhost:8093
+aws:
+  region: eu-west-2
 
 elasticsearch:
-  provider: localstack
-  port: 4571
-  scheme: http
+  provider: aws
+  port: 9200
+  scheme: https
   host: localhost
-  aws.signrequests: false
+  aws.signrequests: true
 
-#sqs:
-#  provider: aws
-#  queue.name: prison_to_nhs_queue
-#  dlq.name: prison_to_nhs_dlq
-#  endpoint.region: eu-west-2
+sqs:
+  provider: aws
+  queue.name: prisoner_offender_search_queue
+  dlq.name: prisoner_offender_search_dlq
+  endpoint.region: ${aws.region}
