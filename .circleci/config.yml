@@ -1,0 +1,112 @@
+version: 2.1
+
+orbs:
+  owasp: entur/owasp@0.0.6
+  dps: ministryofjustice/dps@1.2.1
+
+executors:
+  validator:
+    docker:
+      - image: circleci/openjdk:11-jdk
+      - image: localstack/localstack:0.10.5
+        environment:
+          - SERVICES=sqs,sns,es
+          - ES_PORT_EXTERNAL=4571
+          - DEBUG=${DEBUG- }
+          - DATA_DIR=/tmp/localstack/data
+          - DOCKER_HOST=unix:///var/run/docker.sock
+          - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+          - AWS_EXECUTION_ENV=True
+          - DEFAULT_REGION=eu-west-2
+          - TMPDIR=/private
+    environment:
+      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport
+    working_directory: ~/app
+
+jobs:
+  validate:
+    executor: validator
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle.kts" }}
+            - gradle-
+      - run:
+          environment:
+            SQS_PROVIDER: localstack
+          command: ./gradlew test
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle.kts" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build/libs
+            - build.gradle.kts
+
+workflows:
+  version: 2
+  build-test-and-deploy:
+    jobs:
+      - validate:
+          filters:
+            tags:
+              ignore: /.*/
+      - dps/helm_lint:
+          name: helm_lint
+      - dps/build_docker:
+          name: build_docker
+          filters:
+            branches:
+              only:
+                - master
+      - dps/deploy_env:
+          name: deploy_dev
+          env: "dev"
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - validate
+            - helm_lint
+            - build_docker
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_dev
+      - dps/deploy_env:
+          name: deploy_preprod
+          env: "preprod"
+          context: prisoner-offender-search-preprod
+          requires:
+            - request-preprod-approval
+      - request-prod-approval:
+          type: approval
+          requires:
+            - deploy_preprod
+      - dps/deploy_env:
+          name: deploy_prod
+          env: "prod"
+          slack_notification: true
+          context: prisoner-offender-search-prod
+          requires:
+            - request-prod-approval
+
+  scheduled:
+    triggers:
+      - schedule:
+          cron: "0 7 * * 1-5"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - owasp/gradle_owasp_dependency_check:
+          executor: validator

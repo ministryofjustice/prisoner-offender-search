@@ -1,5 +1,10 @@
 package uk.org.justice.digital.hmpps.prisonersearch.config
 
+import com.amazonaws.auth.AWS4Signer
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
+import org.apache.http.HttpHost
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
+import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -8,8 +13,6 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.data.convert.ReadingConverter
 import org.springframework.data.convert.WritingConverter
-import org.springframework.data.elasticsearch.client.ClientConfiguration
-import org.springframework.data.elasticsearch.client.RestClients
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration
 import org.springframework.data.elasticsearch.core.ElasticsearchEntityMapper
 import org.springframework.data.elasticsearch.core.EntityMapper
@@ -40,8 +43,17 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
 
     @Bean
     override fun elasticsearchClient(): RestHighLevelClient {
-        return RestClients.create(ClientConfiguration.create("$host:$port")).rest()
-    }
+        if (shouldSignRequests) {
+            val signer = AWS4Signer()
+            signer.serviceName = "es"
+            signer.regionName = awsRegion
+            val clientBuilder = RestClient.builder(HttpHost(host, port, scheme)).setHttpClientConfigCallback { callback: HttpAsyncClientBuilder ->
+                callback.addInterceptorLast(
+                    AWSRequestSigningApacheInterceptor(signer.serviceName, signer, DefaultAWSCredentialsProviderChain()))
+            }
+            return RestHighLevelClient(clientBuilder)
+        }
+        return RestHighLevelClient(RestClient.builder(HttpHost(host, port, scheme)))    }
 
     @Bean
     override fun entityMapper(): EntityMapper? {
