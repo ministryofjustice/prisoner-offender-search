@@ -49,11 +49,10 @@ open class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
                 .authorizeRequests { auth ->
                     auth.antMatchers(
                                     "/webjars/**", "/favicon.ico", "/csrf",
-                                    "/health", "/info", "/health/ping",
+                                    "/health/**", "/info",
                                     "/v2/api-docs",
                                     "/swagger-ui.html", "/swagger-resources", "/swagger-resources/configuration/ui",
-                                    "/swagger-resources/configuration/security",
-                        "/prisoner-search/**"
+                                    "/swagger-resources/configuration/security"
                             ).permitAll()
                             .anyRequest()
                             .authenticated()
