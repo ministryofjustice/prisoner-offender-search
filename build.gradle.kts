@@ -57,7 +57,7 @@ tasks.withType<DependencyUpdatesTask> {
     }
 }
 
-group = "uk.org.justice.digital.hmpps"
+group = "uk.gov.justice.digital.hmpps"
 
 val todaysDate: String = LocalDate.now().format(ISO_DATE)
 version = if (System.getenv().contains("BUILD_NUMBER")) System.getenv("BUILD_NUMBER") else todaysDate
