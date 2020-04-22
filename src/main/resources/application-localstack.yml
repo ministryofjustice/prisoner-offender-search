@@ -12,8 +12,6 @@ graceful:
   shutdown.enabled: false
 
 elasticsearch:
-  provider: localstack
   port: 4571
   scheme: http
   host: localhost
-  aws.signrequests: false

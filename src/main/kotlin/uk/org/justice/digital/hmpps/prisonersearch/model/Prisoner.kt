@@ -24,7 +24,7 @@ class Prisoner (
     val dateOfBirth: LocalDate? = null,
     @Field(type = Keyword)
     val agencyId: String? = null,
-    val active: Boolean = false
+    val active: Boolean
 )
 
 fun translate(offenderBooking : OffenderBooking) =

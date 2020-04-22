@@ -67,15 +67,13 @@ azure:
 aws:
   region: eu-west-2
 
-elasticsearch:
-  provider: aws
-  port: 9200
-  scheme: https
-  host: localhost
-  aws.signrequests: true
-
 sqs:
   provider: aws
   queue.name: prisoner_offender_search_queue
   dlq.name: prisoner_offender_search_dlq
   endpoint.region: ${aws.region}
+
+elasticsearch:
+  port: 9200
+  scheme: http
+  host: localhost

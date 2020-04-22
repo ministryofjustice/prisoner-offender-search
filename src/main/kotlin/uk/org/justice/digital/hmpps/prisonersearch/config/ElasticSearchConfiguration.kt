@@ -1,9 +1,6 @@
 package uk.org.justice.digital.hmpps.prisonersearch.config
 
-import com.amazonaws.auth.AWS4Signer
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import org.apache.http.HttpHost
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Value
@@ -35,25 +32,10 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
     @Value("\${elasticsearch.scheme}")
     private val scheme: String? = null
 
-    @Value("\${elasticsearch.aws.signrequests}")
-    private val shouldSignRequests = false
-
-    @Value("\${aws.region:eu-west-2}")
-    private val awsRegion: String? = null
-
     @Bean
     override fun elasticsearchClient(): RestHighLevelClient {
-        if (shouldSignRequests) {
-            val signer = AWS4Signer()
-            signer.serviceName = "es"
-            signer.regionName = awsRegion
-            val clientBuilder = RestClient.builder(HttpHost(host, port, scheme)).setHttpClientConfigCallback { callback: HttpAsyncClientBuilder ->
-                callback.addInterceptorLast(
-                    AWSRequestSigningApacheInterceptor(signer.serviceName, signer, DefaultAWSCredentialsProviderChain()))
-            }
-            return RestHighLevelClient(clientBuilder)
-        }
-        return RestHighLevelClient(RestClient.builder(HttpHost(host, port, scheme)))    }
+        return RestHighLevelClient(RestClient.builder(HttpHost(host, port, scheme)))
+    }
 
     @Bean
     override fun entityMapper(): EntityMapper? {
