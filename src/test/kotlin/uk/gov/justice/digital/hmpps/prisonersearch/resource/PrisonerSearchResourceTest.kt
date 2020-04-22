@@ -34,7 +34,7 @@ class PrisonerSearchResourceTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false},{\"prisonerId\":\"A7089EZ\",\"bookingId\":1900837,\"bookingNo\":\"38339C\",\"firstName\":\"John\",\"lastName\":\"Smyth\",\"dateOfBirth\":\"1981-01-01\",\"agencyId\":\"LEI\",\"active\":false}],\"pageable\":\"INSTANCE\",\"facets\":[],\"maxScore\":0.6931472,\"totalElements\":2,\"totalPages\":1,\"size\":2,\"numberOfElements\":2,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"first\":true,\"number\":0,\"last\":true,\"empty\":false}\n")
+      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false}],\"pageable\":\"INSTANCE\",\"facets\":[],\"maxScore\":0.2876821,\"totalElements\":1,\"totalPages\":1,\"size\":1,\"numberOfElements\":1,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"first\":true,\"number\":0,\"last\":true,\"empty\":false}\n")
   }
 
 }
