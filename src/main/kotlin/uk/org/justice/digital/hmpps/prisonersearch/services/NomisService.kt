@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
+import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.LocalDate
 
@@ -23,10 +25,10 @@ class NomisService(val prisonWebClient: WebClient,
             .block(offenderTimeout.multipliedBy(12))
     }
 
-    fun getOffendersIds(page: Int = 0, size: Int = 10): List<OffenderId>? {
+    fun getOffendersIds(offset: Int = 0, size: Int = 10): List<OffenderId>? {
         return prisonWebClient.get()
             .uri("/api/offenders/ids")
-            .header("Page-Offset", page.toString())
+            .header("Page-Offset", offset.toString())
             .header("Page-Limit", size.toString())
             .retrieve()
             .bodyToMono(ids)
@@ -46,6 +48,7 @@ class NomisService(val prisonWebClient: WebClient,
         .uri("/api/bookings/offenderNo/$nomsId")
         .retrieve()
         .bodyToMono(OffenderBooking::class.java)
+        .onErrorResume(NotFound::class.java) { Mono.empty() }
         .block(offenderTimeout)
   }
 }

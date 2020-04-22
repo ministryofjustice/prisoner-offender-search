@@ -18,6 +18,7 @@ class PrisonerIndexService(val nomisService: NomisService,
         return prisonerRepository.save(prisoner)
     }
 
+    //TODO: this is just a dummy way of indexing - just a tmp solution to try things out
     fun indexActivePrisonersInPrison(prisonId : String) : Int {
         log.debug("Indexing Active Prisoner in {}", prisonId)
 
@@ -30,21 +31,23 @@ class PrisonerIndexService(val nomisService: NomisService,
         return count
     }
 
+    //TODO: this is just a dummy way of indexing - just a tmp solution to try things out
     fun indexAll() : Int {
         log.debug("Indexing All prisoners")
 
         var count = 0
-        var page = 0
+        var offset = 0
         do {
             var pageCount = 0
-            nomisService.getOffendersIds(page, 100)?.forEach {
+            nomisService.getOffendersIds(offset, 100)?.forEach {
                 nomisService.getOffender(it.offenderNumber)?.let { ob ->
-                    prisonerRepository.save(translate(ob))
+                    save(translate(ob))
                     count += 1
                 }
                 pageCount += 1
             }
-            page += 1
+            offset += pageCount
+            log.debug("Indexed {} prisoners", count)
         } while (pageCount > 0)
         return count
     }
