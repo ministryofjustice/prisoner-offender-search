@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/ids"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "offenderNumber": "A7089EY"
+      },
+      {
+        "offenderNumber": "A7089EZ"
+      }
+    ]
+  }
+}
