@@ -49,7 +49,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
         .expectBody()
         .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("OK")
         .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("OK")
-        .jsonPath("components.db.status").isEqualTo("UP")
         .jsonPath("status").isEqualTo("UP")
   }
 
