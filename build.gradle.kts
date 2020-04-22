@@ -121,6 +121,16 @@ dependencies {
     implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.750"))
     implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
 
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude("org.junit.vintage", "junit-vintage-engine")
+    }
+
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+    testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+    testImplementation("org.testcontainers:localstack:1.14.0")
+    testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
+    testImplementation("io.jsonwebtoken:jjwt:0.9.1")
 }
 
 tasks {

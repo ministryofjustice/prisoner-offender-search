@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/bookings/offenderNo/A7089EZ"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody":
+    {
+      "bookingId": 1900837,
+      "bookingNo": "38339C",
+      "offenderNo": "A7089EZ",
+      "firstName": "John",
+      "lastName": "Smyth",
+      "agencyId": "LEI",
+      "assignedLivingUnitId": 25630,
+      "activeFlag": true,
+      "dateOfBirth": "1981-01-01"
+    }
+  }
+}

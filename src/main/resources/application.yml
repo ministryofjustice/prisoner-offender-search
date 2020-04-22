@@ -76,4 +76,4 @@ sqs:
 elasticsearch:
   port: 9200
   scheme: http
-  host: localhost
+  host: aws-es-proxy-service
