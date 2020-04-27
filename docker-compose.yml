@@ -56,7 +56,7 @@ services:
       - hmpps
     container_name: localstack
     ports:
-      - "4567-4597:4567-4597"
+      - "4566-4597:4566-4597"
       - 8999:8080
     environment:
       - SERVICES=sqs,sns,es

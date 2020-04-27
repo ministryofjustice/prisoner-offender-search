@@ -35,6 +35,7 @@ class IndexStatusService( val indexStatusRepository : IndexStatusRepository) {
     }
     currentIndexStatus.inProgress = true
     currentIndexStatus.startIndexTime = LocalDateTime.now()
+    currentIndexStatus.endIndexTime = null
     indexStatusRepository.save(currentIndexStatus)
 
     return true

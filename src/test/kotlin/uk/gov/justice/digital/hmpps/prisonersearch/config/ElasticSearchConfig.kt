@@ -18,7 +18,7 @@ class ElasticSearchConfig {
   @Bean
   fun elasticSearchContainer() : ElasticsearchContainer {
     log.info("Starting elasticsearch...")
-    val container = ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.6.2")
+    val container = ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:6.7.2")
     container.start()
     log.info("Started elasticsearch")
     return container

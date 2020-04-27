@@ -1,14 +1,17 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 
-class PrisonerIndexResourceTest : IntegrationTest() {
+class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `access forbidden when no authority`() {
 
-    webTestClient.get().uri("/prisoner-index/build-index")
+    webTestClient.put().uri("/prisoner-index/build-index")
         .exchange()
         .expectStatus().isUnauthorized
   }
@@ -16,7 +19,7 @@ class PrisonerIndexResourceTest : IntegrationTest() {
   @Test
   fun `access forbidden when no role`() {
 
-    webTestClient.get().uri("/prisoner-index/build-index")
+    webTestClient.put().uri("/prisoner-index/build-index")
         .headers(setAuthorisation())
         .exchange()
         .expectStatus().isForbidden
@@ -24,9 +27,21 @@ class PrisonerIndexResourceTest : IntegrationTest() {
 
   @Test
   fun `can index a prison with correct role`() {
-    webTestClient.get().uri("/prisoner-index/build-index")
+    webTestClient.put().uri("/prisoner-index/build-index")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
+
+    await untilCallTo { prisonRequestCountFor("/api/offenders/ids") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EY") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EZ") } matches { it == 1 }
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
   }
+
 }

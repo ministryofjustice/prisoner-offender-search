@@ -13,10 +13,19 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     @Autowired
     lateinit var queueUrl: String
 
+    @Autowired
+    lateinit var indexQueueUrl: String
+
     fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
         val queueAttributes = awsSqsClient.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
         return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
     }
+
+    fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
+        val queueAttributes = awsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
+        return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
+    }
+
 
     fun prisonRequestCountFor(url: String) = prisonMockServer.findAll(getRequestedFor(urlEqualTo(url))).count()
 
