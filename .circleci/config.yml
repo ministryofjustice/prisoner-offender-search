@@ -76,7 +76,7 @@ workflows:
                 - master
                 - alternate-indexing
           requires:
-            - validate
+#            - validate
             - helm_lint
             - build_docker
       - request-preprod-approval:
