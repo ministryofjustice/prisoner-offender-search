@@ -8,7 +8,7 @@ class PrisonerSearchResourceTest : IntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
 
-    webTestClient.get().uri("/prisoner-search/keywords/smith")
+    webTestClient.get().uri("/prisoner-search/match/smith")
       .exchange()
       .expectStatus().isUnauthorized
   }
@@ -16,7 +16,7 @@ class PrisonerSearchResourceTest : IntegrationTest() {
   @Test
   fun `access forbidden when no role`() {
 
-    webTestClient.get().uri("/prisoner-search/keywords/smith")
+    webTestClient.get().uri("/prisoner-search/match/smith")
       .headers(setAuthorisation())
       .exchange()
       .expectStatus().isForbidden
@@ -24,12 +24,12 @@ class PrisonerSearchResourceTest : IntegrationTest() {
 
   @Test
   fun `can retrieve a list of prisoners with correct role`() {
-    webTestClient.get().uri("/prisoner-index/prison/MDI/activeOnly")
+    webTestClient.get().uri("/prisoner-index/build-index")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
 
-    webTestClient.get().uri("/prisoner-search/keywords/smith")
+    webTestClient.get().uri("/prisoner-search/match/smith")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .exchange()
       .expectStatus().isOk

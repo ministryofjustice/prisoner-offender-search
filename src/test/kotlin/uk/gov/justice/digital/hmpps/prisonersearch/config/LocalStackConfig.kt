@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.config
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import com.amazonaws.services.sqs.model.QueueAttributeName
 import org.slf4j.Logger
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.testcontainers.containers.localstack.LocalStackContainer
+
 
 @Configuration
 @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "embedded-localstack")
@@ -43,5 +45,19 @@ class LocalStackConfig {
             """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}""")
     ))
     return awsSqsClient.getQueueUrl(queueName).queueUrl
+  }
+
+  @Bean
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  fun queueIndexUrl(@Autowired awsSqsIndexClient: AmazonSQSAsync,
+               @Value("\${sqs.index.queue.name}") queueName: String,
+               @Value("\${sqs.index.dlq.name}") dlqName: String): String {
+    val result = awsSqsIndexClient.createQueue(CreateQueueRequest(dlqName))
+    val dlqArn = awsSqsIndexClient.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
+    awsSqsIndexClient.createQueue(CreateQueueRequest(queueName).withAttributes(
+      mapOf(QueueAttributeName.RedrivePolicy.toString() to
+          """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}""")
+    ))
+    return awsSqsIndexClient.getQueueUrl(queueName).queueUrl
   }
 }

@@ -18,9 +18,9 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.health.QueueAttribut
 @Component
 @ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('\${sqs.provider}')")
 class IndexQueueHealth(@Autowired @Qualifier("awsSqsIndexClient") private val awsSqsClient: AmazonSQS,
-                  @Autowired @Qualifier("awsSqsIndexDlqClient") private val awsSqsDlqClient: AmazonSQS,
-                  @Value("\${sqs.index.queue.name}") private val queueName: String,
-                  @Value("\${sqs.index.dlq.name}") private val dlqName: String) : HealthIndicator {
+                       @Autowired @Qualifier("awsSqsIndexDlqClient") private val awsSqsDlqClient: AmazonSQS,
+                       @Value("\${sqs.index.queue.name}") private val queueName: String,
+                       @Value("\${sqs.index.dlq.name}") private val dlqName: String) : HealthIndicator {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)

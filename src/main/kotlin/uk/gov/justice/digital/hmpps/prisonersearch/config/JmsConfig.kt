@@ -26,7 +26,7 @@ import javax.jms.Session
 
 @Configuration
 @EnableJms
-@ConditionalOnExpression("{'aws', 'localstack'}.contains('\${sqs.provider}')")
+@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('\${sqs.provider}')")
 open class JmsConfig {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

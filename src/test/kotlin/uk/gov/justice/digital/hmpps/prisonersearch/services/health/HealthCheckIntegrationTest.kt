@@ -35,6 +35,8 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   fun tearDown() {
     ReflectionTestUtils.setField(queueHealth, "queueName", queueName)
     ReflectionTestUtils.setField(queueHealth, "dlqName", dlqName)
+    ReflectionTestUtils.setField(queueHealth, "indexQueueName", queueName)
+    ReflectionTestUtils.setField(queueHealth, "indexDlqName", dlqName)
   }
 
   @Test

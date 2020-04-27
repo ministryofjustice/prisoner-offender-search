@@ -8,7 +8,7 @@ class PrisonerIndexResourceTest : IntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
 
-    webTestClient.get().uri("/prisoner-index/rebuild")
+    webTestClient.get().uri("/prisoner-index/build-index")
         .exchange()
         .expectStatus().isUnauthorized
   }
@@ -16,7 +16,7 @@ class PrisonerIndexResourceTest : IntegrationTest() {
   @Test
   fun `access forbidden when no role`() {
 
-    webTestClient.get().uri("/prisoner-index/rebuild")
+    webTestClient.get().uri("/prisoner-index/build-index")
         .headers(setAuthorisation())
         .exchange()
         .expectStatus().isForbidden
@@ -24,7 +24,7 @@ class PrisonerIndexResourceTest : IntegrationTest() {
 
   @Test
   fun `can index a prison with correct role`() {
-    webTestClient.get().uri("/prisoner-index/prison/MDI/activeOnly")
+    webTestClient.get().uri("/prisoner-index/build-index")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
