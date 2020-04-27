@@ -22,6 +22,9 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   private lateinit var queueHealth: QueueHealth
 
   @Autowired
+  private lateinit var indexQueueHealth: IndexQueueHealth
+
+  @Autowired
   @Value("\${sqs.queue.name}")
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private lateinit var queueName: String
@@ -31,12 +34,23 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private lateinit var dlqName: String
 
+  @Autowired
+  @Value("\${sqs.index.queue.name}")
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private lateinit var indexQueueName: String
+
+  @Autowired
+  @Value("\${sqs.index.dlq.name}")
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private lateinit var indexDlqName: String
+
+
   @AfterEach
   fun tearDown() {
     ReflectionTestUtils.setField(queueHealth, "queueName", queueName)
     ReflectionTestUtils.setField(queueHealth, "dlqName", dlqName)
-    ReflectionTestUtils.setField(queueHealth, "indexQueueName", queueName)
-    ReflectionTestUtils.setField(queueHealth, "indexDlqName", dlqName)
+    ReflectionTestUtils.setField(indexQueueHealth, "indexQueueName", indexQueueName)
+    ReflectionTestUtils.setField(indexQueueHealth, "indexDlqName", indexDlqName)
   }
 
   @Test
