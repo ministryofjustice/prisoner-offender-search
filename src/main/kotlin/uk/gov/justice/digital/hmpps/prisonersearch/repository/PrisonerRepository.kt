@@ -7,6 +7,6 @@ import java.time.LocalDate
 
 interface PrisonerRepository {
     fun findByKeywords(keywords: String, pageable: Pageable?): Page<Prisoner>
-    fun findByIds(prisonerId: String): Prisoner
+    fun findByIds(prisonerId: String): Prisoner?
     fun findByDateOfBirth(dateOfBirth : LocalDate, pageable: Pageable?): Page<Prisoner>
 }

@@ -8,13 +8,13 @@ import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.LocalDateTime
 
 @Document(indexName = "offender-index-status")
-class IndexStatus (
+class IndexStatus(
   @Id
   @Field(type = FieldType.Keyword)
   var id: String = "STATUS",
 
   @Field(type = FieldType.Keyword)
-  var currentIndex : String?,
+  var currentIndex: SyncIndex,
 
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
   var startIndexTime: LocalDateTime?,
@@ -23,6 +23,11 @@ class IndexStatus (
   var endIndexTime: LocalDateTime?,
 
   @Field(type = FieldType.Boolean)
-  var inProgress : Boolean
+  var inProgress: Boolean
 
-)
+) {
+
+  fun toggleIndex() {
+    currentIndex = if (currentIndex == SyncIndex.INDEX_A) SyncIndex.INDEX_B else SyncIndex.INDEX_A
+  }
+}

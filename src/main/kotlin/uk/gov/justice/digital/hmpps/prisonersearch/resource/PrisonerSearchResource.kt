@@ -24,7 +24,7 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
     @GetMapping("/find-by/id/{id}")
     @ApiOperation(value = "Find by IDs")
     @PreAuthorize("hasAnyRole('GLOBAL_SEARCH','SYSTEM_USER')")
-    fun findByPrisonerId(@ApiParam("id", example = "A1234AA") @PathVariable id: String): Prisoner {
+    fun findByPrisonerId(@ApiParam("id", example = "A1234AA") @PathVariable id: String): Prisoner? {
         return prisonerSearchService.findById(id)
     }
 

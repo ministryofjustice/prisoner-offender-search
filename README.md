@@ -57,7 +57,7 @@ local test data:
 
 Purging a local queue
 ```bash
-aws --endpoint-url=http://localhost:4576 sqs purge-queue --queue-url http://localhost:4576/queue/prison_to_nhs_queue
+aws --endpoint-url=http://localhost:4576 sqs purge-queue --queue-url http://localhost:4576/queue/prisoner_offender_index_queue
 ```
 
 #### Running without queues

@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.amazonaws.services.sqs.AmazonSQSAsync
+import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.google.gson.Gson
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,11 +19,15 @@ class IndexQueueService(
   private val queueUrl : String = awsSqsIndexClient.getQueueUrl(indexQueueUrl).queueUrl
 
   fun sendIndexRequestMessage(payload: IndexRequest) {
-    awsSqsIndexClient.sendMessage(SendMessageRequest(queueUrl, gson.toJson(payload)))
+    awsSqsIndexClient.sendMessageAsync(SendMessageRequest(queueUrl, gson.toJson(payload)))
+  }
+
+  fun clearAllMessages() {
+    awsSqsIndexClient.purgeQueueAsync(PurgeQueueRequest(queueUrl))
   }
 }
 
 data class IndexRequest (
   val requestType: IndexRequestType,
-  val indexData: String?
+  val indexData: String? = null
 )

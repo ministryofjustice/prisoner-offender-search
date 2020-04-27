@@ -17,23 +17,20 @@ class PrisonerSyncService(
 
     fun externalMovement(message: ExternalPrisonerMovementMessage) {
         nomisService.getOffender(message.bookingId)?.let {
-            prisonerIndexService.save(it)
+            prisonerIndexService.sync(it)
         }
     }
 
     fun offenderBookingChange(message: OffenderBookingChangedMessage) {
         nomisService.getOffender(message.bookingId)?.let {
-            prisonerIndexService.save(it)
+            prisonerIndexService.sync(it)
         }
     }
 
     fun offenderChange(message: OffenderChangedMessage) {
-        syncPrisoner(message.offenderIdDisplay)
-    }
-
-    fun syncPrisoner(prisonerId: String) {
-        nomisService.getOffender(prisonerId)?.let {
-            prisonerIndexService.save(it)
+        nomisService.getOffender(message.offenderIdDisplay)?.let {
+            prisonerIndexService.sync(it)
         }
     }
+
 }
