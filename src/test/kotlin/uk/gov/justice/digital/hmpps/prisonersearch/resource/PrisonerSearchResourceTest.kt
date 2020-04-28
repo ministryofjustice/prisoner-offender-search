@@ -43,12 +43,27 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .exchange()
       .expectStatus().isOk
 
-    webTestClient.get().uri("/prisoner-search/match/smith")
+    webTestClient.get().uri("/prisoner-search/match/smith?page=0&size=10")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .exchange()
       .expectStatus().isOk
       .expectBody()
-      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false},{\"prisonerId\":\"A7089EZ\",\"bookingId\":1900837,\"bookingNo\":\"38339C\",\"firstName\":\"John\",\"lastName\":\"Smyth\",\"dateOfBirth\":\"1981-01-01\",\"agencyId\":\"LEI\",\"active\":false}],\"pageable\":\"INSTANCE\",\"facets\":[],\"maxScore\":0.6931472,\"totalElements\":2,\"totalPages\":1,\"size\":2,\"numberOfElements\":2,\"first\":true,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"number\":0,\"last\":true,\"empty\":false}\n")
+      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false},{\"prisonerId\":\"A7089EZ\",\"bookingId\":1900837,\"bookingNo\":\"38339C\",\"firstName\":\"John\",\"lastName\":\"Smyth\",\"dateOfBirth\":\"1981-01-01\",\"agencyId\":\"LEI\",\"active\":false}],\"pageable\":{\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"offset\":0,\"pageSize\":10,\"pageNumber\":0,\"paged\":true,\"unpaged\":false},\"facets\":[],\"maxScore\":0.6931472,\"totalPages\":1,\"totalElements\":2,\"size\":10,\"numberOfElements\":2,\"number\":0,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"first\":true,\"last\":true,\"empty\":false}")
+
+    webTestClient.get().uri("/prisoner-search/find-by/id/A7089EY")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .json("{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false}")
+
+    webTestClient.get().uri("/prisoner-search/find-by/date-of-birth/1980-12-31?page=0&size=10")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false}],\"pageable\":{\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"offset\":0,\"pageNumber\":0,\"pageSize\":10,\"paged\":true,\"unpaged\":false},\"facets\":[],\"maxScore\":1.0,\"totalElements\":1,\"totalPages\":1,\"size\":10,\"numberOfElements\":1,\"number\":0,\"first\":true,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"last\":true,\"empty\":false}")
+
   }
 
 }

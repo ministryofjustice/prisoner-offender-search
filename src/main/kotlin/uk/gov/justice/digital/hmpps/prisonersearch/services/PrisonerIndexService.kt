@@ -40,6 +40,11 @@ class PrisonerIndexService(val nomisService: NomisService,
 
     fun buildIndex() : IndexStatus {
         if (indexStatusService.markRebuildStarting()) {
+            if (indexStatusService.getCurrentIndex().currentIndex == SyncIndex.INDEX_A) {
+                prisonerBRepository.deleteAll()
+            } else {
+                prisonerARepository.deleteAll()
+            }
             indexQueueService.sendIndexRequestMessage(IndexRequest(IndexRequestType.REBUILD))
         }
         return indexStatusService.getCurrentIndex()
