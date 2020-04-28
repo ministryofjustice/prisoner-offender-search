@@ -67,7 +67,7 @@ env:
         name: pos-sqs-dl-instance-output
         key: secret_access_key
 
-  - name: SQS_DLQ_URL
+  - name: SQS_DLQ_NAME
     valueFrom:
       secretKeyRef:
         name: pos-sqs-dl-instance-output
