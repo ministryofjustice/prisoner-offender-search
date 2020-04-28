@@ -128,7 +128,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
-    testImplementation("org.testcontainers:localstack:1.14.1")
+    testImplementation("org.testcontainers:localstack:1.13.0")
     testImplementation("org.testcontainers:elasticsearch:1.14.1")
     testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
     testImplementation("io.jsonwebtoken:jjwt:0.9.1")

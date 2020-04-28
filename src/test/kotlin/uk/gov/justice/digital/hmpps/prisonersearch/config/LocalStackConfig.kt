@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.test.context.support.TestPropertySourceUtils
 import org.testcontainers.containers.localstack.LocalStackContainer
+import org.testcontainers.elasticsearch.ElasticsearchContainer
 
 
 @Configuration
@@ -22,7 +25,18 @@ class LocalStackConfig {
   }
 
   @Bean
-  fun localStackContainer(): LocalStackContainer {
+  fun elasticSearchContainer() : ElasticsearchContainer {
+    return ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch-oss:6.7.2")
+  }
+
+  @Bean
+  fun localStackContainer(elasticsearchContainer: ElasticsearchContainer, applicationContext : ConfigurableApplicationContext): LocalStackContainer {
+    log.info("Starting elasticsearch...")
+    elasticsearchContainer.start()
+    val elasticSearchPort = elasticsearchContainer.getMappedPort(9200)
+    TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext, "elasticsearch.port=$elasticSearchPort")
+    log.info("Started elasticsearch on port {}", elasticSearchPort)
+
     log.info("Starting localstack...")
     val localStackContainer: LocalStackContainer = LocalStackContainer()
         .withServices(LocalStackContainer.Service.SQS)
@@ -42,21 +56,21 @@ class LocalStackConfig {
     val dlqArn = awsSqsClient.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
     awsSqsClient.createQueue(CreateQueueRequest(queueName).withAttributes(
         mapOf(QueueAttributeName.RedrivePolicy.toString() to
-            """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}""")
+            """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"3"}""")
     ))
     return awsSqsClient.getQueueUrl(queueName).queueUrl
   }
 
   @Bean
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun queueIndexUrl(@Autowired awsSqsIndexClient: AmazonSQSAsync,
+  fun indexQueueUrl(@Autowired awsSqsIndexClient: AmazonSQSAsync,
                @Value("\${sqs.index.queue.name}") queueName: String,
                @Value("\${sqs.index.dlq.name}") dlqName: String): String {
     val result = awsSqsIndexClient.createQueue(CreateQueueRequest(dlqName))
     val dlqArn = awsSqsIndexClient.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
     awsSqsIndexClient.createQueue(CreateQueueRequest(queueName).withAttributes(
       mapOf(QueueAttributeName.RedrivePolicy.toString() to
-          """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}""")
+          """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"3"}""")
     ))
     return awsSqsIndexClient.getQueueUrl(queueName).queueUrl
   }

@@ -18,7 +18,7 @@ class PrisonerIndexListener(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  @JmsListener(destination = "\${sqs.index.queue.name}")
+  @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
   fun processIndexRequest(requestJson: String?) {
     log.debug(requestJson)
     val (requestType, indexData) = gson.fromJson(requestJson, IndexRequest::class.java)

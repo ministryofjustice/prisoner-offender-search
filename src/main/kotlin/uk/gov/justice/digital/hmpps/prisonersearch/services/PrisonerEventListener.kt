@@ -17,7 +17,7 @@ open class PrisonerEventListener(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  @JmsListener(destination = "\${sqs.queue.name}")
+  @JmsListener(destination = "\${sqs.queue.name}", containerFactory = "jmsListenerContainerFactory")
   fun processOffenderEvent(requestJson: String?) {
     log.debug(requestJson)
     val (message, messageId, messageAttributes) = gson.fromJson(requestJson, Message::class.java)

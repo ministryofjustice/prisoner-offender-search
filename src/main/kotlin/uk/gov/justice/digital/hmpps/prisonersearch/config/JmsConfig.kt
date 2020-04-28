@@ -14,6 +14,7 @@ import com.amazonaws.services.sqs.model.CreateQueueRequest
 import com.amazonaws.services.sqs.model.QueueAttributeName
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -26,7 +27,6 @@ import javax.jms.Session
 
 @Configuration
 @EnableJms
-@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('\${sqs.provider}')")
 open class JmsConfig {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -37,6 +37,18 @@ open class JmsConfig {
   open fun jmsListenerContainerFactory(awsSqsClient: AmazonSQS): DefaultJmsListenerContainerFactory {
     val factory = DefaultJmsListenerContainerFactory()
     factory.setConnectionFactory(SQSConnectionFactory(ProviderConfiguration(), awsSqsClient))
+    factory.setDestinationResolver(DynamicDestinationResolver())
+    factory.setConcurrency("1")
+    factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE)
+    factory.setErrorHandler { t: Throwable? -> log.error("Error caught in jms listener", t) }
+    return factory
+  }
+
+  @Bean
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  open fun jmsIndexListenerContainerFactory(awsSqsIndexClient: AmazonSQSAsync): DefaultJmsListenerContainerFactory {
+    val factory = DefaultJmsListenerContainerFactory()
+    factory.setConnectionFactory(SQSConnectionFactory(ProviderConfiguration(), awsSqsIndexClient))
     factory.setDestinationResolver(DynamicDestinationResolver())
     factory.setConcurrency("1")
     factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE)
@@ -85,7 +97,7 @@ open class JmsConfig {
       .build()
 
   @Bean("awsSqsClient")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnExpression("{'aws', 'localstack-docker-compose', 'localstack'}.contains('\${sqs.provider}')")
   fun awsSqsClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                   @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
       AmazonSQSClientBuilder.standard()
@@ -94,7 +106,7 @@ open class JmsConfig {
           .build()
 
   @Bean("awsSqsDlqClient")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnExpression("{'aws', 'localstack-docker-compose', 'localstack'}.contains('\${sqs.provider}')")
   open fun awsSqsDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                      @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
       AmazonSQSClientBuilder.standard()
@@ -103,7 +115,7 @@ open class JmsConfig {
           .build()
 
   @Bean("awsSqsIndexClient")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnExpression("{'aws', 'localstack-docker-compose', 'localstack'}.contains('\${sqs.provider}')")
   fun awsSqsIndexClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                              @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
     AmazonSQSAsyncClientBuilder.standard()
@@ -112,7 +124,7 @@ open class JmsConfig {
       .build()
 
   @Bean("awsSqsIndexDlqClient")
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @ConditionalOnExpression("{'aws', 'localstack-docker-compose', 'localstack'}.contains('\${sqs.provider}')")
   open fun awsSqsIndexDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                      @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
     AmazonSQSClientBuilder.standard()
@@ -120,30 +132,40 @@ open class JmsConfig {
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
-  @Bean
+  @Bean("queueUrl")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun queueUrl(@Autowired awsSqsClient: AmazonSQS,
+  fun queueUrl(@Qualifier("awsSqsClient") @Autowired awsSqsClient: AmazonSQS,
                     @Value("\${sqs.queue.name}") queueName: String,
                     @Value("\${sqs.dlq.name}") dlqName: String): String {
     return createQueue(awsSqsClient, queueName, dlqName)
   }
 
-  @Bean
-  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @Bean("indexQueueUrl")
+  @ConditionalOnExpression("{'aws', 'localstack-docker-compose'}.contains('\${sqs.provider}')")
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun indexQueueUrl(@Autowired awsSqsClient: AmazonSQS,
-                         @Value("\${sqs.index.queue.name}") queueName: String,
-                         @Value("\${sqs.index.dlq.name}") dlqName: String): String {
-    return createQueue(awsSqsClient, queueName, dlqName)
+  fun indexQueueUrl(@Qualifier("awsSqsIndexClient") @Autowired awsSqsIndexClient: AmazonSQSAsync,
+                    @Value("\${sqs.index.queue.name}") indexQueueName: String,
+                    @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
+    return awsSqsIndexClient.getQueueUrl(indexQueueName).queueUrl
   }
 
-  fun createQueue(awsSqsClient: AmazonSQS, queueName: String, dlqName: String): String {
+  @Bean("indexQueueUrl")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  fun indexQueueUrlLocalstack(@Qualifier("awsSqsIndexClient") @Autowired awsSqsIndexClient: AmazonSQSAsync,
+                    @Value("\${sqs.index.queue.name}") indexQueueName: String,
+                    @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
+    return createQueue(awsSqsIndexClient, indexQueueName, indexDlqName)
+  }
+
+  private fun createQueue(awsSqsClient: AmazonSQS, queueName: String, dlqName: String): String {
+    log.info("**** Creating Queue {} and DLQ {}", queueName, dlqName)
     val result = awsSqsClient.createQueue(CreateQueueRequest(dlqName))
     val dlqArn = awsSqsClient.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
     awsSqsClient.createQueue(CreateQueueRequest(queueName).withAttributes(
       mapOf(QueueAttributeName.RedrivePolicy.toString() to
-          """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}""")
+          """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"3"}""")
     ))
     return awsSqsClient.getQueueUrl(queueName).queueUrl
   }
