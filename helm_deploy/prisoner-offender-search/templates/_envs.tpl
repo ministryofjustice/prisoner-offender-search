@@ -49,11 +49,11 @@ env:
         name: pos-sqs-instance-output
         key: secret_access_key
 
-  - name: QUEUE_NAME
+  - name: SQS_QUEUE_NAME
     valueFrom:
       secretKeyRef:
         name: pos-sqs-instance-output
-        key: sqs_pos_url
+        key: sqs_pos_name
 
   - name: SQS_AWS_DLQ_ACCESS_KEY_ID
     valueFrom:
@@ -67,11 +67,11 @@ env:
         name: pos-sqs-dl-instance-output
         key: secret_access_key
 
-  - name: DLQ_URL
+  - name: SQS_DLQ_URL
     valueFrom:
       secretKeyRef:
         name: pos-sqs-dl-instance-output
-        key: sqs_pos_url
+        key: sqs_pos_name
 
   - name: SQS_INDEX_AWS_ACCESS_KEY_ID
     valueFrom:
