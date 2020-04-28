@@ -19,6 +19,10 @@ executors:
           - AWS_EXECUTION_ENV=True
           - DEFAULT_REGION=eu-west-2
           - TMPDIR=/private
+        volumes:
+          - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+          - "/var/run/docker.sock:/var/run/docker.sock"
+          - $PWD/localstack:/docker-entrypoint-initaws.d
     environment:
       _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport
     working_directory: ~/app
