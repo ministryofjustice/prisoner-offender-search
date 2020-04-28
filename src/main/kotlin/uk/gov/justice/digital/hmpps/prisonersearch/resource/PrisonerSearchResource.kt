@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.format.annotation.DateTimeFormat.ISO.DATE
 import org.springframework.http.MediaType
@@ -24,24 +26,26 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
     @GetMapping("/find-by/id/{id}")
     @ApiOperation(value = "Find by IDs")
     @PreAuthorize("hasAnyRole('GLOBAL_SEARCH')")
-    fun findByPrisonerId(@ApiParam("id", example = "A1234AA") @PathVariable id: String): Prisoner? {
+    fun findByPrisonerId(@ApiParam("id", example = "A1234AA", required = true) @PathVariable id: String): Prisoner? {
         return prisonerSearchService.findById(id)
     }
 
     @GetMapping("/find-by/date-of-birth/{dateOfBirth}")
     @ApiOperation(value = "Find offenders with specified date of birth")
     @PreAuthorize("hasAnyRole('GLOBAL_SEARCH')")
-    fun findByDob(@ApiParam("dateOfBirth", required = true) @DateTimeFormat(iso = DATE) @PathVariable dateOfBirth: LocalDate
+    fun findByDob(@ApiParam("dateOfBirth", required = true) @DateTimeFormat(iso = DATE) @PathVariable dateOfBirth: LocalDate,
+                  @PageableDefault pageable : Pageable
     ): Page<Prisoner> {
-        return prisonerSearchService.findByDob(dateOfBirth)
+        return prisonerSearchService.findByDob(dateOfBirth, pageable)
     }
 
     @GetMapping("/match/{keywords}")
     @ApiOperation(value = "Match offenders by keywords")
     @PreAuthorize("hasAnyRole('GLOBAL_SEARCH')")
-    fun findByKeywords(@ApiParam("keywords", example = "John Smith") @PathVariable keywords: String
-    ): Page<Prisoner> {
-        return prisonerSearchService.findByKeywords(keywords)
+    fun findByKeywords(@ApiParam("keywords", example = "John Smith", required = true) @PathVariable keywords: String,
+                       @PageableDefault pageable : Pageable
+    ) : Page<Prisoner> {
+        return prisonerSearchService.findByKeywords(keywords, pageable)
     }
 
 }

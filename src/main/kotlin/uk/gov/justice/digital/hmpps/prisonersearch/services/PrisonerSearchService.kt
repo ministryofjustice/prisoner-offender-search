@@ -17,12 +17,12 @@ class PrisonerSearchService(val prisonerARepository: PrisonerARepository, val pr
         return getPrisonerRepository().findByIds(id)
     }
 
-    fun findByKeywords(keywords : String) : Page<Prisoner> {
-        return getPrisonerRepository().findByKeywords(keywords, Pageable.unpaged())
+    fun findByKeywords(keywords : String, pageable : Pageable) : Page<Prisoner> {
+        return getPrisonerRepository().findByKeywords(keywords, pageable)
     }
 
-    fun findByDob(dob : LocalDate) : Page<Prisoner> {
-        return getPrisonerRepository().findByDateOfBirth(dob, Pageable.unpaged())
+    fun findByDob(dob : LocalDate, pageable : Pageable) : Page<Prisoner> {
+        return getPrisonerRepository().findByDateOfBirth(dob, pageable)
     }
 
     fun getPrisonerRepository() : PrisonerRepository {
