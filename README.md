@@ -35,10 +35,16 @@ TMPDIR=/private$TMPDIR docker-compose up --scale prisoner-offender-search=0
 
 Check the docker-compose file for sample environment variables to run the application locally.
 
-Or to just run `localstack` which is useful when running against an a non-local test system
+Or to just run `localstack` which is useful when running against an a non-local test system Env need to be `spring.profiles.active=localstack` and `sqs.provider=full-localstack`
 
 ```bash
 TMPDIR=/private$TMPDIR docker-compose up localstack 
+```
+
+Or to just run `localstack` is in the way CI would run and then run tests with `spring.profiles.active=localstack`
+
+```bash
+TMPDIR=/private$TMPDIR docker-compose -f docker-compose-circleci.yml up 
 ```
 
 In all of the above the application should use the host network to communicate with `localstack` since AWS Client will try to read messages from localhost rather than the `localstack` network.
@@ -57,7 +63,7 @@ local test data:
 
 Purging a local queue
 ```bash
-aws --endpoint-url=http://localhost:4576 sqs purge-queue --queue-url http://localhost:4576/queue/prison_to_nhs_queue
+aws --endpoint-url=http://localhost:4576 sqs purge-queue --queue-url http://localhost:4576/queue/prisoner_offender_index_queue
 ```
 
 #### Running without queues

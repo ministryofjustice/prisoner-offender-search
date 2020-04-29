@@ -21,7 +21,7 @@ class QueueHealthTest {
   private val someMessagesOnDLQCount = 789
   private val amazonSqs: AmazonSQS = mock()
   private val amazonSqsDLQ: AmazonSQS = mock()
-  private val queueHealth: QueueHealth = QueueHealth(amazonSqs, amazonSqsDLQ, someQueueName, someDLQName)
+  private val queueHealth: QueueHealth = EventQueueHealth(amazonSqs, amazonSqsDLQ, someQueueName, someDLQName)
 
   @Test
   fun `health - queue found - UP`() {

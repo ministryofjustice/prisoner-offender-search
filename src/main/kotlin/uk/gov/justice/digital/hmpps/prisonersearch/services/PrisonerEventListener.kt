@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-open class PrisonerChangeListenerPusher(
+open class PrisonerEventListener(
     private val prisonerSyncService: PrisonerSyncService,
     @Qualifier("gson") private val gson : Gson
 ) {
@@ -17,12 +17,12 @@ open class PrisonerChangeListenerPusher(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  @JmsListener(destination = "\${sqs.queue.name}")
-  fun pushPrisonUpdateToNhs(requestJson: String?) {
+  @JmsListener(destination = "\${sqs.queue.name}", containerFactory = "jmsListenerContainerFactory")
+  fun processOffenderEvent(requestJson: String?) {
     log.debug(requestJson)
     val (message, messageId, messageAttributes) = gson.fromJson(requestJson, Message::class.java)
     val eventType = messageAttributes.eventType.Value
-    log.info("Received message {} type {}", messageId, eventType)
+    log.debug("Received message {} type {}", messageId, eventType)
 
     when (eventType) {
       "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))

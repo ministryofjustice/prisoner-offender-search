@@ -6,4 +6,4 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 
 @Component
-class OauthApiHealth(webClient: WebClient, @Value("\${api.base.url.oauth}") baseUri: String, @Value("\${api.health-timeout:1s}") timeout: Duration) : HealthCheck(webClient, baseUri, timeout)
+class OauthApiHealth(webClient: WebClient, @Value("\${api.base.url.oauth}") baseUri: String, @Value("\${api.health-timeout:2s}") timeout: Duration) : HealthCheck(webClient, baseUri, timeout)

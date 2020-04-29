@@ -1,6 +1,8 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.config
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.amazonaws.services.sqs.AmazonSQSAsync
+import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
@@ -23,4 +25,16 @@ open class JmsLocalStackConfig(private val localStackContainer: LocalStackContai
       .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
       .withCredentials(localStackContainer.defaultCredentialsProvider)
       .build()
+
+  @Bean
+  fun awsSqsIndexClient(): AmazonSQSAsync = AmazonSQSAsyncClientBuilder.standard()
+    .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
+    .withCredentials(localStackContainer.defaultCredentialsProvider)
+    .build()
+
+  @Bean
+  fun awsSqsIndexDlqClient(): AmazonSQS = AmazonSQSClientBuilder.standard()
+    .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
+    .withCredentials(localStackContainer.defaultCredentialsProvider)
+    .build()
 }

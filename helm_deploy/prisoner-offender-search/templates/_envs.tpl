@@ -73,4 +73,40 @@ env:
         name: pos-sqs-dl-instance-output
         key: sqs_pos_name
 
+  - name: SQS_INDEX_AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: pos-idx-sqs-instance-output
+        key: access_key_id
+
+  - name: SQS_INDEX_AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: pos-idx-sqs-instance-output
+        key: secret_access_key
+
+  - name: SQS_INDEX_QUEUE_NAME
+    valueFrom:
+      secretKeyRef:
+        name: pos-idx-sqs-instance-output
+        key: sqs_pos_name
+
+  - name: SQS_INDEX_AWS_DLQ_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: pos-idx-sqs-dl-instance-output
+        key: access_key_id
+
+  - name: SQS_INDEX_AWS_DLQ_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: pos-idx-sqs-dl-instance-output
+        key: secret_access_key
+
+  - name: SQS_INDEX_DLQ_NAME
+    valueFrom:
+      secretKeyRef:
+        name: pos-idx-sqs-dl-instance-output
+        key: sqs_pos_name
+
 {{- end -}}

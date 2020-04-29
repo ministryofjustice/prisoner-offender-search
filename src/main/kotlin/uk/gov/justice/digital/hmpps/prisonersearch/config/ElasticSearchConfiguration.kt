@@ -16,6 +16,7 @@ import org.springframework.data.elasticsearch.core.EntityMapper
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchCustomConversions
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
@@ -48,7 +49,9 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
         return ElasticsearchCustomConversions(
             listOf(
                 DateToStringConverter(),
-                StringToDateConverter()
+                StringToDateConverter(),
+                DateTimeToStringConverter(),
+                StringToDateTimeConverter()
             )
         )
     }
@@ -64,6 +67,20 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
     class StringToDateConverter : Converter<String, LocalDate> {
         override fun convert(dateStr: String): LocalDate {
             return LocalDate.parse(dateStr);
+        }
+    }
+
+    @WritingConverter
+    class DateTimeToStringConverter : Converter<LocalDateTime, String> {
+        override fun convert(localDateTime: LocalDateTime): String {
+            return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        }
+    }
+
+    @ReadingConverter
+    class StringToDateTimeConverter : Converter<String, LocalDateTime> {
+        override fun convert(dateStr: String): LocalDateTime {
+            return LocalDateTime.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
     }
 

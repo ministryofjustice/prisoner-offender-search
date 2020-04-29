@@ -72,6 +72,8 @@ sqs:
   queue.name: prisoner_offender_search_queue
   dlq.name: prisoner_offender_search_dlq
   endpoint.region: ${aws.region}
+  index.queue.name: prisoner_offender_index_queue
+  index.dlq.name: prisoner_offender_index_dlq
 
 elasticsearch:
   port: 9200

@@ -3,53 +3,91 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
-import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
-import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerRepository
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
+import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 
 @Service
 class PrisonerIndexService(val nomisService: NomisService,
-                           val prisonerRepository: PrisonerRepository) {
+                           val prisonerARepository: PrisonerARepository,
+                           val prisonerBRepository: PrisonerBRepository,
+                           val indexQueueService : IndexQueueService,
+                           val indexStatusService: IndexStatusService
+) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
-    fun save(prisoner : Prisoner) : Prisoner {
-        return prisonerRepository.save(prisoner)
-    }
-
-    //TODO: this is just a dummy way of indexing - just a tmp solution to try things out
-    fun indexActivePrisonersInPrison(prisonId : String) : Int {
-        log.debug("Indexing Active Prisoner in {}", prisonId)
-
-        var count = 0
-        nomisService.getOffendersByPrison(prisonId)?.forEach {
-            prisonerRepository.save(translate(it))
-            count += 1
+    fun indexPrisoner(prisonerId: String) {
+        nomisService.getOffender(prisonerId)?.let {
+            buildIndex(it)
         }
-        log.debug("Indexed {} prisoners", count)
-        return count
     }
 
-    //TODO: this is just a dummy way of indexing - just a tmp solution to try things out
-    fun indexAll() : Int {
-        log.debug("Indexing All prisoners")
+    fun sync(offenderBooking: OffenderBooking)  {
+        val currentIndexStatus = indexStatusService.getCurrentIndex()
 
+        if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+            prisonerARepository.save(PrisonerA(offenderBooking))
+        } else {
+            prisonerBRepository.save(PrisonerB(offenderBooking))
+        }
+        buildIndex(offenderBooking)  // Keep changes in sync if rebuilding
+    }
+
+    fun buildIndex() : IndexStatus {
+        if (indexStatusService.markRebuildStarting()) {
+            if (indexStatusService.getCurrentIndex().currentIndex == SyncIndex.INDEX_A) {
+                prisonerBRepository.deleteAll()
+            } else {
+                prisonerARepository.deleteAll()
+            }
+            indexQueueService.sendIndexRequestMessage(IndexRequest(IndexRequestType.REBUILD))
+        }
+        return indexStatusService.getCurrentIndex()
+    }
+
+    fun indexingComplete() : IndexStatus {
+        indexStatusService.markRebuildComplete()
+        indexQueueService.clearAllMessages()
+        return indexStatusService.getCurrentIndex()
+    }
+
+    fun addIndexRequestToQueue(): Int {
         var count = 0
+
+        log.debug("Sending Indexing Requests")
         var offset = 0
         do {
-            var pageCount = 0
-            nomisService.getOffendersIds(offset, 100)?.forEach {
-                nomisService.getOffender(it.offenderNumber)?.let { ob ->
-                    save(translate(ob))
-                    count += 1
-                }
-                pageCount += 1
+            var numberReturned = 0
+            nomisService.getOffendersIds(offset, pageSizeToRetrieve())?.forEach {
+                indexQueueService.sendIndexRequestMessage(IndexRequest(IndexRequestType.OFFENDER, it.offenderNumber))
+                count += 1
+                numberReturned += 1
             }
-            offset += pageCount
-            log.debug("Indexed {} prisoners", count)
-        } while (pageCount > 0)
+            offset += pageSizeToRetrieve()
+            log.debug("Requested {} so far, number returned {}", count, numberReturned)
+        } while (numberReturned > pageSize() && indexStatusService.getCurrentIndex().inProgress)
+        log.debug("All Rebuild messages sent {}", count)
         return count
     }
+
+    private fun buildIndex(offenderBooking: OffenderBooking) {
+        val currentIndexStatus = indexStatusService.getCurrentIndex()
+
+        if (currentIndexStatus.inProgress) {
+            if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+                prisonerBRepository.save(PrisonerB(offenderBooking))
+            } else {
+                prisonerARepository.save(PrisonerA(offenderBooking))
+            }
+        }
+    }
+
+    private fun pageSize() = 100
+    private fun pageSizeToRetrieve() = pageSize()+1
 
 }

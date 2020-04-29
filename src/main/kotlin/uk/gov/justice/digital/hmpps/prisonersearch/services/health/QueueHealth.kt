@@ -6,14 +6,9 @@ import com.amazonaws.services.sqs.model.QueueAttributeName.ApproximateNumberOfMe
 import com.amazonaws.services.sqs.model.QueueAttributeName.ApproximateNumberOfMessagesNotVisible
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.Health.Builder
 import org.springframework.boot.actuate.health.HealthIndicator
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
-import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.prisonersearch.services.health.DlqStatus.*
 import uk.gov.justice.digital.hmpps.prisonersearch.services.health.QueueAttributes.*
 
@@ -30,12 +25,10 @@ enum class QueueAttributes(val awsName: String, val healthName: String) {
   MESSAGES_ON_DLQ(ApproximateNumberOfMessages.toString(), "MessagesOnDLQ")
 }
 
-@Component
-@ConditionalOnExpression("{'aws', 'localstack', 'embedded-localstack'}.contains('\${sqs.provider}')")
-class QueueHealth(@Autowired @Qualifier("awsSqsClient") private val awsSqsClient: AmazonSQS,
-                  @Autowired @Qualifier("awsSqsDlqClient") private val awsSqsDlqClient: AmazonSQS,
-                  @Value("\${sqs.queue.name}") private val queueName: String,
-                  @Value("\${sqs.dlq.name}") private val dlqName: String) : HealthIndicator {
+abstract class QueueHealth( private val awsSqsClient: AmazonSQS,
+                  private val awsSqsDlqClient: AmazonSQS,
+                  private val queueName: String,
+                  private val dlqName: String) : HealthIndicator {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -77,7 +70,7 @@ class QueueHealth(@Autowired @Qualifier("awsSqsClient") private val awsSqsClient
       return down(e).withDetail("dlqStatus", NOT_AVAILABLE.description)
     }
 
-    return withDetail("dlqStatus", DlqStatus.UP.description)
+    return withDetail("dlqStatus", UP.description)
         .withDetail(MESSAGES_ON_DLQ.healthName, dlqAttributes.attributes[MESSAGES_ON_DLQ.awsName]?.toInt())
   }
 
