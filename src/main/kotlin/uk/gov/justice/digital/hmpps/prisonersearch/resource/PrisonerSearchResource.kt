@@ -25,14 +25,14 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
 
     @GetMapping("/find-by/id/{id}")
     @ApiOperation(value = "Find by IDs")
-    @PreAuthorize("hasAnyRole('GLOBAL_SEARCH')")
+    @PreAuthorize("hasRole('GLOBAL_SEARCH')")
     fun findByPrisonerId(@ApiParam("id", example = "A1234AA", required = true) @PathVariable id: String): Prisoner? {
         return prisonerSearchService.findById(id)
     }
 
     @GetMapping("/find-by/date-of-birth/{dateOfBirth}")
     @ApiOperation(value = "Find offenders with specified date of birth")
-    @PreAuthorize("hasAnyRole('GLOBAL_SEARCH')")
+    @PreAuthorize("hasRole('GLOBAL_SEARCH')")
     fun findByDob(@ApiParam("dateOfBirth", required = true) @DateTimeFormat(iso = DATE) @PathVariable dateOfBirth: LocalDate,
                   @PageableDefault pageable : Pageable
     ): Page<Prisoner> {
@@ -41,7 +41,7 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
 
     @GetMapping("/match/{keywords}")
     @ApiOperation(value = "Match offenders by keywords")
-    @PreAuthorize("hasAnyRole('GLOBAL_SEARCH')")
+    @PreAuthorize("hasRole('GLOBAL_SEARCH')")
     fun findByKeywords(@ApiParam("keywords", example = "John Smith", required = true) @PathVariable keywords: String,
                        @PageableDefault pageable : Pageable
     ) : Page<Prisoner> {

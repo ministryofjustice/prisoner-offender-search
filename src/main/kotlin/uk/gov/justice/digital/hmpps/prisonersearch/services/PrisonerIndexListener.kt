@@ -19,13 +19,16 @@ class PrisonerIndexListener(
   }
 
   @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
-  fun processIndexRequest(requestJson: String?) {
+  fun processIndexRequest(requestJson: String?, msg : javax.jms.Message ) {
     log.debug(requestJson)
     val (requestType, indexData) = gson.fromJson(requestJson, IndexRequest::class.java)
     log.debug("Received message request {} {}", requestType, indexData)
 
     when (requestType) {
-      REBUILD -> prisonerIndexService.addIndexRequestToQueue()
+      REBUILD -> {
+        msg.acknowledge()  // ack before processing
+        prisonerIndexService.addIndexRequestToQueue()
+      }
       OFFENDER -> indexData?.let { prisonerIndexService.indexPrisoner(it) }
     }
   }

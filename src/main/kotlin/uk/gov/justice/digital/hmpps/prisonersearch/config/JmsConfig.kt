@@ -34,11 +34,11 @@ open class JmsConfig {
 
   @Bean
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  open fun jmsListenerContainerFactory(awsSqsClient: AmazonSQS): DefaultJmsListenerContainerFactory {
+  fun jmsListenerContainerFactory(awsSqsClient: AmazonSQS): DefaultJmsListenerContainerFactory {
     val factory = DefaultJmsListenerContainerFactory()
     factory.setConnectionFactory(SQSConnectionFactory(ProviderConfiguration(), awsSqsClient))
     factory.setDestinationResolver(DynamicDestinationResolver())
-    factory.setConcurrency("1")
+    factory.setConcurrency("1-1")
     factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE)
     factory.setErrorHandler { t: Throwable? -> log.error("Error caught in jms listener", t) }
     return factory
@@ -46,11 +46,11 @@ open class JmsConfig {
 
   @Bean
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  open fun jmsIndexListenerContainerFactory(awsSqsIndexClient: AmazonSQSAsync): DefaultJmsListenerContainerFactory {
+  fun jmsIndexListenerContainerFactory(awsSqsIndexClient: AmazonSQS): DefaultJmsListenerContainerFactory {
     val factory = DefaultJmsListenerContainerFactory()
     factory.setConnectionFactory(SQSConnectionFactory(ProviderConfiguration(), awsSqsIndexClient))
     factory.setDestinationResolver(DynamicDestinationResolver())
-    factory.setConcurrency("1")
+    factory.setConcurrency("1-1")
     factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE)
     factory.setErrorHandler { t: Throwable? -> log.error("Error caught in jms listener", t) }
     return factory
@@ -78,7 +78,7 @@ open class JmsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun awsSqsIndexClient(@Value("\${sqs.index.aws.access.key.id}") accessKey: String,
+  fun awsSqsIndexASyncClient(@Value("\${sqs.index.aws.access.key.id}") accessKey: String,
                         @Value("\${sqs.index.aws.secret.access.key}") secretKey: String,
                         @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
     AmazonSQSAsyncClientBuilder.standard()
@@ -114,11 +114,20 @@ open class JmsConfig {
           .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
           .build()
 
+  @Bean("awsSqsIndexASyncClient")
+  @ConditionalOnExpression("{'aws', 'full-localstack', 'localstack'}.contains('\${sqs.provider}')")
+  fun awsSqsIndexASyncClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+                             @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
+    AmazonSQSAsyncClientBuilder.standard()
+      .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
+      .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
+      .build()
+
   @Bean("awsSqsIndexClient")
   @ConditionalOnExpression("{'aws', 'full-localstack', 'localstack'}.contains('\${sqs.provider}')")
   fun awsSqsIndexClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-                             @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
-    AmazonSQSAsyncClientBuilder.standard()
+                                       @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+    AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
@@ -144,19 +153,19 @@ open class JmsConfig {
   @Bean("indexQueueUrl")
   @ConditionalOnExpression("{'aws', 'full-localstack'}.contains('\${sqs.provider}')")
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun indexQueueUrl(@Qualifier("awsSqsIndexClient") @Autowired awsSqsIndexClient: AmazonSQSAsync,
+  fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") @Autowired awsSqsIndexASyncClient: AmazonSQSAsync,
                     @Value("\${sqs.index.queue.name}") indexQueueName: String,
                     @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
-    return awsSqsIndexClient.getQueueUrl(indexQueueName).queueUrl
+    return awsSqsIndexASyncClient.getQueueUrl(indexQueueName).queueUrl
   }
 
   @Bean("indexQueueUrl")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun indexQueueUrlLocalstack(@Qualifier("awsSqsIndexClient") @Autowired awsSqsIndexClient: AmazonSQSAsync,
+  fun indexQueueUrlLocalstack(@Qualifier("awsSqsIndexASyncClient") @Autowired awsSqsIndexASyncClient: AmazonSQSAsync,
                     @Value("\${sqs.index.queue.name}") indexQueueName: String,
                     @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
-    return createQueue(awsSqsIndexClient, indexQueueName, indexDlqName)
+    return createQueue(awsSqsIndexASyncClient, indexQueueName, indexDlqName)
   }
 
   private fun createQueue(awsSqsClient: AmazonSQS, queueName: String, dlqName: String): String {

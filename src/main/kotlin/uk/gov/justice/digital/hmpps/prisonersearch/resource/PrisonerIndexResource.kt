@@ -17,14 +17,14 @@ class PrisonerIndexResource(val prisonerIndexService: PrisonerIndexService){
 
     @PutMapping("/build-index")
     @ApiOperation(value = "Build index")
-    @PreAuthorize("hasAnyRole('PRISONER_INDEX')")
+    @PreAuthorize("hasRole('PRISONER_INDEX')")
     fun buildIndex(): IndexStatus {
         return prisonerIndexService.buildIndex()
     }
 
     @PutMapping("/mark-complete")
     @ApiOperation(value = "Mark index as complete")
-    @PreAuthorize("hasAnyRole('PRISONER_INDEX')")
+    @PreAuthorize("hasRole('PRISONER_INDEX')")
     fun indexComplete(): IndexStatus{
         return prisonerIndexService.indexingComplete()
     }
