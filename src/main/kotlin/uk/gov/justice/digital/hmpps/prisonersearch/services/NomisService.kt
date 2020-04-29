@@ -13,19 +13,8 @@ import java.time.LocalDate
 class NomisService(val prisonWebClient: WebClient,
                       @Value("\${api.offender.timeout:5s}") val offenderTimeout: Duration) {
 
-    private val prisoners = object : ParameterizedTypeReference<List<OffenderBooking>>() {}
     private val ids = object : ParameterizedTypeReference<List<OffenderId>>() {}
-
-    fun getOffendersByPrison(prisonId: String, offset : Int, limit : Int): List<OffenderBooking>? {
-        return prisonWebClient.get()
-            .uri("/api/bookings?query=agencyId:eq:'$prisonId'")
-            .header("Page-Offset", offset.toString())
-            .header("Page-Limit", limit.toString())
-            .retrieve()
-            .bodyToMono(prisoners)
-            .block(offenderTimeout.multipliedBy(12))
-    }
-
+  
     fun getOffendersIds(offset: Int = 0, size: Int = 10): List<OffenderId>? {
         return prisonWebClient.get()
             .uri("/api/offenders/ids")
