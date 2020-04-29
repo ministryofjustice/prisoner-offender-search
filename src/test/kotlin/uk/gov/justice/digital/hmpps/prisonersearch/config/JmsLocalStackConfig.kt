@@ -27,7 +27,13 @@ open class JmsLocalStackConfig(private val localStackContainer: LocalStackContai
       .build()
 
   @Bean
-  fun awsSqsIndexClient(): AmazonSQSAsync = AmazonSQSAsyncClientBuilder.standard()
+  fun awsSqsIndexASyncClient(): AmazonSQSAsync = AmazonSQSAsyncClientBuilder.standard()
+    .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
+    .withCredentials(localStackContainer.defaultCredentialsProvider)
+    .build()
+
+  @Bean
+  fun awsSqsIndexClient(): AmazonSQS = AmazonSQSClientBuilder.standard()
     .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
     .withCredentials(localStackContainer.defaultCredentialsProvider)
     .build()

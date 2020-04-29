@@ -11,17 +11,17 @@ import org.springframework.stereotype.Service
 
 @Service
 class IndexQueueService(
-  @Autowired @Qualifier("awsSqsIndexClient") private val awsSqsIndexClient: AmazonSQSAsync,
+  @Autowired @Qualifier("awsSqsIndexASyncClient") private val awsSqsIndexASyncClient: AmazonSQSAsync,
   @Autowired @Qualifier("indexQueueUrl") private val indexQueueUrl: String,
   private val gson: Gson
 ) {
 
   fun sendIndexRequestMessage(payload: IndexRequest) {
-    awsSqsIndexClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
+    awsSqsIndexASyncClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
   }
 
   fun clearAllMessages() {
-    awsSqsIndexClient.purgeQueueAsync(PurgeQueueRequest(indexQueueUrl))
+    awsSqsIndexASyncClient.purgeQueueAsync(PurgeQueueRequest(indexQueueUrl))
   }
 }
 

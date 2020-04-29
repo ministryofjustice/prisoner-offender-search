@@ -63,15 +63,15 @@ class LocalStackConfig {
 
   @Bean
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun indexQueueUrl(@Autowired awsSqsIndexClient: AmazonSQSAsync,
+  fun indexQueueUrl(@Autowired awsSqsIndexASyncClient: AmazonSQSAsync,
                @Value("\${sqs.index.queue.name}") queueName: String,
                @Value("\${sqs.index.dlq.name}") dlqName: String): String {
-    val result = awsSqsIndexClient.createQueue(CreateQueueRequest(dlqName))
-    val dlqArn = awsSqsIndexClient.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
-    awsSqsIndexClient.createQueue(CreateQueueRequest(queueName).withAttributes(
+    val result = awsSqsIndexASyncClient.createQueue(CreateQueueRequest(dlqName))
+    val dlqArn = awsSqsIndexASyncClient.getQueueAttributes(result.queueUrl, listOf(QueueAttributeName.QueueArn.toString()))
+    awsSqsIndexASyncClient.createQueue(CreateQueueRequest(queueName).withAttributes(
       mapOf(QueueAttributeName.RedrivePolicy.toString() to
           """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"3"}""")
     ))
-    return awsSqsIndexClient.getQueueUrl(queueName).queueUrl
+    return awsSqsIndexASyncClient.getQueueUrl(queueName).queueUrl
   }
 }
