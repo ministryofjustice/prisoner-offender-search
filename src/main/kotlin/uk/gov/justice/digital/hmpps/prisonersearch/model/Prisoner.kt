@@ -3,12 +3,13 @@ package uk.gov.justice.digital.hmpps.prisonersearch.model
 import java.time.LocalDate
 
 interface Prisoner {
-  var prisonerId: String?
+  var prisonerNumber: String?
   val bookingId: Long?
-  val bookingNo: String?
+  val bookNumber: String?
   val firstName: String?
+  val middleNames: String?
   val lastName: String?
   val dateOfBirth: LocalDate?
-  val agencyId: String?
-  val active: Boolean
+  val prisonId: String?
+  val status: String
 }
