@@ -3,7 +3,10 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.model.*
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.model.translateA
+import uk.gov.justice.digital.hmpps.prisonersearch.model.translateB
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
@@ -29,9 +32,9 @@ class PrisonerIndexService(val nomisService: NomisService,
         val currentIndexStatus = indexStatusService.getCurrentIndex()
 
         if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-            prisonerARepository.save(translate(offenderBooking, currentIndexStatus.currentIndex) as PrisonerA)
+            prisonerARepository.save(translateA(offenderBooking))
         } else {
-            prisonerBRepository.save(translate(offenderBooking, currentIndexStatus.currentIndex) as PrisonerB)
+            prisonerBRepository.save(translateB(offenderBooking))
         }
         buildIndex(offenderBooking)  // Keep changes in sync if rebuilding
     }
@@ -78,9 +81,9 @@ class PrisonerIndexService(val nomisService: NomisService,
 
         if (currentIndexStatus.inProgress) {
             if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-                prisonerBRepository.save(translate(offenderBooking, currentIndexStatus.currentIndex) as PrisonerB)
+                prisonerBRepository.save(translateB(offenderBooking))
             } else {
-                prisonerARepository.save(translate(offenderBooking, currentIndexStatus.currentIndex) as PrisonerA)
+                prisonerARepository.save(translateA(offenderBooking))
             }
         }
     }

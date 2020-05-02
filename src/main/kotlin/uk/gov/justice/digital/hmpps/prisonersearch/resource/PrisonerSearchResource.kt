@@ -30,6 +30,13 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
         return prisonerSearchService.findById(id)
     }
 
+    @GetMapping("/find-by/bookingId/{id}")
+    @ApiOperation(value = "Find by booking ID")
+    @PreAuthorize("hasRole('GLOBAL_SEARCH')")
+    fun findByBookingId(@ApiParam("id", example = "1241242", required = true) @PathVariable id: Long): Prisoner? {
+        return prisonerSearchService.findByBookingId(id)
+    }
+
     @GetMapping("/find-by/date-of-birth/{dateOfBirth}")
     @ApiOperation(value = "Find offenders with specified date of birth")
     @PreAuthorize("hasRole('GLOBAL_SEARCH')")
@@ -46,6 +53,15 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
                        @PageableDefault pageable : Pageable
     ) : Page<Prisoner> {
         return prisonerSearchService.findByKeywords(keywords, pageable)
+    }
+
+    @GetMapping("/find-by/prison/{prisonId}")
+    @ApiOperation(value = "Match offenders by prison")
+    @PreAuthorize("hasRole('GLOBAL_SEARCH')")
+    fun findByPrisonId(@ApiParam("prisonId", example = "MDI", required = true) @PathVariable prisonId: String,
+                       @PageableDefault pageable : Pageable
+    ) : Page<Prisoner> {
+        return prisonerSearchService.findByPrisonId(prisonId, pageable)
     }
 
 }

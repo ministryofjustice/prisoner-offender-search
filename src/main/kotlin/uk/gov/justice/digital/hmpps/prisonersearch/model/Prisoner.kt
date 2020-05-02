@@ -1,15 +1,24 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.elasticsearch.annotations.DateFormat
+import org.springframework.data.elasticsearch.annotations.Field
+import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.LocalDate
 
-interface Prisoner {
-  var prisonerNumber: String?
-  val bookingId: Long?
-  val bookNumber: String?
-  val firstName: String?
-  val middleNames: String?
-  val lastName: String?
-  val dateOfBirth: LocalDate?
-  val prisonId: String?
-  val status: String
-}
+abstract class Prisoner(
+  @Id
+  @Field(type = FieldType.Keyword)
+  var prisonerNumber: String? = null,
+  var bookingId: Long? = null,
+  @Field(type = FieldType.Keyword)
+  var bookNumber: String? = null,
+  var firstName: String? = null,
+  var middleNames: String? = null,
+  var lastName: String? = null,
+  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
+  var dateOfBirth: LocalDate? = null,
+  @Field(type = FieldType.Keyword)
+  var prisonId: String? = null,
+  var status: String? = null
+)

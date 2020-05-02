@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class Alert (
   val alertId: Long,
-  val offenderNo: String,
+  val offenderNo: String?,
   val alertType: String,
   val alertTypeDescription: String?,
   val alertCode: String,
