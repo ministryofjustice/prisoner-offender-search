@@ -1,24 +1,513 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/api/bookings/offenderNo/A7089EY"
+    "urlPath": "/api/offenders/A7089EY"
   },
   "response": {
     "status": 200,
     "headers": {
       "Content-Type": "application/json"
     },
-    "jsonBody":
-    {
+    "jsonBody": {
       "bookingId": 1900836,
-      "bookingNo": "38339B",
+      "bookingNo": "V61585",
       "offenderNo": "A7089EY",
-      "firstName": "John",
-      "lastName": "Smith",
+      "firstName": "JOHN",
+      "middleName": "LEE",
+      "lastName": "SMITH",
       "agencyId": "MDI",
-      "assignedLivingUnitId": 25638,
+      "assignedLivingUnitId": 721725,
       "activeFlag": true,
-      "dateOfBirth": "1980-12-31"
+      "religion": "Christian",
+      "alertsCodes": [
+        "P",
+        "R",
+        "V",
+        "H",
+        "X",
+        "O"
+      ],
+      "activeAlertCount": 8,
+      "inactiveAlertCount": 6,
+      "alerts": [
+        {
+          "alertId": 14,
+          "alertType": "P",
+          "alertTypeDescription": "MAPPP Case",
+          "alertCode": "PL1",
+          "alertCodeDescription": "MAPPA Level 1",
+          "comment": "This is a comment",
+          "dateCreated": "2016-08-03",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "TEST1",
+          "addedByLastName": "TESTLAST1",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 10,
+          "alertType": "H",
+          "alertTypeDescription": "Self Harm",
+          "alertCode": "HC",
+          "alertCodeDescription": "Self Harm - Custody",
+          "comment": "MOCBdVZBsqCgpMOCBdVZBsqCgp",
+          "dateCreated": "2015-07-02",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "UMEEMTIF",
+          "addedByLastName": "CHASIF",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 7,
+          "alertType": "X",
+          "alertTypeDescription": "Security",
+          "alertCode": "XSA",
+          "alertCodeDescription": "Staff Assaulter",
+          "comment": "HiljValKtGyLeUsgDHiljValKtGyLeUsg",
+          "dateCreated": "2014-05-08",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "IPOUSTIUS",
+          "addedByLastName": "DALYSSUS",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 6,
+          "alertType": "R",
+          "alertTypeDescription": "Risk",
+          "alertCode": "RKS",
+          "alertCodeDescription": "Risk to Known Adult - Custody",
+          "comment": "rwgkOnaiqstZQnDfSOWYLdpRrwgkOnaiqstZQnDfSOWYLdpR",
+          "dateCreated": "2014-05-01",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "IPUICARIA",
+          "addedByLastName": "ROLARDO",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 5,
+          "alertType": "R",
+          "alertTypeDescription": "Risk",
+          "alertCode": "RSS",
+          "alertCodeDescription": "Risk to Staff - Custody",
+          "comment": "XTXHTlvbtAreZIaXTXHTlvbtAreZIa",
+          "dateCreated": "2014-03-18",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "IPUICARIA",
+          "addedByLastName": "ROLARDO",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 4,
+          "alertType": "X",
+          "alertTypeDescription": "Security",
+          "alertCode": "XVL",
+          "alertCodeDescription": "Violent",
+          "comment": "Another comment",
+          "dateCreated": "2013-12-02",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "YTIALEL",
+          "addedByLastName": "JASARD",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 3,
+          "alertType": "O",
+          "alertTypeDescription": "Other",
+          "alertCode": "OCYP",
+          "alertCodeDescription": "Looked after Child",
+          "dateCreated": "2013-11-19",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "IPUICARIA",
+          "addedByLastName": "ANISSENTINO",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 1,
+          "alertType": "V",
+          "alertTypeDescription": "Vulnerability",
+          "alertCode": "VU",
+          "alertCodeDescription": "Poor Coper",
+          "dateCreated": "2013-11-19",
+          "expired": false,
+          "active": true,
+          "addedByFirstName": "IPUICARIA",
+          "addedByLastName": "ANISSENTINO",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 13,
+          "alertType": "H",
+          "alertTypeDescription": "Self Harm",
+          "alertCode": "HA",
+          "alertCodeDescription": "ACCT Open (HMPS)",
+          "comment": "Another comment about alert",
+          "dateCreated": "2016-08-02",
+          "dateExpires": "2016-08-05",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "INSOSLKAS",
+          "addedByLastName": "SILVILLE",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 12,
+          "alertType": "H",
+          "alertTypeDescription": "Self Harm",
+          "alertCode": "HA",
+          "alertCodeDescription": "ACCT Open (HMPS)",
+          "comment": "Some more details",
+          "dateCreated": "2016-01-05",
+          "dateExpires": "2016-01-13",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "EMYEGOUI",
+          "addedByLastName": "CRYSEDO",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 9,
+          "alertType": "P",
+          "alertTypeDescription": "MAPPP Case",
+          "alertCode": "P2",
+          "alertCodeDescription": "MAPPA Level 2 Case",
+          "dateCreated": "2014-08-14",
+          "dateExpires": "2015-11-24",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "AREGOATE",
+          "addedByLastName": "ODICE",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 11,
+          "alertType": "X",
+          "alertTypeDescription": "Security",
+          "alertCode": "XNR",
+          "alertCodeDescription": "Not For Release",
+          "comment": "This is important",
+          "dateCreated": "2015-07-10",
+          "dateExpires": "2015-08-14",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "BUIAMOIGH",
+          "addedByLastName": "SOFIL",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 8,
+          "alertType": "V",
+          "alertTypeDescription": "Vulnerability",
+          "alertCode": "V49G",
+          "alertCodeDescription": "Rule 49 - GOOD",
+          "comment": "Some interesting things",
+          "dateCreated": "2014-05-09",
+          "dateExpires": "2015-03-02",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "UALICNAIN",
+          "addedByLastName": "SIDNEH",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        },
+        {
+          "alertId": 2,
+          "alertType": "H",
+          "alertTypeDescription": "Self Harm",
+          "alertCode": "HA",
+          "alertCodeDescription": "ACCT Open (HMPS)",
+          "dateCreated": "2013-11-19",
+          "dateExpires": "2013-11-22",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "IPUICARIA",
+          "addedByLastName": "ANISSENTINO",
+          "expiredByFirstName": "ADMIN&ONB",
+          "expiredByLastName": "CNOMIS"
+        }
+      ],
+      "assignedLivingUnit": {
+        "agencyId": "MDI",
+        "locationId": 721725,
+        "description": "A-1-001",
+        "agencyName": "Moorland Prison"
+      },
+      "facialImageId": 1171170,
+      "dateOfBirth": "1980-12-31",
+      "age": 22,
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "heightFeet": 5,
+        "heightInches": 5,
+        "heightMetres": 1.65,
+        "heightCentimetres": 165,
+        "weightPounds": 125,
+        "weightKilograms": 57,
+        "sexCode": "M"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "HAIR",
+          "characteristic": "Hair Colour",
+          "detail": "Brown"
+        },
+        {
+          "type": "R_EYE_C",
+          "characteristic": "Right Eye Colour",
+          "detail": "Blue"
+        },
+        {
+          "type": "L_EYE_C",
+          "characteristic": "Left Eye Colour",
+          "detail": "Green"
+        },
+        {
+          "type": "FACIAL_HAIR",
+          "characteristic": "Facial Hair",
+          "detail": "Beard"
+        },
+        {
+          "type": "FACE",
+          "characteristic": "Shape of Face",
+          "detail": "Oval"
+        },
+        {
+          "type": "BUILD",
+          "characteristic": "Build",
+          "detail": "Slim"
+        },
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "8"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "N"
+        },
+        {
+          "type": "MARITAL",
+          "question": "Domestic Status",
+          "resultValue": "Married"
+        },
+        {
+          "type": "CHILD",
+          "question": "Number of Children?",
+          "resultValue": "2"
+        },
+        {
+          "type": "SMOKE",
+          "question": "Is the Offender a smoker?",
+          "resultValue": "Yes"
+        },
+        {
+          "type": "SEXO",
+          "question": "Sexual Orientation",
+          "resultValue": "Heterosexual / Straight"
+        },
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        },
+        {
+          "type": "NAT",
+          "question": "Nationality?",
+          "resultValue": "British"
+        }
+      ],
+      "physicalMarks": [],
+      "assessments": [
+        {
+          "bookingId": 1058711,
+          "classificationCode": "HI",
+          "classification": "High",
+          "assessmentCode": "CSR",
+          "assessmentDescription": "CSR Rating",
+          "cellSharingAlertFlag": true,
+          "assessmentDate": "2016-09-10",
+          "nextReviewDate": "2017-07-05",
+          "assessmentStatus": "A",
+          "assessmentSeq": 6
+        },
+        {
+          "bookingId": 1058711,
+          "classificationCode": "C",
+          "classification": "Category C",
+          "assessmentCode": "CATEGORY",
+          "assessmentDescription": "Categorisation",
+          "cellSharingAlertFlag": false,
+          "assessmentDate": "2016-08-03",
+          "nextReviewDate": "2019-06-09",
+          "assessmentStatus": "A",
+          "assessmentSeq": 5
+        }
+      ],
+      "csra": "High",
+      "category": "Category C",
+      "categoryCode": "C",
+      "assignedOfficerId": 410055,
+      "birthPlace": "MANCHESTER",
+      "birthCountryCode": "ENG",
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12J",
+          "offenderNo": "A7089EY",
+          "bookingId": 1058711,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773H",
+          "offenderNo": "A7089EY",
+          "bookingId": 1058711,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "sentenceDetail": {
+        "sentenceExpiryDate": "2026-04-05",
+        "conditionalReleaseDate": "2023-05-16",
+        "licenceExpiryDate": "2026-04-15",
+        "homeDetentionCurfewEligibilityDate": "2020-12-20",
+        "paroleEligibilityDate": "2020-12-30",
+        "homeDetentionCurfewActualDate": "2019-06-22",
+        "bookingId": 1058711,
+        "sentenceStartDate": "2016-09-09",
+        "additionalDaysAwarded": 27,
+        "nonDtoReleaseDate": "2023-05-16",
+        "nonDtoReleaseDateType": "CRD",
+        "confirmedReleaseDate": "2023-04-01",
+        "releaseDate": "2023-04-01"
+      },
+      "offenceHistory": [
+        {
+          "bookingId": 811808,
+          "offenceDate": "2013-08-09",
+          "offenceRangeDate": "2013-06-23",
+          "offenceDescription": "Burglary (stealing or attempting to steal - in dwelling)",
+          "offenceCode": "TH68036",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 811808,
+          "offenceDate": "2013-09-18",
+          "offenceDescription": "Burglary other than dwelling - theft",
+          "offenceCode": "TH68037",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 811808,
+          "offenceDate": "2013-10-10",
+          "offenceDescription": "Have blade/article  which was sharply pointed in public place",
+          "offenceCode": "CJ88144",
+          "statuteCode": "CJ88",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 811808,
+          "offenceDate": "2013-12-01",
+          "offenceDescription": "Theft from the person of another",
+          "offenceCode": "TH68001",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 811808,
+          "offenceDate": "2014-02-05",
+          "offenceDescription": "Breach of a supervision order",
+          "offenceCode": "PC00010",
+          "statuteCode": "PC00",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 811808,
+          "offenceDate": "2015-03-09",
+          "offenceDescription": "Threats to kill",
+          "offenceCode": "OF61014",
+          "statuteCode": "OF61",
+          "mostSerious": true
+        },
+        {
+          "bookingId": 1900836,
+          "offenceDate": "2015-12-01",
+          "offenceDescription": "Handle stolen goods",
+          "offenceCode": "TH68073",
+          "statuteCode": "TH68",
+          "mostSerious": true
+        },
+        {
+          "bookingId": 1900836,
+          "offenceDate": "2015-12-06",
+          "offenceDescription": "Theft from the person of another",
+          "offenceCode": "TH68001",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 1900836,
+          "offenceDate": "2015-12-24",
+          "offenceDescription": "Handle stolen goods",
+          "offenceCode": "TH68073",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 1900836,
+          "offenceDate": "2016-02-02",
+          "offenceRangeDate": "2016-01-03",
+          "offenceDescription": "Conspire to commit robbery",
+          "offenceCode": "TH68023C",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 1900836,
+          "offenceDate": "2016-02-08",
+          "offenceDescription": "Section 18 - wounding with intent",
+          "offenceCode": "OF61016",
+          "statuteCode": "OF61",
+          "mostSerious": true
+        },
+        {
+          "bookingId": 1900836,
+          "offenceDescription": "Breach of a personal licence condition",
+          "offenceCode": "GA05046",
+          "statuteCode": "GA05",
+          "mostSerious": false
+        }
+      ],
+      "aliases": [],
+      "status": "ACTIVE IN",
+      "legalStatus": "Convicted",
+      "imprisonmentStatus": "LASPO_DR"
     }
   }
 }

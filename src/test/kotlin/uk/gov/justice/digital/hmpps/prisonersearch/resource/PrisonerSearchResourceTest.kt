@@ -33,8 +33,8 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .expectStatus().isOk
 
     await untilCallTo { prisonRequestCountFor("/api/offenders/ids") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EY") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EZ") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EZ") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
 
@@ -47,23 +47,29 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .exchange()
       .expectStatus().isOk
-      .expectBody()
-      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false},{\"prisonerId\":\"A7089EZ\",\"bookingId\":1900837,\"bookingNo\":\"38339C\",\"firstName\":\"John\",\"lastName\":\"Smyth\",\"dateOfBirth\":\"1981-01-01\",\"agencyId\":\"LEI\",\"active\":false}],\"pageable\":{\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"offset\":0,\"pageSize\":10,\"pageNumber\":0,\"paged\":true,\"unpaged\":false},\"facets\":[],\"maxScore\":970.406,\"totalElements\":2,\"totalPages\":1,\"size\":10,\"numberOfElements\":2,\"number\":0,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"first\":true,\"last\":true,\"empty\":false}")
+      .expectBody().json("/results/search_results_smith.json".readResourceAsText())
+
+    webTestClient.get().uri("/prisoner-search/match/smyth?prisonId=LEI&page=0&size=10")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_smyth.json".readResourceAsText())
+
 
     webTestClient.get().uri("/prisoner-search/find-by/id/A7089EY")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .exchange()
       .expectStatus().isOk
-      .expectBody()
-      .json("{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false}")
+      .expectBody().json("/results/search_result_A7089EY.json".readResourceAsText())
 
     webTestClient.get().uri("/prisoner-search/find-by/date-of-birth/1980-12-31?page=0&size=10")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .exchange()
       .expectStatus().isOk
-      .expectBody()
-      .json("{\"content\":[{\"prisonerId\":\"A7089EY\",\"bookingId\":1900836,\"bookingNo\":\"38339B\",\"firstName\":\"John\",\"lastName\":\"Smith\",\"dateOfBirth\":\"1980-12-31\",\"agencyId\":\"MDI\",\"active\":false}],\"pageable\":{\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"offset\":0,\"pageNumber\":0,\"pageSize\":10,\"paged\":true,\"unpaged\":false},\"facets\":[],\"maxScore\":1.0,\"totalElements\":1,\"totalPages\":1,\"size\":10,\"numberOfElements\":1,\"number\":0,\"first\":true,\"sort\":{\"sorted\":false,\"unsorted\":true,\"empty\":true},\"last\":true,\"empty\":false}")
-
+      .expectBody().json("/results/search_results_dob.json".readResourceAsText())
   }
-
 }
+
+private fun String.loadJson(): String = PrisonerSearchResourceTest::class.java.getResource("$this.json").readText()
+
+private fun String.readResourceAsText(): String = PrisonerSearchResourceTest::class.java.getResource(this).readText()

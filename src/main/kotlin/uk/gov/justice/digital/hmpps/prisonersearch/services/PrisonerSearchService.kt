@@ -12,17 +12,23 @@ import java.time.LocalDate
 
 @Service
 class PrisonerSearchService(
-    val prisonerARepository: PrisonerARepository,
-    val prisonerBRepository: PrisonerBRepository,
-    val indexStatusService: IndexStatusService
+  val prisonerARepository: PrisonerARepository,
+  val prisonerBRepository: PrisonerBRepository,
+  val indexStatusService: IndexStatusService
 ) {
 
   fun findById(id: String): Prisoner? {
+    val bookingId = id.toLongOrNull()
+    if (bookingId != null) return findByBookingId(bookingId)
     return getPrisonerRepository().findByIds(id)
   }
 
   fun findByKeywords(keywords: String, pageable: Pageable): Page<Prisoner> {
     return getPrisonerRepository().findByKeywords(keywords, pageable)
+  }
+
+  fun findByKeywordsFilterByPrison(keywords: String, prisonId : String, pageable: Pageable): Page<Prisoner> {
+    return getPrisonerRepository().findByKeywordsFilterByPrison(keywords, prisonId, pageable)
   }
 
   fun findByDob(dob: LocalDate, pageable: Pageable): Page<Prisoner> {
@@ -37,7 +43,7 @@ class PrisonerSearchService(
     return getPrisonerRepository().findByPrisonId(prisonId, pageable)
   }
 
-
+  @Suppress("UNCHECKED_CAST")
   fun getPrisonerRepository(): PrisonerRepository<Prisoner, String> {
     if (indexStatusService.getCurrentIndex().currentIndex == SyncIndex.INDEX_A) {
       return prisonerARepository as PrisonerRepository<Prisoner, String>

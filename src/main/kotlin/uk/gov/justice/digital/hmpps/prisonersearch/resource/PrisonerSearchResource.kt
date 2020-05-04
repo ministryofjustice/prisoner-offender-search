@@ -10,10 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO.DATE
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import java.time.LocalDate
@@ -50,8 +47,12 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
     @ApiOperation(value = "Match offenders by keywords")
     @PreAuthorize("hasRole('GLOBAL_SEARCH')")
     fun findByKeywords(@ApiParam("keywords", example = "John Smith", required = true) @PathVariable keywords: String,
+                       @ApiParam("prisonId", example = "MDI", required = false) @RequestParam(value = "prisonId", required = false) prisonId: String?,
                        @PageableDefault pageable : Pageable
     ) : Page<Prisoner> {
+        if (prisonId != null) {
+            return prisonerSearchService.findByKeywordsFilterByPrison(keywords, prisonId, pageable)
+        }
         return prisonerSearchService.findByKeywords(keywords, pageable)
     }
 

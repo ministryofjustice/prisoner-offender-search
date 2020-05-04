@@ -18,7 +18,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     awsSqsClient.sendMessage(queueUrl, message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EY") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
 
   }
 }

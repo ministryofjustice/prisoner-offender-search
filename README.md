@@ -41,7 +41,7 @@ Or to just run `localstack` which is useful when running against an a non-local 
 TMPDIR=/private$TMPDIR docker-compose up localstack 
 ```
 
-Or to just run `localstack` is in the way CI would run and then run tests with `spring.profiles.active=localstack`
+Or to just run `localstack` in the way CI would run and then run tests with `spring.profiles.active=localstack`
 
 ```bash
 TMPDIR=/private$TMPDIR docker-compose -f docker-compose-circleci.yml up 
