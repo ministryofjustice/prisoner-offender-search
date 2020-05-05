@@ -1,0 +1,86 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7089EZ",
+      "pncNumber": "08/359381C",
+      "bookingId": 1900837,
+      "bookNumber": "38339C",
+      "firstName": "JOHN",
+      "lastName": "SMYTH",
+      "aliases": [
+        {
+          "firstName": "MASTER",
+          "lastName": "CORDIAN",
+          "dob": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+        },
+        {
+          "firstName": "MASTER",
+          "middleName": "J117",
+          "lastName": "CHIEF",
+          "dob": "1983-06-17",
+          "gender": "Male"
+        },
+        {
+          "firstName": "MASTER",
+          "middleName": "J117",
+          "lastName": "CHEIF",
+          "dob": "1983-06-17",
+          "gender": "Male"
+        },
+        {
+          "firstName": "TONY",
+          "middleName": "IRONMAN",
+          "lastName": "STARK",
+          "dob": "1970-05-29",
+          "gender": "Male"
+        }
+      ],
+      "dateOfBirth": "1981-01-01",
+      "prisonId": "LEI",
+      "cellLocation": "B-C1-010",
+      "prisonName": "HMP Leeds",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "shoeSize": 10,
+      "youthOffender": false,
+      "maritalStatus": "Single-not married/in civil partnership",
+      "disability": false,
+      "religion": "Church of England (Anglican)",
+      "nationality": "British",
+      "csra": "HI",
+      "category": "C",
+      "releaseDate": "2020-04-28",
+      "legalStatus": "Convicted",
+      "mostSeriousOffence": "Burglary dwelling - with intent to steal"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": false,
+      "unsorted": true,
+      "empty": true
+    },
+    "offset": 0,
+    "pageNumber": 0,
+    "pageSize": 10,
+    "paged": true,
+    "unpaged": false
+  },
+  "facets": [],
+  "maxScore": 0.6931472,
+  "totalElements": 1,
+  "totalPages": 1,
+  "size": 10,
+  "numberOfElements": 1,
+  "sort": {
+    "sorted": false,
+    "unsorted": true,
+    "empty": true
+  },
+  "number": 0,
+  "first": true,
+  "last": true,
+  "empty": false
+}

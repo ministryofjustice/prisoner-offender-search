@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound
 import reactor.core.publisher.Mono
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Duration
-import java.time.LocalDate
 
 @Service
 class NomisService(val prisonWebClient: WebClient,
@@ -27,15 +27,15 @@ class NomisService(val prisonWebClient: WebClient,
 
   fun getOffender(bookingId: Long): OffenderBooking? {
     return prisonWebClient.get()
-        .uri("/api/bookings/$bookingId")
+        .uri("/api/bookings/$bookingId?extraInfo=true")
         .retrieve()
         .bodyToMono(OffenderBooking::class.java)
         .block(offenderTimeout)
   }
 
-  fun getOffender(nomsId: String): OffenderBooking? {
+  fun getOffender(offenderNo: String): OffenderBooking? {
     return prisonWebClient.get()
-        .uri("/api/bookings/offenderNo/$nomsId")
+        .uri("/api/offenders/$offenderNo")
         .retrieve()
         .bodyToMono(OffenderBooking::class.java)
         .onErrorResume(NotFound::class.java) { Mono.empty() }
@@ -47,13 +47,3 @@ data class OffenderId (
     val offenderNumber: String
 )
 
-data class OffenderBooking (
-    val offenderNo: String,
-    val bookingId: Long,
-    val bookingNo: String?,
-    val firstName: String,
-    val lastName: String,
-    val dateOfBirth: LocalDate,
-    val agencyId: String?,
-    val active: Boolean
-)

@@ -3,10 +3,19 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
+
+  @BeforeEach
+   fun init() {
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+  }
 
   @Test
   fun `access forbidden when no authority`() {
@@ -33,8 +42,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .expectStatus().isOk
 
     await untilCallTo { prisonRequestCountFor("/api/offenders/ids") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EY") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/bookings/offenderNo/A7089EZ") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EZ") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
 
