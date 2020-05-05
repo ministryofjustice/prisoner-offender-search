@@ -30,7 +30,7 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.youthOffender = ob.profileInformation?.firstOrNull { p -> p.type == "YOUTH" }?.resultValue == "Y"
   prisoner.disability = ob.profileInformation?.firstOrNull { p -> p.type == "DISABILITY" }?.resultValue == "Y"
 
-  prisoner.shoeSize = ob.physicalCharacteristics?.firstOrNull{ pc -> pc.type == "SHOESIZE"}?.detail?.toInt()
+  prisoner.shoeSize = ob.physicalCharacteristics?.firstOrNull{ pc -> pc.type == "SHOESIZE"}?.detail?.toIntOrNull()
 
   prisoner.legalStatus = ob.legalStatus
   prisoner.confirmedReleaseDate = ob.sentenceDetail?.confirmedReleaseDate
