@@ -18,8 +18,6 @@ class PrisonerSearchService(
 ) {
 
   fun findById(id: String): Prisoner? {
-    val bookingId = id.toLongOrNull()
-    if (bookingId != null) return findByBookingId(bookingId)
     return getPrisonerRepository().findByIds(id)
   }
 

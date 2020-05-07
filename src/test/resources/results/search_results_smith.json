@@ -16,7 +16,7 @@
       "gender": "Male",
       "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
       "shoeSize": 8,
-      "youthOffender": false,
+      "youthOffender": true,
       "maritalStatus": "Married",
       "disability": false,
       "religion": "Christian",
@@ -42,7 +42,6 @@
     "unpaged": false
   },
   "facets": [],
-  "maxScore": 0.6931472,
   "totalElements": 1,
   "totalPages": 1,
   "size": 10,
