@@ -5,7 +5,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.prisonerNumber = ob.offenderNo
   prisoner.bookNumber = ob.bookingNo
-  prisoner.bookingId = ob.bookingId
+  prisoner.bookingId = ob.bookingId.toString()
   prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
 
   prisoner.cellLocation = ob.assignedLivingUnit?.description

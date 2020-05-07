@@ -16,7 +16,7 @@ abstract class Prisoner {
   @Field(type = FieldType.Keyword)
   var pncNumber: String? = null
 
-  var bookingId: Long? = null
+  var bookingId: String? = null
 
   @Field(type = FieldType.Keyword)
   var bookNumber: String? = null
@@ -24,6 +24,7 @@ abstract class Prisoner {
   var firstName: String? = null
   var middleNames: String? = null
   var lastName: String? = null
+  @Field(type = FieldType.Nested)
   var aliases: List<PrisonerAlias>? = null
 
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
@@ -38,9 +39,9 @@ abstract class Prisoner {
   var gender: String? = null
   var ethnicity: String? = null
   var shoeSize: Int? = null
-  var youthOffender: Boolean = false
+  var youthOffender: Boolean? = null
   var maritalStatus: String? = null
-  var disability: Boolean = false
+  var disability: Boolean? = null
   var religion: String? = null
   var nationality: String? = null
 

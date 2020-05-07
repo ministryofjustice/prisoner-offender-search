@@ -49,12 +49,35 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .expectStatus().isOk
       .expectBody().json("/results/search_results_smith.json".readResourceAsText())
 
+    webTestClient.get().uri("/prisoner-search/match/1900836?page=0&size=10")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_smith.json".readResourceAsText())
+
+    webTestClient.get().uri("/prisoner-search/match/A7089EY?page=0&size=10")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_smith.json".readResourceAsText())
+
     webTestClient.get().uri("/prisoner-search/match/smyth?prisonId=LEI&page=0&size=10")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .exchange()
       .expectStatus().isOk
       .expectBody().json("/results/search_results_smyth.json".readResourceAsText())
 
+    webTestClient.get().uri("/prisoner-search/match/smyth?prisonId=MDI&page=0&size=10")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/empty.json".readResourceAsText())
+
+    webTestClient.get().uri("/prisoner-search/match/cordian")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_smyth.json".readResourceAsText())
 
     webTestClient.get().uri("/prisoner-search/find-by/id/A7089EY")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -69,7 +92,5 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .expectBody().json("/results/search_results_dob.json".readResourceAsText())
   }
 }
-
-private fun String.loadJson(): String = PrisonerSearchResourceTest::class.java.getResource("$this.json").readText()
 
 private fun String.readResourceAsText(): String = PrisonerSearchResourceTest::class.java.getResource(this).readText()

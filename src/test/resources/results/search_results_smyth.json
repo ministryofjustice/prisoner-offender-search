@@ -3,7 +3,7 @@
     {
       "prisonerNumber": "A7089EZ",
       "pncNumber": "08/359381C",
-      "bookingId": 1900837,
+      "bookingId": "1900837",
       "bookNumber": "38339C",
       "firstName": "JOHN",
       "lastName": "SMYTH",
@@ -69,7 +69,6 @@
     "unpaged": false
   },
   "facets": [],
-  "maxScore": 0.6931472,
   "totalElements": 1,
   "totalPages": 1,
   "size": 10,

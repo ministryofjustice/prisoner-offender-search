@@ -13,13 +13,68 @@ import java.time.LocalDate
 
 @NoRepositoryBean
 interface PrisonerRepository<T:Prisoner, String> : ElasticsearchRepository<T, String> {
-    @Query("{ \"bool\": { \"should\": [ { \"bool\": { \"must\": [ { \"match\": { \"prisonerNumber\": \"?0\" } } ] } }, { \"bool\": { \"must\": [ { \"match\": { \"pncNumber\": \"?0\" } } ] } }, { \"bool\": { \"should\": [ { \"match\": { \"lastName\": \"?0\" } }, { \"match\": { \"firstName\": \"?0\" } }, { \"match\": { \"middleNames\": \"?0\" } }, { \"match\": { \"aliases.lastName\": \"?0\" } }, { \"match\": { \"aliases.firstName\": \"?0\" } }, { \"match\": { \"aliases.middleNames\": \"?0\" } } ] } } ] } }")
+    @Query("{" +
+        "    \"bool\": {" +
+        "      \"should\": [" +
+        "      { \"match\" : { \"prisonerNumber\" : \"?0\" } }," +
+        "      { \"match\" : { \"bookNumber\" : \"?0\" } }," +
+        "      { \"match\" : { \"bookingId\" : \"?0\" } }," +
+        "        { \"match\" : { \"pncNumber\" : \"?0\" } }," +
+        "        { \"term\" : { \"lastName\" : \"?0\" } }," +
+        "        { \"term\" : { \"firstName\" : \"?0\" } }," +
+        "        { \"term\" : { \"middleNames\" : \"?0\" } }," +
+        "        {" +
+        "         \"nested\": {" +
+        "            \"path\":\"aliases\"," +
+        "            \"query\":{" +
+        "            \"bool\": {" +
+        "                  \"should\": [" +
+        "                    {\"term\": { \"aliases.lastName\": \"?0\" } }," +
+        "                    {\"term\": { \"aliases.firstName\": \"?0\" } }," +
+        "                    {\"term\": { \"aliases.middleName\": \"?0\" } }" +
+        "                ]" +
+        "            }" +
+        "            }" +
+        "          }" +
+        "        }" +
+        "      ]," +
+        "      \"minimum_should_match\" : 1" +
+        "    }" +
+        "  }")
     fun findByKeywords(keywords: String, pageable: Pageable?): Page<T>
 
-    @Query("{ \"bool\": { \"should\": [ { \"bool\": { \"must\": [ { \"match\": { \"prisonerNumber\": \"?0\" } } ] } }, { \"bool\": { \"must\": [ { \"match\": { \"pncNumber\": \"?0\" } } ] } }, { \"bool\": { \"should\": [ { \"match\": { \"lastName\": \"?0\" } }, { \"match\": { \"firstName\": \"?0\" } }, { \"match\": { \"middleNames\": \"?0\" } }, { \"match\": { \"aliases.lastName\": \"?0\" } }, { \"match\": { \"aliases.firstName\": \"?0\" } }, { \"match\": { \"aliases.middleNames\": \"?0\" } } ] } } ], \"filter\" : { \"term\": { \"prisonId\": \"?1\" } } } }")
+    @Query("{" +
+        "    \"bool\": {" +
+        "      \"should\": [" +
+        "      { \"match\" : { \"prisonerNumber\" : \"?0\" } }," +
+        "      { \"match\" : { \"bookNumber\" : \"?0\" } }," +
+        "      { \"match\" : { \"bookingId\" : \"?0\" } }," +
+        "        { \"match\" : { \"pncNumber\" : \"?0\" } }," +
+        "        { \"term\" : { \"lastName\" : \"?0\" } }," +
+        "        { \"term\" : { \"firstName\" : \"?0\" } }," +
+        "        { \"term\" : { \"middleNames\" : \"?0\" } }," +
+        "        {" +
+        "         \"nested\": {" +
+        "            \"path\":\"aliases\"," +
+        "            \"query\":{" +
+        "            \"bool\": {" +
+        "                  \"should\": [" +
+        "                    {\"term\": { \"aliases.lastName\": \"?0\" } }," +
+        "                    {\"term\": { \"aliases.firstName\": \"?0\" } }," +
+        "                    {\"term\": { \"aliases.middleName\": \"?0\" } }" +
+        "                ]" +
+        "            }" +
+        "            }" +
+        "          }" +
+        "        }" +
+        "      ]," +
+        "      \"filter\": { \"term\" : { \"prisonId\" : \"?1\" } }," +
+        "      \"minimum_should_match\" : 1" +
+        "    }" +
+        "  }")
     fun findByKeywordsFilterByPrison(keywords: String, prisonId: String, pageable: Pageable?): Page<T>
 
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"fields\": [\"prisonerNumber\",\"bookNumber\",\"pncNumber\"]}}")
+    @Query("{\"multi_match\": {\"query\": \"?0\", \"fields\": [\"prisonerNumber\",\"bookNumber\",\"pncNumber\",\"bookingId\"]}}")
     fun findByIds(ids: String): T?
     fun findByDateOfBirth(dateOfBirth : LocalDate, pageable: Pageable?): Page<T>
     fun findByPrisonId(prisonId : String, pageable: Pageable?): Page<T>
