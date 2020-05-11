@@ -86,10 +86,14 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
     search(SearchCriteria("X7089EY", "JOHN", "SMITH"), "/results/search_results_smith.json")
   }
 
-
   @Test
   fun `can perform a match on PNC number`() {
     search(SearchCriteria("12/394773H", null, null), "/results/search_results_smith.json")
+  }
+
+  @Test
+  fun `can perform a match on CRO number`() {
+    search(SearchCriteria("29906/12J", null, null), "/results/search_results_smith.json")
   }
 
   @Test
@@ -150,6 +154,16 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on first and last name in alias`() {
     search(SearchCriteria(null, "master", "cordian", null, true), "/results/search_results_smyth.json")
+  }
+
+  @Test
+  fun `can perform a match on first and last name in alias but they must be from the same record`() {
+    search(SearchCriteria(null, "master", "stark", null, true), "/results/empty.json")
+  }
+
+  @Test
+  fun `can perform a match on first and last name in alias but they must be from the same record matches`() {
+    search(SearchCriteria(null, "tony", "stark", null, true), "/results/search_results_smyth.json")
   }
 
   @Test

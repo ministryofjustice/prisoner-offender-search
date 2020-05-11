@@ -17,6 +17,9 @@ open class Prisoner {
   var pncNumber: String? = null
 
   @Field(type = FieldType.Keyword)
+  var croNumber: String? = null
+
+  @Field(type = FieldType.Keyword)
   var bookingId: String? = null
 
   @Field(type = FieldType.Keyword)

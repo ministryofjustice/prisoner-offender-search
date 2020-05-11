@@ -79,3 +79,8 @@ elasticsearch:
   port: 9200
   scheme: http
   host: aws-es-proxy-service
+
+
+index:
+  page:
+    size: 1000

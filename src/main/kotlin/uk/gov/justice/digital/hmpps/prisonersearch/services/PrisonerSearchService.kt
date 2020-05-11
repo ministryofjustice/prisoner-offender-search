@@ -11,7 +11,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
-import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @Service
@@ -61,7 +60,7 @@ class PrisonerSearchService(
   private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .mustMultiMatchKeyword(prisonerIdentifier?.canonicalPNCNumber(), "prisonerNumber", "bookingId", "pncNumber", "bookNumber")
+        .mustMultiMatchKeyword(prisonerIdentifier?.canonicalPNCNumber(), "prisonerNumber", "bookingId", "pncNumber", "croNumber", "bookNumber")
     }
   }
 
@@ -104,11 +103,7 @@ class PrisonerSearchService(
   }
 
   private fun getIndex(): String{
-    return if (indexStatusService.getCurrentIndex().currentIndex == SyncIndex.INDEX_A) {
-      "prisoner-search-a"
-    } else {
-      "prisoner-search-b"
-    }
+    return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 }
 
