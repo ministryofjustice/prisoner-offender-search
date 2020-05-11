@@ -82,6 +82,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match wrong prisoner number but correct name`() {
+    search(SearchCriteria("X7089EY", "JOHN", "SMITH"), "/results/search_results_smith.json")
+  }
+
+
+  @Test
   fun `can perform a match on PNC number`() {
     search(SearchCriteria("12/394773H", null, null), "/results/search_results_smith.json")
   }
