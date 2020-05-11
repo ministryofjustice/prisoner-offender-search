@@ -38,11 +38,14 @@ class PrisonerIndexService(val nomisService: NomisService,
 
     fun buildIndex() : IndexStatus {
         if (indexStatusService.markRebuildStarting()) {
-            if (indexStatusService.getCurrentIndex().currentIndex == SyncIndex.INDEX_A) {
+            val currentIndex = indexStatusService.getCurrentIndex().currentIndex
+            log.info("Current Index is {}, rebuilding index {}", currentIndex, if (currentIndex == SyncIndex.INDEX_A) SyncIndex.INDEX_B else SyncIndex.INDEX_A)
+            if (currentIndex == SyncIndex.INDEX_A) {
                 prisonerBRepository.deleteAll()
             } else {
                 prisonerARepository.deleteAll()
             }
+            log.info("Sending rebuild request")
             indexQueueService.sendIndexRequestMessage(IndexRequest(IndexRequestType.REBUILD))
         }
         return indexStatusService.getCurrentIndex()
@@ -51,7 +54,9 @@ class PrisonerIndexService(val nomisService: NomisService,
     fun indexingComplete() : IndexStatus {
         indexStatusService.markRebuildComplete()
         indexQueueService.clearAllMessages()
-        return indexStatusService.getCurrentIndex()
+        val currentIndex = indexStatusService.getCurrentIndex()
+        log.info("Index marked as Complete, Index {} is now current.", currentIndex.currentIndex)
+        return currentIndex
     }
 
     fun addIndexRequestToQueue(): Int {

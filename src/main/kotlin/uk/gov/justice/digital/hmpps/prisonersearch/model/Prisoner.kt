@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.LocalDate
 
-abstract class Prisoner {
+open class Prisoner {
 
   @Id
   @Field(type = FieldType.Keyword)
@@ -16,6 +16,7 @@ abstract class Prisoner {
   @Field(type = FieldType.Keyword)
   var pncNumber: String? = null
 
+  @Field(type = FieldType.Keyword)
   var bookingId: String? = null
 
   @Field(type = FieldType.Keyword)
@@ -24,6 +25,7 @@ abstract class Prisoner {
   var firstName: String? = null
   var middleNames: String? = null
   var lastName: String? = null
+
   @Field(type = FieldType.Nested)
   var aliases: List<PrisonerAlias>? = null
 
@@ -32,6 +34,8 @@ abstract class Prisoner {
 
   @Field(type = FieldType.Keyword)
   var prisonId: String? = null
+
+  @Field(type = FieldType.Keyword)
   var status: String? = null
   var cellLocation: String? = null
   var prisonName: String? = null
