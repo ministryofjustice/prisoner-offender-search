@@ -33,7 +33,7 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
     @Value("\${elasticsearch.scheme}")
     private val scheme: String? = null
 
-    @Bean
+    @Bean("elasticSearchClient")
     override fun elasticsearchClient(): RestHighLevelClient {
         return RestHighLevelClient(RestClient.builder(HttpHost(host, port, scheme)))
     }

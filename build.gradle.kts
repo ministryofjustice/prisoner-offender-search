@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter.ISO_DATE
 plugins {
     kotlin("jvm") version "1.3.71"
     kotlin("plugin.spring") version "1.3.71"
-    id("org.springframework.boot") version "2.2.6.RELEASE"
+    id("org.springframework.boot") version "2.2.7.RELEASE"
     id("io.spring.dependency-management") version "1.0.9.RELEASE"
     id("org.owasp.dependencycheck") version "5.3.2.1"
     id("com.github.ben-manes.versions") version "0.28.0"
@@ -103,7 +103,7 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:6.3")
     implementation("com.microsoft.azure:applicationinsights-spring-boot-starter:2.6.0")
     implementation("com.microsoft.azure:applicationinsights-logging-logback:2.6.0")
-    implementation("com.github.timpeeters:spring-boot-graceful-shutdown:2.2.1")
+    implementation("com.github.timpeeters:spring-boot-graceful-shutdown:2.2.2")
 
     implementation("io.springfox:springfox-swagger2:2.9.2")
     implementation("io.springfox:springfox-swagger-ui:2.9.2")

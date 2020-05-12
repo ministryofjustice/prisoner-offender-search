@@ -7,8 +7,8 @@ import java.time.LocalDate
  */
 data class Assessment (
   val classificationCode: String,
-  val classification: String,
-  val assessmentCode: String,
+  val classification: String?,
+  val assessmentCode: String?,
   val assessmentDescription: String?,
   val cellSharingAlertFlag : Boolean,
   val assessmentDate: LocalDate?,

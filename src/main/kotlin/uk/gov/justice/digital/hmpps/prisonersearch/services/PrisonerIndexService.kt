@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.*
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
@@ -13,7 +14,8 @@ class PrisonerIndexService(val nomisService: NomisService,
                            val prisonerARepository: PrisonerARepository,
                            val prisonerBRepository: PrisonerBRepository,
                            val indexQueueService : IndexQueueService,
-                           val indexStatusService: IndexStatusService
+                           val indexStatusService: IndexStatusService,
+                           @Value("\${index.page.size:1000}") val pageSize : Int
 ) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -38,11 +40,14 @@ class PrisonerIndexService(val nomisService: NomisService,
 
     fun buildIndex() : IndexStatus {
         if (indexStatusService.markRebuildStarting()) {
-            if (indexStatusService.getCurrentIndex().currentIndex == SyncIndex.INDEX_A) {
+            val currentIndex = indexStatusService.getCurrentIndex().currentIndex
+            log.info("Current Index is {}, rebuilding index {}", currentIndex, currentIndex.otherIndex())
+            if (currentIndex == SyncIndex.INDEX_A) {
                 prisonerBRepository.deleteAll()
             } else {
                 prisonerARepository.deleteAll()
             }
+            log.info("Sending rebuild request")
             indexQueueService.sendIndexRequestMessage(IndexRequest(IndexRequestType.REBUILD))
         }
         return indexStatusService.getCurrentIndex()
@@ -51,7 +56,9 @@ class PrisonerIndexService(val nomisService: NomisService,
     fun indexingComplete() : IndexStatus {
         indexStatusService.markRebuildComplete()
         indexQueueService.clearAllMessages()
-        return indexStatusService.getCurrentIndex()
+        val currentIndex = indexStatusService.getCurrentIndex()
+        log.info("Index marked as Complete, Index {} is now current.", currentIndex.currentIndex)
+        return currentIndex
     }
 
     fun addIndexRequestToQueue(): Int {
@@ -68,7 +75,7 @@ class PrisonerIndexService(val nomisService: NomisService,
             }
             offset += pageSizeToRetrieve()
             log.debug("Requested {} so far, number returned {}", count, numberReturned)
-        } while (numberReturned > pageSize() && indexStatusService.getCurrentIndex().inProgress)
+        } while (numberReturned > pageSize && indexStatusService.getCurrentIndex().inProgress)
         log.debug("All Rebuild messages sent {}", count)
         return count
     }
@@ -85,7 +92,6 @@ class PrisonerIndexService(val nomisService: NomisService,
         }
     }
 
-    private fun pageSize() = 100
-    private fun pageSizeToRetrieve() = pageSize()+1
+    private fun pageSizeToRetrieve() = pageSize+1
 
 }

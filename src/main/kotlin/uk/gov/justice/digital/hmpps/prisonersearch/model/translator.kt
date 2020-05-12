@@ -7,6 +7,7 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.bookNumber = ob.bookingNo
   prisoner.bookingId = ob.bookingId.toString()
   prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
+  prisoner.croNumber = ob.identifiers?.firstOrNull { i -> i.type == "CRO" }?.value
 
   prisoner.cellLocation = ob.assignedLivingUnit?.description
   prisoner.prisonName = ob.assignedLivingUnit?.agencyName
