@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/ids",
+    "headers" : {
+      "Page-Offset": {
+        "equalTo": "0"
+      },
+      "Page-Limit": {
+        "equalTo": "3"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json",
+      "Total-Records": "5"
+    },
+    "jsonBody": [
+      {
+        "offenderNumber": "A7089EY"
+      },
+      {
+        "offenderNumber": "A7089EZ"
+      },
+      {
+        "offenderNumber": "A7089FA"
+      }
+    ]
+  }
+}

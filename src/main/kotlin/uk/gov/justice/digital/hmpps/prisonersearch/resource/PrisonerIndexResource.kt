@@ -16,14 +16,14 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 class PrisonerIndexResource(val prisonerIndexService: PrisonerIndexService){
 
     @PutMapping("/build-index")
-    @ApiOperation(value = "Build index")
+    @ApiOperation(value = "Start building a new index.", notes = "Old index is left untouched and will be maintained whilst new index is built")
     @PreAuthorize("hasRole('PRISONER_INDEX')")
     fun buildIndex(): IndexStatus {
         return prisonerIndexService.buildIndex()
     }
 
     @PutMapping("/mark-complete")
-    @ApiOperation(value = "Mark index as complete")
+    @ApiOperation(value = "Mark index as complete and swap", notes = "Swaps to the newly built index")
     @PreAuthorize("hasRole('PRISONER_INDEX')")
     fun indexComplete(): IndexStatus{
         return prisonerIndexService.indexingComplete()

@@ -6,8 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER
-import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.REBUILD
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.*
 
 @Service
 class PrisonerIndexListener(
@@ -21,15 +20,16 @@ class PrisonerIndexListener(
   @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
   fun processIndexRequest(requestJson: String?, msg : javax.jms.Message ) {
     log.debug(requestJson)
-    val (requestType, indexData) = gson.fromJson(requestJson, IndexRequest::class.java)
-    log.debug("Received message request {} {}", requestType, indexData)
+    val indexRequest = gson.fromJson(requestJson, IndexRequest::class.java)
+    log.debug("Received message request {}", indexRequest)
 
-    when (requestType) {
+    when (indexRequest.requestType) {
       REBUILD -> {
         msg.acknowledge()  // ack before processing
         prisonerIndexService.addIndexRequestToQueue()
       }
-      OFFENDER -> indexData?.let { prisonerIndexService.indexPrisoner(it) }
+      OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeIndexed(it) }
+      OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
     }
   }
 

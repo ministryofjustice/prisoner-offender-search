@@ -1,0 +1,84 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7089FA"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1900837,
+      "bookingNo": "V61586",
+      "offenderNo": "A7089FA",
+      "firstName": "JAMES",
+      "middleName": "TREVOR",
+      "lastName": "DAVIES",
+      "agencyId": "MDI",
+      "assignedLivingUnitId": 721726,
+      "activeFlag": true,
+      "religion": "Christian",
+      "assignedLivingUnit": {
+        "agencyId": "MDI",
+        "locationId": 721726,
+        "description": "A-1-002",
+        "agencyName": "Moorland Prison"
+      },
+      "facialImageId": 1171171,
+      "dateOfBirth": "1990-01-31",
+      "age": 22,
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "8"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "Y"
+        },
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        },
+        {
+          "type": "NAT",
+          "question": "Nationality?",
+          "resultValue": "British"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12K",
+          "offenderNo": "A7089FA",
+          "bookingId": 1900837,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773I",
+          "offenderNo": "A7089FA",
+          "bookingId": 1900837,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "Remand"
+    }
+  }
+}

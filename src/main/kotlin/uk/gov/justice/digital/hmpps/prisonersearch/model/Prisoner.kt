@@ -62,6 +62,9 @@ open class Prisoner {
   var legalStatus: String? = null
 
   var mostSeriousOffence : String? = null
+
+  @Field(type = FieldType.Nested)
+  var alerts: List<PrisonerAlert>? = null
 }
 
 @Document(indexName = "prisoner-search-a")

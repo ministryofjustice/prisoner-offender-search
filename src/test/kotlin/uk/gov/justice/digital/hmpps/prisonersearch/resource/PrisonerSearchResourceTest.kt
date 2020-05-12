@@ -33,6 +33,9 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       await untilCallTo { prisonRequestCountFor("/api/offenders/ids") } matches { it == 1 }
       await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
       await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EZ") } matches { it == 1 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FA") } matches { it == 1 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FB") } matches { it == 1 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FC") } matches { it == 1 }
 
       await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
 

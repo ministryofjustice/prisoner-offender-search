@@ -22,6 +22,7 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.lastName = ob.lastName
 
   prisoner.aliases = ob.aliases?.map { a -> PrisonerAlias(a.firstName, a.middleName, a.lastName, a.dob, a.gender, a.ethnicity) }
+  prisoner.alerts = ob.alerts?.filter { a -> a.active }?.map { a -> PrisonerAlert(a.alertId, a.alertType, a.alertCode) }
 
   prisoner.gender = ob.physicalAttributes?.gender
   prisoner.ethnicity = ob.physicalAttributes?.ethnicity
