@@ -15,14 +15,17 @@ class NomisService(val prisonWebClient: WebClient,
 
     private val ids = object : ParameterizedTypeReference<List<OffenderId>>() {}
   
-    fun getOffendersIds(offset: Int = 0, size: Int = 10): List<OffenderId>? {
-        return prisonWebClient.get()
-            .uri("/api/offenders/ids")
-            .header("Page-Offset", offset.toString())
-            .header("Page-Limit", size.toString())
-            .retrieve()
-            .bodyToMono(ids)
-            .block(offenderTimeout.multipliedBy(24))
+    fun getOffendersIds(offset: Long = 0, size: Int = 10): OffenderResponse {
+      return prisonWebClient.get()
+        .uri("/api/offenders/ids")
+        .header("Page-Offset", offset.toString())
+        .header("Page-Limit", size.toString())
+        .exchange()
+        .block(offenderTimeout.multipliedBy(24))?.let {
+          OffenderResponse(
+            it.bodyToMono(ids).block(),
+            it.headers().header("Total-Records").first().toLongOrNull()?:0)
+        }?: OffenderResponse()
     }
 
   fun getOffender(bookingId: Long): OffenderBooking? {
@@ -47,3 +50,7 @@ data class OffenderId (
     val offenderNumber: String
 )
 
+data class OffenderResponse(
+  val offenderIds : List<OffenderId>? = emptyList(),
+  val totalRows : Long = 0
+)

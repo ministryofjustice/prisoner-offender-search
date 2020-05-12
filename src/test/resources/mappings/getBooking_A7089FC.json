@@ -1,0 +1,74 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7089FC"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1900838,
+      "bookingNo": "V61588",
+      "offenderNo": "A7089FC",
+      "firstName": "JIM",
+      "lastName": "BORROWER",
+      "agencyId": "LEI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "LEI",
+        "description": "H-1-005",
+        "agencyName": "Leeds Prison"
+      },
+      "facialImageId": 1171177,
+      "dateOfBirth": "1990-02-02",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "10"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "Y"
+        },
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12P",
+          "offenderNo": "A7089FC",
+          "bookingId": 1900838,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773I",
+          "offenderNo": "A7089FZ",
+          "bookingId": 1900838,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "Remand"
+    }
+  }
+}
