@@ -1,7 +1,6 @@
 # Prisoner Offender Search
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/prisoner-offender-search/tree/master.svg?style=svg)](https://circleci.com/gh/ministryofjustice/prisoner-offender-search)
-[![Known Vulnerabilities](https://snyk.io/test/github/ministryofjustice/prisoner-offender-search/badge.svg)](https://snyk.io/test/github/ministryofjustice/prisoner-offender-search)
 [![Docker](https://quay.io/repository/hmpps/prisoner-offender-search/status)](https://quay.io/repository/hmpps/prisoner-offender-search/status)
 
 
