@@ -27,15 +27,15 @@ dependencies {
   implementation("io.springfox:springfox-swagger2:2.9.2")
   implementation("io.springfox:springfox-swagger-ui:2.9.2")
   implementation("io.springfox:springfox-bean-validators:2.9.2")
-  implementation("com.nimbusds:nimbus-jose-jwt:8.11")
+  implementation("com.nimbusds:nimbus-jose-jwt:8.17")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation( "com.google.code.gson:gson:2.8.6")
-  implementation("com.google.guava:guava:28.2-jre")
+  implementation("com.google.guava:guava:29.0-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.750"))
+  implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.782"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
