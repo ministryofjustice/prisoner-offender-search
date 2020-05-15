@@ -46,13 +46,14 @@
     "shoeSize": 10,
     "youthOffender": false,
     "maritalStatus": "Single-not married/in civil partnership",
-    "disability": false,
+    "disability": true,
     "religion": "Church of England (Anglican)",
     "nationality": "British",
     "csra": "HI",
     "category": "C",
     "releaseDate": "2020-04-28",
     "legalStatus": "Convicted",
-    "mostSeriousOffence": "Burglary dwelling - with intent to steal"
+    "mostSeriousOffence": "Burglary dwelling - with intent to steal",
+    "status": "ACTIVE IN"
   }
 ]

@@ -305,7 +305,7 @@
         {
           "type": "YOUTH",
           "question": "Youth Offender?",
-          "resultValue": "Y"
+          "resultValue": "YES"
         },
         {
           "type": "MARITAL",

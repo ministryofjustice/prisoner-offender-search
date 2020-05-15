@@ -12,6 +12,7 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.cellLocation = ob.assignedLivingUnit?.description
   prisoner.prisonName = ob.assignedLivingUnit?.agencyName
   prisoner.prisonId = ob.agencyId
+  prisoner.status = ob.status
 
   prisoner.category = ob.assessments?.firstOrNull{ a -> a.assessmentCode == "CATEGORY"}?.classificationCode
   prisoner.csra = ob.assessments?.firstOrNull{ a -> a.cellSharingAlertFlag }?.classificationCode
@@ -29,8 +30,8 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.nationality = ob.profileInformation?.firstOrNull { p -> p.type == "NAT" }?.resultValue
   prisoner.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue
   prisoner.maritalStatus = ob.profileInformation?.firstOrNull { p -> p.type == "MARITAL" }?.resultValue
-  prisoner.youthOffender = ob.profileInformation?.firstOrNull { p -> p.type == "YOUTH" }?.resultValue == "Y"
-  prisoner.disability = ob.profileInformation?.firstOrNull { p -> p.type == "DISABILITY" }?.resultValue == "Y"
+  prisoner.youthOffender = ob.profileInformation?.firstOrNull { p -> p.type == "YOUTH" }?.resultValue?.toUpperCase() == "YES"
+  prisoner.disability = ob.profileInformation?.firstOrNull { p -> p.type == "DISABILITY" }?.resultValue?.toUpperCase() == "YES"
 
   prisoner.shoeSize = ob.physicalCharacteristics?.firstOrNull{ pc -> pc.type == "SHOESIZE"}?.detail?.toIntOrNull()
 

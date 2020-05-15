@@ -42,7 +42,7 @@
         {
           "type": "YOUTH",
           "question": "Youth Offender?",
-          "resultValue": "N"
+          "resultValue": "NO"
         },
         {
           "type": "RELF",
