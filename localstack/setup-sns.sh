@@ -13,7 +13,7 @@ aws --endpoint-url=http://localhost:4575 sns subscribe \
     --topic-arn arn:aws:sns:eu-west-2:000000000000:offender_events \
     --protocol sqs \
     --notification-endpoint http://localhost:4576/queue/prisoner_offender_search_queue \
-    --attributes '{"FilterPolicy":"{\"eventType\":[ \"OFFENDER-UPDATED\", \"EXTERNAL_MOVEMENT_RECORD-INSERTED\", \"ASSESSMENT-CHANGED\", \"OFFENDER_BOOKING-REASSIGNED\", \"OFFENDER_BOOKING-CHANGED\", \"OFFENDER_DETAILS-CHANGED\", \"BOOKING_NUMBER-CHANGED\", \"SENTENCE_DATES-CHANGED\", \"IMPRISONMENT_STATUS-CHANGED\", \"BED_ASSIGNMENT_HISTORY-INSERTED\"] }"}'
+    --attributes '{"FilterPolicy":"{\"eventType\":[ \"OFFENDER-UPDATED\", \"EXTERNAL_MOVEMENT_RECORD-INSERTED\", \"ASSESSMENT-CHANGED\", \"OFFENDER_BOOKING-REASSIGNED\", \"OFFENDER_BOOKING-CHANGED\", \"OFFENDER_DETAILS-CHANGED\", \"BOOKING_NUMBER-CHANGED\", \"SENTENCE_DATES-CHANGED\", \"IMPRISONMENT_STATUS-CHANGED\", \"BED_ASSIGNMENT_HISTORY-INSERTED\", \"DATA_COMPLIANCE_DELETE-OFFENDER\", \"CONFIRMED_RELEASE_DATE-CHANGED\"] }"}'
 
 aws --endpoint-url=http://localhost:4576 sqs set-queue-attributes --queue-url "http://localhost:4576/queue/prisoner_offender_search_queue" --attributes '{"RedrivePolicy":"{\"maxReceiveCount\":\"3\", \"deadLetterTargetArn\":\"arn:aws:sqs:eu-west-2:000000000000:prisoner_offender_search_dlq\"}"}'
 aws --endpoint-url=http://localhost:4576 sqs set-queue-attributes --queue-url "http://localhost:4576/queue/prisoner_offender_index_queue" --attributes '{"RedrivePolicy":"{\"maxReceiveCount\":\"3\", \"deadLetterTargetArn\":\"arn:aws:sqs:eu-west-2:000000000000:prisoner_offender_index_dlq\"}"}'

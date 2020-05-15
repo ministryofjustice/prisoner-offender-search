@@ -26,15 +26,10 @@ open class PrisonerEventListener(
 
     when (eventType) {
       "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))
-      "BED_ASSIGNMENT_HISTORY-INSERTED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "IMPRISONMENT_STATUS-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "SENTENCE_DATES-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "ASSESSMENT-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "OFFENDER_BOOKING-REASSIGNED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "OFFENDER_BOOKING-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
+      "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED", "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED", "ASSESSMENT-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
       "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
-      "OFFENDER_DETAILS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
-      "OFFENDER-UPDATED" -> prisonerSyncService.offenderChange(fromJson(message))
+      "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
+      "ALERT-INSERTED", "ALERT-UPDATED", "ALERT-DELETED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
       "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
 
       else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
