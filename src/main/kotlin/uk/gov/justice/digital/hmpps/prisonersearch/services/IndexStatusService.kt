@@ -17,7 +17,7 @@ class IndexStatusService( val indexStatusRepository : IndexStatusRepository) {
   }
 
   fun getCurrentIndex() : IndexStatus {
-    var indexStatus = indexStatusRepository.findById("STATUS").toNullable()
+    val indexStatus = indexStatusRepository.findById("STATUS").toNullable()
 
     if (indexStatus == null) {
       indexStatus = IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false)

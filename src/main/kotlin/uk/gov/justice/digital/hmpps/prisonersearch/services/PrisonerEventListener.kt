@@ -32,9 +32,10 @@ open class PrisonerEventListener(
       "ASSESSMENT-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
       "OFFENDER_BOOKING-REASSIGNED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
       "OFFENDER_BOOKING-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
+      "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
       "OFFENDER_DETAILS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
       "OFFENDER-UPDATED" -> prisonerSyncService.offenderChange(fromJson(message))
+      "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
 
       else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
     }
