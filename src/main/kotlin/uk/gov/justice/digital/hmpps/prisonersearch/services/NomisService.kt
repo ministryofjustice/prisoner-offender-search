@@ -13,8 +13,9 @@ import java.time.Duration
 class NomisService(val prisonWebClient: WebClient,
                       @Value("\${api.offender.timeout:5s}") val offenderTimeout: Duration) {
 
-    private val ids = object : ParameterizedTypeReference<List<OffenderId>>() {}
-  
+  private val ids = object : ParameterizedTypeReference<List<OffenderId>>() {}
+  private val identifiers = object : ParameterizedTypeReference<List<BookingIdentifier>>() {}
+
     fun getOffendersIds(offset: Long = 0, size: Int = 10): OffenderResponse {
       return prisonWebClient.get()
         .uri("/api/offenders/ids")
@@ -44,6 +45,15 @@ class NomisService(val prisonWebClient: WebClient,
         .onErrorResume(NotFound::class.java) { Mono.empty() }
         .block(offenderTimeout)
   }
+
+  fun getMergedIdentifiersByBookingId(bookingId: Long): List<BookingIdentifier>? {
+    return prisonWebClient.get()
+      .uri("/api/bookings/$bookingId/identifiers?type=MERGED")
+      .retrieve()
+      .bodyToMono(identifiers)
+      .onErrorResume(NotFound::class.java) { Mono.empty() }
+      .block(offenderTimeout)
+  }
 }
 
 data class OffenderId (
@@ -53,4 +63,9 @@ data class OffenderId (
 data class OffenderResponse(
   val offenderIds : List<OffenderId>? = emptyList(),
   val totalRows : Long = 0
+)
+
+data class BookingIdentifier (
+   val type: String,
+   val value: String
 )
