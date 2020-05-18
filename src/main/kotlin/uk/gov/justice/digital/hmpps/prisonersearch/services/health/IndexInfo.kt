@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchClient
 
 
 @Component
-class IndexInfo(private var indexStatusService : IndexStatusService,
+class IndexInfo(private val indexStatusService : IndexStatusService,
                 private val searchClient: SearchClient) : InfoContributor {
 
   override fun contribute(builder : Info.Builder) {

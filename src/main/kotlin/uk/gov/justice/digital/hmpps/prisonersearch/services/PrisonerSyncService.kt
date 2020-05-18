@@ -7,30 +7,48 @@ import org.springframework.stereotype.Service
 
 @Service
 class PrisonerSyncService(
-    private val telemetryClient: TelemetryClient,
-    private val nomisService: NomisService,
-    private val prisonerIndexService: PrisonerIndexService
+  private val telemetryClient: TelemetryClient,
+  private val nomisService: NomisService,
+  private val prisonerIndexService: PrisonerIndexService
 ) {
-    companion object {
-        val log: Logger = LoggerFactory.getLogger(this::class.java)
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
+
+  fun externalMovement(message: ExternalPrisonerMovementMessage) {
+    nomisService.getOffender(message.bookingId)?.let {
+      prisonerIndexService.sync(it)
+    }
+  }
+
+  fun offenderBookingChange(message: OffenderBookingChangedMessage) {
+    nomisService.getOffender(message.bookingId)?.let {
+      prisonerIndexService.sync(it)
+    }
+  }
+
+  fun offenderBookNumberChange(message: OffenderBookingChangedMessage) {
+    val bookingId = message.bookingId
+    log.debug("Check for merged booking for ID {}", bookingId);
+
+    // check for merges
+    nomisService.getMergedIdentifiersByBookingId(bookingId)?.forEach {
+      prisonerIndexService.delete(it.value)
     }
 
-    fun externalMovement(message: ExternalPrisonerMovementMessage) {
-        nomisService.getOffender(message.bookingId)?.let {
-            prisonerIndexService.sync(it)
-        }
+    nomisService.getOffender(bookingId)?.let {
+      prisonerIndexService.sync(it)
     }
+  }
 
-    fun offenderBookingChange(message: OffenderBookingChangedMessage) {
-        nomisService.getOffender(message.bookingId)?.let {
-            prisonerIndexService.sync(it)
-        }
+  fun offenderChange(message: OffenderChangedMessage) {
+    nomisService.getOffender(message.offenderIdDisplay)?.let {
+      prisonerIndexService.sync(it)
     }
+  }
 
-    fun offenderChange(message: OffenderChangedMessage) {
-        nomisService.getOffender(message.offenderIdDisplay)?.let {
-            prisonerIndexService.sync(it)
-        }
-    }
+  fun deleteOffender(message: OffenderChangedMessage) {
+    prisonerIndexService.delete(message.offenderIdDisplay)
+  }
 
 }

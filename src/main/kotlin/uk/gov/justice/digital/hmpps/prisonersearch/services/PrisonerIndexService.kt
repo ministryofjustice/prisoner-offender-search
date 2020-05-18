@@ -28,6 +28,13 @@ class PrisonerIndexService(val nomisService: NomisService,
         }
     }
 
+    fun delete(prisonerNumber : String) {
+        log.info("Delete Prisoner {}", prisonerNumber)
+
+        prisonerARepository.deleteById(prisonerNumber)
+        prisonerBRepository.deleteById(prisonerNumber)
+    }
+
     fun sync(offenderBooking: OffenderBooking)  {
         val currentIndexStatus = indexStatusService.getCurrentIndex()
 

@@ -14,9 +14,9 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.data:spring-data-elasticsearch")
-  implementation("org.elasticsearch:elasticsearch:6.7.2")
-  implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:6.7.2")
-  implementation("org.elasticsearch.client:elasticsearch-rest-client:6.7.2")
+  implementation("org.elasticsearch:elasticsearch:6.8.9")
+  implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:6.8.9")
+  implementation("org.elasticsearch.client:elasticsearch-rest-client:6.8.9")
   implementation("org.springframework.boot:spring-boot-devtools")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
