@@ -342,18 +342,6 @@
       "assessments": [
         {
           "bookingId": 1058711,
-          "classificationCode": "HI",
-          "classification": "High",
-          "assessmentCode": "CSR",
-          "assessmentDescription": "CSR Rating",
-          "cellSharingAlertFlag": true,
-          "assessmentDate": "2016-09-10",
-          "nextReviewDate": "2017-07-05",
-          "assessmentStatus": "A",
-          "assessmentSeq": 6
-        },
-        {
-          "bookingId": 1058711,
           "classificationCode": "C",
           "classification": "Category C",
           "assessmentCode": "CATEGORY",
@@ -363,6 +351,30 @@
           "nextReviewDate": "2019-06-09",
           "assessmentStatus": "A",
           "assessmentSeq": 5
+        },
+        {
+          "bookingId": 1058711,
+          "classificationCode": "STANDARD",
+          "classification": "Standard",
+          "assessmentCode": "CSRA",
+          "assessmentDescription": "CSRA",
+          "cellSharingAlertFlag": true,
+          "assessmentDate": "2016-09-10",
+          "nextReviewDate": "2017-07-05",
+          "assessmentStatus": "A",
+          "assessmentSeq": 3
+        },
+        {
+          "bookingId": 1058711,
+          "classificationCode": "HI",
+          "classification": "High",
+          "assessmentCode": "CSR",
+          "assessmentDescription": "CSR Rating",
+          "cellSharingAlertFlag": true,
+          "assessmentDate": "2019-09-10",
+          "nextReviewDate": "2020-07-05",
+          "assessmentStatus": "A",
+          "assessmentSeq": 6
         }
       ],
       "csra": "High",

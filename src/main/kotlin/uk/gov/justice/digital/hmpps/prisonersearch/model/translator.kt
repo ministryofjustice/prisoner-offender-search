@@ -14,8 +14,8 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.prisonId = ob.agencyId
   prisoner.status = ob.status
 
-  prisoner.category = ob.assessments?.firstOrNull{ a -> a.assessmentCode == "CATEGORY"}?.classificationCode
-  prisoner.csra = ob.assessments?.firstOrNull{ a -> a.cellSharingAlertFlag }?.classificationCode
+  prisoner.category = ob.assessments?.sortedByDescending { a -> a.assessmentDate }?.firstOrNull{ a -> a.assessmentCode == "CATEGORY"}?.classificationCode
+  prisoner.csra = ob.assessments?.sortedByDescending { a -> a.assessmentDate }?.firstOrNull{ a -> a.cellSharingAlertFlag }?.classificationCode
 
   prisoner.dateOfBirth = ob.dateOfBirth
   prisoner.firstName = ob.firstName
@@ -23,7 +23,7 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.lastName = ob.lastName
 
   prisoner.aliases = ob.aliases?.map { a -> PrisonerAlias(a.firstName, a.middleName, a.lastName, a.dob, a.gender, a.ethnicity) }
-  prisoner.alerts = ob.alerts?.filter { a -> a.active }?.map { a -> PrisonerAlert(a.alertId, a.alertType, a.alertCode) }
+  prisoner.alerts = ob.alerts?.filter { a -> a.active }?.map { a -> PrisonerAlert(a.alertType, a.alertCode) }
 
   prisoner.gender = ob.physicalAttributes?.gender
   prisoner.ethnicity = ob.physicalAttributes?.ethnicity
@@ -31,11 +31,9 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue
   prisoner.maritalStatus = ob.profileInformation?.firstOrNull { p -> p.type == "MARITAL" }?.resultValue
   prisoner.youthOffender = ob.profileInformation?.firstOrNull { p -> p.type == "YOUTH" }?.resultValue?.toUpperCase() == "YES"
-  prisoner.disability = ob.profileInformation?.firstOrNull { p -> p.type == "DISABILITY" }?.resultValue?.toUpperCase() == "YES"
-
-  prisoner.shoeSize = ob.physicalCharacteristics?.firstOrNull{ pc -> pc.type == "SHOESIZE"}?.detail?.toIntOrNull()
 
   prisoner.legalStatus = ob.legalStatus
+  prisoner.sentenceStartDate = ob.sentenceDetail?.sentenceStartDate
   prisoner.confirmedReleaseDate = ob.sentenceDetail?.confirmedReleaseDate
   prisoner.releaseDate = ob.sentenceDetail?.releaseDate
 
