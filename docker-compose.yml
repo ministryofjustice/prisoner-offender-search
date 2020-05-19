@@ -25,7 +25,7 @@ services:
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
 
   nomis-api:
-    image: mojdigitalstudio/elite2-api:latest
+    image: quay.io/hmpps/elite2-api:latest
     container_name: nomis-api
     depends_on:
       - oauth
@@ -38,7 +38,7 @@ services:
       - SPRING_PROFILES_ACTIVE=nomis-hsqldb
 
   oauth:
-    image: mojdigitalstudio/nomis-oauth2-server:latest
+    image: quay.io/hmpps/nomis-oauth2-server:latest
     networks:
       - hmpps
     container_name: oauth
