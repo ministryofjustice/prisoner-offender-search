@@ -15,14 +15,13 @@
     "prisonName": "Moorland Prison",
     "gender": "Male",
     "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
-    "shoeSize": 8,
     "youthOffender": true,
     "maritalStatus": "Married",
-    "disability": false,
     "religion": "Christian",
     "nationality": "British",
     "csra": "HI",
     "category": "C",
+    "sentenceStartDate": "2016-09-09",
     "confirmedReleaseDate": "2023-04-01",
     "releaseDate": "2023-04-01",
     "legalStatus": "Convicted",
@@ -41,29 +40,29 @@
       {
         "firstName": "MASTER",
         "lastName": "CORDIAN",
-        "dob": "1990-08-15",
+        "dateOfBirth": "1990-08-15",
         "gender": "Male",
         "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
       },
       {
         "firstName": "MASTER",
-        "middleName": "J117",
+        "middleNames": "J117",
         "lastName": "CHIEF",
-        "dob": "1983-06-17",
+        "dateOfBirth": "1983-06-17",
         "gender": "Male"
       },
       {
         "firstName": "MASTER",
-        "middleName": "J117",
+        "middleNames": "J117",
         "lastName": "CHEIF",
-        "dob": "1983-06-17",
+        "dateOfBirth": "1983-06-17",
         "gender": "Male"
       },
       {
         "firstName": "TONY",
-        "middleName": "IRONMAN",
+        "middleNames": "IRONMAN",
         "lastName": "STARK",
-        "dob": "1970-05-29",
+        "dateOfBirth": "1970-05-29",
         "gender": "Male"
       }
     ],
@@ -73,10 +72,8 @@
     "prisonName": "HMP Leeds",
     "gender": "Male",
     "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
-    "shoeSize": 10,
     "youthOffender": false,
     "maritalStatus": "Single-not married/in civil partnership",
-    "disability": true,
     "religion": "Church of England (Anglican)",
     "nationality": "British",
     "csra": "HI",
