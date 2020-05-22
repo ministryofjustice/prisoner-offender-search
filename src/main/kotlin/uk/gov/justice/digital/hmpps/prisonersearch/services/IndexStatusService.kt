@@ -41,6 +41,18 @@ class IndexStatusService( val indexStatusRepository : IndexStatusRepository) {
     return true
   }
 
+  fun cancelIndexing() : Boolean {
+    val currentIndexStatus = getCurrentIndex()
+    if (currentIndexStatus.inProgress) {
+      currentIndexStatus.inProgress = false
+      indexStatusRepository.save(currentIndexStatus)
+      log.warn("Indexing cancelled")
+      return true
+    }
+
+    return false;
+  }
+
   fun markRebuildComplete() : Boolean {
     val currentIndexStatus = getCurrentIndex()
     if (currentIndexStatus.inProgress) {
@@ -51,7 +63,7 @@ class IndexStatusService( val indexStatusRepository : IndexStatusRepository) {
       return true
     }
 
-    log.warn("Index not marked as already in progress")
+    log.warn("Index not swapped as not in progress")
     return false;
   }
 }

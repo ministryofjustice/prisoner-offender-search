@@ -17,7 +17,7 @@ class IndexQueueService(
   private val gson: Gson
 ) {
 
-  fun sendIndexRequestMessage(payload: IndexRequest) {
+  fun sendIndexRequestMessage(payload: PrisonerIndexRequest) {
     awsSqsIndexASyncClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
   }
 
@@ -26,7 +26,7 @@ class IndexQueueService(
   }
 }
 
-data class IndexRequest (
+data class PrisonerIndexRequest (
   val requestType: IndexRequestType,
   val prisonerNumber: String? = null,
   val pageRequest: PageRequest? = null

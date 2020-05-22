@@ -24,6 +24,13 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   fun setup() {
 
     if (initialiseSearchData) {
+
+      webTestClient.put().uri("/prisoner-index/cancel-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+
       webTestClient.put().uri("/prisoner-index/build-index")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .header("Content-Type", "application/json")

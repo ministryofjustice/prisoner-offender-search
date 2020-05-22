@@ -20,7 +20,7 @@ class PrisonerIndexListener(
   @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
   fun processIndexRequest(requestJson: String?, msg : javax.jms.Message ) {
     log.debug(requestJson)
-    val indexRequest = gson.fromJson(requestJson, IndexRequest::class.java)
+    val indexRequest = gson.fromJson(requestJson, PrisonerIndexRequest::class.java)
     log.debug("Received message request {}", indexRequest)
 
     when (indexRequest.requestType) {
