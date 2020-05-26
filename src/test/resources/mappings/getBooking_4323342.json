@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/api/offenders/A7089FC"
+    "urlPath": "/api/bookings/4323342",
+    "queryParameters" : {
+      "extraInfo" : {
+        "equalTo" : "true"
+      }
+    }
   },
   "response": {
     "status": 200,
@@ -9,38 +14,30 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "bookingId": 1902838,
-      "bookingNo": "V61588",
-      "offenderNo": "A7089FC",
-      "firstName": "JIM",
-      "lastName": "BORROWER",
+      "bookingId": 4323342,
+      "bookingNo": "V91188",
+      "offenderNo": "A7089FE",
+      "firstName": "ORIGINAL",
+      "lastName": "RECORD-TO-REMOVE",
       "agencyId": "LEI",
       "activeFlag": true,
       "assignedLivingUnit": {
         "agencyId": "LEI",
-        "description": "H-1-005",
+        "description": "H-4-008",
         "agencyName": "Leeds Prison"
       },
-      "facialImageId": 1171177,
-      "dateOfBirth": "1990-02-02",
+      "dateOfBirth": "1931-02-02",
       "physicalAttributes": {
         "gender": "Male",
         "raceCode": "W1",
         "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
         "sexCode": "M"
       },
-      "physicalCharacteristics": [
-        {
-          "type": "SHOESIZE",
-          "characteristic": "Shoe Size",
-          "detail": "10"
-        }
-      ],
       "profileInformation": [
         {
           "type": "YOUTH",
           "question": "Youth Offender?",
-          "resultValue": "Yes"
+          "resultValue": "No"
         },
         {
           "type": "RELF",
@@ -52,17 +49,17 @@
       "identifiers": [
         {
           "type": "CRO",
-          "value": "29906/12P",
-          "offenderNo": "A7089FC",
-          "bookingId": 1902838,
+          "value": "79906/12Q",
+          "offenderNo": "A7089FE",
+          "bookingId": 4323342,
           "issuedDate": "2013-12-02",
           "caseloadType": "INST"
         },
         {
           "type": "PNC",
-          "value": "12/394773I",
-          "offenderNo": "A7089FZ",
-          "bookingId": 1902838,
+          "value": "20/394774J",
+          "offenderNo": "A7089FE",
+          "bookingId": 4323342,
           "issuedDate": "2013-12-02",
           "caseloadType": "INST"
         }

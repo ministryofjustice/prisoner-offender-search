@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/api/offenders/A7089FA"
+    "urlPath": "/api/bookings/1900838",
+    "queryParameters" : {
+      "extraInfo" : {
+        "equalTo" : "true"
+      }
+    }
   },
   "response": {
     "status": 200,
@@ -9,25 +14,22 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "bookingId": 2900837,
-      "bookingNo": "V61586",
-      "offenderNo": "A7089FA",
-      "firstName": "JAMES",
-      "middleName": "TREVOR",
-      "lastName": "DAVIES",
+      "bookingId": 1900838,
+      "bookingNo": "V61587",
+      "offenderNo": "A7089FB",
+      "firstName": "DAVID",
+      "lastName": "WALLIS",
       "agencyId": "MDI",
-      "assignedLivingUnitId": 721726,
+      "assignedLivingUnitId": 721727,
       "activeFlag": true,
-      "religion": "Christian",
       "assignedLivingUnit": {
         "agencyId": "MDI",
         "locationId": 721726,
-        "description": "A-1-002",
+        "description": "A-1-003",
         "agencyName": "Moorland Prison"
       },
-      "facialImageId": 1171171,
-      "dateOfBirth": "1990-01-31",
-      "age": 22,
+      "facialImageId": 1171172,
+      "dateOfBirth": "1990-02-01",
       "physicalAttributes": {
         "gender": "Male",
         "raceCode": "W1",
@@ -38,14 +40,14 @@
         {
           "type": "SHOESIZE",
           "characteristic": "Shoe Size",
-          "detail": "8"
+          "detail": "9"
         }
       ],
       "profileInformation": [
         {
           "type": "YOUTH",
           "question": "Youth Offender?",
-          "resultValue": "Y"
+          "resultValue": "NO"
         },
         {
           "type": "RELF",
@@ -62,17 +64,17 @@
       "identifiers": [
         {
           "type": "CRO",
-          "value": "29906/12K",
-          "offenderNo": "A7089FA",
-          "bookingId": 2900837,
+          "value": "29906/12L",
+          "offenderNo": "A7089FB",
+          "bookingId": 1900838,
           "issuedDate": "2013-12-02",
           "caseloadType": "INST"
         },
         {
           "type": "PNC",
-          "value": "12/394773I",
-          "offenderNo": "A7089FA",
-          "bookingId": 2900837,
+          "value": "12/394773W",
+          "offenderNo": "A7089FB",
+          "bookingId": 1900838,
           "issuedDate": "2013-12-02",
           "caseloadType": "INST"
         }

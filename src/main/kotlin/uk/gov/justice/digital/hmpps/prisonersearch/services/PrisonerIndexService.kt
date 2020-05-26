@@ -7,7 +7,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.*
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
@@ -30,7 +29,7 @@ class PrisonerIndexService(val nomisService: NomisService,
 
     fun indexPrisoner(prisonerId: String) : Prisoner? {
         return nomisService.getOffender(prisonerId)?.let {
-            buildIndex(it)
+            sync(it)
         }
     }
 
@@ -41,15 +40,28 @@ class PrisonerIndexService(val nomisService: NomisService,
         prisonerBRepository.deleteById(prisonerNumber)
     }
 
-    fun sync(offenderBooking: OffenderBooking)  {
-        val currentIndexStatus = indexStatusService.getCurrentIndex()
+    fun sync(offenderBooking: OffenderBooking) : Prisoner {
 
+        val prisonerA = translate(PrisonerA(), offenderBooking)
+        val prisonerB = translate(PrisonerB(), offenderBooking)
+        val storedPrisoner : Prisoner
+
+        val currentIndexStatus = indexStatusService.getCurrentIndex()
         if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-            prisonerARepository.save(translate(PrisonerA(), offenderBooking))
+            storedPrisoner = prisonerARepository.save(prisonerA)
         } else {
-            prisonerBRepository.save(translate(PrisonerB(), offenderBooking))
+            storedPrisoner = prisonerBRepository.save(prisonerB)
         }
-        buildIndex(offenderBooking)  // Keep changes in sync if rebuilding
+
+        if (currentIndexStatus.inProgress) {  // Keep changes in sync if rebuilding
+            if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+                prisonerBRepository.save(prisonerB)
+            } else {
+                prisonerARepository.save(prisonerA)
+            }
+        }
+
+        return storedPrisoner
     }
 
     fun countIndex(indexName: String): Int {
@@ -67,13 +79,8 @@ class PrisonerIndexService(val nomisService: NomisService,
                 otherIndexCount
             )
 
-            searchClient.lowLevelClient()
-                .performRequest(Request("DELETE", "/${currentIndex.otherIndex().indexName}"))
-
-            searchClient.elasticsearchOperations().index(IndexQueryBuilder()
-                .withObject(if (currentIndex.otherIndex() == SyncIndex.INDEX_A) PrisonerA() else PrisonerB())
-                .build())
-
+            searchClient.lowLevelClient().performRequest(Request("DELETE", "/${currentIndex.otherIndex().indexName}"))
+            searchClient.elasticsearchOperations().createIndex(currentIndex.otherIndex().indexName)
             searchClient.elasticsearchOperations().putMapping(if (currentIndex.otherIndex() == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java)
 
             log.info("Sending rebuild request")
@@ -125,16 +132,5 @@ class PrisonerIndexService(val nomisService: NomisService,
         return totalRows
     }
 
-    private fun buildIndex(offenderBooking: OffenderBooking) : Prisoner? {
-        val currentIndexStatus = indexStatusService.getCurrentIndex()
 
-        if (currentIndexStatus.inProgress) {
-            if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-                return prisonerBRepository.save(translate(PrisonerB(), offenderBooking))
-            } else {
-                return prisonerARepository.save(translate(PrisonerA(), offenderBooking))
-            }
-        }
-        return null
-    }
 }

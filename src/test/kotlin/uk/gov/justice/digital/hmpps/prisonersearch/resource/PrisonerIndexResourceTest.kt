@@ -1,59 +1,221 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.matches
-import org.awaitility.kotlin.untilCallTo
+import org.elasticsearch.client.Request
+import org.elasticsearch.client.RestHighLevelClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
+  @Autowired
+  lateinit var elasticSearchClient: RestHighLevelClient
+
   @BeforeEach
-   fun init() {
-    webTestClient.put().uri("/prisoner-index/mark-complete")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-      .exchange()
-      .expectStatus().isOk
+  fun init() {
+    resetStubs()
+    val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
+    resetIndexStatus.setJsonEntity("{ \"currentIndex\": \"INDEX_A\", \"startIndexTime\": null, \"endIndexTime\": null, \"inProgress\": false}")
+    elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
   }
 
   @Test
   fun `access forbidden when no authority`() {
 
     webTestClient.put().uri("/prisoner-index/build-index")
-        .exchange()
-        .expectStatus().isUnauthorized
+      .exchange()
+      .expectStatus().isUnauthorized
   }
 
   @Test
   fun `access forbidden when no role`() {
 
     webTestClient.put().uri("/prisoner-index/build-index")
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus().isForbidden
+      .headers(setAuthorisation())
+      .exchange()
+      .expectStatus().isForbidden
   }
 
   @Test
   fun `can index a prison with correct role`() {
-    webTestClient.put().uri("/prisoner-index/build-index")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .exchange()
-        .expectStatus().isOk
 
-    await untilCallTo { prisonRequestCountFor("/api/offenders/ids") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EZ") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FA") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FB") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FC") } matches { it == 1 }
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+      .jsonPath("index-status.inProgress").isEqualTo("false")
+      .jsonPath("index-status.startIndexTime").doesNotHaveJsonPath()
+      .jsonPath("index-status.endIndexTime").doesNotHaveJsonPath()
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    indexPrisoners()
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+      .jsonPath("index-status.inProgress").isEqualTo("true")
+      .jsonPath("index-status.startIndexTime").isNotEmpty
+      .jsonPath("index-status.endIndexTime").doesNotHaveJsonPath()
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("5")
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-status.inProgress").isEqualTo("false")
+      .jsonPath("index-status.startIndexTime").isNotEmpty
+      .jsonPath("index-status.endIndexTime").isNotEmpty
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("5")
+  }
+
+  @Test
+  fun `can cancel and re-index`() {
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+      .jsonPath("index-status.inProgress").isEqualTo("false")
+
+    indexPrisoners()
+
+    webTestClient.put().uri("/prisoner-index/cancel-index")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+      .jsonPath("index-status.inProgress").isEqualTo("false")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("5")
+  }
+
+
+  @Test
+  fun `can index a new prisoner`() {
+    indexPrisoners()
+
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("5")
+
+    webTestClient.put().uri("/prisoner-index/index/prisoner/A5432AA")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/new_prisoner.json".readResourceAsText())
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("6")
+
+  }
+
+  @Test
+  fun `both indexes are maintained whilst indexing but not once completed`() {
+
+    //index B
+    indexPrisoners()
+
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    resetStubs()
+    // Start indexing A
+    indexPrisoners()
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-status.inProgress").isEqualTo("true")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("5")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("5")
+
+    webTestClient.put().uri("/prisoner-index/index/prisoner/A5432AA")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-status.inProgress").isEqualTo("true")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("6")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("6")
+
+
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    webTestClient.put().uri("/prisoner-index/index/prisoner/A5432AB")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    webTestClient.get()
+      .uri("/info")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+      .jsonPath("index-status.inProgress").isEqualTo("false")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("7")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("6")
+
   }
 
 }
+
+private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()
