@@ -1,0 +1,22 @@
+[
+  {
+    "prisonerNumber": "A7089FB",
+    "pncNumber": "12/394773W",
+    "croNumber": "29906/12L",
+    "bookingId": "1900838",
+    "bookNumber": "V61587",
+    "firstName": "DAVID",
+    "lastName": "WALLIS",
+    "dateOfBirth": "1990-02-01",
+    "gender": "Male",
+    "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+    "youthOffender": false,
+    "religion": "Christian",
+    "nationality": "British",
+    "status": "ACTIVE IN",
+    "prisonId": "MDI",
+    "prisonName": "Moorland Prison",
+    "cellLocation": "A-1-003",
+    "legalStatus": "Remand"
+  }
+]

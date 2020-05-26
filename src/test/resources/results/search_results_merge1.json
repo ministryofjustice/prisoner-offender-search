@@ -1,0 +1,21 @@
+[
+  {
+    "prisonerNumber": "A7089FD",
+    "pncNumber": "20/394774I",
+    "croNumber": "79906/12P",
+    "bookingId": "4323341",
+    "bookNumber": "V61188",
+    "firstName": "ORIGINAL",
+    "lastName": "RECORD-TO-MERGE",
+    "dateOfBirth": "1930-02-02",
+    "gender": "Male",
+    "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+    "youthOffender": false,
+    "religion": "Christian",
+    "status": "ACTIVE IN",
+    "prisonId": "LEI",
+    "prisonName": "Leeds Prison",
+    "cellLocation": "H-4-005",
+    "legalStatus": "Remand"
+  }
+]

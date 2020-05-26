@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
 
     @PostMapping("/match")
-    @ApiOperation(value = "Match prisoners by criteria")
+    @ApiOperation(value = "Match prisoners by criteria", notes = "Requires GLOBAL_SEARCH role")
     @PreAuthorize("hasRole('GLOBAL_SEARCH')")
     fun findByCriteria(@ApiParam(required = true, name = "searchCriteria") @RequestBody searchCriteria : SearchCriteria
     ) : List<Prisoner> {

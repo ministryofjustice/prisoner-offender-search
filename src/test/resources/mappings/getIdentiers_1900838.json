@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/bookings/1900838/identifiers",
+    "queryParameters" : {
+      "type" : {
+        "equalTo" : "MERGED"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "type": "MERGED",
+        "value": "A7089FA"
+      }
+    ]
+  }
+}

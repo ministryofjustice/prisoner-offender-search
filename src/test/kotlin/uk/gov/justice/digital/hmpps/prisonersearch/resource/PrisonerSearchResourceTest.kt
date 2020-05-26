@@ -1,9 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import com.google.gson.Gson
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.matches
-import org.awaitility.kotlin.untilCallTo
+import org.elasticsearch.client.Request
+import org.elasticsearch.client.RestHighLevelClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,31 +11,23 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
-  @Autowired
-  lateinit var gson: Gson
-
   companion object {
     var initialiseSearchData = true
   }
+
+  @Autowired
+  lateinit var elasticSearchClient: RestHighLevelClient
 
   @BeforeEach
   fun setup() {
 
     if (initialiseSearchData) {
-      webTestClient.put().uri("/prisoner-index/build-index")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .header("Content-Type", "application/json")
-        .exchange()
-        .expectStatus().isOk
 
-      await untilCallTo { prisonRequestCountFor("/api/offenders/ids") } matches { it == 1 }
-      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
-      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EZ") } matches { it == 1 }
-      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FA") } matches { it == 1 }
-      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FB") } matches { it == 1 }
-      await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FC") } matches { it == 1 }
+      val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
+      resetIndexStatus.setJsonEntity("{ \"currentIndex\": \"INDEX_A\", \"startIndexTime\": null, \"endIndexTime\": null, \"inProgress\": false}")
+      elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
 
-      await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+      indexPrisoners()
 
       webTestClient.put().uri("/prisoner-index/mark-complete")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -214,16 +204,6 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
     search(SearchCriteria("A7089EY", null, null, "LEI"), "/results/empty.json")
   }
 
-  private fun search(searchCriteria: SearchCriteria, fileAssert: String) {
-    webTestClient.post().uri("/prisoner-search/match")
-      .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isOk
-      .expectBody().json(fileAssert.readResourceAsText())
-  }
-
 }
 
-private fun String.readResourceAsText(): String = PrisonerSearchResourceTest::class.java.getResource(this).readText()
+

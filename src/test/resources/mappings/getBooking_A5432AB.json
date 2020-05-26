@@ -1,0 +1,58 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A5432AB"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1232125,
+      "bookingNo": "T61588",
+      "offenderNo": "A5432AB",
+      "firstName": "TEST2",
+      "lastName": "TESTER2",
+      "agencyId": "MDI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "MDI",
+        "description": "A-1-006",
+        "agencyName": "Moorland Prison"
+      },
+      "dateOfBirth": "1990-02-03",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+      },
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "No"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29981/12P",
+          "bookingId": 1232125,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "14/344223I",
+          "bookingId": 1232125,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "Convicted"
+    }
+  }
+}
