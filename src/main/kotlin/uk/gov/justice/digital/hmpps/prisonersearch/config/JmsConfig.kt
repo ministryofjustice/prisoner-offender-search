@@ -27,7 +27,7 @@ import javax.jms.Session
 
 @Configuration
 @EnableJms
-open class JmsConfig {
+class JmsConfig {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }

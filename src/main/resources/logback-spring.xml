@@ -36,12 +36,7 @@
     <appender-ref ref="aiAppender"/>
   </logger>
 
-  <logger name="org.flywaydb" additivity="false" level="INFO">
-    <appender-ref ref="consoleAppender"/>
-    <appender-ref ref="aiAppender"/>
-  </logger>
-
-  <logger name="com.zaxxer.hikari" additivity="false" level="WARN">
+  <logger name="org.springframework.data.elasticsearch.client" additivity="false"  level="DEBUG">
     <appender-ref ref="consoleAppender"/>
     <appender-ref ref="aiAppender"/>
   </logger>

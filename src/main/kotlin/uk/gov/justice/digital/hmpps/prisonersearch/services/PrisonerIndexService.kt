@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.*
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
@@ -80,8 +81,10 @@ class PrisonerIndexService(val nomisService: NomisService,
             )
 
             searchClient.lowLevelClient().performRequest(Request("DELETE", "/${currentIndex.otherIndex().indexName}"))
-            searchClient.elasticsearchOperations().createIndex(currentIndex.otherIndex().indexName)
-            searchClient.elasticsearchOperations().putMapping(if (currentIndex.otherIndex() == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java)
+            val indexOperations = searchClient.elasticsearchOperations().indexOps(IndexCoordinates.of(currentIndex.otherIndex().indexName))
+
+            indexOperations.create()
+            indexOperations.putMapping(indexOperations.createMapping(if (currentIndex.otherIndex() == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java));
 
             log.info("Sending rebuild request")
             indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.REBUILD))

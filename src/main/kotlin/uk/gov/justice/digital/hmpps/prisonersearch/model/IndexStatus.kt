@@ -16,10 +16,10 @@ class IndexStatus(
   @Field(type = FieldType.Keyword)
   var currentIndex: SyncIndex,
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
+  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
   var startIndexTime: LocalDateTime?,
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd HH:mm:ss")
+  @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
   var endIndexTime: LocalDateTime?,
 
   @Field(type = FieldType.Boolean)

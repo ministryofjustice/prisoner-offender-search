@@ -2,6 +2,10 @@ sqs:
   endpoint.url: http://localhost:4576
   provider: localstack
 
+es:
+  endpoint.url: http://localhost:4578
+  provider: localstack
+
 api:
   base:
     url:

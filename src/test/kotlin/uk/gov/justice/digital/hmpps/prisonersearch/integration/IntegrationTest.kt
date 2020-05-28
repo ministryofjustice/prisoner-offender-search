@@ -21,7 +21,7 @@ import java.time.Duration
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ActiveProfiles(profiles = ["test"])
 abstract class IntegrationTest {
 
   @SpyBean

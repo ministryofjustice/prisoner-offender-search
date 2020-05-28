@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.3.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.0"
   kotlin("plugin.spring") version "1.3.72"
 }
 
@@ -14,9 +14,6 @@ dependencies {
 
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.data:spring-data-elasticsearch")
-  implementation("org.elasticsearch:elasticsearch:6.8.9")
-  implementation("org.elasticsearch.client:elasticsearch-rest-high-level-client:6.8.9")
-  implementation("org.elasticsearch.client:elasticsearch-rest-client:6.8.9")
   implementation("org.springframework.boot:spring-boot-devtools")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
@@ -35,12 +32,13 @@ dependencies {
   implementation("com.google.guava:guava:29.0-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.782"))
+  implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.790"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
+  implementation ("com.amazonaws:aws-java-sdk-elasticsearch:1.11.791")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
   testImplementation("org.testcontainers:localstack:1.13.0")
-  testImplementation("org.testcontainers:elasticsearch:1.14.1")
+  testImplementation("org.testcontainers:elasticsearch:1.14.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
 }
