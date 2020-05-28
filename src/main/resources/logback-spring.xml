@@ -36,7 +36,7 @@
     <appender-ref ref="aiAppender"/>
   </logger>
 
-  <logger name="org.springframework.data.elasticsearch.client" additivity="false"  level="DEBUG">
+  <logger name="org.springframework.data.elasticsearch.client" additivity="false" level="DEBUG">
     <appender-ref ref="consoleAppender"/>
     <appender-ref ref="aiAppender"/>
   </logger>

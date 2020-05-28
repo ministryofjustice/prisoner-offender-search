@@ -16,8 +16,8 @@ class IndexInfo(private val indexStatusService : IndexStatusService,
     val indexStatus = indexStatusService.getCurrentIndex()
     builder.withDetail("index-status", indexStatus);
     builder.withDetail("index-size", mapOf(
-      indexStatus.currentIndex.name to prisonerIndexService.countIndex(indexStatus.currentIndex.indexName),
-      indexStatus.currentIndex.otherIndex().name to prisonerIndexService.countIndex(indexStatus.currentIndex.otherIndex().indexName)
+      indexStatus.currentIndex.name to prisonerIndexService.countIndex(indexStatus.currentIndex),
+      indexStatus.currentIndex.otherIndex().name to prisonerIndexService.countIndex(indexStatus.currentIndex.otherIndex())
     ))
   }
 
