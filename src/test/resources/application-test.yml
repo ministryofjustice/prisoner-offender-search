@@ -5,6 +5,10 @@ sqs:
   provider: embedded-localstack
   endpoint.url: http://localhost:4576
 
+es:
+  provider: embedded-localstack
+  endpoint.url: http://localhost:4578
+
 elasticsearch:
   port: 4571
   scheme: http

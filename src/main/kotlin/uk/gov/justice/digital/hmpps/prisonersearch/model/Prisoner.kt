@@ -40,7 +40,7 @@ open class Prisoner {
   @ApiModelProperty(required = true, value = "Last name", example = "Larsen", position = 8)
   var lastName: String? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date)
   @ApiModelProperty(required = true, value = "Date of Birth", example = "1975-04-02", position = 9)
   var dateOfBirth: LocalDate? = null
 
@@ -91,15 +91,15 @@ open class Prisoner {
   @ApiModelProperty(required = true, value = "Most serious offence for this sentence", example = "Robbery", position = 25)
   var mostSeriousOffence : String? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date)
   @ApiModelProperty(value = "Start Date for this sentence", example = "2020-04-03", position = 26)
   var sentenceStartDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date)
   @ApiModelProperty(value = "Actual of most likely Release Date", example = "2023-05-02", position = 27)
   var releaseDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = DateFormat.date)
   @ApiModelProperty(value = "Release Date Confirmed", example = "2023-05-01", position = 28)
   var confirmedReleaseDate: LocalDate? = null
 }

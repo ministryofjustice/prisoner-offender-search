@@ -53,21 +53,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   }
 
   @Test
-  fun `Health page reports ok`() {
-    subPing(200)
-
-    webTestClient.get()
-      .uri("/health")
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("OK")
-      .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("OK")
-      .jsonPath("status").isEqualTo("UP")
-  }
-
-  @Test
   fun `Health ping page is accessible`() {
     subPing(200)
 
@@ -139,85 +124,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .expectBody()
       .jsonPath("components.indexQueueHealth.status").isEqualTo("DOWN")
       .jsonPath("status").isEqualTo("DOWN")
-
-  }
-
-  @Test
-  fun `Queue health ok and dlq health ok, reports everything up`() {
-    subPing(200)
-
-    webTestClient.get()
-      .uri("/health")
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("components.eventQueueHealth.status").isEqualTo("UP")
-      .jsonPath("components.eventQueueHealth.status").isEqualTo(DlqStatus.UP.description)
-      .jsonPath("components.indexQueueHealth.status").isEqualTo("UP")
-      .jsonPath("components.indexQueueHealth.status").isEqualTo(DlqStatus.UP.description)
-      .jsonPath("status").isEqualTo("UP")
-
-  }
-
-  @Test
-  fun `Dlq health reports interesting attributes`() {
-    subPing(200)
-
-    webTestClient.get()
-      .uri("/health")
-      .exchange()
-      .expectStatus()
-      .isOk
-      .expectBody()
-      .jsonPath("components.eventQueueHealth.details.${QueueAttributes.MESSAGES_ON_DLQ.healthName}").isEqualTo(0)
-      .jsonPath("components.indexQueueHealth.details.${QueueAttributes.MESSAGES_ON_DLQ.healthName}").isEqualTo(0)
-
-  }
-
-  @Test
-  fun `Dlq down brings main health and queue health down`() {
-    subPing(200)
-    mockQueueWithoutRedrivePolicyAttributes()
-
-    webTestClient.get()
-      .uri("/health")
-      .exchange()
-      .expectStatus()
-      .is5xxServerError
-      .expectBody()
-      .jsonPath("status").isEqualTo("DOWN")
-      .jsonPath("components.eventQueueHealth.status").isEqualTo("DOWN")
-      .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
-  }
-
-  @Test
-  fun `Main queue has no redrive policy reports dlq down`() {
-    subPing(200)
-    mockQueueWithoutRedrivePolicyAttributes()
-
-    webTestClient.get()
-      .uri("/health")
-      .exchange()
-      .expectStatus()
-      .is5xxServerError
-      .expectBody()
-      .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
-
-  }
-
-  @Test
-  fun `Dlq not found reports dlq down`() {
-    subPing(200)
-    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java,"dlqName", "missing_queue", String::class.java)
-
-    webTestClient.get()
-      .uri("/health")
-      .exchange()
-      .expectStatus()
-      .is5xxServerError
-      .expectBody()
-      .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_FOUND.description)
 
   }
 

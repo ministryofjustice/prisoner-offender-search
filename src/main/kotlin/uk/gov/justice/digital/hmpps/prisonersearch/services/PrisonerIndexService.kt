@@ -7,8 +7,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.model.*
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
+import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
@@ -64,29 +70,45 @@ class PrisonerIndexService(val nomisService: NomisService,
         return storedPrisoner
     }
 
-    fun countIndex(indexName: String): Int {
-        val response = searchClient.lowLevelClient().performRequest(Request("get", "/$indexName/_count"))
+    private fun checkIfIndexExists(indexName: String): Boolean {
+        val response = searchClient.lowLevelClient().performRequest(Request("HEAD", "/$indexName"))
+        return response.statusLine.statusCode != 404
+    }
+
+    fun countIndex(prisonerIndex: SyncIndex): Int {
+        val response = searchClient.lowLevelClient().performRequest(Request("get", "/${prisonerIndex.indexName}/_count"))
         return JsonParser.parseString(IOUtils.toString(response.entity.content)).asJsonObject["count"].asInt
     }
 
     fun buildIndex() : IndexStatus {
         if (indexStatusService.markRebuildStarting()) {
             val currentIndex = indexStatusService.getCurrentIndex().currentIndex
-            val otherIndexCount = countIndex(currentIndex.otherIndex().indexName)
+            val otherIndexCount = countIndex(currentIndex.otherIndex())
             log.info("Current index is {} [{}], rebuilding index {} [{}]", currentIndex,
-                countIndex(currentIndex.indexName),
+                countIndex(currentIndex),
                 currentIndex.otherIndex(),
                 otherIndexCount
             )
 
-            searchClient.lowLevelClient().performRequest(Request("DELETE", "/${currentIndex.otherIndex().indexName}"))
-            searchClient.elasticsearchOperations().createIndex(currentIndex.otherIndex().indexName)
-            searchClient.elasticsearchOperations().putMapping(if (currentIndex.otherIndex() == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java)
+            checkExistsAndReset(currentIndex.otherIndex())
 
             log.info("Sending rebuild request")
             indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.REBUILD))
         }
         return indexStatusService.getCurrentIndex()
+    }
+
+    private fun checkExistsAndReset(prisonerIndex: SyncIndex) {
+        if (checkIfIndexExists(prisonerIndex.indexName)) {
+            searchClient.lowLevelClient().performRequest(Request("DELETE", "/${prisonerIndex.indexName}"))
+        }
+        createPrisonerIndex(prisonerIndex)
+    }
+
+    private fun createPrisonerIndex(prisonerIndex: SyncIndex) {
+        val indexOperations = searchClient.elasticsearchOperations().indexOps(IndexCoordinates.of(prisonerIndex.indexName))
+        indexOperations.create()
+        indexOperations.putMapping(indexOperations.createMapping(if (prisonerIndex == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java))
     }
 
     fun cancelIndex() : IndexStatus {

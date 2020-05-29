@@ -26,7 +26,7 @@ class LocalStackConfig {
 
   @Bean
   fun elasticSearchContainer() : ElasticsearchContainer {
-    return ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch-oss:6.7.2")
+    return ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1")
   }
 
   @Bean

@@ -1,12 +1,18 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.health
 
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 
 @ExtendWith(SpringExtension::class)
-class InfoIntegrationTest : IntegrationTest() {
+class InfoIntegrationTest : QueueIntegrationTest() {
+
+  @BeforeEach
+  fun init() {
+    setupIndexes()
+  }
 
   @Test
   fun `Info page reports ok`() {

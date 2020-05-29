@@ -3,11 +3,8 @@ package uk.gov.justice.digital.hmpps.prisonersearch
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
-import org.elasticsearch.client.Request
-import org.elasticsearch.client.RestHighLevelClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
@@ -18,18 +15,12 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     var initialiseSearchData = true
   }
 
-  @Autowired
-  lateinit var elasticSearchClient: RestHighLevelClient
-
   @BeforeEach
   fun setup() {
 
     if (initialiseSearchData) {
 
-      val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
-      resetIndexStatus.setJsonEntity("{ \"currentIndex\": \"INDEX_A\", \"startIndexTime\": null, \"endIndexTime\": null, \"inProgress\": false}")
-      elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
-
+      setupIndexes()
       indexPrisoners()
 
       webTestClient.put().uri("/prisoner-index/mark-complete")

@@ -1,24 +1,16 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import org.elasticsearch.client.Request
-import org.elasticsearch.client.RestHighLevelClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
-  @Autowired
-  lateinit var elasticSearchClient: RestHighLevelClient
-
   @BeforeEach
   fun init() {
     resetStubs()
-    val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
-    resetIndexStatus.setJsonEntity("{ \"currentIndex\": \"INDEX_A\", \"startIndexTime\": null, \"endIndexTime\": null, \"inProgress\": false}")
-    elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
+    setupIndexes()
   }
 
   @Test
