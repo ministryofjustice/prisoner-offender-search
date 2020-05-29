@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.amazonaws.util.IOUtils
 import com.google.gson.JsonParser
+import com.microsoft.applicationinsights.TelemetryClient
 import org.elasticsearch.client.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,22 +22,32 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
 
 @Service
-class PrisonerIndexService(val nomisService: NomisService,
-                           val prisonerARepository: PrisonerARepository,
-                           val prisonerBRepository: PrisonerBRepository,
-                           val indexQueueService : IndexQueueService,
-                           val indexStatusService: IndexStatusService,
-                           val searchClient: SearchClient,
-                           @Value("\${index.page.size:1000}") val pageSize : Int
+class PrisonerIndexService(private val nomisService: NomisService,
+                           private val prisonerARepository: PrisonerARepository,
+                           private val prisonerBRepository: PrisonerBRepository,
+                           private val indexQueueService : IndexQueueService,
+                           private val indexStatusService: IndexStatusService,
+                           private val searchClient: SearchClient,
+                           private val telemetryClient: TelemetryClient,
+                           @Value("\${index.page.size:1000}") private val pageSize : Int
 ) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
     fun indexPrisoner(prisonerId: String) : Prisoner? {
-        return nomisService.getOffender(prisonerId)?.let {
+        val prisoner = nomisService.getOffender(prisonerId)?.let {
             sync(it)
         }
+
+        if (prisoner == null) {
+            telemetryClient.trackEvent(
+                "POSOffenderNotFoundForIndexing",
+                mapOf("prisonerID" to prisonerId),
+                null)
+        }
+
+        return prisoner
     }
 
     fun delete(prisonerNumber : String) {
