@@ -59,6 +59,9 @@ management:
       cache:
         time-to-live: 2000ms
 
+graceful:
+  shutdown.enabled: true
+
 azure:
   application-insights.web.enable-W3C: true
 
