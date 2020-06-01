@@ -14,8 +14,8 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.prisonId = ob.agencyId
   prisoner.status = ob.status
 
-  prisoner.category = ob.assessments?.sortedByDescending { a -> a.assessmentDate }?.firstOrNull{ a -> a.assessmentCode == "CATEGORY"}?.classificationCode
-  prisoner.csra = ob.assessments?.sortedByDescending { a -> a.assessmentDate }?.firstOrNull{ a -> a.cellSharingAlertFlag }?.classificationCode
+  prisoner.category = ob.categoryCode
+  prisoner.csra = ob.csra
 
   prisoner.dateOfBirth = ob.dateOfBirth
   prisoner.firstName = ob.firstName
