@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
+import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Service
 @Service
 class PrisonerEventListener(
     private val prisonerSyncService: PrisonerSyncService,
-    @Qualifier("gson") private val gson : Gson
+    @Qualifier("gson") private val gson : Gson,
+    private val telemetryClient: TelemetryClient
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -23,6 +25,7 @@ class PrisonerEventListener(
     val eventType = messageAttributes.eventType.Value
     log.debug("Received message {} type {}", messageId, eventType)
 
+    try {
     when (eventType) {
       "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))
       "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED", "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED", "ASSESSMENT-CHANGED", "OFFENDER_PROFILE_DETAILS-INSERTED", "OFFENDER_PROFILE_DETAILS-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
@@ -34,6 +37,14 @@ class PrisonerEventListener(
       else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
     }
 
+    } catch (e: Exception) {
+      telemetryClient.trackEvent(
+          "POSProcessEventRequestError",
+          mapOf("requestPayload" to requestJson, "message" to e.message),
+          null)
+
+      throw e
+    }
   }
 
   private inline fun <reified T> fromJson(message: String): T {
