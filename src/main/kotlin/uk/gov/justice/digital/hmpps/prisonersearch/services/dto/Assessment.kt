@@ -6,7 +6,7 @@ import java.time.LocalDate
  * Assessment
  */
 data class Assessment (
-  val classificationCode: String,
+  val classificationCode: String?,
   val classification: String?,
   val assessmentCode: String?,
   val assessmentDescription: String?,
