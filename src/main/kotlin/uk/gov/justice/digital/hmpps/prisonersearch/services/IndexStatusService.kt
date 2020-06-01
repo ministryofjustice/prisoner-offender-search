@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -10,7 +11,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Service
-class IndexStatusService( val indexStatusRepository : IndexStatusRepository) {
+class IndexStatusService(private val indexStatusRepository : IndexStatusRepository, private val telemetryClient: TelemetryClient) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -37,6 +38,11 @@ class IndexStatusService( val indexStatusRepository : IndexStatusRepository) {
     currentIndexStatus.startIndexTime = LocalDateTime.now()
     currentIndexStatus.endIndexTime = null
     indexStatusRepository.save(currentIndexStatus)
+
+    telemetryClient.trackEvent(
+      "POSIndexRebuildStarting",
+      mapOf("indexName" to currentIndexStatus.currentIndex.indexName),
+      null)
 
     return true
   }
