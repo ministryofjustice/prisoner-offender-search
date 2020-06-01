@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.*
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER_LIST
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.REBUILD
 
 @Service
 class PrisonerIndexListener(
@@ -37,7 +39,7 @@ class PrisonerIndexListener(
     } catch (e : Exception) {
       telemetryClient.trackEvent(
         "POSProcessIndexRequestError",
-        mapOf("message" to e.message),
+        mapOf("requestPayload" to requestJson, "message" to e.message),
         null)
 
       throw e
