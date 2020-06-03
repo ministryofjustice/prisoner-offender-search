@@ -24,6 +24,13 @@
     "sentenceStartDate": "2016-09-09",
     "confirmedReleaseDate": "2023-04-01",
     "releaseDate": "2023-04-01",
+    "sentenceExpiryDate": "2026-04-05",
+    "licenceExpiryDate": "2026-04-15",
+    "homeDetentionCurfewEligibilityDate": "2020-12-20",
+    "homeDetentionCurfewActualDate": "2019-06-22",
+    "additionalDaysAwarded": 27,
+    "nonDtoReleaseDate": "2023-05-16",
+    "nonDtoReleaseDateType": "CRD",
     "legalStatus": "Convicted",
     "mostSeriousOffence": "Handle stolen goods",
     "status": "ACTIVE IN"
