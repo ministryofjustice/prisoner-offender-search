@@ -47,11 +47,13 @@
     "maritalStatus": "Single-not married/in civil partnership",
     "religion": "Church of England (Anglican)",
     "nationality": "British",
+    "status": "ACTIVE IN",
     "csra": "High",
     "category": "C",
-    "releaseDate": "2020-04-28",
     "legalStatus": "Convicted",
     "mostSeriousOffence": "Burglary dwelling - with intent to steal",
-    "status": "ACTIVE IN"
+    "releaseDate": "2020-04-28",
+    "nonDtoReleaseDate": "2020-04-28",
+    "nonDtoReleaseDateType": "CRD"
   }
 ]

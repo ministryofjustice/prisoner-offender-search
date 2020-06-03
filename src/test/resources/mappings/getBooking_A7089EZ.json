@@ -114,6 +114,17 @@
         "weightKilograms": 99,
         "sexCode": "M"
       },
+      "personalCareNeeds": [
+        {
+          "problemType": "DISAB",
+          "problemCode": "ND",
+          "problemStatus": "ON",
+          "problemDescription": "No Disability",
+          "commentText": null,
+          "startDate": "2013-06-19",
+          "endDate": null
+        }
+      ],
       "physicalCharacteristics": [
         {
           "type": "HAIR",

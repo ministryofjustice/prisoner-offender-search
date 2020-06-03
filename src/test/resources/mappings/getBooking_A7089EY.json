@@ -417,6 +417,17 @@
         "confirmedReleaseDate": "2023-04-01",
         "releaseDate": "2023-04-01"
       },
+      "personalCareNeeds": [
+        {
+          "problemType": "DISAB",
+          "problemCode": "ND",
+          "problemStatus": "ON",
+          "problemDescription": "No Disability",
+          "commentText": null,
+          "startDate": "2013-06-19",
+          "endDate": null
+        }
+      ],
       "offenceHistory": [
         {
           "bookingId": 811808,
