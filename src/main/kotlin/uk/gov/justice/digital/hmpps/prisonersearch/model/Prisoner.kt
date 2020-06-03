@@ -102,6 +102,32 @@ open class Prisoner {
   @Field(type = FieldType.Date, format = DateFormat.date)
   @ApiModelProperty(value = "Release Date Confirmed", example = "2023-05-01", position = 28)
   var confirmedReleaseDate: LocalDate? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @ApiModelProperty(value = "Sentence Expiry Date", example = "2023-05-01", position = 29)
+  var sentenceExpiryDate: LocalDate? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @ApiModelProperty(value = "Licence Expiry Date", example = "2023-05-01", position = 30)
+  var licenceExpiryDate: LocalDate? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @ApiModelProperty(value = "HDC Eligibility Date", example = "2023-05-01", position = 31)
+  var homeDetentionCurfewEligibilityDate: LocalDate? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @ApiModelProperty(value = "HDC Actual Date", example = "2023-05-01", position = 32)
+  var homeDetentionCurfewActualDate: LocalDate? = null
+
+  @ApiModelProperty(value = "Days added to sentence term due to adjustments.", example = "10", position = 33)
+  var additionalDaysAwarded: Int? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @ApiModelProperty(value = "Release date for Non determinant sentence (if applicable). This will be based on one of ARD, CRD, NPD or PRRD.", example = "2023-05-01", position = 34)
+  var nonDtoReleaseDate: LocalDate? = null
+
+  @ApiModelProperty(value = "Indicates which type of non-DTO release date is the effective release date. One of 'ARD’, 'CRD’, ‘NPD’ or 'PRRD’.", example = "ARD", allowableValues = "ARD,CRD,NPD,PRRD", position = 28)
+  var nonDtoReleaseDateType: String? = null
 }
 
 @Document(indexName = "prisoner-search-a")

@@ -12,8 +12,8 @@ api:
       oauth: http://localhost:8090/auth
       nomis: http://localhost:8093
 
-graceful:
-  shutdown.enabled: false
+server:
+  shutdown: immediate
 
 elasticsearch:
   port: 4571

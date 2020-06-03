@@ -34,5 +34,6 @@ data class OffenderBooking (
   val offenceHistory: List<OffenceHistoryDetail>?,
   val status: String,
   val legalStatus: String?,
-  val imprisonmentStatus: String?
+  val imprisonmentStatus: String?,
+  val personalCareNeeds : List<PersonalCareNeed>?
 )

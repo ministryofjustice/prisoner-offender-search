@@ -1,5 +1,5 @@
-graceful:
-  shutdown.enabled: false
+server:
+  shutdown: immediate
 
 sqs:
   provider: embedded-localstack
