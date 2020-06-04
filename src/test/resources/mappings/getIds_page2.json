@@ -15,7 +15,7 @@
     "status": 200,
     "headers": {
       "Content-Type": "application/json",
-      "Total-Records": "5"
+      "Total-Records": "6"
     },
     "jsonBody": [
       {
@@ -23,6 +23,9 @@
       },
       {
         "offenderNumber": "A7089FC"
+      },
+      {
+        "offenderNumber": "A7089FX"
       }
     ]
   }

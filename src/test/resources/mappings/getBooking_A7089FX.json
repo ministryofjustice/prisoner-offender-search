@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7089FX"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "offenderNo": "A7089FX",
+      "offenderId": 2125050,
+      "rootOffenderId": 2125050,
+      "firstName": "DAVID",
+      "lastName": "DOE",
+      "activeFlag": false,
+      "dateOfBirth": "1930-02-02"
+    }
+  }
+}
