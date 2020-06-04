@@ -138,7 +138,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("6")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("7")
 
   }
 
