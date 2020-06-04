@@ -111,6 +111,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match on a first and last name only`() {
+    search(SearchCriteria(null, "david", "doe"), "/results/search_results_david.json")
+  }
+
+
+  @Test
   fun `can perform a match on a first name only filter by prison`() {
     search(SearchCriteria(null, "john", null, "MDI"), "/results/search_results_smith.json")
   }
