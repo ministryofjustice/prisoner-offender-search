@@ -1,9 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
 @ApiModel("Search Criteria for Prisoner Search")
+
+@JsonIgnoreProperties( value =  [ "isValid" ])
 data class SearchCriteria (
   @ApiModelProperty(required = false, value = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA,", position = 1)
   val prisonerIdentifier : String?,
