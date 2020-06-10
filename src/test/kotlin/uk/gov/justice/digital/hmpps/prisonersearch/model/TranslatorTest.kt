@@ -1,8 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
-import org.junit.jupiter.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.function.Executable
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.LocalDate
 
@@ -14,13 +13,10 @@ class TranslatorTest {
     val dateOfBirth = LocalDate.now().minusYears(18)
     val prisoner = translate(PrisonerA(), OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false))
 
-    Assertions.assertAll(
-        Executable { Assertions.assertEquals("A1234AA", prisoner.prisonerNumber) },
-        Executable { Assertions.assertEquals("Fred", prisoner.firstName) },
-        Executable { Assertions.assertEquals("Bloggs", prisoner.lastName) },
-        Executable { Assertions.assertEquals(dateOfBirth, prisoner.dateOfBirth) },
-        Executable { Assertions.assertNull(prisoner.bookingId) }
-    )
-
+    assertThat(prisoner.prisonerNumber).isEqualTo("A1234AA")
+    assertThat(prisoner.firstName).isEqualTo("Fred")
+    assertThat(prisoner.lastName).isEqualTo("Bloggs")
+    assertThat(prisoner.dateOfBirth).isEqualTo(dateOfBirth)
+    assertThat(prisoner.bookingId).isNull()
   }
 }
