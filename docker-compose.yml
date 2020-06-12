@@ -17,7 +17,7 @@ services:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=localstack
       - API_BASE_URL_OAUTH=http://oauth:8080/auth
-      - API_BASE_URL_NOMIS=http://nomis-api:8080
+      - API_BASE_URL_NOMIS=http://nomisapi:8080
       - SQS_ENDPOINT_URL=http://localstack:4576
       - ES_ENDPOINT_URL=http://localstack:4578
       - ELASTICSEARCH_HOST=localstack
@@ -36,6 +36,8 @@ services:
 
   nomisapi:
     image: quay.io/hmpps/elite2-api:latest
+    networks:
+      - hmpps
     container_name: nomisapi
     depends_on:
       - oauth
