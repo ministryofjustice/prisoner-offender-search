@@ -45,9 +45,9 @@ jobs:
       - run:
           name: Set up queues
           command: src/test/resources/localstack/setup-sns.sh
-      - run:
-          name: Set up es domain
-          command: src/test/resources/localstack/setup-es.sh
+#      - run:
+#          name: Set up es domain
+#          command: src/test/resources/localstack/setup-es.sh
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
