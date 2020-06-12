@@ -78,7 +78,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun setupIndexes() {
-//    waitForDomain()
+    waitForDomain()
     createIndexStatusIndex()
     createPrisonerIndex(SyncIndex.INDEX_A)
     createPrisonerIndex(SyncIndex.INDEX_B)
