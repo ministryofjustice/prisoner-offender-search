@@ -7,26 +7,38 @@ services:
     container_name: prisoner-offender-search
     depends_on:
       - localstack
-      - nomis-api
+      - nomisapi
+      - oauth
     ports:
-      - "8084:8080"
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
       - SERVER_PORT=8080
-      - API_BASE_URL_OAUTH=http://localhost:9090/auth
-      - API_BASE_URL_NOMIS=http://localhost:8093
-      - SQS_ENDPOINT_URL=http://localhost:4576
-      - SQS_PROVIDER=localstack
+      - SPRING_PROFILES_ACTIVE=localstack
+      - API_BASE_URL_OAUTH=http://oauth:8080/auth
+      - API_BASE_URL_NOMIS=http://nomisapi:8080
+      - SQS_ENDPOINT_URL=http://localstack:4576
+      - ES_ENDPOINT_URL=http://localstack:4578
+      - ELASTICSEARCH_HOST=localstack
+      - SQS_PROVIDER=full-localstack
       - SQS_AWS_ACCESS_KEY_ID=foobar
       - SQS_AWS_SECRET_ACCESS_KEY=foobar
+      - SQS_AWS_DLQ_ACCESS_KEY_ID=foobar
+      - SQS_AWS_DLQ_SECRET_ACCESS_KEY=foobar
+      - SQS_INDEX_AWS_ACCESS_KEY_ID=foobar
+      - SQS_INDEX_AWS_SECRET_ACCESS_KEY=foobar
+      - SQS_INDEX_AWS_DLQ_ACCESS_KEY_ID=foobar
+      - SQS_INDEX_AWS_DLQ_SECRET_ACCESS_KEY=foobar
       - SQS_DEFAULT_REGION=eu-west-2
-      - OAUTH_CLIENT_SECRET=clientsecret
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
+      - OAUTH_CLIENT_SECRET=clientsecret
 
-  nomis-api:
+  nomisapi:
     image: quay.io/hmpps/elite2-api:latest
-    container_name: nomis-api
+    networks:
+      - hmpps
+    container_name: nomisapi
     depends_on:
       - oauth
     ports:
@@ -38,12 +50,12 @@ services:
       - SPRING_PROFILES_ACTIVE=nomis-hsqldb
 
   oauth:
-    image: quay.io/hmpps/nomis-oauth2-server:latest
+    image: quay.io/hmpps/hmpps-auth:latest
     networks:
       - hmpps
     container_name: oauth
     ports:
-      - "9090:8080"
+      - "8090:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
     environment:
@@ -59,6 +71,7 @@ services:
       - "4566-4597:4566-4597"
       - 8999:8080
     environment:
+      - HOSTNAME_EXTERNAL=localstack
       - SERVICES=sqs,sns,es
       - ES_PORT_EXTERNAL=4571
       - DEBUG=${DEBUG- }

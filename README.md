@@ -31,9 +31,44 @@ Running all services except this application (hence allowing you to run this in 
 ```bash
 TMPDIR=/private$TMPDIR docker-compose up --scale prisoner-offender-search=0 
 ```
-
 Check the docker-compose file for sample environment variables to run the application locally.
 
+### You can add some prisoners into elastic with the following:-
+
+#### Get a token
+```bash
+TOKEN=$(curl --location --request POST "http://localhost:8090/auth/oauth/token?grant_type=client_credentials" --header "Authorization: Basic $(echo -n prisoner-offender-search-client:clientsecret | base64)" |  jq -r .access_token)
+```
+
+#### Start indexing
+```bash
+curl --location --request PUT "http://localhost:8080/prisoner-index/build-index" --header "Authorization: Bearer $TOKEN" | jq -r
+```
+
+#### Check all indexed with
+```bash
+curl --location --request GET "http://localhost:8080/info" | jq -r
+```
+
+If 48 records then mark complete
+```bash
+curl --location --request PUT "http://localhost:8080/prisoner-index/mark-complete" --header "Authorization: Bearer $TOKEN" | jq -r
+```
+
+#### Now test a search
+```bash
+curl --location --request POST "http://localhost:8080/prisoner-search/match" --header "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' \
+ --data-raw '{
+    "lastName": "Smith"
+ }' | jq -r
+```
+
+#### View ES indexes
+```bash
+curl --location --request POST "http://localhost:4571/prisoner-search-a/_search" | jq
+```
+
+### Alternative running
 Or to just run `localstack` which is useful when running against an a non-local test system Env need to be `spring.profiles.active=localstack` and `sqs.provider=full-localstack`
 
 ```bash
@@ -51,19 +86,8 @@ In all of the above the application should use the host network to communicate w
 
 There are two handy scripts to add messages to the queue with data that matches either the T3 test environment or data in the test Docker version of the apps
 
-T3 test data:
-```bash
-./create-prison-movements-messages-t3.bash 
-```
-local test data:
-```bash
-./create-prison-movements-messages-local.bash 
-```
-
 Purging a local queue
 ```bash
 aws --endpoint-url=http://localhost:4576 sqs purge-queue --queue-url http://localhost:4576/queue/prisoner_offender_index_queue
 ```
 
-#### Running without queues
-This can be done using the `dev` spring profile
