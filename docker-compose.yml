@@ -19,9 +19,8 @@ services:
       - API_BASE_URL_OAUTH=http://oauth:8080/auth
       - API_BASE_URL_NOMIS=http://nomisapi:8080
       - SQS_ENDPOINT_URL=http://localstack:4576
-      - ES_ENDPOINT_URL=http://localstack:4578
       - ELASTICSEARCH_HOST=localstack
-      - SQS_PROVIDER=full-localstack
+      - AWS_PROVIDER=localstack
       - SQS_AWS_ACCESS_KEY_ID=foobar
       - SQS_AWS_SECRET_ACCESS_KEY=foobar
       - SQS_AWS_DLQ_ACCESS_KEY_ID=foobar
@@ -84,7 +83,7 @@ services:
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - $PWD/localstack:/docker-entrypoint-initaws.d
+      - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
 
 networks:
   hmpps:

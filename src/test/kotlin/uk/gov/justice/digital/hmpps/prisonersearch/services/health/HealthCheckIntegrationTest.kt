@@ -46,10 +46,10 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
   @AfterEach
   fun tearDown() {
-    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java,"queueName", queueName, String::class.java)
-    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java,"dlqName", dlqName, String::class.java)
-    ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java,"queueName", indexQueueName, String::class.java)
-    ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java,"dlqName", indexDlqName, String::class.java)
+    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java, "queueName", queueName, String::class.java)
+    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java, "dlqName", dlqName, String::class.java)
+    ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java, "queueName", indexQueueName, String::class.java)
+    ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java, "dlqName", indexDlqName, String::class.java)
   }
 
   @Test
@@ -97,7 +97,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
   @Test
   fun `Queue does not exist reports down`() {
-    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java,"queueName", "missing_queue", String::class.java)
+    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java, "queueName", "missing_queue", String::class.java)
     subPing(200)
 
     webTestClient.get()
@@ -113,7 +113,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
   @Test
   fun `Index Queue does not exist reports down`() {
-    ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java,"queueName", "missing_queue", String::class.java)
+    ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java, "queueName", "missing_queue", String::class.java)
     subPing(200)
 
     webTestClient.get()
@@ -124,6 +124,52 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .expectBody()
       .jsonPath("components.indexQueueHealth.status").isEqualTo("DOWN")
       .jsonPath("status").isEqualTo("DOWN")
+
+  }
+
+  @Test
+  fun `Dlq down brings main health and queue health down`() {
+    subPing(200)
+    mockQueueWithoutRedrivePolicyAttributes()
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .is5xxServerError
+      .expectBody()
+      .jsonPath("status").isEqualTo("DOWN")
+      .jsonPath("components.eventQueueHealth.status").isEqualTo("DOWN")
+      .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
+  }
+
+  @Test
+  fun `Main queue has no redrive policy reports dlq down`() {
+    subPing(200)
+    mockQueueWithoutRedrivePolicyAttributes()
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .is5xxServerError
+      .expectBody()
+      .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
+
+  }
+
+  @Test
+  fun `Dlq not found reports dlq down`() {
+    subPing(200)
+    ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java, "dlqName", "missing_queue", String::class.java)
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .is5xxServerError
+      .expectBody()
+      .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_FOUND.description)
 
   }
 
@@ -148,7 +194,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   }
 
   private fun mockQueueWithoutRedrivePolicyAttributes() {
-    val queueName = ReflectionTestUtils.getField(eventQueueHealth, QueueHealth::class.java,"queueName") as String
+    val queueName = ReflectionTestUtils.getField(eventQueueHealth, QueueHealth::class.java, "queueName") as String
     val queueUrl = awsSqsClient.getQueueUrl(queueName)
     whenever(
       awsSqsClient.getQueueAttributes(
