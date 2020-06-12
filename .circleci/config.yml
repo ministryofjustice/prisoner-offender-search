@@ -55,7 +55,6 @@ jobs:
       - run:
           environment:
             - AWS_PROVIDER: localstack
-            - SQS_PROVIDER: localstack
           command: ./gradlew test
       - save_cache:
           paths:

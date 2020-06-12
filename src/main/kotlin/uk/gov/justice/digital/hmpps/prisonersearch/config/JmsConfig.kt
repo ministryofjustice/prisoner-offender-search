@@ -105,7 +105,7 @@ class JmsConfig {
       .build()
 
   @Bean("indexQueueUrl")
-  @ConditionalOnExpression("{'aws'}.contains('\${sqs.provider}')")
+  @ConditionalOnExpression("{'aws', 'localstack'}.contains('\${sqs.provider}')")
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") @Autowired awsSqsIndexASyncClient: AmazonSQSAsync,
                     @Value("\${sqs.index.queue.name}") indexQueueName: String,
@@ -114,7 +114,7 @@ class JmsConfig {
   }
 
   @Bean("awsSqsClient")
-  @ConditionalOnExpression("{'localstack'}.contains('\${sqs.provider}')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   fun awsSqsClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                   @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
       AmazonSQSClientBuilder.standard()
@@ -123,7 +123,7 @@ class JmsConfig {
           .build()
 
   @Bean("awsSqsDlqClient")
-  @ConditionalOnExpression("{'localstack'}.contains('\${sqs.provider}')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   open fun awsSqsDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                      @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
       AmazonSQSClientBuilder.standard()
@@ -132,7 +132,7 @@ class JmsConfig {
           .build()
 
   @Bean("awsSqsIndexASyncClient")
-  @ConditionalOnExpression("{'localstack'}.contains('\${sqs.provider}')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   fun awsSqsIndexASyncClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                              @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
     AmazonSQSAsyncClientBuilder.standard()
@@ -141,7 +141,7 @@ class JmsConfig {
       .build()
 
   @Bean("awsSqsIndexClient")
-  @ConditionalOnExpression("{'localstack'}.contains('\${sqs.provider}')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   fun awsSqsIndexClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                        @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
     AmazonSQSClientBuilder.standard()
@@ -150,7 +150,7 @@ class JmsConfig {
       .build()
 
   @Bean("awsSqsIndexDlqClient")
-  @ConditionalOnExpression("{'localstack'}.contains('\${sqs.provider}')")
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
   open fun awsSqsIndexDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
                                      @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
     AmazonSQSClientBuilder.standard()
