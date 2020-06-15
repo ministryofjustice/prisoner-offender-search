@@ -12,7 +12,7 @@ import org.testcontainers.containers.localstack.LocalStackContainer
 
 @Configuration
 @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "embedded-localstack")
-open class JmsLocalStackConfig(private val localStackContainer: LocalStackContainer) {
+open class JmsEmbeddedLocalStackConfig(private val localStackContainer: LocalStackContainer) {
 
   @Bean
   fun awsSqsClient(): AmazonSQS = AmazonSQSClientBuilder.standard()

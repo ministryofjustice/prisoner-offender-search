@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class PrisonerEventListener(
-    private val prisonerSyncService: PrisonerSyncService,
-    @Qualifier("gson") private val gson : Gson,
-    private val telemetryClient: TelemetryClient
+  private val prisonerSyncService: PrisonerSyncService,
+  @Qualifier("gson") private val gson: Gson,
+  private val telemetryClient: TelemetryClient
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -21,27 +21,28 @@ class PrisonerEventListener(
 
   @JmsListener(destination = "\${sqs.queue.name}", containerFactory = "jmsListenerContainerFactory")
   fun processOffenderEvent(requestJson: String?) {
-    val (message, messageId, messageAttributes) = gson.fromJson(requestJson, Message::class.java)
-    val eventType = messageAttributes.eventType.Value
-    log.debug("Received message {} type {}", messageId, eventType)
-
     try {
-    when (eventType) {
-      "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))
-      "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED", "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED", "ASSESSMENT-CHANGED", "OFFENDER_PROFILE_DETAILS-INSERTED", "OFFENDER_PROFILE_DETAILS-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
-      "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED", "OFFENDER_ALIAS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
-      "ALERT-INSERTED", "ALERT-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-      "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
+      val (message, messageId, messageAttributes) = gson.fromJson(requestJson, Message::class.java)
+      val eventType = messageAttributes.eventType.Value
+      log.debug("Received message {} type {}", messageId, eventType)
 
-      else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
-    }
+
+      when (eventType) {
+        "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))
+        "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED", "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED", "ASSESSMENT-CHANGED", "OFFENDER_PROFILE_DETAILS-INSERTED", "OFFENDER_PROFILE_DETAILS-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
+        "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
+        "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED", "OFFENDER_ALIAS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
+        "ALERT-INSERTED", "ALERT-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
+        "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
+
+        else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
+      }
 
     } catch (e: Exception) {
       telemetryClient.trackEvent(
-          "POSProcessEventRequestError",
-          mapOf("requestPayload" to requestJson, "message" to e.message),
-          null)
+        "POSProcessEventRequestError",
+        mapOf("requestPayload" to requestJson, "message" to e.message),
+        null)
 
       throw e
     }
