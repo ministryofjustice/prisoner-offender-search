@@ -4,16 +4,10 @@
   <property name="LOG_PATTERN"
             value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m | %mdc %n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
-  <springProperty scope="context" name="appName" source="info.app.name"/>
-  <springProperty scope="context" name="appVersion" source="info.app.version"/>
+  <springProperty scope="context" name="app" source="spring.application.name"/>
 
-  <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
-    <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>${LOG_PATTERN}</Pattern>
-    </layout>
-  </appender>
-
-  <springProfile name="stdout">
+  <springProfile name="dev || stdout">
+    <appender name="consoleAppender" class="ch.qos.logback.core.helpers.NOPAppender" />
     <appender name="logAppender" class="ch.qos.logback.core.ConsoleAppender">
       <layout class="ch.qos.logback.classic.PatternLayout">
         <Pattern>${LOG_PATTERN}</Pattern>
@@ -21,11 +15,21 @@
     </appender>
   </springProfile>
 
-  <springProfile name="!stdout">
+  <springProfile name="!(dev || stdout)">
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+      <layout class="ch.qos.logback.classic.PatternLayout">
+        <Pattern>${LOG_PATTERN}</Pattern>
+      </layout>
+    </appender>
     <appender name="logAppender" class="com.microsoft.applicationinsights.logback.ApplicationInsightsAppender"/>
   </springProfile>
 
-  <logger name="uk.gov.justice.digital.hmpps" additivity="false" level="DEBUG">
+  <logger name="uk.gov.justice.digital.hmpps.prisonersearch.PrisonerOffenderSearch" additivity="false" level="DEBUG">
+    <appender-ref ref="logAppender"/>
+    <appender-ref ref="consoleAppender"/>
+  </logger>
+
+  <logger name="uk.gov.justice.hmpps" additivity="false" level="DEBUG">
     <appender-ref ref="logAppender"/>
   </logger>
 
@@ -33,17 +37,25 @@
     <appender-ref ref="logAppender"/>
   </logger>
 
+  <logger name="springfox.documentation.spring" additivity="false" level="INFO">
+    <appender-ref ref="logAppender"/>
+  </logger>
+
+  <logger name="com.microsoft.applicationinsights" additivity="false" level="INFO">
+    <appender-ref ref="logAppender"/>
+  </logger>
+
+  <logger name="com.zaxxer.hikari" additivity="false" level="INFO">
+    <appender-ref ref="logAppender"/>
+  </logger>
+
+  <logger name="org.apache.catalina" additivity="false" level="INFO">
+    <appender-ref ref="logAppender"/>
+    <appender-ref ref="consoleAppender"/>
+  </logger>
+
   <root level="INFO">
     <appender-ref ref="logAppender"/>
   </root>
 
-  <logger name="org.apache.catalina" additivity="false" level="INFO" >
-    <appender-ref ref="consoleAppender"/>
-  </logger>
-
-  <springProfile name="!stdout">
-    <root level="INFO">
-      <appender-ref ref="logAppender"/>
-    </root>
-  </springProfile>
 </configuration>
