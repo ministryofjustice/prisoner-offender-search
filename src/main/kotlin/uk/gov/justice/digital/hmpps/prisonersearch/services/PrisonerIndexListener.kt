@@ -24,10 +24,10 @@ class PrisonerIndexListener(
   @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
   fun processIndexRequest(requestJson: String?, msg : javax.jms.Message ) {
     log.debug(requestJson)
-    val indexRequest = gson.fromJson(requestJson, PrisonerIndexRequest::class.java)
-    log.debug("Received message request {}", indexRequest)
-
     try {
+      val indexRequest = gson.fromJson(requestJson, PrisonerIndexRequest::class.java)
+      log.debug("Received message request {}", indexRequest)
+
       when (indexRequest.requestType) {
         REBUILD -> {
           msg.acknowledge()  // ack before processing
@@ -35,6 +35,7 @@ class PrisonerIndexListener(
         }
         OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeIndexed(it) }
         OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
+        else -> log.warn("Unexpected Message {}", requestJson)
       }
     } catch (e : Exception) {
       telemetryClient.trackEvent(
