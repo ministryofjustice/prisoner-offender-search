@@ -8,10 +8,7 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
 import org.elasticsearch.client.Response
-import org.elasticsearch.client.ResponseException
 import org.elasticsearch.client.RestHighLevelClient
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -23,15 +20,10 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
-import java.lang.Thread.sleep
 
 
 @ActiveProfiles(profiles = ["test", "test-queue"])
 abstract class QueueIntegrationTest : IntegrationTest() {
-
-  companion object {
-    private val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
 
   @Autowired
   lateinit var queueUrl: String
@@ -78,30 +70,13 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun setupIndexes() {
-    waitForDomain()
     createIndexStatusIndex()
     createPrisonerIndex(SyncIndex.INDEX_A)
     createPrisonerIndex(SyncIndex.INDEX_B)
   }
 
-  private fun waitForDomain() {
-    var retry = 0
-    do {
-      var response: Response? = null
-      try {
-        response = elasticSearchClient.lowLevelClient.performRequest(Request("GET", "/"))
-      } catch (e: ResponseException) {
-      }
-      retry += 1
-      if (retryEsCheck(retry, response)) {
-        log.debug("Waiting for ES Domain to be available...")
-        sleep(5000)
-      }
-    } while (retryEsCheck(retry, response))
-  }
-
   private fun retryEsCheck(retry: Int, response: Response?) =
-      retry < 15 && (response == null || response.statusLine.statusCode != 200)
+    retry < 15 && (response == null || response.statusLine.statusCode != 200)
 
   private fun createIndexStatusIndex() {
     val response = elasticSearchClient.lowLevelClient.performRequest(Request("HEAD", "/offender-index-status"))
