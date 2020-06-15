@@ -31,6 +31,11 @@ Running all services except this application (hence allowing you to run this in 
 ```bash
 TMPDIR=/private$TMPDIR docker-compose up --scale prisoner-offender-search=0 
 ```
+
+### Add localstack to your /etc/hosts
+```
+127.0.0.1 localstack
+```
 Check the docker-compose file for sample environment variables to run the application locally.
 
 ### You can add some prisoners into elastic with the following:-

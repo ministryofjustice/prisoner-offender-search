@@ -1,0 +1,30 @@
+server:
+  shutdown: immediate
+
+spring:
+  profiles:
+    include: stdout
+
+aws:
+  provider: localstack
+
+sqs:
+  endpoint.url: http://localhost:4576
+
+elasticsearch:
+  port: 4571
+  scheme: http
+  host: localhost
+
+api:
+  base:
+    url:
+      oauth: http://localhost:8090/auth
+      nomis: http://localhost:8093
+
+oauth:
+  client:
+    id: prisoner-offender-search-client
+    secret: clientsecret
+
+token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnRlcm5hbFVzZXIiOnRydWUsInVzZXJfbmFtZSI6IklUQUdfVVNFUiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE4MzkxMTY0MzgsImF1dGhvcml0aWVzIjpbIlJPTEVfTElDRU5DRV9DQSIsIlJPTEVfS1dfQURNSU4iXSwianRpIjoiMDMyYzc0MmEtN2Y2OS00YjgyLTgwOGUtNDQ3MTkxM2Y0NGM1IiwiY2xpZW50X2lkIjoiZWxpdGUyYXBpY2xpZW50In0.nJRjJkZbjIJSL8Fah6Lm0eie7BitzVyjEIF2bgUM9Wh3hzciYWn0oADQ82W09qgrDqEf93EA69dHVhXMtktKNCVuT6zvwQQLOjwV2JyLpkI0Rq1TDgEx28duz1wnl_Kr6JFLDeSPmsZmM6mlPSf7oyur3x07__wwS3TXCnEeP_-M8qq-owveOa_0wPDD4fghWyb4QjjHcMYrjzHarrbiQDuAJCMnb3cxCSzHW5G99xLiISoHHGDTCTegpFquoqAXOORl5lx0H9MVl62cVjXrc_PqfqajHIAAYMNylNqL70ce-MKqHR-v1IdIYUCRvMb8mTpOQSuU6-CpTa3i4mYm9g

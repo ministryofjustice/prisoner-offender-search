@@ -34,7 +34,7 @@ spring:
           hmpps-auth:
             token-uri: ${api.base.url.oauth}/oauth/token
 server:
-  port: 8082
+  port: 8080
   servlet:
     context-path: /
   forward-headers-strategy: native
