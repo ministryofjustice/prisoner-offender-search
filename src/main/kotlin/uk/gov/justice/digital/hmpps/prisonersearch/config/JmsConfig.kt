@@ -51,14 +51,12 @@ class JmsConfig {
   }
 
   @Bean("queueUrl")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  fun queueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
+  fun queueUrl(@Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
                @Value("\${sqs.queue.name}") queueName: String): String {
-    return awsSqsIndexASyncClient.getQueueUrl(queueName).queueUrl
+    return awsSqsClient.getQueueUrl(queueName).queueUrl
   }
 
   @Bean("indexQueueUrl")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
                     @Value("\${sqs.index.queue.name}") indexQueueName: String): String {
     return awsSqsIndexASyncClient.getQueueUrl(indexQueueName).queueUrl
