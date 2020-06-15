@@ -1,13 +1,15 @@
 server:
   shutdown: immediate
 
-sqs:
-  provider: embedded-localstack
-  endpoint.url: http://localhost:4576
+spring:
+  profiles:
+    include: stdout
 
-es:
+aws:
   provider: embedded-localstack
-  endpoint.url: http://localhost:4578
+
+sqs:
+  endpoint.url: http://localhost:4576
 
 elasticsearch:
   port: 4571

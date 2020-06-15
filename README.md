@@ -75,12 +75,6 @@ Or to just run `localstack` which is useful when running against an a non-local 
 TMPDIR=/private$TMPDIR docker-compose up localstack 
 ```
 
-Or to just run `localstack` in the way CI would run and then run tests with `spring.profiles.active=localstack`
-
-```bash
-TMPDIR=/private$TMPDIR docker-compose -f docker-compose-circleci.yml up 
-```
-
 In all of the above the application should use the host network to communicate with `localstack` since AWS Client will try to read messages from localhost rather than the `localstack` network.
 ### Experimenting with messages
 

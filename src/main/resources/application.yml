@@ -68,9 +68,10 @@ azure:
 
 aws:
   region: eu-west-2
+  provider: aws
 
 sqs:
-  provider: aws
+  provider: ${aws.provider}
   queue.name: prisoner_offender_search_queue
   dlq.name: prisoner_offender_search_dlq
   endpoint.region: ${aws.region}
