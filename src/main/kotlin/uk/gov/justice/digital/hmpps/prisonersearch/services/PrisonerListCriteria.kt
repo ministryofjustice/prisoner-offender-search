@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty
 
 @JsonIgnoreProperties( value =  [ "isValid" ])
 data class PrisonerListCriteria (
-  @ApiModelProperty(required = false, value = "List of prisoner numbers to search by", example = "A1234AA,", position = 1)
+  @ApiModelProperty(required = false, value = "List of prisoner numbers to search by", example = "[\"A1234AA\"]", position = 1)
   val prisonerNumbers : List<String>
 
 ) {
