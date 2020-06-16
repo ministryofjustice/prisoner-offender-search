@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 class PrisonerSearchResourceTest : QueueIntegrationTest() {
@@ -58,6 +59,80 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isBadRequest
+  }
+
+  @Test
+  fun `access forbidden for prison number search when no role`() {
+
+    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(arrayListOf("ABC")))))
+      .headers(setAuthorisation())
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `prisoner number search returns bad request when no prison numbers provided`() {
+
+    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
+      .body(BodyInserters.fromValue("{\"prisonerNumbers\":[]}"))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody().jsonPath("developerMessage").isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
+  }
+
+  @Test
+  fun `prisoner number search returns bad request when over 200 prison numbers provided`() {
+
+    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(getTestprisonerNumbers(201)))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+      .expectBody().jsonPath("developerMessage").isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
+  }
+
+  @Test
+  fun `prisoner number search returns offender records, single result`() {
+    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(listOf("A7089FA")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_A7089FA.json".readResourceAsText())
+  }
+
+  @Test
+  fun `prisoner number search returns offender records, multiple results`() {
+
+    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(listOf("A7089FA", "A7089FB", "A7089FC")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_prison_numbers.json".readResourceAsText())
+  }
+
+  @Test
+  fun `prisoner number search ignores missing prison numbers`() {
+
+    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(listOf("A7089FA", "A709999", "A707777")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json("/results/search_results_A7089FA.json".readResourceAsText())
+  }
+
+  private fun getTestprisonerNumbers(count: Int): List<String> {
+    return List(count) { i -> "AN$i"  }
   }
 
   @Test
@@ -202,5 +277,8 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
 }
+
+private fun String.readResourceAsText(): String = PrisonerSearchResourceTest::class.java.getResource(this).readText()
+
 
 

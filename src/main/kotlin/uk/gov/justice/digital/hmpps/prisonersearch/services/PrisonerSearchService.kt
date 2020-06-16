@@ -57,6 +57,24 @@ class PrisonerSearchService(
     } ?: Result.NoMatch
   }
 
+  private fun queryBy(searchCriteria: PrisonerListCriteria, queryBuilder: (searchCriteria: PrisonerListCriteria) -> BoolQueryBuilder?): Result {
+    val query = queryBuilder(searchCriteria)
+    return query?.let {
+      val searchSourceBuilder = SearchSourceBuilder().apply {
+        query(query)
+      }
+      val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
+      val prisonerMatches = getSearchResult(searchClient.search(searchRequest))
+      return if (prisonerMatches.isEmpty()) Result.NoMatch else Result.Match(prisonerMatches)
+    } ?: Result.NoMatch
+  }
+
+  private fun matchByIds(searchCriteria: PrisonerListCriteria): BoolQueryBuilder? {
+    with(searchCriteria) {
+      return shouldMatchOneOf("prisonerNumber", searchCriteria.prisonerNumbers)
+    }
+  }
+
   private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
@@ -104,6 +122,16 @@ class PrisonerSearchService(
 
   private fun getIndex(): String{
     return indexStatusService.getCurrentIndex().currentIndex.indexName
+  }
+
+  fun findByListOfprisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
+    if (!prisonerListCriteria.isValid) {
+      log.warn("Invalid search  - no prisoner numbers provided")
+      throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
+    }
+
+    queryBy(prisonerListCriteria) { matchByIds(it) } onMatch { return it.matches }
+    return emptyList()
   }
 }
 

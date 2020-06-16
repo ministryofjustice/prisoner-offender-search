@@ -92,7 +92,13 @@ fun BoolQueryBuilder.mustKeyword(value: Any?, query: String): BoolQueryBuilder {
 
 
 fun BoolQueryBuilder.mustMatchOneOf(query: String, values: List<Any>): BoolQueryBuilder {
-  val nestedQuery = QueryBuilders.boolQuery();
+  val nestedQuery = QueryBuilders.boolQuery()
   values.forEach { nestedQuery.should(QueryBuilders.boolQuery().must(query, it)) }
-  return this.must(nestedQuery);
+  return this.must(nestedQuery)
+}
+
+fun shouldMatchOneOf(query: String, values: List<Any>): BoolQueryBuilder {
+  val nestedQuery = QueryBuilders.boolQuery()
+  values.forEach { nestedQuery.should(QueryBuilders.matchQuery(query, it)) }
+  return nestedQuery
 }
