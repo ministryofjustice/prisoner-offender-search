@@ -24,7 +24,7 @@ Running all services locally:
 ```bash
 TMPDIR=/private$TMPDIR docker-compose up
 ```
-Queues and topics will automatically be created when the `localstack` container starts
+Queues and topics will automatically be created when the `localstack` container starts.
 
 Running all services except this application (hence allowing you to run this in the IDE)
 
