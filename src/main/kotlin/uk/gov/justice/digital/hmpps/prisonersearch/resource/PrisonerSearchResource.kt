@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
@@ -24,6 +25,14 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
     fun findByCriteria(@ApiParam(required = true, name = "searchCriteria") @RequestBody searchCriteria : SearchCriteria
     ) : List<Prisoner> {
         return prisonerSearchService.findBySearchCriteria(searchCriteria)
+    }
+
+    @PostMapping("/prisoner-numbers")
+    @ApiOperation(value = "Match prisoners by a list of prisoner numbers", notes = "Requires GLOBAL_SEARCH role")
+    @PreAuthorize("hasRole('GLOBAL_SEARCH')")
+    fun findByIds(@ApiParam(required = true, name = "prisonerNumberList") @RequestBody prisonerNumberList : PrisonerListCriteria
+    ) : List<Prisoner> {
+      return prisonerSearchService.findByListOfPrisonerNumbers(prisonerNumberList)
     }
 
 }

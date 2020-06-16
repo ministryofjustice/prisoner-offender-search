@@ -22,14 +22,14 @@ Any commands in `localstack/setup-sns.sh` will be run when `localstack` starts, 
 
 Running all services locally:
 ```bash
-TMPDIR=/private$TMPDIR docker-compose up 
+TMPDIR=/private$TMPDIR docker-compose up
 ```
 Queues and topics will automatically be created when the `localstack` container starts.
 
 Running all services except this application (hence allowing you to run this in the IDE)
 
 ```bash
-TMPDIR=/private$TMPDIR docker-compose up --scale prisoner-offender-search=0 
+TMPDIR=/private$TMPDIR docker-compose up --scale prisoner-offender-search=0
 ```
 
 ### Add localstack to your /etc/hosts
@@ -77,7 +77,7 @@ curl --location --request POST "http://localhost:4571/prisoner-search-a/_search"
 Or to just run `localstack` which is useful when running against an a non-local test system Env need to be `spring.profiles.active=localstack` and `sqs.provider=full-localstack`
 
 ```bash
-TMPDIR=/private$TMPDIR docker-compose up localstack 
+TMPDIR=/private$TMPDIR docker-compose up localstack
 ```
 
 In all of the above the application should use the host network to communicate with `localstack` since AWS Client will try to read messages from localhost rather than the `localstack` network.
