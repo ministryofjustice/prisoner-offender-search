@@ -88,7 +88,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   fun `prisoner number search returns bad request when over 200 prison numbers provided`() {
 
     webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(getTestprisonerNumbers(201)))))
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(getTestPrisonerNumbers(201)))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
@@ -131,7 +131,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .expectBody().json("/results/search_results_A7089FA.json".readResourceAsText())
   }
 
-  private fun getTestprisonerNumbers(count: Int): List<String> {
+  private fun getTestPrisonerNumbers(count: Int): List<String> {
     return List(count) { i -> "AN$i"  }
   }
 

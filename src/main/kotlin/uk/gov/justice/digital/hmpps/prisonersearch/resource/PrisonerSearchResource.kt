@@ -32,7 +32,7 @@ class PrisonerSearchResource(val prisonerSearchService: PrisonerSearchService){
     @PreAuthorize("hasRole('GLOBAL_SEARCH')")
     fun findByIds(@ApiParam(required = true, name = "prisonerNumberList") @RequestBody prisonerNumberList : PrisonerListCriteria
     ) : List<Prisoner> {
-      return prisonerSearchService.findByListOfprisonerNumbers(prisonerNumberList)
+      return prisonerSearchService.findByListOfPrisonerNumbers(prisonerNumberList)
     }
 
 }

@@ -61,7 +61,7 @@ class PrisonerSearchService(
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
-        query(query)
+        query(it)
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val prisonerMatches = getSearchResult(searchClient.search(searchRequest))
@@ -70,9 +70,7 @@ class PrisonerSearchService(
   }
 
   private fun matchByIds(searchCriteria: PrisonerListCriteria): BoolQueryBuilder? {
-    with(searchCriteria) {
-      return shouldMatchOneOf("prisonerNumber", searchCriteria.prisonerNumbers)
-    }
+    return shouldMatchOneOf("prisonerNumber", searchCriteria.prisonerNumbers)
   }
 
   private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
@@ -124,7 +122,7 @@ class PrisonerSearchService(
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
-  fun findByListOfprisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
+  fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
     if (!prisonerListCriteria.isValid) {
       log.warn("Invalid search  - no prisoner numbers provided")
       throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
