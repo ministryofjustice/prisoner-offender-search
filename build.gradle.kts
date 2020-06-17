@@ -1,9 +1,7 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "0.4.2"
   kotlin("plugin.spring") version "1.3.72"
 }
-
-extra["spring-security.version"] = "5.3.2.RELEASE" // Updated since spring-boot-starter-oauth2-resource-server-2.2.5.RELEASE only pulls in 5.2.2.RELEASE (still affected by CVE-2018-1258 though)
 
 configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
@@ -37,7 +35,7 @@ dependencies {
   implementation ("com.amazonaws:aws-java-sdk-elasticsearch:1.11.791")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
-  testImplementation("org.testcontainers:localstack:1.13.0")
+  testImplementation("org.testcontainers:localstack:1.14.3")
   testImplementation("org.testcontainers:elasticsearch:1.14.2")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
