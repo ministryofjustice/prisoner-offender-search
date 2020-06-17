@@ -21,6 +21,7 @@ class PrisonerSearchService(
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+    const val RESULT_HITS_MAX = 1000
   }
 
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
@@ -50,6 +51,7 @@ class PrisonerSearchService(
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
         query(query.withDefaults(searchCriteria))
+        size(RESULT_HITS_MAX)
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val prisonerMatches = getSearchResult(searchClient.search(searchRequest))
@@ -61,6 +63,7 @@ class PrisonerSearchService(
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
+        size(RESULT_HITS_MAX)
         query(it)
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
