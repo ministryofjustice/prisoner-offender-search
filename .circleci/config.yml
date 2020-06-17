@@ -85,14 +85,14 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
       - dps/deploy_env:
           name: deploy_dev
           env: "dev"
           filters:
             branches:
               only:
-                - master
+                - main
           requires:
             - validate
             - helm_lint
@@ -126,7 +126,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - owasp/gradle_owasp_dependency_check:
           executor: validator

@@ -47,10 +47,7 @@ abstract class QueueHealth( private val awsSqsClient: AmazonSQS,
         MESSAGES_IN_FLIGHT.healthName to queueAttributes.attributes[MESSAGES_IN_FLIGHT.awsName]?.toInt()
     )
 
-    val health = Builder().up().withDetails(details).addDlqHealth(queueAttributes).build()
-
-    log.info("Found health details for queue '{}': {}", queueName, health)
-    return health
+    return Builder().up().withDetails(details).addDlqHealth(queueAttributes).build()
   }
 
   private fun Builder.addDlqHealth(mainQueueAttributes: GetQueueAttributesResult): Builder {
