@@ -6,10 +6,8 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.test.web.reactive.server.expectBodyList
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
-import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
@@ -39,7 +37,7 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
         }
 
       setupIndexes()
-      indexPrisoners()
+      indexPrisoners(prisonerNumbers)
 
       webTestClient.put().uri("/prisoner-index/mark-complete")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -50,13 +48,14 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
     }
   }
 
-  override fun indexPrisoners() {
+  fun indexPrisoners(prisonerNumbers: List<String>) {
     webTestClient.put().uri("/prisoner-index/build-index")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
 
-    await untilCallTo { prisonRequestCountFor("/api/offenders/AN11") } matches { it == 1 }
+    // wait for last offender to be available
+    await untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
@@ -123,7 +122,8 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isOk
-      .expectBodyList<Prisoner>().hasSize(12)
+      .expectBody()
+      .jsonPath("$.length()").isEqualTo(12)
   }
 
   @Test
