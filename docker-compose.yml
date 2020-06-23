@@ -15,7 +15,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
     environment:
       - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=localstack
+      - SPRING_PROFILES_ACTIVE=dev
       - API_BASE_URL_OAUTH=http://oauth:8080/auth
       - API_BASE_URL_NOMIS=http://nomisapi:8080
       - SQS_ENDPOINT_URL=http://localstack:4576
