@@ -1,5 +1,60 @@
 version: "3"
 services:
+  localstack:
+    image: localstack/localstack:0.11.2
+    networks:
+      - hmpps
+    container_name: localstack
+    ports:
+      - "4566-4597:4566-4597"
+      - 8999:8080
+    environment:
+      - HOSTNAME_EXTERNAL=localstack
+      - SERVICES=sqs,sns,es
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - AWS_EXECUTION_ENV=True
+      - DEFAULT_REGION=eu-west-2
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
+
+  oauth:
+    image: quay.io/hmpps/hmpps-auth:latest
+    networks:
+      - hmpps
+    container_name: oauth
+    depends_on:
+      - localstack
+    ports:
+      - "8090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  nomisapi:
+    image: quay.io/hmpps/elite2-api:latest
+    networks:
+      - hmpps
+    container_name: nomisapi
+    depends_on:
+      - localstack
+      - oauth
+    ports:
+      - "8093:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=nomis-hsqldb
+
   prisoner-offender-search:
     image: quay.io/hmpps/prisoner-offender-search:latest
     networks:
@@ -32,59 +87,6 @@ services:
       - SQS_DEFAULT_REGION=eu-west-2
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
       - OAUTH_CLIENT_SECRET=clientsecret
-
-  nomisapi:
-    image: quay.io/hmpps/elite2-api:latest
-    networks:
-      - hmpps
-    container_name: nomisapi
-    depends_on:
-      - oauth
-    ports:
-      - "8093:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=nomis-hsqldb
-
-  oauth:
-    image: quay.io/hmpps/hmpps-auth:latest
-    networks:
-      - hmpps
-    container_name: oauth
-    ports:
-      - "8090:8080"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
-    environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
-
-  localstack:
-    image: localstack/localstack:0.11.2
-    networks:
-      - hmpps
-    container_name: localstack
-    ports:
-      - "4566-4597:4566-4597"
-      - 8999:8080
-    environment:
-      - HOSTNAME_EXTERNAL=localstack
-      - SERVICES=sqs,sns,es
-      - ES_PORT_EXTERNAL=4571
-      - DEBUG=${DEBUG- }
-      - DATA_DIR=/tmp/localstack/data
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
-      - AWS_EXECUTION_ENV=True
-      - DEFAULT_REGION=eu-west-2
-      - TMPDIR=/private
-      - HOST_TMP_FOLDER=$TMPDIR
-    volumes:
-      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
 
 networks:
   hmpps:
