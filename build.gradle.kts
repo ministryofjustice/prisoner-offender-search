@@ -22,21 +22,22 @@ dependencies {
   implementation("io.springfox:springfox-swagger2:2.9.2")
   implementation("io.springfox:springfox-swagger-ui:2.9.2")
   implementation("io.springfox:springfox-bean-validators:2.9.2")
-  implementation("com.nimbusds:nimbus-jose-jwt:8.17")
+  implementation("com.nimbusds:nimbus-jose-jwt:8.19")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+  implementation("org.apache.commons:commons-lang3:3.10")
   implementation( "com.google.code.gson:gson:2.8.6")
   implementation("com.google.guava:guava:29.0-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.790"))
+  implementation( platform ("com.amazonaws:aws-java-sdk-bom:1.11.809"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation ("com.amazonaws:aws-java-sdk-elasticsearch:1.11.791")
+  implementation ("com.amazonaws:aws-java-sdk-elasticsearch:1.11.809")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.26.3")
   testImplementation("org.testcontainers:localstack:1.14.3")
-  testImplementation("org.testcontainers:elasticsearch:1.14.2")
-  testImplementation("org.awaitility:awaitility-kotlin:4.0.2")
+  testImplementation("org.testcontainers:elasticsearch:1.14.3")
+  testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
 }
