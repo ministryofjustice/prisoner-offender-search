@@ -152,6 +152,7 @@ class PrisonerSearchService(
   private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
     val propertiesMap = mapOf(
       "user" to authenticationFacade.currentUsername(),
+      "clientId" to authenticationFacade.currentClientId(),
       "lastname" to searchCriteria.lastName,
       "firstname" to searchCriteria.firstName,
       "prisonId" to searchCriteria.prisonId,
@@ -166,6 +167,8 @@ class PrisonerSearchService(
 
   private fun customEventForFindByListOfPrisonerNumbers(prisonerListNumber: Int, numberOfResults: Int) {
     val logMap = mapOf(
+      "user" to authenticationFacade.currentUsername(),
+      "clientId" to authenticationFacade.currentClientId(),
       "numberOfPrisonerIds" to prisonerListNumber.toString(),
       "numberOfResults" to numberOfResults.toString()
 
