@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
+import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
@@ -11,13 +12,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationFacade
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @Service
 class PrisonerSearchService(
   private val searchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
-  private val gson : Gson
+  private val gson : Gson,
+  private val telemetryClient: TelemetryClient,
+  private val authenticationFacade: AuthenticationFacade
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -27,15 +31,23 @@ class PrisonerSearchService(
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
     validateSearchForm(searchCriteria)
     if (searchCriteria.prisonerIdentifier != null) {
-      queryBy(searchCriteria) { idMatch(it) } onMatch { return it.matches }
+      queryBy(searchCriteria) { idMatch(it) } onMatch {
+        customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
+        return it.matches
+      }
     }
     if (!(searchCriteria.firstName.isNullOrBlank() && searchCriteria.lastName.isNullOrBlank())) {
       if (searchCriteria.includeAliases) {
-        queryBy(searchCriteria) { nameMatchWithAliases(it) } onMatch { return it.matches }
+        queryBy(searchCriteria) { nameMatchWithAliases(it) } onMatch {
+          customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
+          return it.matches }
       } else {
-        queryBy(searchCriteria) { nameMatch(it) } onMatch { return it.matches }
+        queryBy(searchCriteria) { nameMatch(it) } onMatch {
+          customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
+          return it.matches }
       }
     }
+    customEventForFindBySearchCriteria(searchCriteria, 0)
     return emptyList()
   }
 
@@ -131,8 +143,34 @@ class PrisonerSearchService(
       throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
     }
 
-    queryBy(prisonerListCriteria) { matchByIds(it) } onMatch { return it.matches }
+    queryBy(prisonerListCriteria) { matchByIds(it) } onMatch {
+      customEventForFindByListOfPrisonerNumbers(prisonerListCriteria.prisonerNumbers.size, it.matches.size)
+      return it.matches }
     return emptyList()
+  }
+
+  private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
+    val propertiesMap = mapOf(
+      "user" to authenticationFacade.currentUsername,
+      "lastname" to searchCriteria.lastName,
+      "firstname" to searchCriteria.firstName,
+      "prisonId" to searchCriteria.prisonId,
+      "prisoner identifier" to searchCriteria.prisonerIdentifier,
+      "alias" to searchCriteria.includeAliases.toString()
+    )
+    val metricsMap = mapOf(
+    "numberOfResults" to numberOfResults.toDouble()
+    )
+    telemetryClient.trackEvent("FindByCriteria", propertiesMap, metricsMap)
+  }
+
+  private fun customEventForFindByListOfPrisonerNumbers(prisonerListNumber: Int, numberOfResults: Int) {
+    val logMap = mapOf(
+      "numberOfPrisonerIds" to prisonerListNumber.toString(),
+      "numberOfResults" to numberOfResults.toString()
+
+    )
+    telemetryClient.trackEvent("FindByListOfPrisonerNumbers", logMap, null)
   }
 }
 
