@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.prisonersearch.security
 
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.prisonersearch.config.AuthAwareAuthenticationToken
 
@@ -12,35 +11,11 @@ class UserSecurityUtils : AuthenticationFacade {
     get() = SecurityContextHolder.getContext().authentication
 
   override fun currentUsername(): String? {
-    val username: String?
-    val userPrincipal = userPrincipal
-    username = when (userPrincipal) {
-      is String -> {
-        userPrincipal
-      }
-      is UserDetails -> {
-        userPrincipal.username
-      }
-      is Map<*, *> -> {
-        (userPrincipal["username"] as String?)!!
-      }
-      else -> {
-        null
-      }
-    }
-    return username
+    return authentication.principal as String?
   }
 
   override fun currentClientId(): String? {
     val auth =  authentication as AuthAwareAuthenticationToken
     return auth.clientId
   }
-
-  private val userPrincipal: Any?
-    get() {
-      var userPrincipal: Any? = null
-      val auth = authentication
-      userPrincipal = auth.principal
-      return userPrincipal
-    }
 }

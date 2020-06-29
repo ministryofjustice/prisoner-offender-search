@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadReques
 class PrisonerSearchService(
   private val searchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
-  private val gson : Gson,
+  private val gson: Gson,
   private val telemetryClient: TelemetryClient,
   private val authenticationFacade: AuthenticationFacade
 ) {
@@ -40,11 +40,13 @@ class PrisonerSearchService(
       if (searchCriteria.includeAliases) {
         queryBy(searchCriteria) { nameMatchWithAliases(it) } onMatch {
           customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
-          return it.matches }
+          return it.matches
+        }
       } else {
         queryBy(searchCriteria) { nameMatch(it) } onMatch {
           customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
-          return it.matches }
+          return it.matches
+        }
       }
     }
     customEventForFindBySearchCriteria(searchCriteria, 0)
@@ -58,7 +60,10 @@ class PrisonerSearchService(
     }
   }
 
-  private fun queryBy(searchCriteria: SearchCriteria, queryBuilder: (searchCriteria: SearchCriteria) -> BoolQueryBuilder?): Result {
+  private fun queryBy(
+    searchCriteria: SearchCriteria,
+    queryBuilder: (searchCriteria: SearchCriteria) -> BoolQueryBuilder?
+  ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
@@ -71,7 +76,10 @@ class PrisonerSearchService(
     } ?: Result.NoMatch
   }
 
-  private fun queryBy(searchCriteria: PrisonerListCriteria, queryBuilder: (searchCriteria: PrisonerListCriteria) -> BoolQueryBuilder?): Result {
+  private fun queryBy(
+    searchCriteria: PrisonerListCriteria,
+    queryBuilder: (searchCriteria: PrisonerListCriteria) -> BoolQueryBuilder?
+  ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
@@ -91,18 +99,27 @@ class PrisonerSearchService(
   private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .mustMultiMatchKeyword(prisonerIdentifier?.canonicalPNCNumber(), "prisonerNumber", "bookingId", "pncNumber", "croNumber", "bookNumber")
+        .mustMultiMatchKeyword(
+          prisonerIdentifier?.canonicalPNCNumber(),
+          "prisonerNumber",
+          "bookingId",
+          "pncNumber",
+          "croNumber",
+          "bookNumber"
+        )
     }
   }
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-          .should(QueryBuilders.boolQuery()
-            .mustWhenPresent("lastName", lastName)
-            .mustWhenPresent("firstName", firstName)
-          )
+        .must(
+          QueryBuilders.boolQuery()
+            .should(
+              QueryBuilders.boolQuery()
+                .mustWhenPresent("lastName", lastName)
+                .mustWhenPresent("firstName", firstName)
+            )
         )
     }
   }
@@ -110,19 +127,24 @@ class PrisonerSearchService(
   private fun nameMatchWithAliases(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-          .should(QueryBuilders.boolQuery()
-            .mustWhenPresent("lastName", lastName)
-            .mustWhenPresent("firstName", firstName)
-          )
-          .should(QueryBuilders.nestedQuery("aliases",
-            QueryBuilders.boolQuery()
-              .should(QueryBuilders.boolQuery()
-                .mustWhenPresent("aliases.lastName", lastName)
-                .mustWhenPresent("aliases.firstName", firstName)
-              ), ScoreMode.Max
-          )
-          )
+        .must(
+          QueryBuilders.boolQuery()
+            .should(
+              QueryBuilders.boolQuery()
+                .mustWhenPresent("lastName", lastName)
+                .mustWhenPresent("firstName", firstName)
+            )
+            .should(
+              QueryBuilders.nestedQuery(
+                "aliases",
+                QueryBuilders.boolQuery()
+                  .should(
+                    QueryBuilders.boolQuery()
+                      .mustWhenPresent("aliases.lastName", lastName)
+                      .mustWhenPresent("aliases.firstName", firstName)
+                  ), ScoreMode.Max
+              )
+            )
         )
     }
   }
@@ -133,7 +155,7 @@ class PrisonerSearchService(
     return searchHits.map { gson.fromJson(it.sourceAsString, Prisoner::class.java) }
   }
 
-  private fun getIndex(): String{
+  private fun getIndex(): String {
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
@@ -145,22 +167,23 @@ class PrisonerSearchService(
 
     queryBy(prisonerListCriteria) { matchByIds(it) } onMatch {
       customEventForFindByListOfPrisonerNumbers(prisonerListCriteria.prisonerNumbers.size, it.matches.size)
-      return it.matches }
+      return it.matches
+    }
     return emptyList()
   }
 
   private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
     val propertiesMap = mapOf(
-      "user" to authenticationFacade.currentUsername(),
+      "username" to authenticationFacade.currentUsername(),
       "clientId" to authenticationFacade.currentClientId(),
       "lastname" to searchCriteria.lastName,
       "firstname" to searchCriteria.firstName,
       "prisonId" to searchCriteria.prisonId,
-      "prisoner identifier" to searchCriteria.prisonerIdentifier,
-      "alias" to searchCriteria.includeAliases.toString()
+      "prisonerIdentifier" to searchCriteria.prisonerIdentifier,
+      "includeAliases" to searchCriteria.includeAliases.toString()
     )
     val metricsMap = mapOf(
-    "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble()
     )
     telemetryClient.trackEvent("FindByCriteria", propertiesMap, metricsMap)
   }
@@ -169,11 +192,13 @@ class PrisonerSearchService(
     val logMap = mapOf(
       "user" to authenticationFacade.currentUsername(),
       "clientId" to authenticationFacade.currentClientId(),
-      "numberOfPrisonerIds" to prisonerListNumber.toString(),
-      "numberOfResults" to numberOfResults.toString()
-
+      "numberOfPrisonerIds" to prisonerListNumber.toString()
     )
-    telemetryClient.trackEvent("FindByListOfPrisonerNumbers", logMap, null)
+
+    val metricsMap = mapOf(
+      "numberOfResults" to numberOfResults.toDouble()
+    )
+    telemetryClient.trackEvent("FindByListOfPrisonerNumbers", logMap, metricsMap)
   }
 }
 
