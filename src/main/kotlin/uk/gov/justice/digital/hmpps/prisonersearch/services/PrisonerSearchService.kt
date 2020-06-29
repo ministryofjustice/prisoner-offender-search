@@ -151,7 +151,7 @@ class PrisonerSearchService(
 
   private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
     val propertiesMap = mapOf(
-      "user" to authenticationFacade.currentUsername,
+      "user" to authenticationFacade.currentUsername(),
       "lastname" to searchCriteria.lastName,
       "firstname" to searchCriteria.firstName,
       "prisonId" to searchCriteria.prisonId,
