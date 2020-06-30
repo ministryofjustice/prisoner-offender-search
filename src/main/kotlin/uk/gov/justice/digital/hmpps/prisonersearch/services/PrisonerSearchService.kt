@@ -12,7 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
-import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationFacade
+import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @Service
@@ -21,7 +21,7 @@ class PrisonerSearchService(
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationHolder: AuthenticationHolder
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -174,8 +174,8 @@ class PrisonerSearchService(
 
   private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
     val propertiesMap = mapOf(
-      "username" to authenticationFacade.currentUsername(),
-      "clientId" to authenticationFacade.currentClientId(),
+      "username" to authenticationHolder.currentUsername(),
+      "clientId" to authenticationHolder.currentClientId(),
       "lastname" to searchCriteria.lastName,
       "firstname" to searchCriteria.firstName,
       "prisonId" to searchCriteria.prisonId,
@@ -190,8 +190,8 @@ class PrisonerSearchService(
 
   private fun customEventForFindByListOfPrisonerNumbers(prisonerListNumber: Int, numberOfResults: Int) {
     val logMap = mapOf(
-      "user" to authenticationFacade.currentUsername(),
-      "clientId" to authenticationFacade.currentClientId(),
+      "username" to authenticationHolder.currentUsername(),
+      "clientId" to authenticationHolder.currentClientId(),
       "numberOfPrisonerIds" to prisonerListNumber.toString()
     )
 

@@ -1,26 +1,26 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.security
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.jwt.Jwt
 import uk.gov.justice.digital.hmpps.prisonersearch.config.AuthAwareAuthenticationToken
 
-class UserSecurityUtilsTest {
-  private val userSecurityUtils: UserSecurityUtils = UserSecurityUtils()
+class AuthenticationHolderTest {
+  private val authenticationHolder: AuthenticationHolder = AuthenticationHolder()
 
   @Test
   fun userAuthenticationCurrentUsername() {
     setAuthentication()
-    assertThat(userSecurityUtils.currentUsername()).isEqualTo("UserName")
+    assertThat(authenticationHolder.currentUsername()).isEqualTo("UserName")
   }
 
   @Test
   fun userAuthenticationClientID() {
     setAuthentication()
-    assertThat(userSecurityUtils.currentClientId()).isEqualTo("clientID")
+    assertThat(authenticationHolder.currentClientId()).isEqualTo("clientID")
   }
 
   private fun setAuthentication() {

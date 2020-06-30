@@ -6,16 +6,18 @@ import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.prisonersearch.config.AuthAwareAuthenticationToken
 
 @Component
-class UserSecurityUtils : AuthenticationFacade {
+class AuthenticationHolder {
   val authentication: Authentication
     get() = SecurityContextHolder.getContext().authentication
 
-  override fun currentUsername(): String? {
-    return authentication.principal as String?
+  fun currentUsername(): String? {
+    val auth =  authentication as AuthAwareAuthenticationToken
+    return auth.userName
   }
 
-  override fun currentClientId(): String? {
+  fun currentClientId(): String? {
     val auth =  authentication as AuthAwareAuthenticationToken
     return auth.clientId
   }
+
 }
