@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
+import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
@@ -11,13 +12,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @Service
 class PrisonerSearchService(
   private val searchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
-  private val gson : Gson
+  private val gson: Gson,
+  private val telemetryClient: TelemetryClient,
+  private val authenticationHolder: AuthenticationHolder
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -27,15 +31,25 @@ class PrisonerSearchService(
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
     validateSearchForm(searchCriteria)
     if (searchCriteria.prisonerIdentifier != null) {
-      queryBy(searchCriteria) { idMatch(it) } onMatch { return it.matches }
+      queryBy(searchCriteria) { idMatch(it) } onMatch {
+        customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
+        return it.matches
+      }
     }
     if (!(searchCriteria.firstName.isNullOrBlank() && searchCriteria.lastName.isNullOrBlank())) {
       if (searchCriteria.includeAliases) {
-        queryBy(searchCriteria) { nameMatchWithAliases(it) } onMatch { return it.matches }
+        queryBy(searchCriteria) { nameMatchWithAliases(it) } onMatch {
+          customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
+          return it.matches
+        }
       } else {
-        queryBy(searchCriteria) { nameMatch(it) } onMatch { return it.matches }
+        queryBy(searchCriteria) { nameMatch(it) } onMatch {
+          customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
+          return it.matches
+        }
       }
     }
+    customEventForFindBySearchCriteria(searchCriteria, 0)
     return emptyList()
   }
 
@@ -46,7 +60,10 @@ class PrisonerSearchService(
     }
   }
 
-  private fun queryBy(searchCriteria: SearchCriteria, queryBuilder: (searchCriteria: SearchCriteria) -> BoolQueryBuilder?): Result {
+  private fun queryBy(
+    searchCriteria: SearchCriteria,
+    queryBuilder: (searchCriteria: SearchCriteria) -> BoolQueryBuilder?
+  ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
@@ -59,7 +76,10 @@ class PrisonerSearchService(
     } ?: Result.NoMatch
   }
 
-  private fun queryBy(searchCriteria: PrisonerListCriteria, queryBuilder: (searchCriteria: PrisonerListCriteria) -> BoolQueryBuilder?): Result {
+  private fun queryBy(
+    searchCriteria: PrisonerListCriteria,
+    queryBuilder: (searchCriteria: PrisonerListCriteria) -> BoolQueryBuilder?
+  ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
@@ -79,18 +99,27 @@ class PrisonerSearchService(
   private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .mustMultiMatchKeyword(prisonerIdentifier?.canonicalPNCNumber(), "prisonerNumber", "bookingId", "pncNumber", "croNumber", "bookNumber")
+        .mustMultiMatchKeyword(
+          prisonerIdentifier?.canonicalPNCNumber(),
+          "prisonerNumber",
+          "bookingId",
+          "pncNumber",
+          "croNumber",
+          "bookNumber"
+        )
     }
   }
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-          .should(QueryBuilders.boolQuery()
-            .mustWhenPresent("lastName", lastName)
-            .mustWhenPresent("firstName", firstName)
-          )
+        .must(
+          QueryBuilders.boolQuery()
+            .should(
+              QueryBuilders.boolQuery()
+                .mustWhenPresent("lastName", lastName)
+                .mustWhenPresent("firstName", firstName)
+            )
         )
     }
   }
@@ -98,19 +127,24 @@ class PrisonerSearchService(
   private fun nameMatchWithAliases(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
-        .must(QueryBuilders.boolQuery()
-          .should(QueryBuilders.boolQuery()
-            .mustWhenPresent("lastName", lastName)
-            .mustWhenPresent("firstName", firstName)
-          )
-          .should(QueryBuilders.nestedQuery("aliases",
-            QueryBuilders.boolQuery()
-              .should(QueryBuilders.boolQuery()
-                .mustWhenPresent("aliases.lastName", lastName)
-                .mustWhenPresent("aliases.firstName", firstName)
-              ), ScoreMode.Max
-          )
-          )
+        .must(
+          QueryBuilders.boolQuery()
+            .should(
+              QueryBuilders.boolQuery()
+                .mustWhenPresent("lastName", lastName)
+                .mustWhenPresent("firstName", firstName)
+            )
+            .should(
+              QueryBuilders.nestedQuery(
+                "aliases",
+                QueryBuilders.boolQuery()
+                  .should(
+                    QueryBuilders.boolQuery()
+                      .mustWhenPresent("aliases.lastName", lastName)
+                      .mustWhenPresent("aliases.firstName", firstName)
+                  ), ScoreMode.Max
+              )
+            )
         )
     }
   }
@@ -121,7 +155,7 @@ class PrisonerSearchService(
     return searchHits.map { gson.fromJson(it.sourceAsString, Prisoner::class.java) }
   }
 
-  private fun getIndex(): String{
+  private fun getIndex(): String {
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
@@ -131,8 +165,40 @@ class PrisonerSearchService(
       throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
     }
 
-    queryBy(prisonerListCriteria) { matchByIds(it) } onMatch { return it.matches }
+    queryBy(prisonerListCriteria) { matchByIds(it) } onMatch {
+      customEventForFindByListOfPrisonerNumbers(prisonerListCriteria.prisonerNumbers.size, it.matches.size)
+      return it.matches
+    }
     return emptyList()
+  }
+
+  private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
+    val propertiesMap = mapOf(
+      "username" to authenticationHolder.currentUsername(),
+      "clientId" to authenticationHolder.currentClientId(),
+      "lastname" to searchCriteria.lastName,
+      "firstname" to searchCriteria.firstName,
+      "prisonId" to searchCriteria.prisonId,
+      "prisonerIdentifier" to searchCriteria.prisonerIdentifier,
+      "includeAliases" to searchCriteria.includeAliases.toString()
+    )
+    val metricsMap = mapOf(
+      "numberOfResults" to numberOfResults.toDouble()
+    )
+    telemetryClient.trackEvent("FindByCriteria", propertiesMap, metricsMap)
+  }
+
+  private fun customEventForFindByListOfPrisonerNumbers(prisonerListNumber: Int, numberOfResults: Int) {
+    val logMap = mapOf(
+      "username" to authenticationHolder.currentUsername(),
+      "clientId" to authenticationHolder.currentClientId(),
+      "numberOfPrisonerIds" to prisonerListNumber.toString()
+    )
+
+    val metricsMap = mapOf(
+      "numberOfResults" to numberOfResults.toDouble()
+    )
+    telemetryClient.trackEvent("FindByListOfPrisonerNumbers", logMap, metricsMap)
   }
 }
 

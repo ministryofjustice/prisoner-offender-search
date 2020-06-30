@@ -31,7 +31,7 @@ class PrisonerIndexResource(val prisonerIndexService: PrisonerIndexService){
     @PutMapping("/cancel-index")
     @ApiOperation(value = "Cancels a building index.", notes = "Only cancels if indexing is in progress, requires PRISONER_INDEX role")
     @PreAuthorize("hasRole('PRISONER_INDEX')")
-    fun cencelIndex(): IndexStatus {
+    fun cancelIndex(): IndexStatus {
         return prisonerIndexService.cancelIndex()
     }
 

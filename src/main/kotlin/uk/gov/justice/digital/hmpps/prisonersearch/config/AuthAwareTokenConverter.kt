@@ -10,22 +10,28 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 
 class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
-  private val jwtGrantedAuthoritiesConverter: Converter<Jwt, Collection<GrantedAuthority>> = JwtGrantedAuthoritiesConverter()
+  private val jwtGrantedAuthoritiesConverter: Converter<Jwt, Collection<GrantedAuthority>> =
+    JwtGrantedAuthoritiesConverter()
 
   override fun convert(jwt: Jwt): AbstractAuthenticationToken {
     val claims = jwt.claims
-    val principal = findPrincipal(claims)
+    val userName = findUserName(claims)
+    val clientId = findClientId(claims)
     val authorities = extractAuthorities(jwt)
-    return AuthAwareAuthenticationToken(jwt, principal, authorities)
+    return AuthAwareAuthenticationToken(jwt, userName, clientId, authorities)
   }
 
-  private fun findPrincipal(claims: Map<String, Any?>): String {
+  private fun findUserName(claims: Map<String, Any?>): String? {
     return if (claims.containsKey("user_name")) {
       claims["user_name"] as String
     } else {
-      claims["client_id"] as String
+      null
     }
   }
+
+  private fun findClientId(claims: Map<String, Any?>) =
+    claims["client_id"] as String
+
 
   private fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> {
     val authorities = mutableListOf<GrantedAuthority>().apply { addAll(jwtGrantedAuthoritiesConverter.convert(jwt)!!) }
@@ -39,11 +45,13 @@ class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
 }
 
 class AuthAwareAuthenticationToken(
-    jwt: Jwt,
-    private val aPrincipal: String,
-    authorities: Collection<GrantedAuthority>
+  jwt: Jwt,
+  val userName: String?,
+  val clientId: String,
+  authorities: Collection<GrantedAuthority>
 ) : JwtAuthenticationToken(jwt, authorities) {
   override fun getPrincipal(): Any {
-    return aPrincipal
+    return userName ?: clientId
   }
 }
+
