@@ -485,7 +485,7 @@
         }
       ],
       "status": "ACTIVE IN",
-      "legalStatus": "Convicted",
+      "legalStatus": "SENTENCED",
       "imprisonmentStatus": "LR_HDC"
     }
   }
