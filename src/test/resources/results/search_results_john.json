@@ -31,7 +31,7 @@
     "additionalDaysAwarded": 27,
     "nonDtoReleaseDate": "2023-05-16",
     "nonDtoReleaseDateType": "CRD",
-    "legalStatus": "Convicted",
+    "legalStatus": "SENTENCED",
     "mostSeriousOffence": "Handle stolen goods",
     "status": "ACTIVE IN"
   },
@@ -86,7 +86,7 @@
     "csra": "High",
     "category": "C",
     "releaseDate": "2020-04-28",
-    "legalStatus": "Convicted",
+    "legalStatus": "SENTENCED",
     "mostSeriousOffence": "Burglary dwelling - with intent to steal",
     "status": "ACTIVE IN"
   }
