@@ -18,7 +18,7 @@
     "prisonId": "MDI",
     "prisonName": "Moorland Prison",
     "cellLocation": "A-1-002",
-    "legalStatus": "Remand"
+    "legalStatus": "REMAND"
   },
   {
     "prisonerNumber": "A7089FB",
@@ -38,7 +38,7 @@
     "prisonId": "MDI",
     "prisonName": "Moorland Prison",
     "cellLocation": "A-1-003",
-    "legalStatus": "Remand"
+    "legalStatus": "REMAND"
   },
   {
     "prisonerNumber": "A7089FC",
@@ -57,6 +57,6 @@
     "prisonId": "LEI",
     "prisonName": "Leeds Prison",
     "cellLocation": "H-1-005",
-    "legalStatus": "Remand"
+    "legalStatus": "REMAND"
   }
 ]
