@@ -85,7 +85,7 @@ open class Prisoner {
   @ApiModelProperty(value = "Prisoner Category", example = "C", position = 23)
   var category: String? = null
 
-  @ApiModelProperty(value = "Legal Status of Remand or Conviction", example = "REMAND", allowableValues = "REMAND,CONVICTED", position = 24)
+  @ApiModelProperty(value = "Legal Status", example = "SENTENCED", allowableValues = "RECALL,DEAD,INDETERMINATE_SENTENCE,SENTENCED,CONVICTED_UNSENTENCED,CIVIL_PRISONER,IMMIGRATION_DETAINEE,REMAND,UNKNOWN,OTHER", position = 24)
   var legalStatus: String? = null
 
   @ApiModelProperty(required = true, value = "Most serious offence for this sentence", example = "Robbery", position = 25)
