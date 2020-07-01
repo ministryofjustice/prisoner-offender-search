@@ -185,7 +185,7 @@ class PrisonerSearchService(
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
     )
-    telemetryClient.trackEvent("FindByCriteria", propertiesMap, metricsMap)
+    telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }
 
   private fun customEventForFindByListOfPrisonerNumbers(prisonerListNumber: Int, numberOfResults: Int) {
@@ -198,7 +198,7 @@ class PrisonerSearchService(
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
     )
-    telemetryClient.trackEvent("FindByListOfPrisonerNumbers", logMap, metricsMap)
+    telemetryClient.trackEvent("POSFindByListOfPrisonerNumbers", logMap, metricsMap)
   }
 }
 
