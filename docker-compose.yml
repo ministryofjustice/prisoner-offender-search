@@ -34,7 +34,7 @@ services:
       - OAUTH_CLIENT_SECRET=clientsecret
 
   nomisapi:
-    image: quay.io/hmpps/elite2-api:latest
+    image: quay.io/hmpps/prison-api:latest
     networks:
       - hmpps
     container_name: nomisapi
