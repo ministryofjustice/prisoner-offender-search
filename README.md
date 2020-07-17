@@ -83,7 +83,7 @@ TMPDIR=/private$TMPDIR docker-compose up localstack
 In all of the above the application should use the host network to communicate with `localstack` since AWS Client will try to read messages from localhost rather than the `localstack` network.
 ### Experimenting with messages
 
-There are two handy scripts to add messages to the queue with data that matches either the T3 test environment or data in the test Docker version of the apps
+There are two handy scripts to add messages to the queue with data that matches either the dev environment or data in the test Docker version of the apps
 
 Purging a local queue
 ```bash
