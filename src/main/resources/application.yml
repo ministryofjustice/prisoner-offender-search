@@ -19,7 +19,6 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${api.base.url.oauth}/issuer
           jwk-set-uri: ${api.base.url.oauth}/.well-known/jwks.json
 
       client:
@@ -64,7 +63,9 @@ management:
         time-to-live: 2000ms
 
 azure:
-  application-insights.web.enable-W3C: true
+  application-insights:
+    web:
+      enable-W3C: true
 
 aws:
   region: eu-west-2
@@ -72,17 +73,22 @@ aws:
 
 sqs:
   provider: ${aws.provider}
-  queue.name: prisoner_offender_search_queue
-  dlq.name: prisoner_offender_search_dlq
-  endpoint.region: ${aws.region}
-  index.queue.name: prisoner_offender_index_queue
-  index.dlq.name: prisoner_offender_index_dlq
+  queue:
+    name: prisoner_offender_search_queue
+  dlq:
+    name: prisoner_offender_search_dlq
+  endpoint:
+    region: ${aws.region}
+  index:
+    queue:
+      name: prisoner_offender_index_queue
+    dlq:
+      name: prisoner_offender_index_dlq
 
 elasticsearch:
   port: 9200
   scheme: http
   host: aws-es-proxy-service
-
 
 index:
   page:

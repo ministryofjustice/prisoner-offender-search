@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   owasp: entur/owasp@0.0.10
-  dps: ministryofjustice/hmpps@1.0.0
+  dps: ministryofjustice/hmpps@1.1.1
 
 executors:
   validator:
@@ -29,10 +29,6 @@ jobs:
     steps:
       - checkout
       - dps/install_aws_cli
-      - run:
-          name: Install less
-          command: |
-            sudo apt-get install less
       - run:
           name: Wait for SQS to be ready
           command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
