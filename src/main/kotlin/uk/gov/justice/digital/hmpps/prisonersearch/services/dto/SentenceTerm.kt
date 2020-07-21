@@ -11,13 +11,13 @@ data class SentenceTerm (
   val sentenceTermCode: String,
   val lineSeq: Long,
   val sentenceStartDate: LocalDate,
-  val caseId: String? = null,
-  val consecutiveTo: Int? = null,
+  val caseId: String?,
+  val consecutiveTo: Int?,
   val sentenceType: String,
-  val sentenceTypeDescription: String? = null,
-  val fineAmount: Double? = null,
-  val years: Int? = null,
-  val months: Int? = null,
-  val weeks: Int? = null,
-  val days: Int? = null
+  val sentenceTypeDescription: String?,
+  val fineAmount: Double?,
+  val years: Int?,
+  val months: Int?,
+  val weeks: Int?,
+  val days: Int?
 )
