@@ -1,0 +1,67 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7090AB",
+      "pncNumber": "12/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1903839",
+      "bookNumber": "V63589",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "dateOfBirth": "1980-02-28",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "prisonId": "MDI",
+      "prisonName": "Moorland Prison",
+      "cellLocation": "H-1-004",
+      "legalStatus": "REMAND"
+    },
+    {
+      "prisonerNumber": "A7090AE",
+      "pncNumber": "12/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1903835",
+      "bookNumber": "V63586",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "dateOfBirth": "1980-02-28",
+      "gender": "Not specified",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "prisonId": "OUT",
+      "prisonName": "out",
+      "cellLocation": "H-1-004",
+      "legalStatus": "REMAND"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": true,
+      "unsorted": false,
+      "empty": false
+    },
+    "pageSize": 2,
+    "pageNumber": 2,
+    "offset": 4,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalPages": 4,
+  "totalElements": 7,
+  "last": false,
+  "number": 2,
+  "size": 2,
+  "numberOfElements": 2,
+  "sort": {
+    "sorted": true,
+    "unsorted": false,
+    "empty": false
+  },
+  "first": false,
+  "empty": false
+}

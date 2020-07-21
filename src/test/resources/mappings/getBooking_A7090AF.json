@@ -1,0 +1,91 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7090AF"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1903834,
+      "bookingNo": "V63584",
+      "offenderNo": "A7090AF",
+      "firstName": "THE",
+      "lastName": "SON",
+      "agencyId": "LEI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "LEI",
+        "locationId": 27136,
+        "description": "B-C1-010",
+        "agencyName": "HMP Leeds"
+      },
+      "facialImageId": 1171279,
+      "dateOfBirth": "1990-08-15",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "11"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12P",
+          "offenderNo": "A7090AF",
+          "bookingId": 1903834,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773I",
+          "offenderNo": "A7090AF",
+          "bookingId": 1903834,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "aliases": [
+        {
+          "firstName": "THE",
+          "lastName": "TON",
+          "age": 29,
+          "dob": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+          "nameType": "Alias Name",
+          "createDate": "2011-06-02"
+        },
+        {
+          "firstName": "SAM",
+          "middleName": "JAMES",
+          "lastName": "JONES",
+          "age": 36,
+          "dob": "1983-06-17",
+          "gender": "Male",
+          "createDate": "2020-05-04"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "REMAND"
+    }
+  }
+}

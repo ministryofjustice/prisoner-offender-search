@@ -1,0 +1,37 @@
+[
+  {
+    "prisonerNumber": "A7090AF",
+    "pncNumber": "12/394773I",
+    "croNumber": "29906/12P",
+    "bookingId": "1903834",
+    "bookNumber": "V63584",
+    "firstName": "THE",
+    "lastName": "SON",
+    "dateOfBirth": "1990-08-15",
+    "gender": "Male",
+    "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+    "youthOffender": false,
+    "religion": "Christian",
+    "status": "ACTIVE IN",
+    "prisonId": "LEI",
+    "prisonName": "HMP Leeds",
+    "cellLocation": "B-C1-010",
+    "aliases": [
+      {
+        "firstName": "THE",
+        "lastName": "TON",
+        "dateOfBirth": "1990-08-15",
+        "gender": "Female",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+      },
+      {
+        "firstName": "SAM",
+        "middleNames": "JAMES",
+        "lastName": "JONES",
+        "dateOfBirth": "1983-06-17",
+        "gender": "Male"
+      }
+    ],
+    "legalStatus": "REMAND"
+  }
+]

@@ -1,0 +1,81 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7090BB"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1904838,
+      "bookingNo": "V61587",
+      "offenderNo": "A7090BB",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "agencyId": "MDI",
+      "assignedLivingUnitId": 721727,
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "MDI",
+        "locationId": 721726,
+        "description": "A-1-003",
+        "agencyName": "Moorland Prison"
+      },
+      "facialImageId": 1171172,
+      "dateOfBirth": "1962-11-01",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "9"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "NO"
+        },
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        },
+        {
+          "type": "NAT",
+          "question": "Nationality?",
+          "resultValue": "British"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12L",
+          "offenderNo": "A7090BB",
+          "bookingId": 1904838,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773W",
+          "offenderNo": "A7090BB",
+          "bookingId": 1904838,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "REMAND"
+    }
+  }
+}
