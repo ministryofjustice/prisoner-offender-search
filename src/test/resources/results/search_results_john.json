@@ -90,6 +90,8 @@
     "releaseDate": "2020-04-28",
     "legalStatus": "SENTENCED",
     "mostSeriousOffence": "Burglary dwelling - with intent to steal",
-    "status": "ACTIVE IN"
+    "status": "ACTIVE IN",
+    "recall": false,
+    "indeterminateSentence": false
   }
 ]

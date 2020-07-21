@@ -534,7 +534,7 @@
       "recall": false,
       "sentenceTerms": [
         {
-          "bookingId": 1900838,
+          "bookingId": 1900836,
           "sentenceSequence": 2,
           "termSequence": 1,
           "sentenceType": "ADIMP_LR",
