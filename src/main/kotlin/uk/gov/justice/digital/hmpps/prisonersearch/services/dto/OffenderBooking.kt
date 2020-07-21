@@ -32,8 +32,10 @@ data class OffenderBooking (
   val identifiers: List<OffenderIdentifier>? = null,
   val sentenceDetail: SentenceDetail? = null,
   val offenceHistory: List<OffenceHistoryDetail>? = null,
+  val sentenceTerms: List<SentenceTerm>? = null,
   val status: String? = null,
   val legalStatus: String? = null,
+  val recall: Boolean? = null,
   val imprisonmentStatus: String? = null,
   val personalCareNeeds : List<PersonalCareNeed>? = null
 )

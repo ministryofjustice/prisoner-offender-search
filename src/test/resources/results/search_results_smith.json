@@ -32,6 +32,8 @@
     "nonDtoReleaseDateType": "CRD",
     "legalStatus": "SENTENCED",
     "mostSeriousOffence": "Handle stolen goods",
-    "status": "ACTIVE IN"
+    "status": "ACTIVE IN",
+    "recall": false,
+    "indeterminateSentence": true
   }
 ]

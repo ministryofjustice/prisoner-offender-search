@@ -91,42 +91,48 @@ open class Prisoner {
   @ApiModelProperty(required = true, value = "Most serious offence for this sentence", example = "Robbery", position = 25)
   var mostSeriousOffence : String? = null
 
+  @ApiModelProperty(required = false, value = "Indicates that the offender has been recalled", example = "false", position = 26)
+  var recall : Boolean? = null
+
+  @ApiModelProperty(required = false, value = "Indicates the the offender has an indeterminate sentence", example = "true", position = 27)
+  var indeterminateSentence : Boolean? = null
+
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "Start Date for this sentence", example = "2020-04-03", position = 26)
+  @ApiModelProperty(value = "Start Date for this sentence", example = "2020-04-03", position = 28)
   var sentenceStartDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "Actual of most likely Release Date", example = "2023-05-02", position = 27)
+  @ApiModelProperty(value = "Actual of most likely Release Date", example = "2023-05-02", position = 29)
   var releaseDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "Release Date Confirmed", example = "2023-05-01", position = 28)
+  @ApiModelProperty(value = "Release Date Confirmed", example = "2023-05-01", position = 30)
   var confirmedReleaseDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "Sentence Expiry Date", example = "2023-05-01", position = 29)
+  @ApiModelProperty(value = "Sentence Expiry Date", example = "2023-05-01", position = 31)
   var sentenceExpiryDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "Licence Expiry Date", example = "2023-05-01", position = 30)
+  @ApiModelProperty(value = "Licence Expiry Date", example = "2023-05-01", position = 32)
   var licenceExpiryDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "HDC Eligibility Date", example = "2023-05-01", position = 31)
+  @ApiModelProperty(value = "HDC Eligibility Date", example = "2023-05-01", position = 33)
   var homeDetentionCurfewEligibilityDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "HDC Actual Date", example = "2023-05-01", position = 32)
+  @ApiModelProperty(value = "HDC Actual Date", example = "2023-05-01", position = 34)
   var homeDetentionCurfewActualDate: LocalDate? = null
 
-  @ApiModelProperty(value = "Days added to sentence term due to adjustments.", example = "10", position = 33)
+  @ApiModelProperty(value = "Days added to sentence term due to adjustments.", example = "10", position = 35)
   var additionalDaysAwarded: Int? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @ApiModelProperty(value = "Release date for Non determinant sentence (if applicable). This will be based on one of ARD, CRD, NPD or PRRD.", example = "2023-05-01", position = 34)
+  @ApiModelProperty(value = "Release date for Non determinant sentence (if applicable). This will be based on one of ARD, CRD, NPD or PRRD.", example = "2023-05-01", position = 36)
   var nonDtoReleaseDate: LocalDate? = null
 
-  @ApiModelProperty(value = "Indicates which type of non-DTO release date is the effective release date. One of 'ARD’, 'CRD’, ‘NPD’ or 'PRRD’.", example = "ARD", allowableValues = "ARD,CRD,NPD,PRRD", position = 28)
+  @ApiModelProperty(value = "Indicates which type of non-DTO release date is the effective release date. One of 'ARD’, 'CRD’, ‘NPD’ or 'PRRD’.", example = "ARD", allowableValues = "ARD,CRD,NPD,PRRD", position = 37)
   var nonDtoReleaseDateType: String? = null
 }
 

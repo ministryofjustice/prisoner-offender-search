@@ -32,7 +32,6 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.maritalStatus = ob.profileInformation?.firstOrNull { p -> p.type == "MARITAL" }?.resultValue
   prisoner.youthOffender = ob.profileInformation?.firstOrNull { p -> p.type == "YOUTH" }?.resultValue?.toUpperCase() == "YES"
 
-  prisoner.legalStatus = ob.legalStatus
   prisoner.sentenceStartDate = ob.sentenceDetail?.sentenceStartDate
   prisoner.confirmedReleaseDate = ob.sentenceDetail?.confirmedReleaseDate
   prisoner.releaseDate = ob.sentenceDetail?.releaseDate
@@ -46,6 +45,9 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
 
   // get the most serious offence for this booking
   prisoner.mostSeriousOffence = ob.offenceHistory?.firstOrNull{ off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
+  prisoner.recall = ob.recall
+  prisoner.legalStatus = ob.legalStatus
+  prisoner.indeterminateSentence = ob.sentenceTerms?.any{ st -> st.lifeSentence && st.bookingId == ob.bookingId }
   return prisoner
 }
 
