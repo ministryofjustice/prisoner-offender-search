@@ -15,6 +15,18 @@ fun BoolQueryBuilder.mustWhenPresent(query: String, value: Any?): BoolQueryBuild
   return this
 }
 
+fun BoolQueryBuilder.mustNotWhenPresent(query: String, value: Any?): BoolQueryBuilder {
+  value.takeIf {
+    when(it) {
+      is String -> it.isNotBlank()
+      else -> true
+    }
+  }?.let {
+    this.mustNot(QueryBuilders.matchQuery(query, it))
+  }
+  return this
+}
+
 fun BoolQueryBuilder.filterWhenPresent(query: String, value: Any?): BoolQueryBuilder {
   value.takeIf {
     when(it) {

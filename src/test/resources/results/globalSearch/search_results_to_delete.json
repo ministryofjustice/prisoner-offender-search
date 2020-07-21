@@ -1,0 +1,21 @@
+[
+  {
+    "prisonerNumber": "A7089FC",
+    "pncNumber": "12/394773I",
+    "croNumber": "29906/12P",
+    "bookingId": "1902838",
+    "bookNumber": "V61588",
+    "firstName": "JIM",
+    "lastName": "BORROWER",
+    "dateOfBirth": "1990-02-02",
+    "gender": "Male",
+    "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+    "youthOffender": true,
+    "religion": "Christian",
+    "status": "ACTIVE IN",
+    "prisonId": "LEI",
+    "prisonName": "Leeds Prison",
+    "cellLocation": "H-1-005",
+    "legalStatus": "REMAND"
+  }
+]

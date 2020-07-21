@@ -101,7 +101,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can not match when name is prisoner not exists`() {
+  fun `can not match when name of prisoner does not exist`() {
     search(SearchCriteria(null, "trevor", "willis"), "/results/empty.json")
   }
 
@@ -114,7 +114,6 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on a first and last name only`() {
     search(SearchCriteria(null, "david", "doe"), "/results/search_results_david.json")
   }
-
 
   @Test
   fun `can perform a match on a first name only filter by prison`() {

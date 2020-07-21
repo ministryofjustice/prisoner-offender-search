@@ -1,0 +1,492 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7090BA"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1902837,
+      "bookingNo": "38239C",
+      "offenderNo": "A7090BA",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "agencyId": "LEI",
+      "assignedLivingUnitId": 27136,
+      "activeFlag": true,
+      "religion": "Church of England (Anglican)",
+      "language": "British Sign Language",
+      "alertsCodes": [
+        "R",
+        "H",
+        "X",
+        "O"
+      ],
+      "activeAlertCount": 13,
+      "inactiveAlertCount": 45,
+      "alerts": [
+        {
+          "alertId": 54,
+          "alertType": "V",
+          "alertTypeDescription": "Vulnerability",
+          "alertCode": "V45",
+          "alertCodeDescription": "Rule 45 - GOOD",
+          "comment": "been bad again",
+          "dateCreated": "2019-11-04",
+          "dateExpires": "2019-11-04",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "JAMES T",
+          "addedByLastName": "KIRK",
+          "expiredByFirstName": "JAMES T",
+          "expiredByLastName": "KIRK"
+        },
+        {
+          "alertId": 52,
+          "alertType": "V",
+          "alertTypeDescription": "Vulnerability",
+          "alertCode": "V45",
+          "alertCodeDescription": "Rule 45 - GOOD",
+          "comment": ";oiy",
+          "dateCreated": "2019-09-18",
+          "dateExpires": "2019-09-18",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "JAMES T",
+          "addedByLastName": "KIRK",
+          "expiredByFirstName": "JAMES T",
+          "expiredByLastName": "KIRK"
+        },
+        {
+          "alertId": 51,
+          "alertType": "X",
+          "alertTypeDescription": "Security",
+          "alertCode": "XTACT",
+          "alertCodeDescription": "Terrorism Act or Related Offence",
+          "comment": "hhdks",
+          "dateCreated": "2019-09-16",
+          "dateExpires": "2019-09-16",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "JAMES T",
+          "addedByLastName": "KIRK",
+          "expiredByFirstName": "JAMES T",
+          "expiredByLastName": "KIRK"
+        },
+        {
+          "alertId": 50,
+          "alertType": "R",
+          "alertTypeDescription": "Risk",
+          "alertCode": "ROP",
+          "alertCodeDescription": "Risk to older people",
+          "comment": "ght",
+          "dateCreated": "2019-09-05",
+          "dateExpires": "2019-09-09",
+          "expired": true,
+          "active": false,
+          "addedByFirstName": "JAMES T",
+          "addedByLastName": "KIRK",
+          "expiredByFirstName": "JAMES T",
+          "expiredByLastName": "KIRK"
+        }
+      ],
+      "assignedLivingUnit": {
+        "agencyId": "LEI",
+        "locationId": 27136,
+        "description": "B-C1-010",
+        "agencyName": "HMP Leeds"
+      },
+      "facialImageId": 1412890,
+      "dateOfBirth": "1945-10-10",
+      "age": 39,
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "heightFeet": 6,
+        "heightInches": 2,
+        "heightMetres": 1.88,
+        "heightCentimetres": 188,
+        "weightPounds": 218,
+        "weightKilograms": 99,
+        "sexCode": "M"
+      },
+      "personalCareNeeds": [
+        {
+          "problemType": "DISAB",
+          "problemCode": "ND",
+          "problemStatus": "ON",
+          "problemDescription": "No Disability",
+          "commentText": null,
+          "startDate": "2013-06-19",
+          "endDate": null
+        }
+      ],
+      "physicalCharacteristics": [
+        {
+          "type": "HAIR",
+          "characteristic": "Hair Colour",
+          "detail": "Brown"
+        },
+        {
+          "type": "R_EYE_C",
+          "characteristic": "Right Eye Colour",
+          "detail": "Blue"
+        },
+        {
+          "type": "L_EYE_C",
+          "characteristic": "Left Eye Colour",
+          "detail": "Blue"
+        },
+        {
+          "type": "FACIAL_HAIR",
+          "characteristic": "Facial Hair",
+          "detail": "Clean Shaven"
+        },
+        {
+          "type": "FACE",
+          "characteristic": "Shape of Face",
+          "detail": "Angular"
+        },
+        {
+          "type": "BUILD",
+          "characteristic": "Build",
+          "detail": "Proportional"
+        },
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "10"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "NO"
+        },
+        {
+          "type": "MARITAL",
+          "question": "Domestic Status",
+          "resultValue": "Single-not married/in civil partnership"
+        },
+        {
+          "type": "CHILD",
+          "question": "Number of Children?",
+          "resultValue": "2"
+        },
+        {
+          "type": "DOMESTIC",
+          "question": "Domestic Abuse Perpetrator?",
+          "resultValue": "NO"
+        },
+        {
+          "type": "DOMVIC",
+          "question": "Domestic Violence Victim?",
+          "resultValue": "NO"
+        },
+        {
+          "type": "SMOKE",
+          "question": "Is the Offender a smoker?",
+          "resultValue": "Yes"
+        },
+        {
+          "type": "TAT",
+          "question": "Warned about tattooing?",
+          "resultValue": "Yes"
+        },
+        {
+          "type": "APPEAR",
+          "question": "Warned not to change appearance?",
+          "resultValue": "Yes"
+        },
+        {
+          "type": "DNA",
+          "question": "DNA Required?",
+          "resultValue": "No"
+        },
+        {
+          "type": "IMM",
+          "question": "Interest to Immigration?",
+          "resultValue": "No"
+        },
+        {
+          "type": "DIET",
+          "question": "Type of diet?",
+          "resultValue": "Religion - Muslim"
+        },
+        {
+          "type": "LIST_SUIT",
+          "question": "Listener - Suitable?",
+          "resultValue": "Yes"
+        },
+        {
+          "type": "LIST_REC",
+          "question": "Listener - Recognised?",
+          "resultValue": "Yes"
+        },
+        {
+          "type": "SEXO",
+          "question": "Sexual Orientation",
+          "resultValue": "Bisexual"
+        },
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Church of England (Anglican)"
+        },
+        {
+          "type": "NAT",
+          "question": "Nationality?",
+          "resultValue": "British"
+        },
+        {
+          "type": "PERSC",
+          "question": "Social Care Needed?",
+          "resultValue": "No"
+        }
+      ],
+      "physicalMarks": [
+        {
+          "type": "Other",
+          "bodyPart": "Torso",
+          "comment": "Red bull Logo",
+          "imageId": 1413012
+        },
+        {
+          "type": "Other",
+          "bodyPart": "Torso",
+          "comment": "Mr Dizzy"
+        },
+        {
+          "type": "Tattoo",
+          "side": "Left",
+          "bodyPart": "Arm",
+          "comment": "Monster drink logo",
+          "orentiation": "Facing"
+        }
+      ],
+      "assessments": [
+        {
+          "bookingId": 1900837,
+          "classificationCode": "STANDARD",
+          "classification": "Standard",
+          "assessmentCode": "CSRREV",
+          "assessmentDescription": "CSR Review",
+          "cellSharingAlertFlag": true,
+          "assessmentDate": "2016-11-23",
+          "nextReviewDate": "2017-02-21",
+          "assessmentStatus": "A",
+          "assessmentSeq": 4
+        },
+        {
+          "bookingId": 1900837,
+          "classificationCode": "HI",
+          "classification": "High",
+          "assessmentCode": "CSR",
+          "assessmentDescription": "CSR Rating",
+          "cellSharingAlertFlag": true,
+          "assessmentDate": "2020-04-17",
+          "nextReviewDate": "2020-04-18",
+          "assessmentStatus": "A",
+          "assessmentSeq": 9
+        },
+        {
+          "bookingId": 1900837,
+          "classificationCode": "C",
+          "classification": "Cat C",
+          "assessmentCode": "CATEGORY",
+          "assessmentDescription": "Categorisation",
+          "cellSharingAlertFlag": false,
+          "assessmentDate": "2017-02-21",
+          "nextReviewDate": "2017-08-01",
+          "assessmentStatus": "A",
+          "assessmentSeq": 6
+        }
+      ],
+      "csra": "High",
+      "category": "Cat C",
+      "categoryCode": "C",
+      "assignedOfficerId": 397309,
+      "birthPlace": "DONCASTER",
+      "birthCountryCode": "ENG",
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "400862/08W",
+          "offenderNo": "G6123VU",
+          "bookingId": 1900837,
+          "issuedAuthorityText": "P/CONS",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "08/359381C",
+          "offenderNo": "G6123VU",
+          "bookingId": 1900837,
+          "issuedAuthorityText": "P/CONS",
+          "caseloadType": "INST"
+        }
+      ],
+      "sentenceDetail": {
+        "bookingId": 1900837,
+        "conditionalReleaseOverrideDate": "2020-04-28",
+        "nonDtoReleaseDate": "2020-04-28",
+        "nonDtoReleaseDateType": "CRD",
+        "releaseDate": "2020-04-28"
+      },
+      "offenceHistory": [
+        {
+          "bookingId": 580596,
+          "offenceDate": "2011-02-16",
+          "offenceDescription": "Burglary (stealing or attempting to steal - in dwelling)",
+          "offenceCode": "TH68036",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 401267,
+          "offenceDate": "2011-02-26",
+          "offenceDescription": "Breaching probation order",
+          "offenceCode": "PC73001",
+          "statuteCode": "PC73",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 580596,
+          "offenceDate": "2011-03-20",
+          "offenceDescription": "Breach of a community punishment order",
+          "offenceCode": "PC00006",
+          "statuteCode": "PC00",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 401267,
+          "offenceDate": "2011-03-25",
+          "offenceDescription": "Burglary (stealing or attempting to steal - in dwelling)",
+          "offenceCode": "TH68036",
+          "statuteCode": "TH68",
+          "mostSerious": true
+        },
+        {
+          "bookingId": 580596,
+          "offenceDate": "2012-02-26",
+          "offenceDescription": "Burglary (stealing or attempting to steal - in dwelling)",
+          "offenceCode": "TH68036",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 580596,
+          "offenceDate": "2012-03-05",
+          "offenceDescription": "Breach of an anti-social behaviour order",
+          "offenceCode": "CD98002",
+          "statuteCode": "CD98",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 580596,
+          "offenceDate": "2012-03-11",
+          "offenceDescription": "Breaching probation order",
+          "offenceCode": "PC73001",
+          "statuteCode": "PC73",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 580596,
+          "offenceDate": "2013-08-14",
+          "offenceDescription": "Theft in dwelling other than an automatic machine or meter",
+          "offenceCode": "TH68002",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 580596,
+          "offenceDate": "2013-08-18",
+          "offenceRangeDate": "2013-07-10",
+          "offenceDescription": "Burglary (stealing or attempting to steal - in dwelling)",
+          "offenceCode": "TH68036",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 1900837,
+          "offenceDate": "2016-06-22",
+          "offenceDescription": "Burglary dwelling - with intent to steal",
+          "offenceCode": "TH68026",
+          "statuteCode": "TH68",
+          "mostSerious": true
+        },
+        {
+          "bookingId": 1900837,
+          "offenceDate": "2016-07-17",
+          "offenceRangeDate": "2016-05-29",
+          "offenceDescription": "Burglary other than dwelling - theft",
+          "offenceCode": "TH68037",
+          "statuteCode": "TH68",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 1900837,
+          "offenceDescription": "Import nuclear material with intent to evade a prohibition / restriction",
+          "offenceCode": "CE79245",
+          "statuteCode": "CE79",
+          "mostSerious": false
+        },
+        {
+          "bookingId": 580596,
+          "offenceDescription": "Breach of a personal licence condition",
+          "offenceCode": "GA05046",
+          "statuteCode": "GA05",
+          "mostSerious": false
+        }
+      ],
+      "aliases": [
+        {
+          "firstName": "MASTER",
+          "lastName": "CORDIAN",
+          "age": 29,
+          "dob": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+          "nameType": "Alias Name",
+          "createDate": "2011-06-02"
+        },
+        {
+          "firstName": "MASTER",
+          "middleName": "J117",
+          "lastName": "CHIEF",
+          "age": 36,
+          "dob": "1983-06-17",
+          "gender": "Male",
+          "createDate": "2020-05-04"
+        },
+        {
+          "firstName": "MASTER",
+          "middleName": "J117",
+          "lastName": "CHEIF",
+          "age": 36,
+          "dob": "1983-06-17",
+          "gender": "Male",
+          "createDate": "2020-05-04"
+        },
+        {
+          "firstName": "TONY",
+          "middleName": "IRONMAN",
+          "lastName": "STARK",
+          "age": 49,
+          "dob": "1970-05-29",
+          "gender": "Male",
+          "createDate": "2020-05-04"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "SENTENCED",
+      "imprisonmentStatus": "LR_HDC"
+    }
+  }
+}

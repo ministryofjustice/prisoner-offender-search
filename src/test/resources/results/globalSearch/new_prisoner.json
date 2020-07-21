@@ -1,0 +1,18 @@
+{
+  "prisonerNumber": "A5432AA",
+  "pncNumber": "14/394223I",
+  "croNumber": "29901/12P",
+  "bookingId": "1232123",
+  "bookNumber": "T61588",
+  "firstName": "TEST",
+  "lastName": "TESTER",
+  "dateOfBirth": "1990-02-02",
+  "gender": "Male",
+  "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+  "youthOffender": true,
+  "status": "ACTIVE IN",
+  "prisonId": "MDI",
+  "prisonName": "Moorland Prison",
+  "cellLocation": "A-1-005",
+  "legalStatus": "REMAND"
+}

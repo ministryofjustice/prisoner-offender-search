@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 
@@ -65,6 +66,12 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FB") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FC") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FX") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AA") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AB") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AC") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AD") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AE") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AF") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
@@ -109,6 +116,26 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
+  fun globalSearch(globalSearchCriteria: GlobalSearchCriteria, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/global")
+      .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun globalSearchPagination(globalSearchCriteria: GlobalSearchCriteria, size: Long, page: Long, fileAssert: String) {
+    val string = "/prisoner-search/global?size=$size&page=$page"
+    webTestClient.post().uri("/prisoner-search/global?size=$size&page=$page")
+      .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
 }
 
 private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
