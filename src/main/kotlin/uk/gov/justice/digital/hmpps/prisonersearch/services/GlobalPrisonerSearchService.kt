@@ -104,7 +104,7 @@ class GlobalPrisonerSearchService(
               QueryBuilders.boolQuery()
                 .mustWhenPresent("lastName", lastName)
                 .mustWhenPresent("firstName", firstName)
-                .mustWhenPresent("gender", gender?.value)
+                .mustWhenPresentGender("gender", gender?.value)
                 .mustWhenPresent("dateOfBirth", dateOfBirth)
             )
         )
@@ -120,7 +120,7 @@ class GlobalPrisonerSearchService(
               QueryBuilders.boolQuery()
                 .mustWhenPresent("lastName", lastName)
                 .mustWhenPresent("firstName", firstName)
-                .mustWhenPresent("gender", gender?.value)
+                .mustWhenPresentGender("gender", gender?.value)
                 .mustWhenPresent("dateOfBirth", dateOfBirth)
             )
             .should(
@@ -131,7 +131,7 @@ class GlobalPrisonerSearchService(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
                       .mustWhenPresent("aliases.firstName", firstName)
-                      .mustWhenPresent("gender", gender?.value)
+                      .mustWhenPresentGender("gender", gender?.value)
                       .mustWhenPresent("dateOfBirth", dateOfBirth)
                   ), ScoreMode.Max
               )

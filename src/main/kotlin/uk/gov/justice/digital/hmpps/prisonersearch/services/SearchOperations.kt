@@ -114,3 +114,6 @@ fun shouldMatchOneOf(query: String, values: List<Any>): BoolQueryBuilder {
   values.forEach { nestedQuery.should(QueryBuilders.matchQuery(query, it)) }
   return nestedQuery
 }
+
+fun BoolQueryBuilder.mustWhenPresentGender(query: String, value: Any?) =
+  if(value == "ALL") this else mustWhenPresent(query,value)
