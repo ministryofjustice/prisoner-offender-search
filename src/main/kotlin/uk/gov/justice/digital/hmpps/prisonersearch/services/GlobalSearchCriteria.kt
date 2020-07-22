@@ -37,5 +37,6 @@ enum class Gender(val value: String?){
   M("Male"),
   F("Female"),
   UK("Unknown"),
-  NS("Not specified");
+  NS("Not specified"),
+  ALL("ALL");
 }

@@ -153,6 +153,11 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match on a first name,last name and all genders`() {
+    globalSearch(GlobalSearchCriteria(null, "sam", "jones", Gender.ALL, null, null), "/results/globalSearch/search_results_sams.json")
+  }
+
+  @Test
   fun `can perform a match on a first, last name and date of birth`() {
     globalSearch(GlobalSearchCriteria(null, "sam", "jones", null, null, LocalDate.of(1975 , 5 , 15)), "/results/globalSearch/search_results_sam4.json")
   }
