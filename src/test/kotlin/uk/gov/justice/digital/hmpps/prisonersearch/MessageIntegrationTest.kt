@@ -107,7 +107,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("13")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("15")
 
     val message = "/messages/offenderDetailsNew.json".readResourceAsText()
 
