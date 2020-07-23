@@ -73,6 +73,8 @@ class GlobalPrisonerSearchService(
         query(query.withDefaults(globalSearchCriteria))
         size(pageable.pageSize)
         from(pageable.offset.toInt())
+        sort("_score")
+        sort("prisonerNumber")
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)

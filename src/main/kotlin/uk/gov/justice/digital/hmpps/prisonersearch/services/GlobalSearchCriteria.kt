@@ -12,7 +12,7 @@ data class GlobalSearchCriteria (
   val firstName : String?,
   @ApiModelProperty(required = false, value = "Last Name", example = "Smith", position = 3)
   val lastName: String?,
-  @ApiModelProperty(required = false, value = "Gender", notes = "F - Female, M - Male, NK - Not Known or NS - Not Specified", example = "M", position = 4)
+  @ApiModelProperty(required = false, value = "Gender", notes = "F - Female, M - Male, NK - Not Known / Not Recorded or NS - Not Specified (Indeterminate)", example = "M", position = 4)
   val gender: Gender?,
   @ApiModelProperty(required = false, value = "Location", notes = "All or Inside or Outside", example = "IN", position = 5)
   val location: String?,
