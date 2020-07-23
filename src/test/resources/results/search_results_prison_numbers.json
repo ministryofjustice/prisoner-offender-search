@@ -38,7 +38,9 @@
     "prisonId": "MDI",
     "prisonName": "Moorland Prison",
     "cellLocation": "A-1-003",
-    "legalStatus": "REMAND"
+    "legalStatus": "SENTENCED",
+    "recall": true,
+    "indeterminateSentence": false
   },
   {
     "prisonerNumber": "A7089FC",

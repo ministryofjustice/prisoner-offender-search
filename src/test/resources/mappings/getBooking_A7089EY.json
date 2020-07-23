@@ -530,7 +530,24 @@
       "aliases": [],
       "status": "ACTIVE IN",
       "legalStatus": "SENTENCED",
-      "imprisonmentStatus": "LASPO_DR"
+      "imprisonmentStatus": "LASPO_DR",
+      "recall": false,
+      "sentenceTerms": [
+        {
+          "bookingId": 1900836,
+          "sentenceSequence": 2,
+          "termSequence": 1,
+          "sentenceType": "ADIMP_LR",
+          "sentenceTypeDescription": "ORA CJA03 Life Sentence",
+          "startDate": "2020-05-05",
+          "lifeSentence": true,
+          "caseId": "2986589",
+          "sentenceTermCode": "IMP",
+          "lineSeq": 1,
+          "sentenceStartDate": "2020-05-05"
+        }
+      ]
+    }
     }
   }
 }
