@@ -18,7 +18,7 @@ Self-contained fat-jar micro-service to listen for events from Prison systems (N
 
 `localstack` is used to emulate the AWS SQS service. When running the integration test this will be started automatically. If you want the tests to use an already running version of `locastack` run the tests with the environment `SQS_PROVIDER=localstack`. This has the benefit of running the test quicker without the overhead of starting the `localstack` container.
 
-Any commands in `localstack/setup-sns.sh` will be run when `localstack` starts, so this should contain commands to create the appropriate queues.
+Any commands in `src/test/resources/localstack/setup-sns.sh` and `src/test/resources/localstack/setup-es.sh` will be run when `localstack` starts, so this should contain commands to create the appropriate queues.
 
 Running all services locally:
 ```bash
