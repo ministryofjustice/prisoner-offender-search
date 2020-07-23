@@ -117,7 +117,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun globalSearch(globalSearchCriteria: GlobalSearchCriteria, fileAssert: String) {
-    webTestClient.post().uri("/prisoner-search/global")
+    webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -127,8 +127,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun globalSearchPagination(globalSearchCriteria: GlobalSearchCriteria, size: Long, page: Long, fileAssert: String) {
-    val string = "/prisoner-search/global?size=$size&page=$page"
-    webTestClient.post().uri("/prisoner-search/global?size=$size&page=$page")
+    webTestClient.post().uri("/global-search?size=$size&page=$page")
       .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")

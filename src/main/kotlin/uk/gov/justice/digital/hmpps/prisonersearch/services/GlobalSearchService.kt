@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @Service
-class GlobalPrisonerSearchService(
+class GlobalSearchService(
   private val searchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
@@ -133,8 +133,8 @@ class GlobalPrisonerSearchService(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
                       .mustWhenPresent("aliases.firstName", firstName)
-                      .mustWhenPresentGender("gender", gender?.value)
-                      .mustWhenPresent("dateOfBirth", dateOfBirth)
+                      .mustWhenPresentGender("aliases.gender", gender?.value)
+                      .mustWhenPresent("aliases.dateOfBirth", dateOfBirth)
                   ), ScoreMode.Max
               )
             )

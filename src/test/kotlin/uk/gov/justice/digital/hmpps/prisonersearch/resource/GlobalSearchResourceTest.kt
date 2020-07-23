@@ -35,7 +35,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
 
-    webTestClient.post().uri("/prisoner-search/global")
+    webTestClient.post().uri("/global-search")
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isUnauthorized
@@ -44,7 +44,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `access forbidden when no role`() {
 
-    webTestClient.post().uri("/prisoner-search/global")
+    webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(SearchCriteria("A7089EY", "john", "smith", "MDI"))))
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
@@ -55,7 +55,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `bad request when no criteria provided`() {
 
-    webTestClient.post().uri("/prisoner-search/global")
+    webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(SearchCriteria(null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -206,7 +206,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on last name only in alias`() {
     globalSearch(GlobalSearchCriteria(null, null, "cordian", null, null, null, true), "/results/globalSearch/search_results_smyth.json")
   }
-//
+
 //  @Test
 //  fun `can perform a match on last name and gender in alias`() {
 //    globalSearch(GlobalSearchCriteria(null, null, "orange", Gender.M, null, null, true), "/results/globalSearch/search_results_sam5.json")
