@@ -134,7 +134,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on a first name,last name and gender as male`() {
-    globalSearch(GlobalSearchCriteria(null, "sam", "jones", Gender.M, null, null), "/results/globalSearch/search_results_sam1.json")
+    globalSearch(GlobalSearchCriteria(null, "sam", "jones", Gender.F, null, null), "/results/globalSearch/search_results_sam1.json")
   }
 
   @Test
@@ -207,15 +207,20 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
     globalSearch(GlobalSearchCriteria(null, null, "cordian", null, null, null, true), "/results/globalSearch/search_results_smyth.json")
   }
 
-//  @Test
-//  fun `can perform a match on last name and gender in alias`() {
-//    globalSearch(GlobalSearchCriteria(null, null, "orange", Gender.M, null, null, true), "/results/globalSearch/search_results_sam5.json")
-//  }
-//
-//  @Test
-//  fun `can perform a match on last name and date of birth in alias`() {
-//    globalSearch(GlobalSearchCriteria(null, null, "orange", null, null, LocalDate.of(1990,8,15), true), "/results/globalSearch/search_results_sam5.json")
-//  }
+  @Test
+  fun `can perform a match on last name and gender in alias`() {
+    globalSearch(GlobalSearchCriteria(null, null, "orange", Gender.F, null, null, true), "/results/globalSearch/search_results_sam5.json")
+  }
+
+  @Test
+  fun `can perform a match on last name and ALL genders in alias`() {
+    globalSearch(GlobalSearchCriteria(null, null, "Colin", Gender.ALL, null, null, true), "/results/globalSearch/search_results_sam5.json")
+  }
+
+  @Test
+  fun `can perform a match on last name and date of birth in alias`() {
+    globalSearch(GlobalSearchCriteria(null, null, "orange", null, null, LocalDate.of(1991,7,5), true), "/results/globalSearch/search_results_sam5.json")
+  }
 
   @Test
   fun `can perform a match on first and last name in alias but with alias search off`() {
