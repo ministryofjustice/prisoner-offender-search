@@ -143,8 +143,8 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can perform a match on a first name,last name and gender as unknown`() {
-    globalSearch(GlobalSearchCriteria(null, "sam", "jones", Gender.UK, null, null), "/results/globalSearch/search_results_sam4.json")
+  fun `can perform a match on a first name,last name and gender as Not Known`() {
+    globalSearch(GlobalSearchCriteria(null, "sam", "jones", Gender.NK, null, null), "/results/globalSearch/search_results_sam4.json")
   }
 
   @Test
@@ -209,12 +209,12 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
 //
 //  @Test
 //  fun `can perform a match on last name and gender in alias`() {
-//    globalSearch(GlobalSearchCriteria(null, null, "TON", Gender.M, null, null, true), "/results/globalSearch/search_results_sam5.json")
+//    globalSearch(GlobalSearchCriteria(null, null, "orange", Gender.M, null, null, true), "/results/globalSearch/search_results_sam5.json")
 //  }
 //
 //  @Test
 //  fun `can perform a match on last name and date of birth in alias`() {
-//    globalSearch(GlobalSearchCriteria(null, null, "TON", null, null, LocalDate.of(1990,8,15), true), "/results/globalSearch/search_results_sam5.json")
+//    globalSearch(GlobalSearchCriteria(null, null, "orange", null, null, LocalDate.of(1990,8,15), true), "/results/globalSearch/search_results_sam5.json")
 //  }
 
   @Test
@@ -223,7 +223,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can perform a match on firstname only in alias but with alias search off`() {
+  fun `can perform a match on first name only in alias but with alias search off`() {
     globalSearch(GlobalSearchCriteria(null, "master", null, null, null, null, false), "/results/globalSearch/empty.json")
   }
 

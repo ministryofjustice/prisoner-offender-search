@@ -5,8 +5,8 @@
     "croNumber": "29906/12P",
     "bookingId": "1903834",
     "bookNumber": "V63584",
-    "firstName": "THE",
-    "lastName": "SON",
+    "firstName": "MALCOLM",
+    "lastName": "BLUE",
     "dateOfBirth": "1990-08-15",
     "gender": "Male",
     "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
@@ -18,8 +18,8 @@
     "cellLocation": "B-C1-010",
     "aliases": [
       {
-        "firstName": "THE",
-        "lastName": "TON",
+        "firstName": "MAL",
+        "lastName": "ORANGE",
         "dateOfBirth": "1990-08-15",
         "gender": "Female",
         "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"

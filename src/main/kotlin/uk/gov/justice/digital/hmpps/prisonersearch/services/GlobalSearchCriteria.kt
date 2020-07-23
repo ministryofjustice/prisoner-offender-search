@@ -1,15 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDate
 
-@ApiModel("Search Criteria for Prisoner Search")
-
-@JsonIgnoreProperties( value =  [ "isValid" ])
+@ApiModel("Search Criteria for Global Prisoner Search")
 data class GlobalSearchCriteria (
-  @ApiModelProperty(required = false, value = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA,", position = 1)
+  @ApiModelProperty(required = false, value = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA", position = 1)
   val offenderNo : String?,
   @ApiModelProperty(required = false, value = "First Name", example = "John", position = 2)
   val firstName : String?,
@@ -24,9 +21,8 @@ data class GlobalSearchCriteria (
   @ApiModelProperty(required = false, value = "Include aliases in search", example = "false", position = 7)
   val includeAliases : Boolean = false
 ) {
-  val isValid: Boolean
-    get() = !(firstName.isNullOrBlank() && lastName.isNullOrBlank() && offenderNo.isNullOrBlank())
 
+  fun isValid() = !(firstName.isNullOrBlank() && lastName.isNullOrBlank() && offenderNo.isNullOrBlank())
 }
 
 //offenderNo, lastName, firstName, gender, location, dateOfBirth, includeAliases
@@ -36,7 +32,7 @@ enum class Gender(val value: String?){
 
   M("Male"),
   F("Female"),
-  UK("Unknown"),
-  NS("Not specified"),
+  NK("known"),
+  NS("specified"),
   ALL("ALL");
 }

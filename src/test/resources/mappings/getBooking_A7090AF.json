@@ -12,8 +12,8 @@
       "bookingId": 1903834,
       "bookingNo": "V63584",
       "offenderNo": "A7090AF",
-      "firstName": "THE",
-      "lastName": "SON",
+      "firstName": "JIMBOB",
+      "lastName": "JACKS",
       "agencyId": "LEI",
       "activeFlag": true,
       "assignedLivingUnit": {
@@ -65,8 +65,8 @@
       ],
       "aliases": [
         {
-          "firstName": "THE",
-          "lastName": "TON",
+          "firstName": "DANNY",
+          "lastName": "COLIN",
           "age": 29,
           "dob": "1990-08-15",
           "gender": "Male",

@@ -56,7 +56,7 @@ class GlobalPrisonerSearchService(
   }
 
   private fun validateSearchForm(globalSearchCriteria: GlobalSearchCriteria) {
-    if (!globalSearchCriteria.isValid) {
+    if (!globalSearchCriteria.isValid()) {
       log.warn("Invalid search  - no criteria provided")
       throw BadRequestException("Invalid search  - please provide at least 1 search parameter")
     }
@@ -72,7 +72,7 @@ class GlobalPrisonerSearchService(
       val searchSourceBuilder = SearchSourceBuilder().apply {
         query(query.withDefaults(globalSearchCriteria))
         size(pageable.pageSize)
-        from(pageable.pageNumber)
+        from(pageable.offset.toInt())
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
