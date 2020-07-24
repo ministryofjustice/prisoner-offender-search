@@ -1,0 +1,23 @@
+[
+  {
+    "prisonerNumber": "A7089FA",
+    "pncNumber": "12/394773I",
+    "croNumber": "29906/12K",
+    "bookingId": "2900837",
+    "bookNumber": "V61586",
+    "firstName": "JAMES",
+    "middleNames": "TREVOR",
+    "lastName": "DAVIES",
+    "dateOfBirth": "1990-01-31",
+    "gender": "Male",
+    "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+    "youthOffender": false,
+    "religion": "Christian",
+    "nationality": "British",
+    "status": "ACTIVE IN",
+    "prisonId": "MDI",
+    "prisonName": "Moorland Prison",
+    "cellLocation": "A-1-002",
+    "legalStatus": "REMAND"
+  }
+]

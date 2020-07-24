@@ -1,0 +1,21 @@
+[
+  {
+    "prisonerNumber": "A7090AA",
+    "pncNumber": "12/394773I",
+    "croNumber": "29906/12P",
+    "bookingId": "1903838",
+    "bookNumber": "V63588",
+    "firstName": "ERIC",
+    "lastName": "JONES",
+    "dateOfBirth": "1980-02-28",
+    "gender": "Male",
+    "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+    "youthOffender": false,
+    "religion": "Christian",
+    "status": "ACTIVE IN",
+    "prisonId": "MDI",
+    "prisonName": "Moorland Prison",
+    "cellLocation": "H-1-004",
+    "legalStatus": "REMAND"
+  }
+]

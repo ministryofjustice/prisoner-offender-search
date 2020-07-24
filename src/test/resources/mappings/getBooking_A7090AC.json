@@ -1,0 +1,69 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7090AC"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1903837,
+      "bookingNo": "V63587",
+      "offenderNo": "A7090AC",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "agencyId": "AGI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "AGI",
+        "description": "H-1-004",
+        "agencyName": "ASKHAM GRANGE"
+      },
+      "facialImageId": 1171176,
+      "dateOfBirth": "1985-05-15",
+      "physicalAttributes": {
+        "gender": "FEMALE",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "F"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "9"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12P",
+          "offenderNo": "A7090AC",
+          "bookingId": 1903837,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773I",
+          "offenderNo": "A7090AC",
+          "bookingId": 1903837,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "REMAND"
+    }
+  }
+}
