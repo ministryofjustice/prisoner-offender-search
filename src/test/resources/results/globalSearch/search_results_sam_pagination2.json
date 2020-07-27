@@ -1,0 +1,48 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7090AC",
+      "pncNumber": "12/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1903837",
+      "bookNumber": "V63587",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "dateOfBirth": "1985-05-15",
+      "gender": "FEMALE",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "prisonId": "AGI",
+      "prisonName": "ASKHAM GRANGE",
+      "cellLocation": "H-1-004",
+      "legalStatus": "REMAND"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": false,
+      "unsorted": true,
+      "empty": true
+    },
+    "pageSize": 1,
+    "pageNumber": 1,
+    "offset": 1,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalPages": 7,
+  "totalElements": 7,
+  "last": false,
+  "number": 1,
+  "size": 1,
+  "numberOfElements": 1,
+  "sort": {
+    "sorted": false,
+    "unsorted": true,
+    "empty": true
+  },
+  "first": false,
+  "empty": false
+}

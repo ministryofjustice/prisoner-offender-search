@@ -55,7 +55,7 @@ curl --location --request PUT "http://localhost:8080/prisoner-index/build-index"
 curl --location --request GET "http://localhost:8080/info" | jq -r
 ```
 
-If 48 records then mark complete
+If 52 records then mark complete
 ```bash
 curl --location --request PUT "http://localhost:8080/prisoner-index/mark-complete" --header "Authorization: Bearer $TOKEN" | jq -r
 ```
