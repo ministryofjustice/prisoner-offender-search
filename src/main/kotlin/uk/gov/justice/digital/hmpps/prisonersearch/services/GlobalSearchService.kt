@@ -34,7 +34,7 @@ class GlobalSearchService(
   @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByGlobalSearchCriteria(globalSearchCriteria: GlobalSearchCriteria, pageable: Pageable): Page<Prisoner> {
     validateSearchForm(globalSearchCriteria)
-    if (globalSearchCriteria.offenderIdentifier != null) {
+    if (globalSearchCriteria.prisonerIdentifier != null) {
       queryBy(globalSearchCriteria,pageable) { idMatch(it) } onMatch {
         customEventForFindBySearchCriteria(globalSearchCriteria, it.matches.size)
         return PageImpl(it.matches, pageable, it.totalHits)
@@ -88,7 +88,7 @@ class GlobalSearchService(
     with(globalSearchCriteria) {
       return QueryBuilders.boolQuery()
         .mustMultiMatchKeyword(
-          offenderIdentifier?.canonicalPNCNumber(),
+          prisonerIdentifier?.canonicalPNCNumber(),
           "prisonerNumber",
           "bookingId",
           "pncNumber",
@@ -164,7 +164,7 @@ class GlobalSearchService(
       "gender" to globalSearchCriteria.gender?.value,
       "prisonId" to globalSearchCriteria.location,
       "dateOfBirth" to globalSearchCriteria.dateOfBirth.toString(),
-      "offenderIdentifier" to globalSearchCriteria.offenderIdentifier,
+      "prisonerIdentifier" to globalSearchCriteria.prisonerIdentifier,
       "includeAliases" to globalSearchCriteria.includeAliases.toString()
     )
     val metricsMap = mapOf(

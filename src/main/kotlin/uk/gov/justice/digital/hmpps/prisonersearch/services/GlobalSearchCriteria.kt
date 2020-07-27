@@ -6,8 +6,8 @@ import java.time.LocalDate
 
 @ApiModel("Search Criteria for Global Prisoner Search")
 data class GlobalSearchCriteria (
-  @ApiModelProperty(required = false, value = "Offender identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA", position = 1)
-  val offenderIdentifier : String?,
+  @ApiModelProperty(required = false, value = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA", position = 1)
+  val prisonerIdentifier : String?,
   @ApiModelProperty(required = false, value = "First Name", example = "John", position = 2)
   val firstName : String?,
   @ApiModelProperty(required = false, value = "Last Name", example = "Smith", position = 3)
@@ -22,7 +22,7 @@ data class GlobalSearchCriteria (
   val includeAliases : Boolean = false
 ) {
 
-  fun isValid() = !(firstName.isNullOrBlank() && lastName.isNullOrBlank() && offenderIdentifier.isNullOrBlank())
+  fun isValid() = !(firstName.isNullOrBlank() && lastName.isNullOrBlank() && prisonerIdentifier.isNullOrBlank())
 }
 
 //offenderNo, lastName, firstName, gender, location, dateOfBirth, includeAliases
