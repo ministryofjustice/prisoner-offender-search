@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 @ApiModel("Search Criteria for Global Prisoner Search")
 data class GlobalSearchCriteria (
-  @ApiModelProperty(required = false, value = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA", position = 1)
+  @ApiModelProperty(required = false, value = "Offender identifier, one of prisoner number, book number, booking ID or PNC", example = "A1234AA", position = 1)
   val offenderIdentifier : String?,
   @ApiModelProperty(required = false, value = "First Name", example = "John", position = 2)
   val firstName : String?,
