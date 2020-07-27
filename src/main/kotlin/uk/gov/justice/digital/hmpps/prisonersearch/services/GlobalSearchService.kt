@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
@@ -30,9 +31,10 @@ class GlobalSearchService(
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByGlobalSearchCriteria(globalSearchCriteria: GlobalSearchCriteria, pageable: Pageable): Page<Prisoner> {
     validateSearchForm(globalSearchCriteria)
-    if (globalSearchCriteria.offenderNo != null) {
+    if (globalSearchCriteria.offenderIdentifier != null) {
       queryBy(globalSearchCriteria,pageable) { idMatch(it) } onMatch {
         customEventForFindBySearchCriteria(globalSearchCriteria, it.matches.size)
         return PageImpl(it.matches, pageable, it.totalHits)
@@ -42,8 +44,7 @@ class GlobalSearchService(
       if (globalSearchCriteria.includeAliases) {
         queryBy(globalSearchCriteria,pageable) { nameMatchWithAliases(it) } onMatch {
           customEventForFindBySearchCriteria(globalSearchCriteria, it.matches.size)
-          val ret = PageImpl(it.matches, pageable, it.totalHits)
-          return ret
+          return PageImpl(it.matches, pageable, it.totalHits)
         }
       } else {
         queryBy(globalSearchCriteria,pageable) { nameMatch(it) } onMatch {
@@ -87,7 +88,7 @@ class GlobalSearchService(
     with(globalSearchCriteria) {
       return QueryBuilders.boolQuery()
         .mustMultiMatchKeyword(
-          offenderNo?.canonicalPNCNumber(),
+          offenderIdentifier?.canonicalPNCNumber(),
           "prisonerNumber",
           "bookingId",
           "pncNumber",
@@ -163,7 +164,7 @@ class GlobalSearchService(
       "gender" to globalSearchCriteria.gender?.value,
       "prisonId" to globalSearchCriteria.location,
       "dateOfBirth" to globalSearchCriteria.dateOfBirth.toString(),
-      "prisonerIdentifier" to globalSearchCriteria.offenderNo,
+      "offenderIdentifier" to globalSearchCriteria.offenderIdentifier,
       "includeAliases" to globalSearchCriteria.includeAliases.toString()
     )
     val metricsMap = mapOf(

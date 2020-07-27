@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.MediaType
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -29,7 +28,6 @@ class GlobalSearchResource(
     ApiImplicitParam(name = "page", dataType = "int", paramType = "query", value = "Results page you want to retrieve (0..N)", example = "0", defaultValue = "0"),
     ApiImplicitParam(name = "size", dataType = "int", paramType = "query", value = "Number of records per page.", example = "10", defaultValue = "10")
   )
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun globalFindByCriteria(
       @ApiParam(required = true, name = "globalSearchCriteria") @RequestBody globalSearchCriteria: GlobalSearchCriteria,
       @PageableDefault()pageable: Pageable
