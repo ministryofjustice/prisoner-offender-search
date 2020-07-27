@@ -72,6 +72,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AD") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AE") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AF") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BA") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BB") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BC") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
