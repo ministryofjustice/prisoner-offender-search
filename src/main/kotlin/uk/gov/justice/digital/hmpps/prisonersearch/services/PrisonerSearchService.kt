@@ -162,7 +162,7 @@ class PrisonerSearchService(
   fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
     if (!prisonerListCriteria.isValid()) {
       log.warn("Invalid search  - no prisoner numbers provided")
-      throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
+      throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 1000 prisoner numbers")
     }
 
     queryBy(prisonerListCriteria) { matchByIds(it) } onMatch {
