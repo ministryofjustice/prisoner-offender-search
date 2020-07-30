@@ -73,19 +73,21 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isBadRequest
-      .expectBody().jsonPath("developerMessage").isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
+      .expectBody().jsonPath("developerMessage")
+      .isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 1000 prisoner numbers")
   }
 
   @Test
-  fun `prisoner number search returns bad request when over 200 prison numbers provided`() {
+  fun `prisoner number search returns bad request when over 1000 prison numbers provided`() {
 
     webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(getTestPrisonerNumbers(201)))))
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerListCriteria(getTestPrisonerNumbers(1001)))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isBadRequest
-      .expectBody().jsonPath("developerMessage").isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
+      .expectBody().jsonPath("developerMessage")
+      .isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 1000 prisoner numbers")
   }
 
   @Test
