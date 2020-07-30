@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "Search Criteria for Prisoner Search")
 data class SearchCriteria(
   @Schema(
-    description = "Prisoner identifier, one of pryes but you don't need to isoner number, book number, booking ID or PNC",
+    description = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC",
     example = "A1234AA,"
   )
   val prisonerIdentifier: String?,
