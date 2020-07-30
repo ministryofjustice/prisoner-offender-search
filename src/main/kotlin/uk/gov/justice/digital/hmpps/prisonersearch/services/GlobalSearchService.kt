@@ -53,7 +53,7 @@ class GlobalSearchService(
         }
       }
     }
-    return return PageImpl(listOf(), pageable, 0L)
+    return PageImpl(listOf(), pageable, 0L)
   }
 
   private fun validateSearchForm(globalSearchCriteria: GlobalSearchCriteria) {

@@ -1,28 +1,28 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
-import io.swagger.annotations.ApiModelProperty
+import io.swagger.v3.oas.annotations.media.Schema
 import org.springframework.data.elasticsearch.annotations.DateFormat
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.LocalDate
 
-data class PrisonerAlias (
-  @ApiModelProperty(required = true, value = "First Name", example = "Robert", position = 1)
+data class PrisonerAlias(
+  @Schema(description = "First Name", example = "Robert")
   val firstName: String,
 
-  @ApiModelProperty(value = "Middle names", example = "Trevor", position = 2)
+  @Schema(description = "Middle names", example = "Trevor")
   val middleNames: String?,
 
-  @ApiModelProperty(required = true, value = "Last name", example = "Lorsen", position = 3)
+  @Schema(description = "Last name", example = "Lorsen")
   val lastName: String,
 
   @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
-  @ApiModelProperty(required = true, value = "Date of birth", example = "1975-04-02", position = 4)
+  @Schema(description = "Date of birth", example = "1975-04-02")
   val dateOfBirth: LocalDate,
 
-  @ApiModelProperty(value = "Gender", example = "Male", position = 5)
+  @Schema(description = "Gender", example = "Male")
   val gender: String?,
 
-  @ApiModelProperty(value = "Ethnicity", example = "White : Irish", position = 6)
+  @Schema(description = "Ethnicity", example = "White : Irish")
   val ethnicity: String?
 )

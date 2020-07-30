@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
-import io.swagger.annotations.ApiModelProperty
+import io.swagger.v3.oas.annotations.media.Schema
 
 data class PrisonerAlert (
-  @ApiModelProperty(required = true, value = "Alert Type", example = "H", position = 1)
+  @Schema(description = "Alert Type", example = "H")
   val alertType: String,
-  @ApiModelProperty(required = true, value = "Alert Code", example = "HA", position = 2)
+  @Schema(description = "Alert Code", example = "HA")
   val alertCode: String
 )

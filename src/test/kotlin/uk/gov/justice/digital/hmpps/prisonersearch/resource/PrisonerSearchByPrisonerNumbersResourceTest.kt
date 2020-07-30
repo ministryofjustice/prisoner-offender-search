@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
 
   companion object {
-    var initialiseSearchData = true
+    private var initialiseSearchData = true
   }
 
   data class IDs (val offenderNumber: String)
@@ -144,8 +144,8 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   }
 }
 
-
-private fun String.readResourceAsText(): String = PrisonerSearchByPrisonerNumbersResourceTest::class.java.getResource(this).readText()
+private fun String.readResourceAsText() =
+  PrisonerSearchByPrisonerNumbersResourceTest::class.java.getResource(this).readText()
 
 
 

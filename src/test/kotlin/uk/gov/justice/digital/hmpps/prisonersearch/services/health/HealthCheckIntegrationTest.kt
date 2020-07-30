@@ -173,6 +173,22 @@ class HealthCheckIntegrationTest : IntegrationTest() {
 
   }
 
+  @Test
+  fun `Health liveness page is accessible`() {
+    webTestClient.get().uri("/health/liveness")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().jsonPath("status").isEqualTo("UP")
+  }
+
+  @Test
+  fun `Health readiness page is accessible`() {
+    webTestClient.get().uri("/health/readiness")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().jsonPath("status").isEqualTo("UP")
+  }
+
   private fun subPing(status: Int) {
     oauthMockServer.stubFor(
       get("/auth/health/ping").willReturn(
