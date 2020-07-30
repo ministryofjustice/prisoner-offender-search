@@ -54,7 +54,7 @@ class PrisonerSearchService(
   }
 
   private fun validateSearchForm(searchCriteria: SearchCriteria) {
-    if (!searchCriteria.isValid) {
+    if (!searchCriteria.isValid()) {
       log.warn("Invalid search  - no criteria provided")
       throw BadRequestException("Invalid search  - please provide at least 1 search parameter")
     }
@@ -160,7 +160,7 @@ class PrisonerSearchService(
   }
 
   fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
-    if (!prisonerListCriteria.isValid) {
+    if (!prisonerListCriteria.isValid()) {
       log.warn("Invalid search  - no prisoner numbers provided")
       throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 200 prisoner numbers")
     }
