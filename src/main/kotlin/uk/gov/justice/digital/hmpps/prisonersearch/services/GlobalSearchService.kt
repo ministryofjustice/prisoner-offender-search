@@ -76,6 +76,7 @@ class GlobalSearchService(
         from(pageable.offset.toInt())
         sort("_score")
         sort("prisonerNumber")
+        trackTotalHits(true)
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
