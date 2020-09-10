@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
+@PreAuthorize("hasRole('GLOBAL_SEARCH')")
 @Service
 class PrisonerSearchService(
   private val searchClient: SearchClient,
@@ -32,7 +33,7 @@ class PrisonerSearchService(
     const val RESULT_HITS_MAX = 1000
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
+
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
     validateSearchForm(searchCriteria)
     if (searchCriteria.prisonerIdentifier != null) {
@@ -58,12 +59,7 @@ class PrisonerSearchService(
     return emptyList()
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByPrison(prisonId: PrisonId, pageable: Pageable): Page<Prisoner> {
-    if (!prisonId.isValid()) {
-      log.warn("Invalid search  - no prison location provided")
-      throw BadRequestException("Invalid search  - please provide a location")
-    }
     queryBy(prisonId,pageable) {locationMatch(it)} onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
@@ -202,7 +198,6 @@ class PrisonerSearchService(
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
     if (!prisonerListCriteria.isValid()) {
       log.warn("Invalid search  - no prisoner numbers provided")

@@ -38,7 +38,7 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     @PostMapping("/prison")
     @Operation(summary = "Match prisoners by prison", description = "Requires GLOBAL_SEARCH role")
     fun findByPrison(
-        @RequestBody prisonId: PrisonId,
+        @Valid @RequestBody prisonId: PrisonId,
         @PageableDefault pageable: Pageable
     ) = prisonerSearchService.findByPrison(prisonId, pageable)
 }
