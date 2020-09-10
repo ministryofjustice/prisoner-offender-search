@@ -2,12 +2,12 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-@Schema(description = "Search Criteria for all prisoner in a prison")
+@Schema(description = "Search Criteria for all prisoners at a prison")
 
 data class PrisonId(
-  @Schema(description = "List of offenders at location", example = "`LEI`")
-  val location: String?) {
+  @Schema(description = "Prison Id, Prison Id or OUT or TRN", example = "MDI")
+  val prisonId: String?) {
   @Schema(hidden = true)
-  fun isValid() = !(location.isNullOrBlank())
+  fun isValid() = !(prisonId.isNullOrBlank())
 }
 

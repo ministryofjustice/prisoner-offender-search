@@ -151,7 +151,7 @@ class PrisonerSearchService(
   }
 
   private fun locationMatch(prisonId: PrisonId): BoolQueryBuilder? =
-    QueryBuilders.boolQuery().must("prisonId", prisonId.location!!)
+    QueryBuilders.boolQuery().must("prisonId", prisonId.prisonId!!)
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
@@ -248,7 +248,7 @@ class PrisonerSearchService(
   private fun customEventForFindByPrisonId(prisonId: PrisonId, numberOfResults: Int
   ) {
     val propertiesMap = mapOf(
-      "prisonId" to prisonId.location
+      "prisonId" to prisonId.prisonId
     )
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
