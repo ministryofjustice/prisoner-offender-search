@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonId
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 
@@ -132,6 +133,26 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun globalSearchPagination(globalSearchCriteria: GlobalSearchCriteria, size: Long, page: Long, fileAssert: String) {
     webTestClient.post().uri("/global-search?size=$size&page=$page")
       .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun prisonSearch(prisonId: PrisonId, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/prison")
+      .body(BodyInserters.fromValue(gson.toJson(prisonId)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun prisonSearchPagination(prisonId: PrisonId, size: Long, page: Long, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/prison?size=$size&page=$page")
+      .body(BodyInserters.fromValue(gson.toJson(prisonId)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()

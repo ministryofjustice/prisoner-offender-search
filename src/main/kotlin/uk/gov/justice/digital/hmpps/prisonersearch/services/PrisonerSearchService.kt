@@ -10,6 +10,10 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
@@ -28,6 +32,7 @@ class PrisonerSearchService(
     const val RESULT_HITS_MAX = 1000
   }
 
+  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
     validateSearchForm(searchCriteria)
     if (searchCriteria.prisonerIdentifier != null) {
@@ -51,6 +56,19 @@ class PrisonerSearchService(
     }
     customEventForFindBySearchCriteria(searchCriteria, 0)
     return emptyList()
+  }
+
+  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
+  fun findByPrison(prisonId: PrisonId, pageable: Pageable): Page<Prisoner> {
+    if (!prisonId.isValid()) {
+      log.warn("Invalid search  - no prison location provided")
+      throw BadRequestException("Invalid search  - please provide a location")
+    }
+    queryBy(prisonId,pageable) {locationMatch(it)} onMatch {
+      customEventForFindByPrisonId(prisonId, it.matches.size)
+      return PageImpl(it.matches, pageable, it.totalHits)
+    }
+    return PageImpl(listOf(), pageable, 0L)
   }
 
   private fun validateSearchForm(searchCriteria: SearchCriteria) {
@@ -92,6 +110,28 @@ class PrisonerSearchService(
     } ?: Result.NoMatch
   }
 
+  private fun queryBy(
+    prisonId: PrisonId,
+    pageable: Pageable,
+    queryBuilder: (prisonId: PrisonId) -> BoolQueryBuilder?
+  ): GlobalResult {
+    val query = queryBuilder(prisonId)
+    return query?.let {
+      val searchSourceBuilder = SearchSourceBuilder().apply {
+        query(query)
+        size(pageable.pageSize)
+        from(pageable.offset.toInt())
+        sort("_score")
+        sort("prisonerNumber")
+        trackTotalHits(true)
+      }
+      val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
+      val searchResults = searchClient.search(searchRequest)
+      val prisonerMatches = getSearchResult(searchResults)
+      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches,searchResults.hits.totalHits?.value ?: 0)
+    } ?: GlobalResult.NoMatch
+  }
+
   private fun matchByIds(searchCriteria: PrisonerListCriteria): BoolQueryBuilder? {
     return shouldMatchOneOf("prisonerNumber", searchCriteria.prisonerNumbers)
   }
@@ -109,6 +149,9 @@ class PrisonerSearchService(
         )
     }
   }
+
+  private fun locationMatch(prisonId: PrisonId): BoolQueryBuilder? =
+    QueryBuilders.boolQuery().must("prisonId", prisonId.location!!)
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
@@ -159,6 +202,7 @@ class PrisonerSearchService(
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
+  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
     if (!prisonerListCriteria.isValid()) {
       log.warn("Invalid search  - no prisoner numbers provided")
@@ -199,6 +243,17 @@ class PrisonerSearchService(
       "numberOfResults" to numberOfResults.toDouble()
     )
     telemetryClient.trackEvent("POSFindByListOfPrisonerNumbers", logMap, metricsMap)
+  }
+
+  private fun customEventForFindByPrisonId(prisonId: PrisonId, numberOfResults: Int
+  ) {
+    val propertiesMap = mapOf(
+      "prisonId" to prisonId.location
+    )
+    val metricsMap = mapOf(
+      "numberOfResults" to numberOfResults.toDouble()
+    )
+    telemetryClient.trackEvent("POSFindByPrisonId", propertiesMap, metricsMap)
   }
 }
 
