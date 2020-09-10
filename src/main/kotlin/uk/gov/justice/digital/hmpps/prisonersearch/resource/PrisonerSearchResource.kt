@@ -6,11 +6,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonId
+import org.springframework.web.bind.annotation.*
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
@@ -35,10 +31,10 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     fun findByIds(@Parameter(required = true) @Valid @RequestBody prisonerNumberList: PrisonerListCriteria) =
         prisonerSearchService.findByListOfPrisonerNumbers(prisonerNumberList)
 
-    @PostMapping("/prison")
+    @GetMapping("/prison/{prisonId}")
     @Operation(summary = "Match prisoners by prison", description = "Requires GLOBAL_SEARCH role")
     fun findByPrison(
-        @RequestBody prisonId: PrisonId,
+        @Valid @PathVariable prisonId: String,
         @PageableDefault pageable: Pageable
     ) = prisonerSearchService.findByPrison(prisonId, pageable)
 }

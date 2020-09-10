@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
+@PreAuthorize("hasRole('GLOBAL_SEARCH')")
 @Service
 class PrisonerSearchService(
   private val searchClient: SearchClient,
@@ -32,7 +33,7 @@ class PrisonerSearchService(
     const val RESULT_HITS_MAX = 1000
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
+
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
     validateSearchForm(searchCriteria)
     if (searchCriteria.prisonerIdentifier != null) {
@@ -58,12 +59,7 @@ class PrisonerSearchService(
     return emptyList()
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
-  fun findByPrison(prisonId: PrisonId, pageable: Pageable): Page<Prisoner> {
-    if (!prisonId.isValid()) {
-      log.warn("Invalid search  - no prison location provided")
-      throw BadRequestException("Invalid search  - please provide a location")
-    }
+  fun findByPrison(prisonId: String, pageable: Pageable): Page<Prisoner> {
     queryBy(prisonId,pageable) {locationMatch(it)} onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
@@ -111,9 +107,9 @@ class PrisonerSearchService(
   }
 
   private fun queryBy(
-    prisonId: PrisonId,
+    prisonId: String,
     pageable: Pageable,
-    queryBuilder: (prisonId: PrisonId) -> BoolQueryBuilder?
+    queryBuilder: (prisonId: String) -> BoolQueryBuilder?
   ): GlobalResult {
     val query = queryBuilder(prisonId)
     return query?.let {
@@ -150,8 +146,8 @@ class PrisonerSearchService(
     }
   }
 
-  private fun locationMatch(prisonId: PrisonId): BoolQueryBuilder? =
-    QueryBuilders.boolQuery().must("prisonId", prisonId.prisonId!!)
+  private fun locationMatch(prisonId: String): BoolQueryBuilder? =
+    QueryBuilders.boolQuery().must("prisonId", prisonId)
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
@@ -202,7 +198,6 @@ class PrisonerSearchService(
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
     if (!prisonerListCriteria.isValid()) {
       log.warn("Invalid search  - no prisoner numbers provided")
@@ -245,10 +240,10 @@ class PrisonerSearchService(
     telemetryClient.trackEvent("POSFindByListOfPrisonerNumbers", logMap, metricsMap)
   }
 
-  private fun customEventForFindByPrisonId(prisonId: PrisonId, numberOfResults: Int
+  private fun customEventForFindByPrisonId(prisonId: String, numberOfResults: Int
   ) {
     val propertiesMap = mapOf(
-      "prisonId" to prisonId.prisonId
+      "prisonId" to prisonId
     )
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
