@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonId
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 class PrisonerSearchResourceTest : QueueIntegrationTest() {
@@ -64,7 +63,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `search by prisonId access forbidden when no authority`() {
 
-    webTestClient.post().uri("/prisoner-search/prison")
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isUnauthorized
@@ -73,8 +72,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `search by prisonId access forbidden when no role`() {
 
-    webTestClient.post().uri("/prisoner-search/prison")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonId( "MDI"))))
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
       .exchange()
@@ -82,14 +80,13 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `search by prisonId bad request when no criteria provided`() {
+  fun `search by prisonId not found when no criteria provided`() {
 
-    webTestClient.post().uri("/prisoner-search/prison")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonId( null))))
+    webTestClient.get().uri("/prisoner-search/prison/")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
-      .expectStatus().isBadRequest
+      .expectStatus().isNotFound
   }
 
 
@@ -235,17 +232,17 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on prisonId`() {
-    prisonSearch(PrisonId( "MDI"), "/results/search_results_mdi.json")
+    prisonSearch( "MDI", "/results/search_results_mdi.json")
   }
 
   @Test
   fun `can perform a match on prisonId returns 1 result from second page`() {
-    prisonSearchPagination(PrisonId("MDI"), 1, 1, "/results/search_results_mdi_pagination1.json")
+    prisonSearchPagination("MDI", 1, 1, "/results/search_results_mdi_pagination1.json")
   }
 
   @Test
   fun `can perform a match on prisonId returns 2 result from third page`() {
-    prisonSearchPagination(PrisonId( "MDI"),2,2, "/results/search_results_mdi_pagination2.json")
+    prisonSearchPagination( "MDI",2,2, "/results/search_results_mdi_pagination2.json")
   }
 }
 

@@ -59,7 +59,7 @@ class PrisonerSearchService(
     return emptyList()
   }
 
-  fun findByPrison(prisonId: PrisonId, pageable: Pageable): Page<Prisoner> {
+  fun findByPrison(prisonId: String, pageable: Pageable): Page<Prisoner> {
     queryBy(prisonId,pageable) {locationMatch(it)} onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
@@ -107,9 +107,9 @@ class PrisonerSearchService(
   }
 
   private fun queryBy(
-    prisonId: PrisonId,
+    prisonId: String,
     pageable: Pageable,
-    queryBuilder: (prisonId: PrisonId) -> BoolQueryBuilder?
+    queryBuilder: (prisonId: String) -> BoolQueryBuilder?
   ): GlobalResult {
     val query = queryBuilder(prisonId)
     return query?.let {
@@ -146,8 +146,8 @@ class PrisonerSearchService(
     }
   }
 
-  private fun locationMatch(prisonId: PrisonId): BoolQueryBuilder? =
-    QueryBuilders.boolQuery().must("prisonId", prisonId.prisonId!!)
+  private fun locationMatch(prisonId: String): BoolQueryBuilder? =
+    QueryBuilders.boolQuery().must("prisonId", prisonId)
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
@@ -240,10 +240,10 @@ class PrisonerSearchService(
     telemetryClient.trackEvent("POSFindByListOfPrisonerNumbers", logMap, metricsMap)
   }
 
-  private fun customEventForFindByPrisonId(prisonId: PrisonId, numberOfResults: Int
+  private fun customEventForFindByPrisonId(prisonId: String, numberOfResults: Int
   ) {
     val propertiesMap = mapOf(
-      "prisonId" to prisonId.prisonId
+      "prisonId" to prisonId
     )
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
