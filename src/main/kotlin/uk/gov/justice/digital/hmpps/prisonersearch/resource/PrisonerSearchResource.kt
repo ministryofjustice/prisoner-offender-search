@@ -36,5 +36,5 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     fun findByPrison(
         @Valid @PathVariable prisonId: String,
         @PageableDefault pageable: Pageable
-    ) = prisonerSearchService.findByPrison(prisonId, pageable)
+    ) = prisonerSearchService.findByPrison(prisonId.toUpperCase(), pageable)
 }

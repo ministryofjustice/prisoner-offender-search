@@ -236,6 +236,11 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match on lowercase prisonId`() {
+    prisonSearch( "mdi", "/results/search_results_mdi.json")
+  }
+
+  @Test
   fun `can perform a match on prisonId returns 1 result from second page`() {
     prisonSearchPagination("MDI", 1, 1, "/results/search_results_mdi_pagination1.json")
   }
