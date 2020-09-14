@@ -1,0 +1,47 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7090BE"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1908838,
+      "bookingNo": "V63588",
+      "offenderNo": "A7090BE",
+      "firstName": "BORIS",
+      "lastName": "WEST",
+      "agencyId": "LNI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "LNI",
+        "description": "H-1-004",
+        "agencyName": "Low Newton Prison"
+      },
+      "facialImageId": 1171887,
+      "dateOfBirth": "1985-03-15",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "inOutStatus": "IN",
+      "status": "ACTIVE IN",
+      "legalStatus": "REMAND",
+      "receptionDate": "2015-10-01",
+      "sentenceDetail": {
+        "bookingId": 1908838,
+        "automaticReleaseDate": "2020-02-03",
+        "conditionalReleaseDate": "2020-02-03",
+        "postRecallReleaseDate": "2020-02-03",
+        "licenceExpiryDate": "2020-02-03",
+        "paroleEligibilityDate": "2020-02-03",
+        "actualParoleDate": "2020-02-03"
+      }
+    }
+  }
+}

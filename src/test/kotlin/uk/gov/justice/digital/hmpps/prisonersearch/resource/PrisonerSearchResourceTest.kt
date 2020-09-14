@@ -232,12 +232,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on prisonId`() {
-    prisonSearch( "MDI", "/results/search_results_mdi.json")
+    prisonSearch( "LNI", "/results/search_results_lni.json")
   }
 
   @Test
   fun `can perform a match on lowercase prisonId`() {
-    prisonSearch( "mdi", "/results/search_results_mdi.json")
+    prisonSearch( "lni", "/results/search_results_lni.json")
   }
 
   @Test

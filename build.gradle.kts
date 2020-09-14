@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.2"
-  kotlin("plugin.spring") version "1.4.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.4"
+  kotlin("plugin.spring") version "1.4.10"
 }
 
 configurations {
@@ -35,11 +35,11 @@ dependencies {
   implementation("com.google.guava:guava:29.0-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.854"))
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.860"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.854")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.860")
 
-  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.1")
+  testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.testcontainers:localstack:1.14.3")
   testImplementation("org.testcontainers:elasticsearch:1.14.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")

@@ -43,6 +43,13 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.nonDtoReleaseDate = ob.sentenceDetail?.nonDtoReleaseDate
   prisoner.nonDtoReleaseDateType = ob.sentenceDetail?.nonDtoReleaseDateType
 
+  prisoner.receptionDate = ob.receptionDate
+  prisoner.paroleEligibilityDate = ob.sentenceDetail?.paroleEligibilityDate
+  prisoner.automaticReleaseDate = ob.sentenceDetail?.automaticReleaseDate
+  prisoner.postRecallReleaseDate = ob.sentenceDetail?.postRecallReleaseDate
+  prisoner.conditionalReleaseDate = ob.sentenceDetail?.conditionalReleaseDate
+  prisoner.actualParoleDate = ob.sentenceDetail?.actualParoleDate
+
   // get the most serious offence for this booking
   prisoner.mostSeriousOffence = ob.offenceHistory?.firstOrNull{ off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
   prisoner.recall = ob.recall
