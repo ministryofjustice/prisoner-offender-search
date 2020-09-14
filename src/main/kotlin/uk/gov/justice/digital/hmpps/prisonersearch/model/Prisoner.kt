@@ -149,6 +149,31 @@ open class Prisoner {
         allowableValues = ["ARD", "CRD", "NPD", "PRRD"]
     )
     var nonDtoReleaseDateType: String? = null
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    @Schema(description = "Date prisoner was received into the prison", example = "2023-05-01")
+    var receptionDate: LocalDate? = null
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    @Schema(description = "Parole  Eligibility Date", example = "2023-05-01")
+    var paroleEligibilityDate: LocalDate? = null
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    @Schema(description = "Automatic Release Date", example = "2023-05-01")
+    var automaticReleaseDate: LocalDate? = null
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    @Schema(description = "Post Recall Release Date", example = "2023-05-01")
+    var postRecallReleaseDate: LocalDate? = null
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    @Schema(description = "Conditional Release Date", example = "2023-05-01")
+    var conditionalReleaseDate: LocalDate? = null
+
+    @Field(type = FieldType.Date, format = DateFormat.date)
+    @Schema(description = "Actual Parole Date", example = "2023-05-01")
+    var actualParoleDate: LocalDate? = null
+
 }
 
 @Document(indexName = "prisoner-search-a")
