@@ -10,12 +10,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
-import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
-import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
-import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
-import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
+import uk.gov.justice.digital.hmpps.prisonersearch.model.*
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
@@ -135,6 +130,9 @@ class PrisonerIndexService(private val nomisService: NomisService,
     }
 
     fun indexingComplete() : IndexStatus {
+        if(indexQueueService.getNumberOfMessagesCurrentlyOnIndexDLQ() > 0){
+
+        }
         indexStatusService.markRebuildComplete()
         indexQueueService.clearAllMessages()
         val currentIndex = indexStatusService.getCurrentIndex()
