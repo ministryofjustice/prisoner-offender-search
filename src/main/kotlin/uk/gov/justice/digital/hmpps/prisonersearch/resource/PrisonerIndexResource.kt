@@ -2,6 +2,8 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.QueueAdminService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.NotFoundException
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
@@ -18,7 +21,9 @@ import javax.validation.constraints.Pattern
 @RestController
 @Validated
 @RequestMapping("/prisoner-index", produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerIndexResource(val prisonerIndexService: PrisonerIndexService) {
+class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexService,
+                            private val queueAdminService: QueueAdminService
+) {
 
   @PutMapping("/build-index")
   @Operation(
@@ -59,4 +64,26 @@ class PrisonerIndexResource(val prisonerIndexService: PrisonerIndexService) {
     val indexedPrisoner = prisonerIndexService.indexPrisoner(prisonerNumber)
     return indexedPrisoner.takeIf { it != null } ?: throw NotFoundException("$prisonerNumber not found")
   }
+
+  @PutMapping("/purge-index-dlq")
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  @Operation(
+    summary = "Purges the index dead letter queue",
+    description = "Requires PRISONER_INDEX role")
+  @ApiResponses(value = [
+    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+  ])
+  fun purgeIndexDlq(): Unit = queueAdminService.clearAllDlqMessagesForIndex()
+
+  @PutMapping("/transfer-index-dlq")
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  @Operation(
+    summary = "Transfers all DLQ messages to the main queue",
+    description = "Requires PRISONER_INDEX role")
+  @ApiResponses(value = [
+    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+  ])
+  fun transferIndexDlq(): Unit = queueAdminService.transferIndexMessages()
 }
