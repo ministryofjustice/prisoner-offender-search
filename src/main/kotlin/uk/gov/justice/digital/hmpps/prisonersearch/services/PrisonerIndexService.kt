@@ -130,9 +130,6 @@ class PrisonerIndexService(private val nomisService: NomisService,
     }
 
     fun indexingComplete() : IndexStatus {
-        if(indexQueueService.getNumberOfMessagesCurrentlyOnIndexDLQ() > 0){
-
-        }
         indexStatusService.markRebuildComplete()
         indexQueueService.clearAllMessages()
         val currentIndex = indexStatusService.getCurrentIndex()
