@@ -85,7 +85,7 @@ internal class QueueAdminServiceTest {
     internal fun `will read single message from index dlq`() {
       stubDlqMessageCount(1)
       whenever(indexAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("A1234AA"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234AA"))))
 
       queueAdminService.transferIndexMessages()
 
@@ -98,9 +98,9 @@ internal class QueueAdminServiceTest {
     internal fun `will read multiple messages from dlq`() {
       stubDlqMessageCount(3)
       whenever(indexAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("A1234AA"))))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("B1234BB"))))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("C1234CC"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234AA"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234BB"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234CC"))))
 
       queueAdminService.transferIndexMessages()
 
@@ -113,33 +113,33 @@ internal class QueueAdminServiceTest {
     internal fun `will send single message to the index queue`() {
       stubDlqMessageCount(1)
       whenever(indexAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("A1234AA"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234AA"))))
 
       queueAdminService.transferIndexMessages()
 
-      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("A1234AA"))
+      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("Z1234AA"))
     }
 
     @Test
     internal fun `will send multiple messages to the index queue`() {
       stubDlqMessageCount(3)
       whenever(indexAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("A1234AA"))))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("B1234BB"))))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("C1234CC"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234AA"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234BB"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234CC"))))
 
       queueAdminService.transferIndexMessages()
 
-      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("A1234AA"))
-      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("B1234BB"))
-      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("C1234CC"))
+      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("Z1234AA"))
+      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("Z1234BB"))
+      verify(indexAwsSqsClient).sendMessage(indexQueueUrl, populateOffenderMessage("Z1234CC"))
     }
 
     @Test
     internal fun `will send a telemetry event`() {
       stubDlqMessageCount(1)
       whenever(indexAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("A1234AA"))))
+          .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234AA"))))
 
       queueAdminService.transferIndexMessages()
 
