@@ -76,6 +76,17 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
   ])
   fun purgeIndexDlq(): Unit = queueAdminService.clearAllDlqMessagesForIndex()
 
+  @PutMapping("/purge-event-dlq")
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  @Operation(
+    summary = "Purges the event dead letter queue",
+    description = "Requires PRISONER_INDEX role")
+  @ApiResponses(value = [
+    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+  ])
+  fun purgeEventDlq(): Unit = queueAdminService.clearAllDlqMessagesForEvent()
+
   @PutMapping("/transfer-index-dlq")
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
@@ -86,4 +97,15 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
     ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
   ])
   fun transferIndexDlq(): Unit = queueAdminService.transferIndexMessages()
+
+  @PutMapping("/transfer-event-dlq")
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  @Operation(
+    summary = "Transfers all DLQ messages to the main queue",
+    description = "Requires PRISONER_INDEX role")
+  @ApiResponses(value = [
+    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+  ])
+  fun transferEventDlq(): Unit = queueAdminService.transferEventMessages()
 }

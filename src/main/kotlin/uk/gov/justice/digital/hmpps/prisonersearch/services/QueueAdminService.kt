@@ -16,10 +16,14 @@ import org.springframework.stereotype.Service
 class QueueAdminService(
   @Qualifier("awsSqsIndexClient") private val indexAwsSqsClient: AmazonSQS,
   @Qualifier("awsSqsIndexDlqClient") private val indexAwsSqsDlqClient: AmazonSQS,
+  @Qualifier("awsSqsClient") private val eventAwsSqsClient: AmazonSQS,
+  @Qualifier("awsSqsDlqClient") private val eventAwsSqsDlqClient: AmazonSQS,
   private val indexQueueService: IndexQueueService,
   private val telemetryClient: TelemetryClient,
   @Value("\${sqs.index.queue.name}") private val indexQueueName: String,
   @Value("\${sqs.index.dlq.name}") private val indexDlqName: String,
+  @Value("\${sqs.queue.name}") private val eventQueueName: String,
+  @Value("\${sqs.dlq.name}") private val eventDlqName: String,
   private val gson: Gson
 ) {
 
@@ -29,6 +33,8 @@ class QueueAdminService(
 
   val indexQueueUrl: String by lazy { indexAwsSqsClient.getQueueUrl(indexQueueName).queueUrl }
   val indexDlqUrl: String by lazy { indexAwsSqsDlqClient.getQueueUrl(indexDlqName).queueUrl }
+  val eventQueueUrl: String by lazy { eventAwsSqsClient.getQueueUrl(eventQueueName).queueUrl }
+  val eventDlqUrl: String by lazy { eventAwsSqsDlqClient.getQueueUrl(eventDlqName).queueUrl }
 
   fun clearAllIndexQueueMessages() {
     val count = indexQueueService.getNumberOfMessagesCurrentlyOnIndexQueue()
@@ -43,6 +49,25 @@ class QueueAdminService(
     log.info("Clear all messages on index dead letter queue")
     telemetryClient.trackEvent("PURGED_INDEX_DLQ", mapOf("messages-on-queue" to count.toString()), null)
   }
+
+  fun clearAllDlqMessagesForEvent() {
+    eventAwsSqsDlqClient.purgeQueue(PurgeQueueRequest(eventDlqUrl))
+    log.info("Clear all messages on event dead letter queue")
+  }
+
+  fun transferEventMessages() =
+    repeat(getEventDlqMessageCount()) {
+      eventAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(eventDlqUrl).withMaxNumberOfMessages(1)).messages
+        .forEach { msg ->
+          eventAwsSqsClient.sendMessage(eventQueueUrl, msg.body)
+          eventAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(eventDlqUrl, msg.receiptHandle))
+        }
+    }
+
+  private fun getEventDlqMessageCount() =
+    eventAwsSqsDlqClient.getQueueAttributes(eventDlqUrl, listOf("ApproximateNumberOfMessages"))
+      .attributes["ApproximateNumberOfMessages"]
+      ?.toInt() ?: 0
 
   fun transferIndexMessages() =
       indexQueueService.getNumberOfMessagesCurrentlyOnIndexDLQ()

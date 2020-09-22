@@ -1,14 +1,20 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.health
 
 import com.amazonaws.services.sqs.AmazonSQS
-import com.amazonaws.services.sqs.model.*
+import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
+import com.amazonaws.services.sqs.model.GetQueueAttributesResult
+import com.amazonaws.services.sqs.model.GetQueueUrlResult
+import com.amazonaws.services.sqs.model.QueueAttributeName
+import com.amazonaws.services.sqs.model.QueueDoesNotExistException
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.springframework.boot.actuate.health.Status
-import uk.gov.justice.digital.hmpps.prisonersearch.services.health.QueueAttributes.*
+import uk.gov.justice.digital.hmpps.prisonersearch.services.health.QueueAttributes.MESSAGES_IN_FLIGHT
+import uk.gov.justice.digital.hmpps.prisonersearch.services.health.QueueAttributes.MESSAGES_ON_DLQ
+import uk.gov.justice.digital.hmpps.prisonersearch.services.health.QueueAttributes.MESSAGES_ON_QUEUE
 
 class QueueHealthTest {
 

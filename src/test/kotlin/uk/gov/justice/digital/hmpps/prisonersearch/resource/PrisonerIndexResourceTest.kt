@@ -208,6 +208,38 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   }
 
+  @Test
+  fun `can transfer items from dlq to normal queue`(){
+    webTestClient.put().uri("/prisoner-index/transfer-index-dlq")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can purge items from dlq`(){
+    webTestClient.put().uri("/prisoner-index/purge-index-dlq")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can transfer items from event dlq to normal queue`(){
+    webTestClient.put().uri("/prisoner-index/transfer-event-dlq")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can purge items from event dlq `(){
+    webTestClient.put().uri("/prisoner-index/purge-event-dlq")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+  }
+
 }
 
 private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()
