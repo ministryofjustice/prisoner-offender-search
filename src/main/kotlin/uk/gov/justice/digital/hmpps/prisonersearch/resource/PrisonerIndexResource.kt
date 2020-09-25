@@ -49,6 +49,14 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun indexComplete() = prisonerIndexService.indexingComplete()
 
+  @PutMapping("/switch-index")
+  @Operation(
+    summary = "Switch index without rebuilding",
+    description = "current index will be switched both indexed have to be complete, requires PRISONER_INDEX role"
+  )
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  fun switchIndex() = prisonerIndexService.switchIndex()
+
   @PutMapping("/index/prisoner/{prisonerNumber}")
   @Operation(
     summary = "Index/Refresh Data for Prisoner with specified prisoner Number",

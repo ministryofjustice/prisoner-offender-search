@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
@@ -123,6 +125,18 @@ class PrisonerIndexService(private val nomisService: NomisService,
         indexStatusService.cancelIndexing()
         return indexStatusService.getCurrentIndex()
     }
+
+    fun switchIndex(): IndexStatus {
+        val switched = indexStatusService.switchIndex()
+        if( !switched){
+            log.info("Index not switched as one is marked in progress")
+            throw ResponseStatusException(CONFLICT, "unable to switch indexes one is marked as in progress")
+        }
+        val currentIndex = indexStatusService.getCurrentIndex()
+        log.info("Index switched, index {} is now current.", currentIndex.currentIndex)
+        return currentIndex
+    }
+
 
     fun addOffendersToBeIndexed(pageRequest : PageRequest) {
         var count = 0
