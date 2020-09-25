@@ -59,6 +59,16 @@ class IndexStatusService(private val indexStatusRepository : IndexStatusReposito
     return false;
   }
 
+  fun switchIndex(): Boolean {
+    val currentIndexStatus = getCurrentIndex()
+    if (currentIndexStatus.inProgress) {
+      return false
+    }
+    currentIndexStatus.toggleIndex()
+    indexStatusRepository.save(currentIndexStatus)
+    return true
+  }
+
   fun markRebuildComplete() : Boolean {
     val currentIndexStatus = getCurrentIndex()
     if (currentIndexStatus.inProgress) {

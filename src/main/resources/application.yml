@@ -42,6 +42,8 @@ server:
       remote-ip-header: x-forwarded-for
       protocol-header: x-forwarded-proto
   shutdown: graceful
+  error:
+    include-message: always
 
 management:
   endpoints:

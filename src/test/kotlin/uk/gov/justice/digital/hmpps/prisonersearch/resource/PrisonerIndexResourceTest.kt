@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
@@ -206,6 +207,41 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("20")
       .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
 
+  }
+
+  @Test
+  fun `can switch indexes`(){
+    webTestClient.put().uri("/prisoner-index/switch-index")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody()
+      .jsonPath("$.currentIndex").value<String> { currentIndex ->
+        assertThat(currentIndex).isEqualTo(SyncIndex.INDEX_B.name)
+  }}
+
+  @Test
+  fun `conflict returned if one index is rebuilding when trying to switch indexes`() {
+    //index B
+    indexPrisoners()
+
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    resetStubs()
+    // Start indexing A
+    indexPrisoners()
+
+    webTestClient.put().uri("/prisoner-index/switch-index")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isEqualTo(409)
+      .expectBody()
+      .jsonPath("$.message").value<String> { message ->
+        assertThat(message).isEqualTo("unable to switch indexes one is marked as in progress")
+      }
   }
 
   @Test
