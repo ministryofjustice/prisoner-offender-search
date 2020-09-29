@@ -14,14 +14,14 @@
       "offenderNo": "A7090BF",
       "firstName": "FRANK",
       "lastName": "FELLOWS",
-      "agencyId": "LNI",
+      "agencyId": "OUT",
       "assignedLivingUnitId": 731727,
-      "activeFlag": true,
+      "activeFlag": false,
       "assignedLivingUnit": {
         "agencyId": "LNI",
-        "locationId": 721746,
-        "description": "A-1-003",
-        "agencyName": "Low Newton Prison"
+        "locationId": null,
+        "description": null,
+        "agencyName": "Outside"
       },
       "facialImageId": 1171172,
       "dateOfBirth": "1999-06-01",
@@ -31,24 +31,7 @@
         "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
         "sexCode": "M"
       },
-      "profileInformation": [
-        {
-          "type": "YOUTH",
-          "question": "Youth Offender?",
-          "resultValue": "NO"
-        },
-        {
-          "type": "RELF",
-          "question": "Religion",
-          "resultValue": "Christian"
-        },
-        {
-          "type": "NAT",
-          "question": "Nationality?",
-          "resultValue": "British"
-        }
-      ],
-      "inOutStatus": "IN",
+      "inOutStatus": "OUT",
       "identifiers": [
         {
           "type": "CRO",
@@ -67,9 +50,9 @@
           "caseloadType": "INST"
         }
       ],
-      "status": "ACTIVE IN",
-      "legalStatus": "SENTENCED",
-      "recall": true,
+      "status": "INACTIVE OUT",
+      "legalStatus": null,
+      "recall": false,
       "offenceHistory": [
         {
           "bookingId": 1909838,
@@ -137,7 +120,8 @@
         "licenceExpiryDate": "2020-02-03",
         "paroleEligibilityDate": "2020-02-03",
         "actualParoleDate": "2020-02-03"
-      }
+      },
+      "lastPrison": "Leeds"
     }
   }
 }

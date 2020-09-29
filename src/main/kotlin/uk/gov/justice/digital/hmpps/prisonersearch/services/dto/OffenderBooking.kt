@@ -38,5 +38,6 @@ data class OffenderBooking (
   val recall: Boolean? = null,
   val imprisonmentStatus: String? = null,
   val personalCareNeeds : List<PersonalCareNeed>? = null,
-  val receptionDate: LocalDate? = null
+  val receptionDate: LocalDate? = null,
+  val lastPrison: String? = null
 )

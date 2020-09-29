@@ -249,6 +249,11 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on prisonId returns 2 result from third page`() {
     prisonSearchPagination( "MDI",2,2, "/results/search_results_mdi_pagination2.json")
   }
+
+  @Test
+  fun `can perform a match on prisonId OUT`() {
+    prisonSearch( "OUT", "/results/search_results_out.json")
+  }
 }
 
 

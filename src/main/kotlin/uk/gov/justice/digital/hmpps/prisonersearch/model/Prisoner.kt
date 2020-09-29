@@ -174,6 +174,8 @@ open class Prisoner {
     @Schema(description = "Actual Parole Date", example = "2023-05-01")
     var actualParoleDate: LocalDate? = null
 
+     @Schema(description = "If prisoner is `OUT` last Prison Name", example = "Leeds")
+     var lastPrison: String? = null
 }
 
 @Document(indexName = "prisoner-search-a")
