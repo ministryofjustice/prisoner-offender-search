@@ -44,7 +44,7 @@
       "postRecallReleaseDate": "2020-02-03",
       "conditionalReleaseDate": "2020-02-03",
       "actualParoleDate": "2020-02-03",
-      "lastPrison": "Leeds"
+      "locationDescription": "Outside - released from Leeds"
     }
   ],
   "pageable": {

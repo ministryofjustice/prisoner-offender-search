@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.5"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "1.0.6"
   kotlin("plugin.spring") version "1.4.10"
 }
 
@@ -22,9 +22,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.4.7")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.4.7")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.4.7")
+  implementation("org.springdoc:springdoc-openapi-ui:1.4.8")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.4.8")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.4.8")
   implementation("com.nimbusds:nimbus-jose-jwt:8.20")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
@@ -34,9 +34,9 @@ dependencies {
   implementation("com.google.guava:guava:29.0-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.866"))
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.872"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.866")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.872")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.testcontainers:localstack:1.14.3")
