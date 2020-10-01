@@ -1,0 +1,75 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7090AE",
+      "pncNumber": "12/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1903835",
+      "bookNumber": "V63586",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "dateOfBirth": "1980-02-28",
+      "gender": "Not Specified (Indeterminate)",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "prisonId": "OUT",
+      "prisonName": "out",
+      "cellLocation": "H-1-004",
+      "legalStatus": "REMAND"
+    },
+    {
+      "prisonerNumber": "A7090BF",
+      "pncNumber": "12/394773W",
+      "croNumber": "29906/12L",
+      "bookingId": "1909838",
+      "bookNumber": "V61587",
+      "firstName": "FRANK",
+      "lastName": "FELLOWS",
+      "dateOfBirth": "1999-06-01",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "status": "INACTIVE OUT",
+      "prisonId": "OUT",
+      "prisonName": "Outside",
+      "mostSeriousOffence": "Section 18 - wounding with intent",
+      "recall": false,
+      "indeterminateSentence": false,
+      "licenceExpiryDate": "2020-02-03",
+      "receptionDate": "2015-10-01",
+      "paroleEligibilityDate": "2020-02-03",
+      "automaticReleaseDate": "2020-02-03",
+      "postRecallReleaseDate": "2020-02-03",
+      "conditionalReleaseDate": "2020-02-03",
+      "actualParoleDate": "2020-02-03",
+      "locationDescription": "Outside - released from Leeds"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": false,
+      "unsorted": true,
+      "empty": true
+    },
+    "pageSize": 10,
+    "pageNumber": 0,
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalPages": 1,
+  "totalElements": 2,
+  "last": true,
+  "number": 0,
+  "size": 10,
+  "numberOfElements": 2,
+  "sort": {
+    "sorted": false,
+    "unsorted": true,
+    "empty": true
+  },
+  "first": true,
+  "empty": false
+}
