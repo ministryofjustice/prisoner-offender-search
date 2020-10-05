@@ -26,10 +26,17 @@ When we are ready to rebuild the index the "other" non-active index is transitio
     PUT /prisoner-index/build-index
 ```
  
-The entire NOMIS offender base is retrieved and over several hours the other index is fully populated. Once the operator realises the other index is fully rebuilt the active index is switched with 
-```
-    PUT /prisoner-index/mark-complete
-```
+The entire NOMIS offender base is retrieved and over several hours the other index is fully populated. 
+
+Once the index has finished, if there are no errors then the (housekeeping cronjob)[#housekeeping-cronjob] will mark the index as complete and switch to the new index.
+
+If the index build fails - there are messages left on the index dead letter queue - then the new index will remain inactive until the DLQ is empty. It may take user intervention to clear the DLQ if some messages are genuinely unprocessable (rather than just failed due to e.g. network issues).  
+
+### Housekeeping Cronjob
+There is a Kubernetes CronJob which runs on a schedule to perform the following tasks:
+* Checks if an index build has completed and if so then marks the build as complete (which switches the search to the new index)
+
+The CronJob calls the endpoint `/prisoner-index/index-queue-housekeeping` which is not secured by Spring Security. To prevent external calls to the endpoint it has been secured in the ingress instead. 
 
 #### Index switch
 
