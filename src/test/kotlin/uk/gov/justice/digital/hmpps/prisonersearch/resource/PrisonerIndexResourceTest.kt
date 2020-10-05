@@ -1,10 +1,14 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
@@ -12,6 +16,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   fun init() {
     resetStubs()
     setupIndexes()
+    Mockito.reset(indexQueueService)
   }
 
   @Test
@@ -276,6 +281,52 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectStatus().isOk
   }
 
+  @Nested
+  inner class Housekeeping {
+
+    @Test
+    fun `does not secure housekeeping endpoint`() {
+      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `will automatically complete build if ok`() {
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+    }
+
+    @Test
+    fun `will not complete if index build is still active`() {
+      indexPrisoners()
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(1, 0, 0))
+
+      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+    }
+  }
 }
 
 private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()
