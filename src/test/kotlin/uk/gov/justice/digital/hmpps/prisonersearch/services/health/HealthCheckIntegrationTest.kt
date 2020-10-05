@@ -53,6 +53,21 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   }
 
   @Test
+  fun `Health page reports ok`() {
+    subPing(200)
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("status").isEqualTo("UP")
+  }
+
+  @Test
   fun `Health ping page is accessible`() {
     subPing(200)
 
