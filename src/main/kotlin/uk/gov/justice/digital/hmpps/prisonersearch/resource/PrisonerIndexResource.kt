@@ -116,4 +116,12 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
     ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
   ])
   fun transferEventDlq(): Unit = queueAdminService.transferEventMessages()
+
+  @PutMapping("/index-queue-housekeeping")
+  @Operation(
+    summary = "Performs automated housekeeping tasks such as marking builds completed",
+    description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`")
+  fun indexQueueHousekeeping() {
+    prisonerIndexService.indexingComplete()
+  }
 }

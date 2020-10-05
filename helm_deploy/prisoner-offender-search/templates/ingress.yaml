@@ -14,6 +14,13 @@ metadata:
     kubernetes.io/ingress.class: {{ .Release.Namespace }}
     {{ if .Values.ingress.enable_whitelist }}nginx.ingress.kubernetes.io/whitelist-source-range: {{ include "app.joinListWithComma" .Values.whitelist | quote }}{{ end }}
     nginx.ingress.kubernetes.io/custom-http-errors: "418"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      server_tokens off;
+      location /prisoner-index/index-queue-housekeeping {
+        deny all;
+        return 401;
+      }
+
 spec:
   tls:
   {{- range .Values.ingress.hosts }}

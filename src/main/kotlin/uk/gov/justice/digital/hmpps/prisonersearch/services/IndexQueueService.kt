@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
-
 @Service
 class IndexQueueService(
   @Autowired @Qualifier("awsSqsIndexASyncClient") private val awsSqsIndexASyncClient: AmazonSQSAsync,
@@ -41,6 +40,18 @@ class IndexQueueService(
     val queueAttributes = indexAwsSqsDlqClient.getQueueAttributes(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0
   }
+
+  fun getNumberOfMessagesCurrentlyInFlight(): Int {
+    val queueAttributes = indexAwsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessagesNotVisible"))
+    return queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0
+  }
+
+  fun getIndexQueueStatus(): IndexQueueStatus =
+    IndexQueueStatus(
+      messagesOnQueue = getNumberOfMessagesCurrentlyOnIndexQueue(),
+      messagesInFlight = getNumberOfMessagesCurrentlyInFlight(),
+      messagesOnDlq = getNumberOfMessagesCurrentlyOnIndexDLQ()
+    )
 }
 
 data class PrisonerIndexRequest (
@@ -48,3 +59,8 @@ data class PrisonerIndexRequest (
   val prisonerNumber: String? = null,
   val pageRequest: PageRequest? = null
 )
+
+data class IndexQueueStatus(val messagesOnQueue: Int, val messagesOnDlq: Int, val messagesInFlight: Int) {
+  val active
+    get() = messagesOnQueue > 0 || messagesOnDlq > 0 || messagesInFlight > 0
+}

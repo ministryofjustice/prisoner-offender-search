@@ -10,6 +10,7 @@ import org.elasticsearch.client.Request
 import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.ActiveProfiles
@@ -20,6 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 
@@ -40,6 +42,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @Autowired
   lateinit var elasticsearchOperations: ElasticsearchOperations
+
+  @SpyBean
+  lateinit var indexQueueService: IndexQueueService
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes = awsSqsClient.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
