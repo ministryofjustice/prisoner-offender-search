@@ -32,12 +32,6 @@ Once the index has finished, if there are no errors then the (housekeeping cronj
 
 If the index build fails - there are messages left on the index dead letter queue - then the new index will remain inactive until the DLQ is empty. It may take user intervention to clear the DLQ if some messages are genuinely unprocessable (rather than just failed due to e.g. network issues).  
 
-### Housekeeping Cronjob
-There is a Kubernetes CronJob which runs on a schedule to perform the following tasks:
-* Checks if an index build has completed and if so then marks the build as complete (which switches the search to the new index)
-
-The CronJob calls the endpoint `/prisoner-index/index-queue-housekeeping` which is not secured by Spring Security. To prevent external calls to the endpoint it has been secured in the ingress instead. 
-
 #### Index switch
 
 Given the state of the each index is itself held in ES under the `in-progress` index with a single "document" when the INDEX_A/INDEX_B indexes switch there are actually two changes:
@@ -48,6 +42,12 @@ Indexes can be switched without rebuilding, if they are both marked as "inProgre
 ```
     PUT /prisoner/index/switch-index
 ```
+
+### Housekeeping Cronjob
+There is a Kubernetes CronJob which runs on a schedule to perform the following tasks:
+* Checks if an index build has completed and if so then marks the build as complete (which switches the search to the new index)
+
+The CronJob calls the endpoint `/prisoner-index/index-queue-housekeeping` which is not secured by Spring Security. To prevent external calls to the endpoint it has been secured in the ingress instead. 
 
 ### Running
 
