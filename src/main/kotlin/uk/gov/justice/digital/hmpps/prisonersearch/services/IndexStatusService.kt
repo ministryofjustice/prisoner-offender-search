@@ -11,7 +11,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Service
-class IndexStatusService(private val indexStatusRepository : IndexStatusRepository, private val telemetryClient: TelemetryClient) {
+class IndexStatusService(
+  private val indexStatusRepository : IndexStatusRepository,
+  private val telemetryClient: TelemetryClient,
+  private val indexQueueService: IndexQueueService) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -71,7 +74,8 @@ class IndexStatusService(private val indexStatusRepository : IndexStatusReposito
 
   fun markRebuildComplete() : Boolean {
     val currentIndexStatus = getCurrentIndex()
-    if (currentIndexStatus.inProgress) {
+    val indexQueueStatus = indexQueueService.getIndexQueueStatus()
+    if (currentIndexStatus.inProgress && indexQueueStatus.active.not()) {
       currentIndexStatus.inProgress = false
       currentIndexStatus.endIndexTime = LocalDateTime.now()
       currentIndexStatus.toggleIndex()
