@@ -17,9 +17,9 @@ metadata:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       server_tokens off;
       location /prisoner-index/index-queue-housekeeping {
-      deny all;
-      return 401;
-    }
+        deny all;
+        return 401;
+      }
 
 spec:
   tls:
