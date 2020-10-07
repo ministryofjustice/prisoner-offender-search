@@ -59,7 +59,7 @@ class IndexStatusService(
       return true
     }
 
-    return false;
+    return false
   }
 
   fun switchIndex(): Boolean {
@@ -80,12 +80,12 @@ class IndexStatusService(
       currentIndexStatus.endIndexTime = LocalDateTime.now()
       currentIndexStatus.toggleIndex()
       indexStatusRepository.save(currentIndexStatus)
+      log.info("Index marked as complete, index {} is now current.", currentIndexStatus.currentIndex)
       return true
     }
 
-    log.warn("Index not swapped as not in progress")
-    return false;
+    return false
   }
 }
 
-fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null);
+fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null)

@@ -149,11 +149,10 @@ class PrisonerIndexService(private val nomisService: NomisService,
     }
 
     fun indexingComplete() : IndexStatus {
-        indexStatusService.markRebuildComplete()
-        indexQueueService.clearAllMessages()
-        val currentIndex = indexStatusService.getCurrentIndex()
-        log.info("Index marked as complete, index {} is now current.", currentIndex.currentIndex)
-        return currentIndex
+        if (indexStatusService.markRebuildComplete()) {
+            indexQueueService.clearAllMessages()
+        }
+        return indexStatusService.getCurrentIndex()
     }
 
     fun addIndexRequestToQueue(): Long {
