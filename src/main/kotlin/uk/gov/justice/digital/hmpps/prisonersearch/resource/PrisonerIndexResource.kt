@@ -124,5 +124,6 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
   fun indexQueueHousekeeping() {
     prisonerIndexService.indexingComplete()
     queueAdminService.transferIndexMessages()
+    queueAdminService.transferEventMessages()
   }
 }
