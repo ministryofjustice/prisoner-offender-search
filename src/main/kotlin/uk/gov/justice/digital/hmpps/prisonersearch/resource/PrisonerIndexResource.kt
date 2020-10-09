@@ -117,7 +117,7 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
   ])
   fun transferEventDlq(): Unit = queueAdminService.transferEventMessages()
 
-  @PutMapping("/index-queue-housekeeping")
+  @PutMapping("/queue-housekeeping")
   @Operation(
     summary = "Performs automated housekeeping tasks such as marking builds completed",
     description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`")

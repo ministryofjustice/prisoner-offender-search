@@ -16,7 +16,7 @@ metadata:
     nginx.ingress.kubernetes.io/custom-http-errors: "418"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       server_tokens off;
-      location /prisoner-index/index-queue-housekeeping {
+      location /prisoner-index/queue-housekeeping {
         deny all;
         return 401;
       }

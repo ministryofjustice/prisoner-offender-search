@@ -296,7 +296,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
     @Test
     fun `does not secure housekeeping endpoint`() {
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
     }
@@ -305,7 +305,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     fun `will automatically complete build if ok`() {
       indexPrisoners()
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -324,7 +324,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       indexPrisoners()
       whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(1, 0, 0))
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -347,7 +347,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
       awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -370,14 +370,14 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
       awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
       await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
       await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -405,7 +405,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
       awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1234AA"))
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -434,7 +434,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       // this offender is not stubbed in prison API - hence the message is "bad"
       awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1235AB"))
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
