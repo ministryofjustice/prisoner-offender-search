@@ -123,5 +123,6 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
     description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`")
   fun indexQueueHousekeeping() {
     prisonerIndexService.indexingComplete()
+    queueAdminService.transferIndexMessages()
   }
 }

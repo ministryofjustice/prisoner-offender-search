@@ -2,6 +2,9 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -9,6 +12,7 @@ import org.mockito.Mockito
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.services.populateOffenderMessage
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
@@ -282,7 +286,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Nested
-  inner class Housekeeping {
+  inner class HousekeepingBuildComplete {
 
     @Test
     fun `does not secure housekeeping endpoint`() {
@@ -327,6 +331,62 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
     }
   }
+
+  @Nested
+  inner class HousekeepingIndexDlq {
+
+    @Test
+    fun `will add good DLQ messages to the index`() {
+      indexPrisoners()
+
+      awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
+
+      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("19")
+
+    }
+
+    @Test
+    fun `will only complete after 2nd housekeeping call if there are good messages on the DLQ`() {
+      indexPrisoners()
+
+      awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
+
+      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
+
+      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
+    }
+
+  }
+
 }
 
 private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()

@@ -62,10 +62,22 @@ class JmsLocalStackConfig {
     return awsSqsClient.getQueueUrl(queueName).queueUrl
   }
 
+  @Bean("dlqUrl")
+  fun dlqUrl(@Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
+               @Value("\${sqs.dlq.name}") dlqName: String): String {
+    return awsSqsDlqClient.getQueueUrl(dlqName).queueUrl
+  }
+
   @Bean("indexQueueUrl")
   fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
                     @Value("\${sqs.index.queue.name}") indexQueueName: String): String {
     return awsSqsIndexASyncClient.getQueueUrl(indexQueueName).queueUrl
+  }
+
+  @Bean("indexDlqUrl")
+  fun indexDlqUrl(@Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
+             @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
+    return awsSqsIndexDlqClient.getQueueUrl(indexDlqName).queueUrl
   }
 
 }

@@ -56,11 +56,23 @@ class JmsEmbeddedLocalStackConfig(private val localStackContainer: LocalStackCon
         return queueUrlWorkaroundTestcontainers(awsSqsClient, queueName, dlqName)
     }
 
+    @Bean("dlqUrl")
+    fun dlqUrl(@Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
+                 @Value("\${sqs.dlq.name}") dlqName: String): String {
+        return awsSqsDlqClient.getQueueUrl(dlqName).queueUrl
+    }
+
     @Bean("indexQueueUrl")
     fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
                       @Value("\${sqs.index.queue.name}") indexQueueName: String,
                       @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
         return queueUrlWorkaroundTestcontainers(awsSqsIndexASyncClient, indexQueueName, indexDlqName)
+    }
+
+    @Bean("indexDlqUrl")
+    fun indexDlqUrl(@Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
+               @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
+        return awsSqsIndexDlqClient.getQueueUrl(indexDlqName).queueUrl
     }
 
     private fun queueUrlWorkaroundTestcontainers(awsSqsClient: AmazonSQS, queueName: String, dlqName: String): String {

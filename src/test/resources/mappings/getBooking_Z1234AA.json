@@ -1,0 +1,127 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/Z1234AA"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1909898,
+      "bookingNo": "V71587",
+      "offenderNo": "Z1234AA",
+      "firstName": "FRANK",
+      "lastName": "FELLOWS",
+      "agencyId": "OUT",
+      "assignedLivingUnitId": 731727,
+      "activeFlag": false,
+      "assignedLivingUnit": {
+        "agencyId": "LNI",
+        "locationId": null,
+        "description": null,
+        "agencyName": "Outside"
+      },
+      "facialImageId": 1171172,
+      "dateOfBirth": "1999-06-01",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "inOutStatus": "OUT",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12L",
+          "offenderNo": "A7090BF",
+          "bookingId": 1909898,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773W",
+          "offenderNo": "A7090BF",
+          "bookingId": 1909898,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "INACTIVE OUT",
+      "legalStatus": null,
+      "recall": false,
+      "offenceHistory": [
+        {
+          "bookingId": 1909898,
+          "offenceDescription": "Having article with blade or which was sharply pointed in public place",
+          "offenceCode": "CJ88117",
+          "statuteCode": "CJ88",
+          "mostSerious": false,
+          "primaryResultCode": "1501",
+          "primaryResultDescription": "Recall to Prison",
+          "primaryResultConviction": true,
+          "secondaryResultConviction": false,
+          "courtDate": "2020-03-20",
+          "caseId": 2915258
+        },
+        {
+          "bookingId": 1909898,
+          "offenceDescription": "Section 18 - wounding with intent",
+          "offenceCode": "OF61016",
+          "statuteCode": "OF61",
+          "mostSerious": true,
+          "primaryResultCode": "1501",
+          "primaryResultDescription": "Recall to Prison",
+          "primaryResultConviction": true,
+          "secondaryResultConviction": false,
+          "courtDate": "2020-03-20",
+          "caseId": 2915258
+        }
+      ],
+      "receptionDate": "2015-10-01",
+      "sentenceTerms": [
+        {
+          "bookingId": 1909898,
+          "sentenceSequence": 2,
+          "termSequence": 1,
+          "sentenceType": "ADIMP_ORA",
+          "sentenceTypeDescription": "ORA CJA03 Standard Determinate Sentence",
+          "startDate": "2020-05-05",
+          "weeks": 14,
+          "lifeSentence": false,
+          "caseId": "2986589",
+          "sentenceTermCode": "IMP",
+          "lineSeq": 1,
+          "sentenceStartDate": "2020-05-05"
+        },
+        {
+          "bookingId": 1909898,
+          "sentenceSequence": 1,
+          "termSequence": 1,
+          "sentenceType": "LR_ORA",
+          "sentenceTypeDescription": "ORA Licence Recall",
+          "startDate": "2019-09-26",
+          "months": 16,
+          "lifeSentence": false,
+          "caseId": "2843444",
+          "sentenceTermCode": "IMP",
+          "lineSeq": 2,
+          "sentenceStartDate": "2019-09-26"
+        }
+      ],
+      "sentenceDetail": {
+        "bookingId": 1909898,
+        "automaticReleaseDate": "2020-02-03",
+        "conditionalReleaseDate": "2020-02-03",
+        "postRecallReleaseDate": "2020-02-03",
+        "licenceExpiryDate": "2020-02-03",
+        "paroleEligibilityDate": "2020-02-03",
+        "actualParoleDate": "2020-02-03"
+      },
+      "locationDescription": "Outside - released from Leeds"
+    }
+  }
+}
