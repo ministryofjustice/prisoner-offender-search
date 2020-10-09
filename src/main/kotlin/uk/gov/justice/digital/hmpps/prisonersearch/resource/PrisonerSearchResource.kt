@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
-import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import javax.validation.Valid
 
 @RestController
@@ -28,8 +28,8 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
 
     @PostMapping("/match")
     @Operation(summary = "Match prisoners by criteria", description = "Requires GLOBAL_SEARCH role")
-    fun findByCriteria(@Parameter(required = true) @RequestBody searchCriteria: SearchCriteria) =
-        prisonerSearchService.findBySearchCriteria(searchCriteria)
+    fun findByCriteria(@Parameter(required = true) @RequestBody prisonSearch: PrisonSearch) =
+        prisonerSearchService.findBySearchCriteria(prisonSearch.toSearchCriteria())
 
     @PostMapping("/prisoner-numbers")
     @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires GLOBAL_SEARCH role")

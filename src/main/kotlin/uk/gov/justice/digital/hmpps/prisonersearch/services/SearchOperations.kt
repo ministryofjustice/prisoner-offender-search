@@ -31,10 +31,14 @@ fun BoolQueryBuilder.filterWhenPresent(query: String, value: Any?): BoolQueryBui
   value.takeIf {
     when(it) {
       is String -> it.isNotBlank()
+      is List<*> -> it.isNotEmpty()
       else -> true
     }
   }?.let {
-    this.filter(QueryBuilders.matchQuery(query, it))
+    when(it) {
+      is List<*> -> this.filter(shouldMatchOneOf(query, it))
+      else -> this.filter(QueryBuilders.matchQuery(query, it))
+    }
   }
   return this
 }
@@ -102,14 +106,13 @@ fun BoolQueryBuilder.mustKeyword(value: Any?, query: String): BoolQueryBuilder {
   return this
 }
 
-
 fun BoolQueryBuilder.mustMatchOneOf(query: String, values: List<Any>): BoolQueryBuilder {
   val nestedQuery = QueryBuilders.boolQuery()
   values.forEach { nestedQuery.should(QueryBuilders.boolQuery().must(query, it)) }
   return this.must(nestedQuery)
 }
 
-fun shouldMatchOneOf(query: String, values: List<Any>): BoolQueryBuilder {
+fun shouldMatchOneOf(query: String, values: List<*>): BoolQueryBuilder {
   val nestedQuery = QueryBuilders.boolQuery()
   values.forEach { nestedQuery.should(QueryBuilders.matchQuery(query, it)) }
   return nestedQuery

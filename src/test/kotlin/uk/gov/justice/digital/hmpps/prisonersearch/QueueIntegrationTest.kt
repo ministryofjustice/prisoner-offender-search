@@ -23,7 +23,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
-import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 
 
 @ActiveProfiles(profiles = ["test", "test-queue"])
@@ -130,9 +130,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     }
   }
 
-  fun search(searchCriteria: SearchCriteria, fileAssert: String) {
+  fun search(prisonSearch: PrisonSearch, fileAssert: String) {
     webTestClient.post().uri("/prisoner-search/match")
-      .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
+      .body(BodyInserters.fromValue(gson.toJson(prisonSearch)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
