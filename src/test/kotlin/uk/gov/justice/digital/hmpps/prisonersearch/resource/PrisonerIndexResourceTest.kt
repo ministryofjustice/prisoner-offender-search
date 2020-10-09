@@ -2,6 +2,12 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
+import org.elasticsearch.client.RequestOptions
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.reindex.DeleteByQueryRequest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -9,11 +15,15 @@ import org.mockito.Mockito
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.services.offenderChangedMessage
+import uk.gov.justice.digital.hmpps.prisonersearch.services.populateOffenderMessage
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @BeforeEach
   fun init() {
+    elasticSearchClient.deleteByQuery(DeleteByQueryRequest(SyncIndex.INDEX_A.indexName).setQuery(QueryBuilders.matchAllQuery()), RequestOptions.DEFAULT)
+    elasticSearchClient.deleteByQuery(DeleteByQueryRequest(SyncIndex.INDEX_B.indexName).setQuery(QueryBuilders.matchAllQuery()), RequestOptions.DEFAULT)
     resetStubs()
     setupIndexes()
     Mockito.reset(indexQueueService)
@@ -282,11 +292,11 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Nested
-  inner class Housekeeping {
+  inner class HousekeepingBuildComplete {
 
     @Test
     fun `does not secure housekeeping endpoint`() {
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
     }
@@ -295,7 +305,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     fun `will automatically complete build if ok`() {
       indexPrisoners()
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -314,7 +324,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       indexPrisoners()
       whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(1, 0, 0))
 
-      webTestClient.put().uri("/prisoner-index/index-queue-housekeeping")
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
         .exchange()
         .expectStatus().isOk
 
@@ -327,6 +337,122 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
     }
   }
+
+  @Nested
+  inner class HousekeepingIndexDlq {
+
+    @Test
+    fun `will add good DLQ messages to the index`() {
+      indexPrisoners()
+
+      awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
+
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("19")
+
+    }
+
+    @Test
+    fun `will only complete after 2nd housekeeping call if there are good messages on the DLQ`() {
+      indexPrisoners()
+
+      awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
+
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
+
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
+    }
+
+  }
+
+  @Nested
+  inner class HousekeepingEventDlq {
+    @Test
+    fun `will add good messages to the index`() {
+      indexPrisoners()
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1234AA"))
+
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
+
+    }
+
+    @Test
+    fun `will not add bad messages to the index`() {
+      indexPrisoners()
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      // this offender is not stubbed in prison API - hence the message is "bad"
+      awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1235AB"))
+
+      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+        .exchange()
+        .expectStatus().isOk
+
+      await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await untilCallTo { prisonRequestCountFor("/api/offenders/Z1235AB") } matches { it == 1 }
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+
+    }
+  }
+
 }
 
 private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()

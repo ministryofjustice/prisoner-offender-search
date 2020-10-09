@@ -15,5 +15,5 @@ spec:
               args:
                 - /bin/sh
                 - -c
-                - curl -XPUT http://prisoner-offender-search/prisoner-index/index-queue-housekeeping
+                - curl -XPUT http://prisoner-offender-search/prisoner-index/queue-housekeeping
           restartPolicy: Never
