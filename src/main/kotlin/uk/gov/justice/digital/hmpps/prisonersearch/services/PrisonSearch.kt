@@ -26,7 +26,7 @@ data class PrisonSearch(
     prisonerIdentifier = prisonerIdentifier,
     firstName = firstName,
     lastName = lastName,
-    prisonIds = prisonId?.let { listOf(it) },
+    prisonIds = prisonId?.let { id -> listOf(id).filter { it.isNotBlank() } },
     includeAliases = includeAliases
   )
 }

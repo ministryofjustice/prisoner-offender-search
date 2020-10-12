@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
+import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 
 @ActiveProfiles(profiles = ["test", "test-queue"])
@@ -106,9 +107,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     createPrisonerIndex(SyncIndex.INDEX_B)
   }
 
-  private fun retryEsCheck(retry: Int, response: Response?) =
-    retry < 15 && (response == null || response.statusLine.statusCode != 200)
-
   private fun createIndexStatusIndex() {
     val response = elasticSearchClient.lowLevelClient.performRequest(Request("HEAD", "/offender-index-status"))
     if (response.statusLine.statusCode == 404) {
@@ -130,7 +128,17 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     }
   }
 
-  fun search(prisonSearch: PrisonSearch, fileAssert: String) {
+  fun search(searchCriteria: SearchCriteria, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/match-prisoners")
+      .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun singlePrisonSearch(prisonSearch: PrisonSearch, fileAssert: String) {
     webTestClient.post().uri("/prisoner-search/match")
       .body(BodyInserters.fromValue(gson.toJson(prisonSearch)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
