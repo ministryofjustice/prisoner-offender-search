@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
+import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import javax.validation.Valid
 
 @RestController
@@ -26,10 +27,18 @@ import javax.validation.Valid
 )
 class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchService) {
 
+    @Deprecated(message = "Use the /match-prisoners endpoint")
     @PostMapping("/match")
-    @Operation(summary = "Match prisoners by criteria", description = "Requires GLOBAL_SEARCH role")
+    @Operation(
+        summary = "Match prisoners by criteria, to search across a list of specific prisons use /match-prisoners",
+        description = "Requires GLOBAL_SEARCH role")
     fun findByCriteria(@Parameter(required = true) @RequestBody prisonSearch: PrisonSearch) =
         prisonerSearchService.findBySearchCriteria(prisonSearch.toSearchCriteria())
+
+    @PostMapping("/match-prisoners")
+    @Operation(summary = "Match prisoners by criteria", description = "Requires GLOBAL_SEARCH role")
+    fun findByCriteria(@Parameter(required = true) @RequestBody searchCriteria: SearchCriteria) =
+        prisonerSearchService.findBySearchCriteria(searchCriteria)
 
     @PostMapping("/prisoner-numbers")
     @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires GLOBAL_SEARCH role")

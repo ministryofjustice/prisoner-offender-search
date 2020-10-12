@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
+import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 
 class MessageIntegrationTest : QueueIntegrationTest() {
@@ -34,7 +35,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
   @Test
   fun `will consume a new prisoner booking update`() {
-    search(PrisonSearch("A7089FD", null, null), "/results/empty.json")
+    search(SearchCriteria("A7089FD", null, null), "/results/empty.json")
 
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText()
 
@@ -46,12 +47,12 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FD") } matches { it == 1 }
 
-      search(PrisonSearch("A7089FD", null, null), "/results/search_results_merge1.json")
+    search(SearchCriteria("A7089FD", null, null), "/results/search_results_merge1.json")
   }
 
   @Test
   fun `will consume a delete request and remove`() {
-    search(PrisonSearch("A7089FC", null, null), "/results/search_results_to_delete.json")
+    search(SearchCriteria("A7089FC", null, null), "/results/search_results_to_delete.json")
 
     val message = "/messages/offenderDelete.json".readResourceAsText()
 
@@ -62,12 +63,12 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    search(PrisonSearch("A7089FC", null, null), "/results/empty.json")
+    search(SearchCriteria("A7089FC", null, null), "/results/empty.json")
   }
 
   @Test
   fun `will consume and check for merged record and remove`() {
-    search(PrisonSearch("A7089FA", null, null), "/results/search_results_A7089FA.json")
+    search(SearchCriteria("A7089FA", null, null), "/results/search_results_A7089FA.json")
 
     val message = "/messages/offenderMerge.json".readResourceAsText()
 
@@ -78,8 +79,8 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    search(PrisonSearch("A7089FB", null, null), "/results/search_results_A7089FB.json")
-    search(PrisonSearch("A7089FA", null, null), "/results/empty.json")
+    search(SearchCriteria("A7089FB", null, null), "/results/search_results_A7089FB.json")
+    search(SearchCriteria("A7089FA", null, null), "/results/empty.json")
   }
 
   @Test
@@ -93,7 +94,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("false")
 
-    search(PrisonSearch("A7089FE", null, null), "/results/empty.json")
+    search(SearchCriteria("A7089FE", null, null), "/results/empty.json")
 
     resetStubs()
     // Start re-indexing
@@ -128,8 +129,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .jsonPath("index-status.inProgress").isEqualTo("true")
       .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("19")
 
-    search(PrisonSearch("A7089FE", null, null), "/results/search_results_A7089FE.json")
-
+    search(SearchCriteria("A7089FE", null, null), "/results/search_results_A7089FE.json")
   }
 }
 
