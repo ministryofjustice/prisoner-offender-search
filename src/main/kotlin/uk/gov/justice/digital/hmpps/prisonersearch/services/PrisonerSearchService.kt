@@ -217,7 +217,7 @@ class PrisonerSearchService(
       "clientId" to authenticationHolder.currentClientId(),
       "lastname" to searchCriteria.lastName,
       "firstname" to searchCriteria.firstName,
-      "prisonId" to searchCriteria.prisonId,
+      "prisonId" to searchCriteria.prisonIds.toString(),
       "prisonerIdentifier" to searchCriteria.prisonerIdentifier,
       "includeAliases" to searchCriteria.includeAliases.toString()
     )
@@ -267,5 +267,5 @@ inline infix fun Result.onMatch(block: (Result.Match) -> Nothing): Unit? {
 
 private fun BoolQueryBuilder.withDefaults(searchCriteria: SearchCriteria): BoolQueryBuilder? {
   return this
-    .filterWhenPresent("prisonId", searchCriteria.prisonId)
+    .filterWhenPresent("prisonId", searchCriteria.prisonIds)
 }

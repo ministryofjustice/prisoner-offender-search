@@ -6,7 +6,7 @@ import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.Gender
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
-import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import java.time.LocalDate
 
 class GlobalSearchResourceTest : QueueIntegrationTest() {
@@ -45,7 +45,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   fun `access forbidden when no role`() {
 
     webTestClient.post().uri("/global-search")
-      .body(BodyInserters.fromValue(gson.toJson(SearchCriteria("A7089EY", "john", "smith", "MDI"))))
+      .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
       .exchange()
@@ -56,7 +56,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   fun `bad request when no criteria provided`() {
 
     webTestClient.post().uri("/global-search")
-      .body(BodyInserters.fromValue(gson.toJson(SearchCriteria(null, null, null))))
+      .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria(null, null, null, null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
