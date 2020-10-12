@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
+import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLong
+import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
 fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
@@ -7,6 +9,9 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.bookNumber = ob.bookingNo
   prisoner.bookingId = ob.bookingId?.toString()
   prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
+  prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
+  prisoner.pncNumberCanonicalShort = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value?.canonicalPNCNumberShort()
+  prisoner.pncNumberCanonicalLong = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value?.canonicalPNCNumberLong()
   prisoner.croNumber = ob.identifiers?.firstOrNull { i -> i.type == "CRO" }?.value
 
   prisoner.cellLocation = ob.assignedLivingUnit?.description
