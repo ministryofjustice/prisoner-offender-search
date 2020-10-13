@@ -107,32 +107,32 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on PNC number short year`() {
-    search(PrisonSearch("15/1234S", null, null), "/results/search_results_pnc.json")
+    search(SearchCriteria("15/1234S", null, null), "/results/search_results_pnc.json")
   }
 
   @Test
   fun `can perform a match on PNC number long year`() {
-    search(PrisonSearch("2015/1234S", null, null), "/results/search_results_pnc.json")
+    search(SearchCriteria("2015/1234S", null, null), "/results/search_results_pnc.json")
   }
 
   @Test
   fun `can perform a match on PNC number long year extra zeros`() {
-    search(PrisonSearch("2015/001234S", null, null), "/results/search_results_pnc.json")
+    search(SearchCriteria("2015/001234S", null, null), "/results/search_results_pnc.json")
   }
 
   @Test
   fun `can perform a match on PNC number short year 19 century`() {
-    search(PrisonSearch("89/4444S", null, null), "/results/search_results_pnc2.json")
+    search(SearchCriteria("89/4444S", null, null), "/results/search_results_pnc2.json")
   }
 
   @Test
   fun `can perform a match on PNC number long year 19 century`() {
-    search(PrisonSearch("1989/4444S", null, null), "/results/search_results_pnc2.json")
+    search(SearchCriteria("1989/4444S", null, null), "/results/search_results_pnc2.json")
   }
 
   @Test
   fun `can perform a match on PNC number long year 19 century extra zeros`() {
-    search(PrisonSearch("1989/0004444S", null, null), "/results/search_results_pnc2.json")
+    search(SearchCriteria("1989/0004444S", null, null), "/results/search_results_pnc2.json")
   }
 
   @Test
