@@ -88,8 +88,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .exchange()
       .expectStatus().isNotFound
   }
-
-
+  
   @Test
   fun `can perform a match on prisoner number`() {
     search(SearchCriteria("A7089EY", null, null), "/results/search_results_smith.json")
@@ -272,12 +271,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on prisonId`() {
-    prisonSearch( "LNI", "/results/search_results_lni.json")
+    prisonSearch("LNI", "/results/search_results_lni.json")
   }
 
   @Test
   fun `can perform a match on lowercase prisonId`() {
-    prisonSearch( "lni", "/results/search_results_lni.json")
+    prisonSearch("lni", "/results/search_results_lni.json")
   }
 
   @Test
@@ -287,12 +286,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on prisonId returns 2 result from third page`() {
-    prisonSearchPagination( "MDI",2,2, "/results/search_results_mdi_pagination2.json")
+    prisonSearchPagination("MDI", 2, 2, "/results/search_results_mdi_pagination2.json")
   }
 
   @Test
   fun `can perform a match on prisonId OUT`() {
-    prisonSearch( "OUT", "/results/search_results_out.json")
+    prisonSearch("OUT", "/results/search_results_out.json")
   }
 }
 
