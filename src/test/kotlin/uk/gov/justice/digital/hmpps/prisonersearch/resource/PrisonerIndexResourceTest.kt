@@ -22,8 +22,14 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @BeforeEach
   fun init() {
-    elasticSearchClient.deleteByQuery(DeleteByQueryRequest(SyncIndex.INDEX_A.indexName).setQuery(QueryBuilders.matchAllQuery()), RequestOptions.DEFAULT)
-    elasticSearchClient.deleteByQuery(DeleteByQueryRequest(SyncIndex.INDEX_B.indexName).setQuery(QueryBuilders.matchAllQuery()), RequestOptions.DEFAULT)
+    elasticSearchClient.deleteByQuery(
+      DeleteByQueryRequest(SyncIndex.INDEX_A.indexName).setQuery(QueryBuilders.matchAllQuery()),
+      RequestOptions.DEFAULT
+    )
+    elasticSearchClient.deleteByQuery(
+      DeleteByQueryRequest(SyncIndex.INDEX_B.indexName).setQuery(QueryBuilders.matchAllQuery()),
+      RequestOptions.DEFAULT
+    )
     resetStubs()
     setupIndexes()
     Mockito.reset(indexQueueService)
@@ -72,7 +78,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .jsonPath("index-status.inProgress").isEqualTo("true")
       .jsonPath("index-status.startIndexTime").isNotEmpty
       .jsonPath("index-status.endIndexTime").doesNotHaveJsonPath()
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -89,7 +95,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .jsonPath("index-status.inProgress").isEqualTo("false")
       .jsonPath("index-status.startIndexTime").isNotEmpty
       .jsonPath("index-status.endIndexTime").isNotEmpty
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
   }
 
   @Test
@@ -119,7 +125,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
       .jsonPath("index-status.inProgress").isEqualTo("false")
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
   }
 
 
@@ -139,7 +145,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
 
     webTestClient.put().uri("/prisoner-index/index/prisoner/A5432AA")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -154,7 +160,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("21")
 
   }
 
@@ -181,8 +187,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("18")
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("20")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
 
     webTestClient.put().uri("/prisoner-index/index/prisoner/A5432AA")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -197,8 +203,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("19")
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("21")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("21")
 
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
@@ -219,13 +225,12 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
       .jsonPath("index-status.inProgress").isEqualTo("false")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("20")
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
-
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("22")
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("21")
   }
 
   @Test
-  fun `can switch indexes`(){
+  fun `can switch indexes`() {
     webTestClient.put().uri("/prisoner-index/switch-index")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
@@ -233,7 +238,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("$.currentIndex").value<String> { currentIndex ->
         assertThat(currentIndex).isEqualTo(SyncIndex.INDEX_B.name)
-  }}
+      }
+  }
 
   @Test
   fun `conflict returned if one index is rebuilding when trying to switch indexes`() {
@@ -260,7 +266,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can transfer items from dlq to normal queue`(){
+  fun `can transfer items from dlq to normal queue`() {
     webTestClient.put().uri("/prisoner-index/transfer-index-dlq")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
@@ -268,7 +274,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can purge items from dlq`(){
+  fun `can purge items from dlq`() {
     webTestClient.put().uri("/prisoner-index/purge-index-dlq")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
@@ -276,7 +282,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can transfer items from event dlq to normal queue`(){
+  fun `can transfer items from event dlq to normal queue`() {
     webTestClient.put().uri("/prisoner-index/transfer-event-dlq")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
@@ -284,7 +290,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can purge items from event dlq `(){
+  fun `can purge items from event dlq `() {
     webTestClient.put().uri("/prisoner-index/purge-event-dlq")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
@@ -316,7 +322,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .isOk
         .expectBody()
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
     }
 
     @Test
@@ -360,8 +366,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .expectStatus()
         .isOk
         .expectBody()
-        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("19")
-
+        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("21")
     }
 
     @Test
@@ -388,9 +393,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .isOk
         .expectBody()
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("21")
     }
-
   }
 
   @Nested
@@ -419,8 +423,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .isOk
         .expectBody()
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("19")
-
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("21")
     }
 
     @Test
@@ -448,11 +451,9 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .isOk
         .expectBody()
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("18")
-
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo("20")
     }
   }
-
 }
 
 private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()

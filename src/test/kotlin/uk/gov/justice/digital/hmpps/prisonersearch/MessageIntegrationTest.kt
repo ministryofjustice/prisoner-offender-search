@@ -6,7 +6,6 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
 
@@ -108,7 +107,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("18")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("20")
 
     val message = "/messages/offenderDetailsNew.json".readResourceAsText()
 
@@ -127,7 +126,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("19")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("21")
 
     search(SearchCriteria("A7089FE", null, null), "/results/search_results_A7089FE.json")
   }

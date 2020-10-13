@@ -88,8 +88,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .exchange()
       .expectStatus().isNotFound
   }
-
-
+  
   @Test
   fun `can perform a match on prisoner number`() {
     search(SearchCriteria("A7089EY", null, null), "/results/search_results_smith.json")
@@ -103,6 +102,36 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number`() {
     search(SearchCriteria("12/394773H", null, null), "/results/search_results_smith.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number short year`() {
+    search(SearchCriteria("15/1234S", null, null), "/results/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year`() {
+    search(SearchCriteria("2015/1234S", null, null), "/results/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year extra zeros`() {
+    search(SearchCriteria("2015/001234S", null, null), "/results/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number short year 19 century`() {
+    search(SearchCriteria("89/4444S", null, null), "/results/search_results_pnc2.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year 19 century`() {
+    search(SearchCriteria("1989/4444S", null, null), "/results/search_results_pnc2.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year 19 century extra zeros`() {
+    search(SearchCriteria("1989/0004444S", null, null), "/results/search_results_pnc2.json")
   }
 
   @Test
@@ -242,12 +271,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on prisonId`() {
-    prisonSearch( "LNI", "/results/search_results_lni.json")
+    prisonSearch("LNI", "/results/search_results_lni.json")
   }
 
   @Test
   fun `can perform a match on lowercase prisonId`() {
-    prisonSearch( "lni", "/results/search_results_lni.json")
+    prisonSearch("lni", "/results/search_results_lni.json")
   }
 
   @Test
@@ -257,12 +286,12 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a match on prisonId returns 2 result from third page`() {
-    prisonSearchPagination( "MDI",2,2, "/results/search_results_mdi_pagination2.json")
+    prisonSearchPagination("MDI", 2, 2, "/results/search_results_mdi_pagination2.json")
   }
 
   @Test
   fun `can perform a match on prisonId OUT`() {
-    prisonSearch( "OUT", "/results/search_results_out.json")
+    prisonSearch("OUT", "/results/search_results_out.json")
   }
 }
 

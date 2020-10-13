@@ -93,6 +93,8 @@ class GlobalSearchService(
           "prisonerNumber",
           "bookingId",
           "pncNumber",
+          "pncNumberCanonicalShort",
+          "pncNumberCanonicalLong",
           "croNumber",
           "bookNumber"
         )

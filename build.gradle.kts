@@ -34,9 +34,9 @@ dependencies {
   implementation("com.google.guava:guava:29.0-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.879"))
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.880"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.879")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.880")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.testcontainers:localstack:1.14.3")
