@@ -140,6 +140,8 @@ class PrisonerSearchService(
           "prisonerNumber",
           "bookingId",
           "pncNumber",
+          "pncNumberCanonicalShort",
+          "pncNumberCanonicalLong",
           "croNumber",
           "bookNumber"
         )

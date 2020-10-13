@@ -6,7 +6,6 @@ import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.Gender
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import java.time.LocalDate
 
 class GlobalSearchResourceTest : QueueIntegrationTest() {
@@ -79,6 +78,36 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match on PNC number short year`() {
+    globalSearch(GlobalSearchCriteria("15/1234S", null, null, null, null, null), "/results/globalSearch/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year`() {
+    globalSearch(GlobalSearchCriteria("2015/1234S", null, null, null, null, null), "/results/globalSearch/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year extra zeros`() {
+    globalSearch(GlobalSearchCriteria("2015/001234S", null, null, null, null, null), "/results/globalSearch/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number short year 19 century`() {
+    globalSearch(GlobalSearchCriteria("89/4444S", null, null, null, null, null), "/results/globalSearch/search_results_pnc2.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year 19 century`() {
+    globalSearch(GlobalSearchCriteria("1989/4444S", null, null, null, null, null), "/results/globalSearch/search_results_pnc2.json")
+  }
+
+  @Test
+  fun `can perform a match on PNC number long year 19 century extra zeros`() {
+    globalSearch(GlobalSearchCriteria("1989/0004444S", null, null, null, null, null), "/results/globalSearch/search_results_pnc2.json")
+  }
+
+  @Test
   fun `can perform a match on CRO number`() {
     globalSearch(GlobalSearchCriteria("29906/12J", null, null, null, null,null), "/results/globalSearch/search_results_smith.json")
   }
@@ -127,6 +156,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on a first and last name only multiple hits`() {
     globalSearch(GlobalSearchCriteria(null, "sam", "jones", null, null, null), "/results/globalSearch/search_results_sams.json")
   }
+
   @Test
   fun `can perform a match on a first and last name only multiple hits include aliases`() {
     globalSearch(GlobalSearchCriteria(null, "sam", "jones", null, null, null, true), "/results/globalSearch/search_results_sams_aliases.json")
@@ -271,7 +301,6 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   fun `can perform search which returns 2 result from third page`(){
     globalSearchPagination(GlobalSearchCriteria(null, "sam", "jones", null, null, null),2,2, "/results/globalSearch/search_results_sam_pagination3.json")
   }
-
 }
 
 
