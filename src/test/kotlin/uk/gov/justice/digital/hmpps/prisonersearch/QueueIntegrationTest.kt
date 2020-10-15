@@ -8,7 +8,6 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
-import org.elasticsearch.client.Response
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -97,6 +96,8 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BD") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BE") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BF") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AA") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AB") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
