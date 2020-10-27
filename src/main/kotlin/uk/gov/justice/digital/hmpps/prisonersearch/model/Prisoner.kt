@@ -141,6 +141,10 @@ open class Prisoner {
   @Schema(description = "HDC Actual Date", example = "2023-05-01")
   var homeDetentionCurfewActualDate: LocalDate? = null
 
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Schema(description = "Top-up supervision expiry date", example = "2023-05-01")
+  var topupSupervisionExpiryDate: LocalDate? = null
+
   @Schema(description = "Days added to sentence term due to adjustments.", example = "10")
   var additionalDaysAwarded: Int? = null
 
