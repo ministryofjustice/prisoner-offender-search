@@ -23,7 +23,6 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.1")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.1")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.1")
   implementation("com.nimbusds:nimbus-jose-jwt:8.20")
 
