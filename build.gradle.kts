@@ -24,7 +24,7 @@ dependencies {
 
   implementation("org.springdoc:springdoc-openapi-ui:1.5.1")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.5.1")
-  implementation("com.nimbusds:nimbus-jose-jwt:8.20")
+  implementation("com.nimbusds:nimbus-jose-jwt:9.1.5")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -42,6 +42,6 @@ dependencies {
   testImplementation("org.testcontainers:elasticsearch:1.14.3")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.6.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.0")
 
 }
