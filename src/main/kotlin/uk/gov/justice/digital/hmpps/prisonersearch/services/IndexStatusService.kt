@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.IndexStatusRepository
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Optional
 
 @Service
 class IndexStatusService(
