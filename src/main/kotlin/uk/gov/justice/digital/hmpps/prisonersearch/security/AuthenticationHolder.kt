@@ -11,13 +11,12 @@ class AuthenticationHolder {
     get() = SecurityContextHolder.getContext().authentication
 
   fun currentUsername(): String? {
-    val auth =  authentication as AuthAwareAuthenticationToken
+    val auth = authentication as AuthAwareAuthenticationToken
     return auth.userName
   }
 
   fun currentClientId(): String? {
-    val auth =  authentication as AuthAwareAuthenticationToken
+    val auth = authentication as AuthAwareAuthenticationToken
     return auth.clientId
   }
-
 }

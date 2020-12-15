@@ -52,37 +52,47 @@ class JmsConfig {
 
   @Bean("queueUrl")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun queueUrl(@Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
-               @Value("\${sqs.queue.name}") queueName: String): String {
+  fun queueUrl(
+    @Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
+    @Value("\${sqs.queue.name}") queueName: String
+  ): String {
     return awsSqsClient.getQueueUrl(queueName).queueUrl
   }
 
   @Bean("dlqUrl")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun dlqUrl(@Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
-               @Value("\${sqs.dlq.name}") dlqName: String): String {
+  fun dlqUrl(
+    @Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
+    @Value("\${sqs.dlq.name}") dlqName: String
+  ): String {
     return awsSqsDlqClient.getQueueUrl(dlqName).queueUrl
   }
 
   @Bean("indexQueueUrl")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
-                    @Value("\${sqs.index.queue.name}") indexQueueName: String): String {
+  fun indexQueueUrl(
+    @Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
+    @Value("\${sqs.index.queue.name}") indexQueueName: String
+  ): String {
     return awsSqsIndexASyncClient.getQueueUrl(indexQueueName).queueUrl
   }
 
   @Bean("indexDlqUrl")
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun indexDlqUrl(@Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
-             @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
+  fun indexDlqUrl(
+    @Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
+    @Value("\${sqs.index.dlq.name}") indexDlqName: String
+  ): String {
     return awsSqsIndexDlqClient.getQueueUrl(indexDlqName).queueUrl
   }
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun awsSqsClient(@Value("\${sqs.aws.access.key.id}") accessKey: String,
-                   @Value("\${sqs.aws.secret.access.key}") secretKey: String,
-                   @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsClient(
+    @Value("\${sqs.aws.access.key.id}") accessKey: String,
+    @Value("\${sqs.aws.secret.access.key}") secretKey: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
@@ -90,9 +100,11 @@ class JmsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun awsSqsDlqClient(@Value("\${sqs.aws.dlq.access.key.id}") accessKey: String,
-                      @Value("\${sqs.aws.dlq.secret.access.key}") secretKey: String,
-                      @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsDlqClient(
+    @Value("\${sqs.aws.dlq.access.key.id}") accessKey: String,
+    @Value("\${sqs.aws.dlq.secret.access.key}") secretKey: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
@@ -100,9 +112,11 @@ class JmsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun awsSqsIndexASyncClient(@Value("\${sqs.index.aws.access.key.id}") accessKey: String,
-                             @Value("\${sqs.index.aws.secret.access.key}") secretKey: String,
-                             @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
+  fun awsSqsIndexASyncClient(
+    @Value("\${sqs.index.aws.access.key.id}") accessKey: String,
+    @Value("\${sqs.index.aws.secret.access.key}") secretKey: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQSAsync =
     AmazonSQSAsyncClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
@@ -110,9 +124,11 @@ class JmsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun awsSqsIndexClient(@Value("\${sqs.index.aws.access.key.id}") accessKey: String,
-                        @Value("\${sqs.index.aws.secret.access.key}") secretKey: String,
-                        @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsIndexClient(
+    @Value("\${sqs.index.aws.access.key.id}") accessKey: String,
+    @Value("\${sqs.index.aws.secret.access.key}") secretKey: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
@@ -120,12 +136,13 @@ class JmsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
-  fun awsSqsIndexDlqClient(@Value("\${sqs.index.aws.dlq.access.key.id}") accessKey: String,
-                           @Value("\${sqs.index.aws.dlq.secret.access.key}") secretKey: String,
-                           @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsIndexDlqClient(
+    @Value("\${sqs.index.aws.dlq.access.key.id}") accessKey: String,
+    @Value("\${sqs.index.aws.dlq.secret.access.key}") secretKey: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
       .build()
-
 }

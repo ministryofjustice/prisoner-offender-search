@@ -12,15 +12,16 @@ import java.util.*
 
 @Service
 class IndexStatusService(
-  private val indexStatusRepository : IndexStatusRepository,
+  private val indexStatusRepository: IndexStatusRepository,
   private val telemetryClient: TelemetryClient,
-  private val indexQueueService: IndexQueueService) {
+  private val indexQueueService: IndexQueueService
+) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun getCurrentIndex() : IndexStatus {
+  fun getCurrentIndex(): IndexStatus {
     var indexStatus = indexStatusRepository.findById("STATUS").toNullable()
 
     if (indexStatus == null) {
@@ -30,7 +31,7 @@ class IndexStatusService(
     return indexStatus
   }
 
-  fun markRebuildStarting() : Boolean {
+  fun markRebuildStarting(): Boolean {
     val currentIndexStatus = getCurrentIndex()
 
     if (currentIndexStatus.inProgress) {
@@ -45,12 +46,13 @@ class IndexStatusService(
     telemetryClient.trackEvent(
       "POSIndexRebuildStarting",
       mapOf("indexName" to currentIndexStatus.currentIndex.indexName),
-      null)
+      null
+    )
 
     return true
   }
 
-  fun cancelIndexing() : Boolean {
+  fun cancelIndexing(): Boolean {
     val currentIndexStatus = getCurrentIndex()
     if (currentIndexStatus.inProgress) {
       currentIndexStatus.inProgress = false
@@ -72,7 +74,7 @@ class IndexStatusService(
     return true
   }
 
-  fun markRebuildComplete() : Boolean {
+  fun markRebuildComplete(): Boolean {
     val currentIndexStatus = getCurrentIndex()
     val indexQueueStatus = indexQueueService.getIndexQueueStatus()
     if (currentIndexStatus.inProgress && indexQueueStatus.active.not()) {

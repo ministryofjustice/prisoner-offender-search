@@ -13,22 +13,21 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.testcontainers.containers.localstack.LocalStackContainer
 
-
 @Configuration
 @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "embedded-localstack")
 class JmsEmbeddedLocalStackConfig(private val localStackContainer: LocalStackContainer) {
 
   @Bean
   fun awsSqsClient(): AmazonSQS = AmazonSQSClientBuilder.standard()
-      .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
-      .withCredentials(localStackContainer.defaultCredentialsProvider)
-      .build()
+    .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
+    .withCredentials(localStackContainer.defaultCredentialsProvider)
+    .build()
 
   @Bean
   fun awsSqsDlqClient(): AmazonSQS = AmazonSQSClientBuilder.standard()
-      .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
-      .withCredentials(localStackContainer.defaultCredentialsProvider)
-      .build()
+    .withEndpointConfiguration(localStackContainer.getEndpointConfiguration(LocalStackContainer.Service.SQS))
+    .withCredentials(localStackContainer.defaultCredentialsProvider)
+    .build()
 
   @Bean
   fun awsSqsIndexASyncClient(): AmazonSQSAsync = AmazonSQSAsyncClientBuilder.standard()
@@ -48,48 +47,56 @@ class JmsEmbeddedLocalStackConfig(private val localStackContainer: LocalStackCon
     .withCredentials(localStackContainer.defaultCredentialsProvider)
     .build()
 
+  @Bean("queueUrl")
+  fun queueUrl(
+    @Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
+    @Value("\${sqs.queue.name}") queueName: String,
+    @Value("\${sqs.dlq.name}") dlqName: String
+  ): String {
+    return queueUrlWorkaroundTestcontainers(awsSqsClient, queueName, dlqName)
+  }
 
-    @Bean("queueUrl")
-    fun queueUrl(@Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
-                 @Value("\${sqs.queue.name}") queueName: String,
-                 @Value("\${sqs.dlq.name}") dlqName: String): String {
-        return queueUrlWorkaroundTestcontainers(awsSqsClient, queueName, dlqName)
-    }
+  @Bean("dlqUrl")
+  fun dlqUrl(
+    @Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
+    @Value("\${sqs.dlq.name}") dlqName: String
+  ): String {
+    return awsSqsDlqClient.getQueueUrl(dlqName).queueUrl
+  }
 
-    @Bean("dlqUrl")
-    fun dlqUrl(@Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
-                 @Value("\${sqs.dlq.name}") dlqName: String): String {
-        return awsSqsDlqClient.getQueueUrl(dlqName).queueUrl
-    }
+  @Bean("indexQueueUrl")
+  fun indexQueueUrl(
+    @Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
+    @Value("\${sqs.index.queue.name}") indexQueueName: String,
+    @Value("\${sqs.index.dlq.name}") indexDlqName: String
+  ): String {
+    return queueUrlWorkaroundTestcontainers(awsSqsIndexASyncClient, indexQueueName, indexDlqName)
+  }
 
-    @Bean("indexQueueUrl")
-    fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
-                      @Value("\${sqs.index.queue.name}") indexQueueName: String,
-                      @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
-        return queueUrlWorkaroundTestcontainers(awsSqsIndexASyncClient, indexQueueName, indexDlqName)
-    }
+  @Bean("indexDlqUrl")
+  fun indexDlqUrl(
+    @Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
+    @Value("\${sqs.index.dlq.name}") indexDlqName: String
+  ): String {
+    return awsSqsIndexDlqClient.getQueueUrl(indexDlqName).queueUrl
+  }
 
-    @Bean("indexDlqUrl")
-    fun indexDlqUrl(@Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
-               @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
-        return awsSqsIndexDlqClient.getQueueUrl(indexDlqName).queueUrl
-    }
+  private fun queueUrlWorkaroundTestcontainers(awsSqsClient: AmazonSQS, queueName: String, dlqName: String): String {
+    val queueUrl = awsSqsClient.getQueueUrl(queueName).queueUrl
+    val dlqUrl = awsSqsClient.getQueueUrl(dlqName).queueUrl
+    // This is necessary due to a bug in localstack when running in testcontainers that the redrive policy gets lost
+    val dlqArn = awsSqsClient.getQueueAttributes(dlqUrl, listOf(QueueAttributeName.QueueArn.toString()))
 
-    private fun queueUrlWorkaroundTestcontainers(awsSqsClient: AmazonSQS, queueName: String, dlqName: String): String {
-        val queueUrl = awsSqsClient.getQueueUrl(queueName).queueUrl
-        val dlqUrl = awsSqsClient.getQueueUrl(dlqName).queueUrl
-        // This is necessary due to a bug in localstack when running in testcontainers that the redrive policy gets lost
-        val dlqArn = awsSqsClient.getQueueAttributes(dlqUrl, listOf(QueueAttributeName.QueueArn.toString()))
+    // the queue should already be created by the setup script - but should reset the redrive policy
+    awsSqsClient.createQueue(
+      CreateQueueRequest(queueName).withAttributes(
+        mapOf(
+          QueueAttributeName.RedrivePolicy.toString() to
+            """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}"""
+        )
+      )
+    )
 
-        // the queue should already be created by the setup script - but should reset the redrive policy
-        awsSqsClient.createQueue(
-            CreateQueueRequest(queueName).withAttributes(
-                mapOf(
-                    QueueAttributeName.RedrivePolicy.toString() to
-                            """{"deadLetterTargetArn":"${dlqArn.attributes["QueueArn"]}","maxReceiveCount":"5"}""")
-            ))
-
-        return queueUrl
-    }
-
+    return queueUrl
+  }
 }

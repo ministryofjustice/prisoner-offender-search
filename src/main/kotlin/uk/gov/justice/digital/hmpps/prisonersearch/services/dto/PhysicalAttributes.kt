@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import java.math.BigDecimal
 
-data class PhysicalAttributes (
+data class PhysicalAttributes(
   val gender: String?,
   val raceCode: String?,
   val ethnicity: String?,

@@ -5,7 +5,7 @@ import java.time.LocalDate
 /**
  * Alias
  */
-data class Alias (
+data class Alias(
   val firstName: String,
   val middleName: String?,
   val lastName: String,

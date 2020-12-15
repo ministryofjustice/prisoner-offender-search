@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
-
 class MessageIntegrationTest : QueueIntegrationTest() {
 
   companion object {
@@ -131,7 +130,6 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     search(SearchCriteria("A7089FE", null, null), "/results/search_results_A7089FE.json")
   }
 }
-
 
 private fun String.readResourceAsText(): String {
   return MessageIntegrationTest::class.java.getResource(this).readText()

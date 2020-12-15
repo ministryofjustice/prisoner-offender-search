@@ -34,10 +34,12 @@ enum class QueueAttributes(val awsName: String, val healthName: String) {
   MESSAGES_ON_DLQ(ApproximateNumberOfMessages.toString(), "MessagesOnDLQ")
 }
 
-abstract class QueueHealth( private val awsSqsClient: AmazonSQS,
-                  private val awsSqsDlqClient: AmazonSQS,
-                  private val queueName: String,
-                  private val dlqName: String) : HealthIndicator {
+abstract class QueueHealth(
+  private val awsSqsClient: AmazonSQS,
+  private val awsSqsDlqClient: AmazonSQS,
+  private val queueName: String,
+  private val dlqName: String
+) : HealthIndicator {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -52,8 +54,8 @@ abstract class QueueHealth( private val awsSqsClient: AmazonSQS,
       return Builder().down().withException(e).build()
     }
     val details = mutableMapOf<String, Any?>(
-        MESSAGES_ON_QUEUE.healthName to queueAttributes.attributes[MESSAGES_ON_QUEUE.awsName]?.toInt(),
-        MESSAGES_IN_FLIGHT.healthName to queueAttributes.attributes[MESSAGES_IN_FLIGHT.awsName]?.toInt()
+      MESSAGES_ON_QUEUE.healthName to queueAttributes.attributes[MESSAGES_ON_QUEUE.awsName]?.toInt(),
+      MESSAGES_IN_FLIGHT.healthName to queueAttributes.attributes[MESSAGES_IN_FLIGHT.awsName]?.toInt()
     )
 
     return Builder().up().withDetails(details).addDlqHealth(queueAttributes).build()
@@ -77,10 +79,9 @@ abstract class QueueHealth( private val awsSqsClient: AmazonSQS,
     }
 
     return withDetail("dlqStatus", UP.description)
-        .withDetail(MESSAGES_ON_DLQ.healthName, dlqAttributes.attributes[MESSAGES_ON_DLQ.awsName]?.toInt())
+      .withDetail(MESSAGES_ON_DLQ.healthName, dlqAttributes.attributes[MESSAGES_ON_DLQ.awsName]?.toInt())
   }
 
   private fun getQueueAttributesRequest(url: GetQueueUrlResult) =
-      GetQueueAttributesRequest(url.queueUrl).withAttributeNames(QueueAttributeName.All)
-
+    GetQueueAttributesRequest(url.queueUrl).withAttributeNames(QueueAttributeName.All)
 }

@@ -31,8 +31,7 @@ data class GlobalSearchCriteria(
   fun isValid() = !(firstName.isNullOrBlank() && lastName.isNullOrBlank() && prisonerIdentifier.isNullOrBlank())
 }
 
-//offenderNo, lastName, firstName, gender, location, dateOfBirth, includeAliases
-
+// offenderNo, lastName, firstName, gender, location, dateOfBirth, includeAliases
 
 enum class Gender(val value: String?) {
 

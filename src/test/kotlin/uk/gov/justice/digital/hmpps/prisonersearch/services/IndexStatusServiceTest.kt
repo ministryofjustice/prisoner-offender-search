@@ -14,46 +14,44 @@ import java.util.*
 
 class IndexStatusServiceTest {
 
-    private val indexStatusRepository = mock<IndexStatusRepository>()
-    private val telemetryClient = mock<TelemetryClient>()
-    private val indexQueueService = mock<IndexQueueService>()
-    private val indexStatusService = IndexStatusService(indexStatusRepository, telemetryClient, indexQueueService)
+  private val indexStatusRepository = mock<IndexStatusRepository>()
+  private val telemetryClient = mock<TelemetryClient>()
+  private val indexQueueService = mock<IndexQueueService>()
+  private val indexStatusService = IndexStatusService(indexStatusRepository, telemetryClient, indexQueueService)
 
-    @Nested
-    inner class MarkRebuildComplete {
+  @Nested
+  inner class MarkRebuildComplete {
 
-        @Test
-        fun `fails if indexing not in progress`() {
-            whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false)))
+    @Test
+    fun `fails if indexing not in progress`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false)))
 
-            assertThat(indexStatusService.markRebuildComplete()).isFalse
-        }
-
-        @Test
-        fun `fails if index queue has active messages`() {
-            whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true)))
-            whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(1, 0, 0))
-
-            assertThat(indexStatusService.markRebuildComplete()).isFalse
-        }
-
-        @Test
-        fun `completes build if OK`() {
-            whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true)))
-            whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
-
-            assertThat(indexStatusService.markRebuildComplete()).isTrue
-        }
-
+      assertThat(indexStatusService.markRebuildComplete()).isFalse
     }
+
+    @Test
+    fun `fails if index queue has active messages`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(1, 0, 0))
+
+      assertThat(indexStatusService.markRebuildComplete()).isFalse
+    }
+
+    @Test
+    fun `completes build if OK`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+
+      assertThat(indexStatusService.markRebuildComplete()).isTrue
+    }
+  }
 }
 
 fun anIndexStatus(inProgress: Boolean = true) =
-    IndexStatus(
-        id = "STATUS",
-        currentIndex = INDEX_A,
-        startIndexTime = LocalDateTime.now().minusHours(1L),
-        endIndexTime = LocalDateTime.now().minusMinutes(1L),
-        inProgress = inProgress
-    )
-
+  IndexStatus(
+    id = "STATUS",
+    currentIndex = INDEX_A,
+    startIndexTime = LocalDateTime.now().minusHours(1L),
+    endIndexTime = LocalDateTime.now().minusMinutes(1L),
+    inProgress = inProgress
+  )

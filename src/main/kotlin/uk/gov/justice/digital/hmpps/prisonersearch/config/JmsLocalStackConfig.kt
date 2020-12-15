@@ -17,67 +17,84 @@ import org.springframework.context.annotation.Configuration
 @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
 class JmsLocalStackConfig {
   @Bean("awsSqsClient")
-  fun awsSqsClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-                             @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsClientLocalstack(
+    @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
   @Bean("awsSqsDlqClient")
-  fun awsSqsDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-                                     @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsDlqClientLocalstack(
+    @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
   @Bean("awsSqsIndexASyncClient")
-  fun awsSqsIndexASyncClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-                                       @Value("\${sqs.endpoint.region}") region: String): AmazonSQSAsync =
+  fun awsSqsIndexASyncClientLocalstack(
+    @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQSAsync =
     AmazonSQSAsyncClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
   @Bean("awsSqsIndexClient")
-  fun awsSqsIndexClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-                                  @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsIndexClientLocalstack(
+    @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
   @Bean("awsSqsIndexDlqClient")
-  fun awsSqsIndexDlqClientLocalstack(@Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-                                          @Value("\${sqs.endpoint.region}") region: String): AmazonSQS =
+  fun awsSqsIndexDlqClientLocalstack(
+    @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
   @Bean("queueUrl")
-  fun queueUrl(@Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
-               @Value("\${sqs.queue.name}") queueName: String): String {
+  fun queueUrl(
+    @Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,
+    @Value("\${sqs.queue.name}") queueName: String
+  ): String {
     return awsSqsClient.getQueueUrl(queueName).queueUrl
   }
 
   @Bean("dlqUrl")
-  fun dlqUrl(@Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
-               @Value("\${sqs.dlq.name}") dlqName: String): String {
+  fun dlqUrl(
+    @Qualifier("awsSqsDlqClient") awsSqsDlqClient: AmazonSQS,
+    @Value("\${sqs.dlq.name}") dlqName: String
+  ): String {
     return awsSqsDlqClient.getQueueUrl(dlqName).queueUrl
   }
 
   @Bean("indexQueueUrl")
-  fun indexQueueUrl(@Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
-                    @Value("\${sqs.index.queue.name}") indexQueueName: String): String {
+  fun indexQueueUrl(
+    @Qualifier("awsSqsIndexASyncClient") awsSqsIndexASyncClient: AmazonSQSAsync,
+    @Value("\${sqs.index.queue.name}") indexQueueName: String
+  ): String {
     return awsSqsIndexASyncClient.getQueueUrl(indexQueueName).queueUrl
   }
 
   @Bean("indexDlqUrl")
-  fun indexDlqUrl(@Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
-             @Value("\${sqs.index.dlq.name}") indexDlqName: String): String {
+  fun indexDlqUrl(
+    @Qualifier("awsSqsIndexDlqClient") awsSqsIndexDlqClient: AmazonSQS,
+    @Value("\${sqs.index.dlq.name}") indexDlqName: String
+  ): String {
     return awsSqsIndexDlqClient.getQueueUrl(indexDlqName).queueUrl
   }
-
 }

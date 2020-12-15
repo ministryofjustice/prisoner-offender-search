@@ -10,40 +10,43 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Duration
 
 @Service
-class NomisService(val prisonWebClient: WebClient,
-                      @Value("\${api.offender.timeout:20s}") val offenderTimeout: Duration) {
+class NomisService(
+  val prisonWebClient: WebClient,
+  @Value("\${api.offender.timeout:20s}") val offenderTimeout: Duration
+) {
 
   private val ids = object : ParameterizedTypeReference<List<OffenderId>>() {}
   private val identifiers = object : ParameterizedTypeReference<List<BookingIdentifier>>() {}
 
-    fun getOffendersIds(offset: Long = 0, size: Int = 10): OffenderResponse {
-      return prisonWebClient.get()
-        .uri("/api/offenders/ids")
-        .header("Page-Offset", offset.toString())
-        .header("Page-Limit", size.toString())
-        .exchange()
-        .block(offenderTimeout.multipliedBy(6))?.let {
-          OffenderResponse(
-            it.bodyToMono(ids).block(),
-            it.headers().header("Total-Records").first().toLongOrNull()?:0)
-        }?: OffenderResponse()
-    }
+  fun getOffendersIds(offset: Long = 0, size: Int = 10): OffenderResponse {
+    return prisonWebClient.get()
+      .uri("/api/offenders/ids")
+      .header("Page-Offset", offset.toString())
+      .header("Page-Limit", size.toString())
+      .exchange()
+      .block(offenderTimeout.multipliedBy(6))?.let {
+        OffenderResponse(
+          it.bodyToMono(ids).block(),
+          it.headers().header("Total-Records").first().toLongOrNull() ?: 0
+        )
+      } ?: OffenderResponse()
+  }
 
   fun getOffender(bookingId: Long): OffenderBooking? {
     return prisonWebClient.get()
-        .uri("/api/bookings/$bookingId?extraInfo=true")
-        .retrieve()
-        .bodyToMono(OffenderBooking::class.java)
-        .block(offenderTimeout)
+      .uri("/api/bookings/$bookingId?extraInfo=true")
+      .retrieve()
+      .bodyToMono(OffenderBooking::class.java)
+      .block(offenderTimeout)
   }
 
   fun getOffender(offenderNo: String): OffenderBooking? {
     return prisonWebClient.get()
-        .uri("/api/offenders/$offenderNo")
-        .retrieve()
-        .bodyToMono(OffenderBooking::class.java)
-        .onErrorResume(NotFound::class.java) { Mono.empty() }
-        .block(offenderTimeout)
+      .uri("/api/offenders/$offenderNo")
+      .retrieve()
+      .bodyToMono(OffenderBooking::class.java)
+      .onErrorResume(NotFound::class.java) { Mono.empty() }
+      .block(offenderTimeout)
   }
 
   fun getMergedIdentifiersByBookingId(bookingId: Long): List<BookingIdentifier>? {
@@ -56,16 +59,16 @@ class NomisService(val prisonWebClient: WebClient,
   }
 }
 
-data class OffenderId (
-    val offenderNumber: String
+data class OffenderId(
+  val offenderNumber: String
 )
 
 data class OffenderResponse(
-  val offenderIds : List<OffenderId>? = emptyList(),
-  val totalRows : Long = 0
+  val offenderIds: List<OffenderId>? = emptyList(),
+  val totalRows: Long = 0
 )
 
-data class BookingIdentifier (
-   val type: String,
-   val value: String
+data class BookingIdentifier(
+  val type: String,
+  val value: String
 )

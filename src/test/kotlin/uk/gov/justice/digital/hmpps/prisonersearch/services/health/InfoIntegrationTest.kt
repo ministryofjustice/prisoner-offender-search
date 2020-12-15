@@ -27,6 +27,4 @@ class InfoIntegrationTest : QueueIntegrationTest() {
       .jsonPath("index-size.INDEX_A").isNotEmpty
       .jsonPath("index-size.INDEX_B").isNotEmpty
   }
-
-
 }

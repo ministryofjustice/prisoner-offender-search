@@ -25,7 +25,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 
-
 @ActiveProfiles(profiles = ["test", "test-queue"])
 abstract class QueueIntegrationTest : IntegrationTest() {
 
@@ -68,7 +67,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     val queueAttributes = awsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
-
 
   fun prisonRequestCountFor(url: String) = prisonMockServer.findAll(getRequestedFor(urlEqualTo(url))).count()
 

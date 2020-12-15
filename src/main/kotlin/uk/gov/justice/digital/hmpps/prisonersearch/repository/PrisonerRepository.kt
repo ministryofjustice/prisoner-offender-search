@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 
 @NoRepositoryBean
-interface PrisonerRepository<T:Prisoner, String> : ElasticsearchRepository<T, String>
+interface PrisonerRepository<T : Prisoner, String> : ElasticsearchRepository<T, String>
 
 @Repository
 interface PrisonerARepository : PrisonerRepository<PrisonerA, String>

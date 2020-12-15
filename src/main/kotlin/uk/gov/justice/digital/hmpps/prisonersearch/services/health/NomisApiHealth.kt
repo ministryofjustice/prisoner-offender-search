@@ -6,7 +6,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 
 @Component
-class NomisApiHealth(webClient: WebClient,
-                     @Value("\${api.base.url.nomis}") baseUri: String,
-                     @Value("\${api.health-timeout:2s}") timeout: Duration)
-    : HealthCheck(webClient, baseUri, timeout)
+class NomisApiHealth(
+  webClient: WebClient,
+  @Value("\${api.base.url.nomis}") baseUri: String,
+  @Value("\${api.health-timeout:2s}") timeout: Duration
+) :
+  HealthCheck(webClient, baseUri, timeout)

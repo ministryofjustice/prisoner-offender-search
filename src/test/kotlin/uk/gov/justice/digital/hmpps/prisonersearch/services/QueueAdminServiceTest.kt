@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-
 internal class QueueAdminServiceTest {
 
   private val indexAwsSqsClient = mock<AmazonSQS>()
@@ -60,9 +59,11 @@ internal class QueueAdminServiceTest {
       whenever(indexQueueService.getNumberOfMessagesCurrentlyOnIndexQueue()).thenReturn(1)
 
       queueAdminService.clearAllIndexQueueMessages()
-      verify(indexAwsSqsClient).purgeQueue(check {
-        assertThat(it.queueUrl).isEqualTo("arn:eu-west-1:index-queue")
-      })
+      verify(indexAwsSqsClient).purgeQueue(
+        check {
+          assertThat(it.queueUrl).isEqualTo("arn:eu-west-1:index-queue")
+        }
+      )
     }
 
     @Test
@@ -104,9 +105,11 @@ internal class QueueAdminServiceTest {
       whenever(indexQueueService.getNumberOfMessagesCurrentlyOnIndexDLQ()).thenReturn(1)
 
       queueAdminService.clearAllDlqMessagesForIndex()
-      verify(indexAwsSqsDlqClient).purgeQueue(check {
-        assertThat(it.queueUrl).isEqualTo("arn:eu-west-1:index-dlq")
-      })
+      verify(indexAwsSqsDlqClient).purgeQueue(
+        check {
+          assertThat(it.queueUrl).isEqualTo("arn:eu-west-1:index-dlq")
+        }
+      )
     }
 
     @Test
@@ -147,9 +150,11 @@ internal class QueueAdminServiceTest {
       whenever(eventAwsSqsDlqClient.getQueueUrl("event-dlq")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:event-dlq"))
 
       queueAdminService.clearAllDlqMessagesForEvent()
-      verify(eventAwsSqsDlqClient).purgeQueue(check {
-        assertThat(it.queueUrl).isEqualTo("arn:eu-west-1:event-dlq")
-      })
+      verify(eventAwsSqsDlqClient).purgeQueue(
+        check {
+          assertThat(it.queueUrl).isEqualTo("arn:eu-west-1:event-dlq")
+        }
+      )
     }
   }
 
@@ -167,9 +172,11 @@ internal class QueueAdminServiceTest {
 
       queueAdminService.transferEventMessages()
 
-      verify(eventAwsSqsDlqClient).receiveMessage(check<ReceiveMessageRequest> {
-        assertThat(it.queueUrl).isEqualTo(eventDlqUrl)
-      })
+      verify(eventAwsSqsDlqClient).receiveMessage(
+        check<ReceiveMessageRequest> {
+          assertThat(it.queueUrl).isEqualTo(eventDlqUrl)
+        }
+      )
     }
 
     @Test
@@ -182,9 +189,11 @@ internal class QueueAdminServiceTest {
 
       queueAdminService.transferEventMessages()
 
-      verify(eventAwsSqsDlqClient, times(3)).receiveMessage(check<ReceiveMessageRequest> {
-        assertThat(it.queueUrl).isEqualTo(eventDlqUrl)
-      })
+      verify(eventAwsSqsDlqClient, times(3)).receiveMessage(
+        check<ReceiveMessageRequest> {
+          assertThat(it.queueUrl).isEqualTo(eventDlqUrl)
+        }
+      )
     }
 
     @Test
@@ -232,9 +241,11 @@ internal class QueueAdminServiceTest {
 
       queueAdminService.transferIndexMessages()
 
-      verify(indexAwsSqsDlqClient).receiveMessage(check<ReceiveMessageRequest> {
-        assertThat(it.queueUrl).isEqualTo(indexDlqUrl)
-      })
+      verify(indexAwsSqsDlqClient).receiveMessage(
+        check<ReceiveMessageRequest> {
+          assertThat(it.queueUrl).isEqualTo(indexDlqUrl)
+        }
+      )
     }
 
     @Test
@@ -247,9 +258,11 @@ internal class QueueAdminServiceTest {
 
       queueAdminService.transferIndexMessages()
 
-      verify(indexAwsSqsDlqClient, times(3)).receiveMessage(check<ReceiveMessageRequest> {
-        assertThat(it.queueUrl).isEqualTo(indexDlqUrl)
-      })
+      verify(indexAwsSqsDlqClient, times(3)).receiveMessage(
+        check<ReceiveMessageRequest> {
+          assertThat(it.queueUrl).isEqualTo(indexDlqUrl)
+        }
+      )
     }
 
     @Test
@@ -305,7 +318,8 @@ internal class QueueAdminServiceTest {
   }
 }
 
-fun dataComplianceDeleteOffenderMessage(offenderNumber: String) = """
+fun dataComplianceDeleteOffenderMessage(offenderNumber: String) =
+  """
     {
   "Type": "Notification",
   "MessageId": "20e13002-d1be-56e7-be8c-66cdd7e23341",
@@ -337,7 +351,8 @@ fun dataComplianceDeleteOffenderMessage(offenderNumber: String) = """
 }
   """.trimIndent()
 
-fun offenderChangedMessage(offenderNumber: String) = """
+fun offenderChangedMessage(offenderNumber: String) =
+  """
     {
   "Type": "Notification",
   "MessageId": "20e13002-d1be-56e7-be8c-66cdd7e23341",
@@ -369,7 +384,8 @@ fun offenderChangedMessage(offenderNumber: String) = """
 }
   """.trimIndent()
 
-fun populateOffenderMessage(offenderNumber: String) = """
+fun populateOffenderMessage(offenderNumber: String) =
+  """
   {
     "requestType": "OFFENDER",
     "prisonerNumber":"$offenderNumber"

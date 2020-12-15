@@ -88,7 +88,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .exchange()
       .expectStatus().isNotFound
   }
-  
+
   @Test
   fun `can perform a match on prisoner number`() {
     search(SearchCriteria("A7089EY", null, null), "/results/search_results_smith.json")
@@ -294,6 +294,3 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
     prisonSearch("OUT", "/results/search_results_out.json")
   }
 }
-
-
-

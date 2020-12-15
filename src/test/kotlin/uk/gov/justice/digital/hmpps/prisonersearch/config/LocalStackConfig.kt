@@ -13,7 +13,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.elasticsearch.ElasticsearchContainer
 
-
 @Configuration
 @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "embedded-localstack")
 class LocalStackConfig {
@@ -22,14 +21,14 @@ class LocalStackConfig {
   }
 
   @Bean
-  fun localStackContainer(applicationContext : ConfigurableApplicationContext): LocalStackContainer {
+  fun localStackContainer(applicationContext: ConfigurableApplicationContext): LocalStackContainer {
     log.info("Starting elasticsearch...")
     val elasticsearchContainer = ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1")
     elasticsearchContainer
-        .withEnv("HOSTNAME_EXTERNAL", "localhost")
-        .withClasspathResourceMapping("/localstack/setup-es.sh","/docker-entrypoint-initaws.d/setup-es.sh", BindMode.READ_WRITE)
-        .withExposedPorts(9200,4578)
-        .start()
+      .withEnv("HOSTNAME_EXTERNAL", "localhost")
+      .withClasspathResourceMapping("/localstack/setup-es.sh", "/docker-entrypoint-initaws.d/setup-es.sh", BindMode.READ_WRITE)
+      .withExposedPorts(9200, 4578)
+      .start()
 
     val elasticSearchPort = elasticsearchContainer.getMappedPort(9200)
     elasticsearchContainer.setCommand()
@@ -39,13 +38,13 @@ class LocalStackConfig {
     log.info("Starting localstack...")
     val logConsumer = Slf4jLogConsumer(log).withPrefix("localstack")
     val localStackContainer: LocalStackContainer = LocalStackContainer("0.11.2")
-        .withServices(LocalStackContainer.Service.SQS, LocalStackContainer.Service.SNS)
-        .withClasspathResourceMapping("/localstack/setup-sns.sh","/docker-entrypoint-initaws.d/setup-sns.sh", BindMode.READ_WRITE)
-        .withEnv("HOSTNAME_EXTERNAL", "localhost")
-        .withEnv("DEFAULT_REGION", "eu-west-2")
-        .waitingFor(
-            Wait.forLogMessage(".*All Ready.*", 1)
-        )
+      .withServices(LocalStackContainer.Service.SQS, LocalStackContainer.Service.SNS)
+      .withClasspathResourceMapping("/localstack/setup-sns.sh", "/docker-entrypoint-initaws.d/setup-sns.sh", BindMode.READ_WRITE)
+      .withEnv("HOSTNAME_EXTERNAL", "localhost")
+      .withEnv("DEFAULT_REGION", "eu-west-2")
+      .waitingFor(
+        Wait.forLogMessage(".*All Ready.*", 1)
+      )
 
     log.info("Started localstack.")
 

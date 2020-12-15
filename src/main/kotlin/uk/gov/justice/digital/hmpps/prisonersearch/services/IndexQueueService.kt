@@ -54,7 +54,7 @@ class IndexQueueService(
     )
 }
 
-data class PrisonerIndexRequest (
+data class PrisonerIndexRequest(
   val requestType: IndexRequestType?,
   val prisonerNumber: String? = null,
   val pageRequest: PageRequest? = null

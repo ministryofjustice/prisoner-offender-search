@@ -21,8 +21,9 @@ import javax.validation.constraints.Pattern
 @RestController
 @Validated
 @RequestMapping("/prisoner-index", produces = [MediaType.APPLICATION_JSON_VALUE])
-class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexService,
-                            private val queueAdminService: QueueAdminService
+class PrisonerIndexResource(
+  private val prisonerIndexService: PrisonerIndexService,
+  private val queueAdminService: QueueAdminService
 ) {
 
   @PutMapping("/build-index")
@@ -77,50 +78,63 @@ class PrisonerIndexResource(private val prisonerIndexService: PrisonerIndexServi
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
     summary = "Purges the index dead letter queue",
-    description = "Requires PRISONER_INDEX role")
-  @ApiResponses(value = [
-    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-  ])
+    description = "Requires PRISONER_INDEX role"
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+    ]
+  )
   fun purgeIndexDlq(): Unit = queueAdminService.clearAllDlqMessagesForIndex()
 
   @PutMapping("/purge-event-dlq")
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
     summary = "Purges the event dead letter queue",
-    description = "Requires PRISONER_INDEX role")
-  @ApiResponses(value = [
-    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-  ])
+    description = "Requires PRISONER_INDEX role"
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+    ]
+  )
   fun purgeEventDlq(): Unit = queueAdminService.clearAllDlqMessagesForEvent()
 
   @PutMapping("/transfer-index-dlq")
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
     summary = "Transfers all DLQ messages to the main queue",
-    description = "Requires PRISONER_INDEX role")
-  @ApiResponses(value = [
-    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-  ])
+    description = "Requires PRISONER_INDEX role"
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+    ]
+  )
   fun transferIndexDlq(): Unit = queueAdminService.transferIndexMessages()
 
   @PutMapping("/transfer-event-dlq")
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
     summary = "Transfers all DLQ messages to the main queue",
-    description = "Requires PRISONER_INDEX role")
-  @ApiResponses(value = [
-    ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-    ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-  ])
+    description = "Requires PRISONER_INDEX role"
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
+      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
+    ]
+  )
   fun transferEventDlq(): Unit = queueAdminService.transferEventMessages()
 
   @PutMapping("/queue-housekeeping")
   @Operation(
     summary = "Performs automated housekeeping tasks such as marking builds completed",
-    description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`")
+    description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`"
+  )
   fun indexQueueHousekeeping() {
     prisonerIndexService.indexingComplete()
     queueAdminService.transferIndexMessages()

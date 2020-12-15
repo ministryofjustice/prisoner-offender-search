@@ -14,17 +14,17 @@ import org.springframework.core.type.AnnotatedTypeMetadata
  */
 @Configuration
 open class ApplicationInsightsConfiguration {
-    @Bean
-    @Conditional(AppInsightKeyAbsentCondition::class)
-    open fun telemetryClient(): TelemetryClient {
-        return TelemetryClient()
-    }
+  @Bean
+  @Conditional(AppInsightKeyAbsentCondition::class)
+  open fun telemetryClient(): TelemetryClient {
+    return TelemetryClient()
+  }
 
-    class AppInsightKeyAbsentCondition : Condition {
+  class AppInsightKeyAbsentCondition : Condition {
 
-        override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
-            val telemetryKey: String? = context.environment.getProperty("application.insights.ikey")
-            return telemetryKey.isNullOrBlank()
-        }
+    override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
+      val telemetryKey: String? = context.environment.getProperty("application.insights.ikey")
+      return telemetryKey.isNullOrBlank()
     }
+  }
 }

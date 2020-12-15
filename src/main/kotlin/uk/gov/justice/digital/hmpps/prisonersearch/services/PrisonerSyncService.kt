@@ -27,7 +27,7 @@ class PrisonerSyncService(
 
   fun offenderBookNumberChange(message: OffenderBookingChangedMessage) {
     val bookingId = message.bookingId
-    log.debug("Check for merged booking for ID {}", bookingId);
+    log.debug("Check for merged booking for ID {}", bookingId)
 
     // check for merges
     nomisService.getMergedIdentifiersByBookingId(bookingId)?.forEach {
@@ -48,5 +48,4 @@ class PrisonerSyncService(
   fun deleteOffender(message: OffenderChangedMessage) {
     prisonerIndexService.delete(message.offenderIdDisplay)
   }
-
 }

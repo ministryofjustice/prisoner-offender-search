@@ -9,7 +9,6 @@ import org.springframework.data.elasticsearch.client.RestClients
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories
 
-
 @Configuration
 @EnableElasticsearchRepositories(basePackages = ["uk.gov.justice.digital.hmpps.prisonersearch.repository"])
 class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
@@ -25,4 +24,3 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
     return RestClients.create(ClientConfiguration.builder().connectedTo("$host:$port").build()).rest()
   }
 }
-

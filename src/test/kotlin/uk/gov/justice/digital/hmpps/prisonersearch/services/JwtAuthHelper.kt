@@ -11,8 +11,7 @@ import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.*
-import java.util.UUID
-
+import kotlin.collections.HashMap
 
 @Component
 class JwtAuthHelper {
@@ -27,22 +26,24 @@ class JwtAuthHelper {
   @Bean
   fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
-  fun createJwt(subject: String,
-                scope: List<String>? = listOf(),
-                roles: List<String>? = listOf(),
-                expiryTime: Duration = Duration.ofHours(1),
-                jwtId: String = UUID.randomUUID().toString()): String {
+  fun createJwt(
+    subject: String,
+    scope: List<String>? = listOf(),
+    roles: List<String>? = listOf(),
+    expiryTime: Duration = Duration.ofHours(1),
+    jwtId: String = UUID.randomUUID().toString()
+  ): String {
     val claims = HashMap<String, Any>()
     claims["user_name"] = subject
     claims["client_id"] = "prisoner-offender-search-client"
     if (!roles.isNullOrEmpty()) claims["authorities"] = roles
     if (!scope.isNullOrEmpty()) claims["scope"] = scope
     return Jwts.builder()
-        .setId(jwtId)
-        .setSubject(subject)
-        .addClaims(claims)
-        .setExpiration(Date(System.currentTimeMillis() + expiryTime.toMillis()))
-        .signWith(SignatureAlgorithm.RS256, keyPair.private)
-        .compact()
+      .setId(jwtId)
+      .setSubject(subject)
+      .addClaims(claims)
+      .setExpiration(Date(System.currentTimeMillis() + expiryTime.toMillis()))
+      .signWith(SignatureAlgorithm.RS256, keyPair.private)
+      .compact()
   }
 }

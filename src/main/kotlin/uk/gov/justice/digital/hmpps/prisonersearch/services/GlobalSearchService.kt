@@ -35,19 +35,19 @@ class GlobalSearchService(
   fun findByGlobalSearchCriteria(globalSearchCriteria: GlobalSearchCriteria, pageable: Pageable): Page<Prisoner> {
     validateSearchForm(globalSearchCriteria)
     if (globalSearchCriteria.prisonerIdentifier != null) {
-      queryBy(globalSearchCriteria,pageable) { idMatch(it) } onMatch {
+      queryBy(globalSearchCriteria, pageable) { idMatch(it) } onMatch {
         customEventForFindBySearchCriteria(globalSearchCriteria, it.matches.size)
         return PageImpl(it.matches, pageable, it.totalHits)
       }
     }
     if (!(globalSearchCriteria.firstName.isNullOrBlank() && globalSearchCriteria.lastName.isNullOrBlank())) {
       if (globalSearchCriteria.includeAliases) {
-        queryBy(globalSearchCriteria,pageable) { nameMatchWithAliases(it) } onMatch {
+        queryBy(globalSearchCriteria, pageable) { nameMatchWithAliases(it) } onMatch {
           customEventForFindBySearchCriteria(globalSearchCriteria, it.matches.size)
           return PageImpl(it.matches, pageable, it.totalHits)
         }
       } else {
-        queryBy(globalSearchCriteria,pageable) { nameMatch(it) } onMatch {
+        queryBy(globalSearchCriteria, pageable) { nameMatch(it) } onMatch {
           customEventForFindBySearchCriteria(globalSearchCriteria, it.matches.size)
           return PageImpl(it.matches, pageable, it.totalHits)
         }
@@ -81,7 +81,7 @@ class GlobalSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches,searchResults.hits.totalHits?.value ?: 0)
+      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches, searchResults.hits.totalHits?.value ?: 0)
     } ?: GlobalResult.NoMatch
   }
 
@@ -139,7 +139,8 @@ class GlobalSearchService(
                       .mustWhenPresent("aliases.firstName", firstName)
                       .mustWhenPresentGender("aliases.gender", gender?.value)
                       .mustWhenPresent("aliases.dateOfBirth", dateOfBirth)
-                  ), ScoreMode.Max
+                  ),
+                ScoreMode.Max
               )
             )
         )
@@ -153,7 +154,6 @@ class GlobalSearchService(
   }
 
   private fun getIndex() = indexStatusService.getCurrentIndex().currentIndex.indexName
-
 
   private fun customEventForFindBySearchCriteria(
     globalSearchCriteria: GlobalSearchCriteria,
@@ -194,6 +194,5 @@ private fun BoolQueryBuilder.withDefaults(globalSearchCriteria: GlobalSearchCrit
   when (globalSearchCriteria.location) {
     "IN" -> mustNotWhenPresent("prisonId", "OUT")
     "OUT" -> filterWhenPresent("prisonId", "OUT")
-  else -> this
+    else -> this
   }
-

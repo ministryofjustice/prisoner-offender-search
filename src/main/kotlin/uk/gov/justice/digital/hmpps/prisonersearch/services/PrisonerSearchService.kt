@@ -33,7 +33,6 @@ class PrisonerSearchService(
     const val RESULT_HITS_MAX = 1000
   }
 
-
   fun findBySearchCriteria(searchCriteria: SearchCriteria): List<Prisoner> {
     validateSearchForm(searchCriteria)
     if (searchCriteria.prisonerIdentifier != null) {
@@ -60,7 +59,7 @@ class PrisonerSearchService(
   }
 
   fun findByPrison(prisonId: String, pageable: Pageable): Page<Prisoner> {
-    queryBy(prisonId,pageable) {locationMatch(it)} onMatch {
+    queryBy(prisonId, pageable) { locationMatch(it) } onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
     }
@@ -124,7 +123,7 @@ class PrisonerSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches,searchResults.hits.totalHits?.value ?: 0)
+      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches, searchResults.hits.totalHits?.value ?: 0)
     } ?: GlobalResult.NoMatch
   }
 
@@ -183,7 +182,8 @@ class PrisonerSearchService(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
                       .mustWhenPresent("aliases.firstName", firstName)
-                  ), ScoreMode.Max
+                  ),
+                ScoreMode.Max
               )
             )
         )
@@ -242,7 +242,9 @@ class PrisonerSearchService(
     telemetryClient.trackEvent("POSFindByListOfPrisonerNumbers", logMap, metricsMap)
   }
 
-  private fun customEventForFindByPrisonId(prisonId: String, numberOfResults: Int
+  private fun customEventForFindByPrisonId(
+    prisonId: String,
+    numberOfResults: Int
   ) {
     val propertiesMap = mapOf(
       "prisonId" to prisonId

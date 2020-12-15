@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class SearchClient(
-    @param:Qualifier("elasticSearchClient") private val elasticSearchClient: RestHighLevelClient,
-    @param:Qualifier("elasticsearchOperations") private val elasticsearchOperations : ElasticsearchOperations
+  @param:Qualifier("elasticSearchClient") private val elasticSearchClient: RestHighLevelClient,
+  @param:Qualifier("elasticsearchOperations") private val elasticsearchOperations: ElasticsearchOperations
 ) {
   fun search(searchRequest: SearchRequest): SearchResponse = elasticSearchClient.search(searchRequest, RequestOptions.DEFAULT)
   fun count(countRequest: CountRequest): CountResponse = elasticSearchClient.count(countRequest, RequestOptions.DEFAULT)
-  fun lowLevelClient() : RestClient = elasticSearchClient.lowLevelClient
-  fun elasticsearchOperations() : ElasticsearchOperations = elasticsearchOperations
+  fun lowLevelClient(): RestClient = elasticSearchClient.lowLevelClient
+  fun elasticsearchOperations(): ElasticsearchOperations = elasticsearchOperations
 }
