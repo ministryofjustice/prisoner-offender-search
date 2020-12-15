@@ -13,16 +13,16 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.REB
 
 @Service
 class PrisonerIndexListener(
-    private val prisonerIndexService: PrisonerIndexService,
-    @Qualifier("gson") private val gson : Gson,
-    private val telemetryClient: TelemetryClient
+  private val prisonerIndexService: PrisonerIndexService,
+  @Qualifier("gson") private val gson: Gson,
+  private val telemetryClient: TelemetryClient
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
   @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
-  fun processIndexRequest(requestJson: String?, msg : javax.jms.Message ) {
+  fun processIndexRequest(requestJson: String?, msg: javax.jms.Message) {
     log.debug(requestJson)
     try {
       val indexRequest = gson.fromJson(requestJson, PrisonerIndexRequest::class.java)
@@ -30,18 +30,19 @@ class PrisonerIndexListener(
 
       when (indexRequest.requestType) {
         REBUILD -> {
-          msg.acknowledge()  // ack before processing
+          msg.acknowledge() // ack before processing
           prisonerIndexService.addIndexRequestToQueue()
         }
         OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeIndexed(it) }
         OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
         else -> log.warn("Unexpected Message {}", requestJson)
       }
-    } catch (e : Exception) {
+    } catch (e: Exception) {
       telemetryClient.trackEvent(
         "POSProcessIndexRequestError",
         mapOf("requestPayload" to requestJson, "message" to e.message),
-        null)
+        null
+      )
 
       throw e
     }

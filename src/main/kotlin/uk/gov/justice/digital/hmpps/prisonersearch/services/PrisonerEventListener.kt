@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 
-
 @Service
 class PrisonerEventListener(
   private val prisonerSyncService: PrisonerSyncService,
@@ -26,7 +25,6 @@ class PrisonerEventListener(
       val eventType = messageAttributes.eventType.Value
       log.debug("Received message {} type {}", messageId, eventType)
 
-
       when (eventType) {
         "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))
         "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED", "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED", "ASSESSMENT-CHANGED", "OFFENDER_PROFILE_DETAILS-INSERTED", "OFFENDER_PROFILE_DETAILS-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
@@ -37,12 +35,12 @@ class PrisonerEventListener(
 
         else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
       }
-
     } catch (e: Exception) {
       telemetryClient.trackEvent(
         "POSProcessEventRequestError",
         mapOf("requestPayload" to requestJson, "message" to e.message),
-        null)
+        null
+      )
 
       throw e
     }
@@ -57,13 +55,15 @@ data class EventType(val Value: String)
 data class MessageAttributes(val eventType: EventType)
 data class Message(val Message: String, val MessageId: String, val MessageAttributes: MessageAttributes)
 
-data class ExternalPrisonerMovementMessage(val bookingId: Long,
-                                           val movementSeq: Long,
-                                           val offenderIdDisplay: String,
-                                           val fromAgencyLocationId: String,
-                                           val toAgencyLocationId: String,
-                                           val directionCode: String,
-                                           val movementType: String)
+data class ExternalPrisonerMovementMessage(
+  val bookingId: Long,
+  val movementSeq: Long,
+  val offenderIdDisplay: String,
+  val fromAgencyLocationId: String,
+  val toAgencyLocationId: String,
+  val directionCode: String,
+  val movementType: String
+)
 
 data class OffenderBookingChangedMessage(val bookingId: Long)
 

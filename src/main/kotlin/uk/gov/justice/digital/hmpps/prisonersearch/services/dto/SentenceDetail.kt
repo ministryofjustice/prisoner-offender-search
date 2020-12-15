@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import java.time.LocalDate
 
-data class SentenceDetail (
+data class SentenceDetail(
   val sentenceExpiryDate: LocalDate? = null,
   val automaticReleaseDate: LocalDate? = null,
   val conditionalReleaseDate: LocalDate? = null,

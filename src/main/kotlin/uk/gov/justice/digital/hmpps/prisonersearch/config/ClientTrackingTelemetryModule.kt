@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
 import java.text.ParseException
-import java.util.*
+import java.util.Optional
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest

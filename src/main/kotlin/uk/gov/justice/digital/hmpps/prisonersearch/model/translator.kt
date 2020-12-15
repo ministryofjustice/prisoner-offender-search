@@ -4,7 +4,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLo
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
-fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
+fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.prisonerNumber = ob.offenderNo
   prisoner.bookNumber = ob.bookingNo
   prisoner.bookingId = ob.bookingId?.toString()
@@ -59,10 +59,9 @@ fun <P:Prisoner> translate(prisoner : P, ob: OffenderBooking): P {
   prisoner.locationDescription = ob.locationDescription
 
   // get the most serious offence for this booking
-  prisoner.mostSeriousOffence = ob.offenceHistory?.firstOrNull{ off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
+  prisoner.mostSeriousOffence = ob.offenceHistory?.firstOrNull { off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
   prisoner.recall = ob.recall
   prisoner.legalStatus = ob.legalStatus
-  prisoner.indeterminateSentence = ob.sentenceTerms?.any{ st -> st.lifeSentence && st.bookingId == ob.bookingId }
+  prisoner.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
   return prisoner
 }
-

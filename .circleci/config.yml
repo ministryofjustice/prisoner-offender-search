@@ -51,7 +51,7 @@ jobs:
       - run:
           environment:
             - AWS_PROVIDER: localstack
-          command: ./gradlew test
+          command: ./gradlew check
       - save_cache:
           paths:
             - ~/.gradle

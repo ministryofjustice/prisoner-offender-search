@@ -2,12 +2,12 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import java.time.LocalDate
 
-data class OffenderBooking (
+data class OffenderBooking(
   val offenderNo: String,
   val firstName: String,
   val lastName: String,
   val dateOfBirth: LocalDate,
-  val activeFlag : Boolean,
+  val activeFlag: Boolean,
   val bookingId: Long? = null,
   val bookingNo: String? = null,
   val middleName: String? = null,
@@ -37,7 +37,7 @@ data class OffenderBooking (
   val legalStatus: String? = null,
   val recall: Boolean? = null,
   val imprisonmentStatus: String? = null,
-  val personalCareNeeds : List<PersonalCareNeed>? = null,
+  val personalCareNeeds: List<PersonalCareNeed>? = null,
   val receptionDate: LocalDate? = null,
   val locationDescription: String? = null
 )

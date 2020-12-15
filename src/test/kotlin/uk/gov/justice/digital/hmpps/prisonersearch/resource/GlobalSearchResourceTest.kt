@@ -434,6 +434,3 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
     )
   }
 }
-
-
-

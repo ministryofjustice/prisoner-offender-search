@@ -71,11 +71,11 @@ internal class CanonicalPncKtTest {
     "93/0000000a,     93/0A",
   )
   internal fun `will convert to canonical form of PNC with short year when it is valid`(input: String, expected: String) {
-    assertThat(input.canonicalPNCNumberShort()).isEqualTo(expected) }
+    assertThat(input.canonicalPNCNumberShort()).isEqualTo(expected)
+  }
 
   @ParameterizedTest
-  @ValueSource
-    (
+  @ValueSource(
     strings = [
       "2003/A",
       "203/1234567A",
@@ -99,30 +99,29 @@ internal class CanonicalPncKtTest {
 
   @ParameterizedTest
   @CsvSource(
-        "2003/1234567a, 2003/1234567A",
-        "1993/0234567a, 1993/234567A",
-        "2000/0034567a, 2000/34567A",
-        "2003/0004567a, 2003/4567A",
-        "1993/0000567a, 1993/567A",
-        "2000/0000067a, 2000/67A",
-        "2003/0000007a, 2003/7A",
-        "1983/0000000a, 1983/0A",
-        "03/1234567a,   2003/1234567A",
-        "93/0234567a,   1993/234567A",
-        "00/0034567a,   2000/34567A",
-        "03/0004567a,   2003/4567A",
-        "93/0000567a,   1993/567A",
-        "00/0000067a,   2000/67A",
-        "03/0000007a,   2003/7A",
-        "83/0000000a,   1983/0A",
+    "2003/1234567a, 2003/1234567A",
+    "1993/0234567a, 1993/234567A",
+    "2000/0034567a, 2000/34567A",
+    "2003/0004567a, 2003/4567A",
+    "1993/0000567a, 1993/567A",
+    "2000/0000067a, 2000/67A",
+    "2003/0000007a, 2003/7A",
+    "1983/0000000a, 1983/0A",
+    "03/1234567a,   2003/1234567A",
+    "93/0234567a,   1993/234567A",
+    "00/0034567a,   2000/34567A",
+    "03/0004567a,   2003/4567A",
+    "93/0000567a,   1993/567A",
+    "00/0000067a,   2000/67A",
+    "03/0000007a,   2003/7A",
+    "83/0000000a,   1983/0A",
   )
   internal fun `will convert to canonical form of PNC with long year  when it is valid`(input: String, expected: String) {
     assertThat(input.canonicalPNCNumberLong()).isEqualTo(expected)
   }
 
   @ParameterizedTest
-  @ValueSource
-    (
+  @ValueSource(
     strings = [
       "2003/A",
       "203/1234567A",

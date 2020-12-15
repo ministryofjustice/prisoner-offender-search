@@ -130,7 +130,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount)
   }
 
-
   @Test
   fun `can index a new prisoner`() {
     indexPrisoners()
@@ -162,14 +161,13 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount+1)
-
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
   }
 
   @Test
   fun `both indexes are maintained whilst indexing but not once completed`() {
 
-    //index B
+    // index B
     indexPrisoners()
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
@@ -205,9 +203,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount+1)
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount+1)
-
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount + 1)
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -227,8 +224,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
       .jsonPath("index-status.inProgress").isEqualTo("false")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount+2)
-      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount+1)
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount + 2)
+      .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
   }
 
   @Test
@@ -245,7 +242,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `conflict returned if one index is rebuilding when trying to switch indexes`() {
-    //index B
+    // index B
     indexPrisoners()
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
@@ -368,7 +365,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .expectStatus()
         .isOk
         .expectBody()
-        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount+1)
+        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount + 1)
     }
 
     @Test
@@ -395,7 +392,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .isOk
         .expectBody()
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount+1)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
     }
   }
 
@@ -425,7 +422,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .isOk
         .expectBody()
         .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
-        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount+1)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
     }
 
     @Test

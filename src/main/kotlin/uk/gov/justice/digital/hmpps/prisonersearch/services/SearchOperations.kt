@@ -5,7 +5,7 @@ import org.elasticsearch.index.query.QueryBuilders
 
 fun BoolQueryBuilder.mustWhenPresent(query: String, value: Any?): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       else -> true
     }
@@ -17,7 +17,7 @@ fun BoolQueryBuilder.mustWhenPresent(query: String, value: Any?): BoolQueryBuild
 
 fun BoolQueryBuilder.mustNotWhenPresent(query: String, value: Any?): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       else -> true
     }
@@ -29,13 +29,13 @@ fun BoolQueryBuilder.mustNotWhenPresent(query: String, value: Any?): BoolQueryBu
 
 fun BoolQueryBuilder.filterWhenPresent(query: String, value: Any?): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       is List<*> -> it.isNotEmpty()
       else -> true
     }
   }?.let {
-    when(it) {
+    when (it) {
       is List<*> -> this.filter(shouldMatchOneOf(query, it))
       else -> this.filter(QueryBuilders.matchQuery(query, it))
     }
@@ -45,7 +45,7 @@ fun BoolQueryBuilder.filterWhenPresent(query: String, value: Any?): BoolQueryBui
 
 fun BoolQueryBuilder.shouldMultiMatch(value: Any?, vararg query: String): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       else -> true
     }
@@ -69,12 +69,13 @@ fun BoolQueryBuilder.mustWhenTrue(predicate: () -> Boolean, query: String, value
 
 fun BoolQueryBuilder.mustMultiMatchKeyword(value: Any?, vararg query: String): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       else -> true
     }
   }?.let {
-    this.must().add(QueryBuilders.multiMatchQuery(value, *query)
+    this.must().add(
+      QueryBuilders.multiMatchQuery(value, *query)
         .analyzer("keyword")
     )
   }
@@ -83,12 +84,13 @@ fun BoolQueryBuilder.mustMultiMatchKeyword(value: Any?, vararg query: String): B
 
 fun BoolQueryBuilder.mustMultiMatch(value: Any?, vararg query: String): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       else -> true
     }
   }?.let {
-    this.must().add(QueryBuilders.multiMatchQuery(value, *query)
+    this.must().add(
+      QueryBuilders.multiMatchQuery(value, *query)
     )
   }
   return this
@@ -96,7 +98,7 @@ fun BoolQueryBuilder.mustMultiMatch(value: Any?, vararg query: String): BoolQuer
 
 fun BoolQueryBuilder.mustKeyword(value: Any?, query: String): BoolQueryBuilder {
   value.takeIf {
-    when(it) {
+    when (it) {
       is String -> it.isNotBlank()
       else -> true
     }
@@ -119,4 +121,4 @@ fun shouldMatchOneOf(query: String, values: List<*>): BoolQueryBuilder {
 }
 
 fun BoolQueryBuilder.mustWhenPresentGender(query: String, value: Any?) =
-  if(value == "ALL") this else mustWhenPresent(query,value)
+  if (value == "ALL") this else mustWhenPresent(query, value)

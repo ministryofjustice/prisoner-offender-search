@@ -5,12 +5,12 @@ import java.time.LocalDate
 /**
  * Assessment
  */
-data class Assessment (
+data class Assessment(
   val classificationCode: String?,
   val classification: String?,
   val assessmentCode: String?,
   val assessmentDescription: String?,
-  val cellSharingAlertFlag : Boolean,
+  val cellSharingAlertFlag: Boolean,
   val assessmentDate: LocalDate?,
   val nextReviewDate: LocalDate?,
   val approvalDate: LocalDate?,

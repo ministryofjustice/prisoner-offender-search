@@ -6,8 +6,10 @@ import org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElastic
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(
-  exclude = [ReactiveElasticsearchRestClientAutoConfiguration::class,
-    ReactiveElasticsearchRepositoriesAutoConfiguration::class]
+  exclude = [
+    ReactiveElasticsearchRestClientAutoConfiguration::class,
+    ReactiveElasticsearchRepositoriesAutoConfiguration::class
+  ]
 )
 class PrisonerOffenderSearch
 

@@ -36,7 +36,7 @@ abstract class IntegrationTest {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
-  
+
   companion object {
     internal val prisonMockServer = PrisonMockServer()
     internal val oauthMockServer = OAuthMockServer()
@@ -72,11 +72,12 @@ abstract class IntegrationTest {
   internal fun Any.asJson() = gson.toJson(this)
 
   internal fun setAuthorisation(user: String = "prison-to-nhs-api-client", roles: List<String> = listOf()): (HttpHeaders) -> Unit {
-    val token = jwtHelper.createJwt(subject = user,
-        scope = listOf("read"),
-        expiryTime = Duration.ofHours(1L),
-        roles = roles)
+    val token = jwtHelper.createJwt(
+      subject = user,
+      scope = listOf("read"),
+      expiryTime = Duration.ofHours(1L),
+      roles = roles
+    )
     return { it.set(HttpHeaders.AUTHORIZATION, "Bearer $token") }
   }
-
 }

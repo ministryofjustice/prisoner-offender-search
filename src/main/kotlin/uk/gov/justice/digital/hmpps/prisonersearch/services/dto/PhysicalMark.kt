@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
-data class PhysicalMark (
+data class PhysicalMark(
   val type: String,
   val side: String?,
   val bodyPart: String?,

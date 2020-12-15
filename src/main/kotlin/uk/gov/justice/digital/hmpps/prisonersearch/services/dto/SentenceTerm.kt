@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import java.time.LocalDate
 
-data class SentenceTerm (
+data class SentenceTerm(
   val bookingId: Long,
   val sentenceSequence: Int,
   val termSequence: Int,

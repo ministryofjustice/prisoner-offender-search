@@ -19,24 +19,32 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
     private var initialiseSearchData = true
   }
 
-  data class IDs (val offenderNumber: String)
+  data class IDs(val offenderNumber: String)
 
   @BeforeEach
   fun setup() {
 
-      if (initialiseSearchData) {
-        val prisonerNumbers = getTestPrisonerNumbers(12)
-        prisonMockServer.stubFor(get(urlEqualTo("/api/offenders/ids"))
-          .willReturn(aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", prisonerNumbers.size.toString())
-            .withBody(gson.toJson( prisonerNumbers.map { IDs(it) }))))
-        prisonerNumbers.forEach {
-          prisonMockServer.stubFor(get(urlEqualTo("/api/offenders/$it"))
-          .willReturn(aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(getOffenderBookingJson(it))))
-        }
+    if (initialiseSearchData) {
+      val prisonerNumbers = getTestPrisonerNumbers(12)
+      prisonMockServer.stubFor(
+        get(urlEqualTo("/api/offenders/ids"))
+          .willReturn(
+            aResponse()
+              .withHeader("Content-Type", "application/json")
+              .withHeader("Total-Records", prisonerNumbers.size.toString())
+              .withBody(gson.toJson(prisonerNumbers.map { IDs(it) }))
+          )
+      )
+      prisonerNumbers.forEach {
+        prisonMockServer.stubFor(
+          get(urlEqualTo("/api/offenders/$it"))
+            .willReturn(
+              aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(getOffenderBookingJson(it))
+            )
+        )
+      }
 
       setupIndexes()
       indexPrisoners(prisonerNumbers)
@@ -63,7 +71,7 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   }
 
   private fun getTestPrisonerNumbers(count: Int): List<String> {
-    return List(count) { i -> "AN$i"  }
+    return List(count) { i -> "AN$i" }
   }
 
   @Test
@@ -141,7 +149,6 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
       .expectStatus().isForbidden
   }
 
-
   private fun getOffenderBookingJson(offenderNo: String): String? {
     val templateOffender = gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
     return gson.toJson(templateOffender.copy(offenderNo = offenderNo))
@@ -150,6 +157,3 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
 
 private fun String.readResourceAsText() =
   PrisonerSearchByPrisonerNumbersResourceTest::class.java.getResource(this).readText()
-
-
-

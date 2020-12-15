@@ -19,5 +19,4 @@ data class ErrorResponse(
     description = "Additional information about the error",
     example = "Hard disk failure"
   ) val moreInfo: String? = null
-) {
-}
+)

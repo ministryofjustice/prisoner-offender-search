@@ -43,7 +43,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private lateinit var indexDlqName: String
 
-
   @AfterEach
   fun tearDown() {
     ReflectionTestUtils.setField(eventQueueHealth, QueueHealth::class.java, "queueName", queueName, String::class.java)
@@ -123,7 +122,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .expectBody()
       .jsonPath("components.eventQueueHealth.status").isEqualTo("DOWN")
       .jsonPath("status").isEqualTo("DOWN")
-
   }
 
   @Test
@@ -139,7 +137,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .expectBody()
       .jsonPath("components.indexQueueHealth.status").isEqualTo("DOWN")
       .jsonPath("status").isEqualTo("DOWN")
-
   }
 
   @Test
@@ -170,7 +167,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .is5xxServerError
       .expectBody()
       .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_ATTACHED.description)
-
   }
 
   @Test
@@ -185,7 +181,6 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .is5xxServerError
       .expectBody()
       .jsonPath("components.eventQueueHealth.details.dlqStatus").isEqualTo(DlqStatus.NOT_FOUND.description)
-
   }
 
   @Test

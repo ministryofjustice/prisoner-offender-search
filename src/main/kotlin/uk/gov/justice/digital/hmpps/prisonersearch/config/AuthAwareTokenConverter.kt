@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 
-
 class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
   private val jwtGrantedAuthoritiesConverter: Converter<Jwt, Collection<GrantedAuthority>> =
     JwtGrantedAuthoritiesConverter()
@@ -32,7 +31,6 @@ class AuthAwareTokenConverter : Converter<Jwt, AbstractAuthenticationToken> {
   private fun findClientId(claims: Map<String, Any?>) =
     claims["client_id"] as String
 
-
   private fun extractAuthorities(jwt: Jwt): Collection<GrantedAuthority> {
     val authorities = mutableListOf<GrantedAuthority>().apply { addAll(jwtGrantedAuthoritiesConverter.convert(jwt)!!) }
     if (jwt.claims.containsKey("authorities")) {
@@ -54,4 +52,3 @@ class AuthAwareAuthenticationToken(
     return userName ?: clientId
   }
 }
-

@@ -90,5 +90,4 @@ class QueueAdminService(
         telemetryClient.trackEvent("TRANSFERRED_INDEX_DLQ", mapOf("messages-on-queue" to total.toString()), null)
       }
   }
-
 }

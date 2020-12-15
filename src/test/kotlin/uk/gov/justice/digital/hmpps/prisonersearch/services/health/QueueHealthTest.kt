@@ -139,18 +139,23 @@ class QueueHealthTest {
   private fun someGetQueueAttributesRequest() = GetQueueAttributesRequest(someQueueUrl).withAttributeNames(listOf(QueueAttributeName.All.toString()))
   private fun someGetQueueUrlResult(): GetQueueUrlResult = GetQueueUrlResult().withQueueUrl(someQueueUrl)
   private fun someGetQueueAttributesResultWithoutDLQ() = GetQueueAttributesResult().withAttributes(
-      mapOf(MESSAGES_ON_QUEUE.awsName to someMessagesOnQueueCount.toString(),
-          MESSAGES_IN_FLIGHT.awsName to someMessagesInFlightCount.toString()))
+    mapOf(
+      MESSAGES_ON_QUEUE.awsName to someMessagesOnQueueCount.toString(),
+      MESSAGES_IN_FLIGHT.awsName to someMessagesInFlightCount.toString()
+    )
+  )
 
   private fun someGetQueueAttributesResultWithDLQ() = GetQueueAttributesResult().withAttributes(
-      mapOf(MESSAGES_ON_QUEUE.awsName to someMessagesOnQueueCount.toString(),
-          MESSAGES_IN_FLIGHT.awsName to someMessagesInFlightCount.toString(),
-          QueueAttributeName.RedrivePolicy.toString() to "any redrive policy"))
+    mapOf(
+      MESSAGES_ON_QUEUE.awsName to someMessagesOnQueueCount.toString(),
+      MESSAGES_IN_FLIGHT.awsName to someMessagesInFlightCount.toString(),
+      QueueAttributeName.RedrivePolicy.toString() to "any redrive policy"
+    )
+  )
 
   private fun someGetQueueAttributesRequestForDLQ() = GetQueueAttributesRequest(someDLQUrl).withAttributeNames(listOf(QueueAttributeName.All.toString()))
   private fun someGetQueueUrlResultForDLQ(): GetQueueUrlResult = GetQueueUrlResult().withQueueUrl(someDLQUrl)
   private fun someGetQueueAttributesResultForDLQ() = GetQueueAttributesResult().withAttributes(
-      mapOf(MESSAGES_ON_QUEUE.awsName to someMessagesOnDLQCount.toString()))
-
+    mapOf(MESSAGES_ON_QUEUE.awsName to someMessagesOnDLQCount.toString())
+  )
 }
-

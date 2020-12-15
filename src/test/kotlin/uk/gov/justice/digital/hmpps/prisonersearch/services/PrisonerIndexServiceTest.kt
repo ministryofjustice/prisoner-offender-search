@@ -11,31 +11,30 @@ import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepositor
 
 class PrisonerIndexServiceTest {
 
-    private val nomisService = mock<NomisService>()
-    private val prisonerARepository = mock<PrisonerARepository>()
-    private val prisonerBRepository = mock<PrisonerBRepository>()
-    private val indexQueueService = mock<IndexQueueService>()
-    private val indexStatusService = mock<IndexStatusService>()
-    private val searchClient = mock<SearchClient>()
-    private val telemetryClient = mock<TelemetryClient>()
-    private val prisonerIndexService = PrisonerIndexService(nomisService, prisonerARepository, prisonerBRepository, indexQueueService, indexStatusService, searchClient, telemetryClient, 1000)
+  private val nomisService = mock<NomisService>()
+  private val prisonerARepository = mock<PrisonerARepository>()
+  private val prisonerBRepository = mock<PrisonerBRepository>()
+  private val indexQueueService = mock<IndexQueueService>()
+  private val indexStatusService = mock<IndexStatusService>()
+  private val searchClient = mock<SearchClient>()
+  private val telemetryClient = mock<TelemetryClient>()
+  private val prisonerIndexService = PrisonerIndexService(nomisService, prisonerARepository, prisonerBRepository, indexQueueService, indexStatusService, searchClient, telemetryClient, 1000)
 
-    @Test
-    fun `indexingComplete - clear messages if index build is complete`() {
-        whenever(indexStatusService.markRebuildComplete()).thenReturn(true)
+  @Test
+  fun `indexingComplete - clear messages if index build is complete`() {
+    whenever(indexStatusService.markRebuildComplete()).thenReturn(true)
 
-        prisonerIndexService.indexingComplete()
+    prisonerIndexService.indexingComplete()
 
-        verify(indexQueueService).clearAllMessages()
-    }
+    verify(indexQueueService).clearAllMessages()
+  }
 
-    @Test
-    fun `indexingComplete - do not clear messages if index build is not complete`() {
-        whenever(indexStatusService.markRebuildComplete()).thenReturn(false)
+  @Test
+  fun `indexingComplete - do not clear messages if index build is not complete`() {
+    whenever(indexStatusService.markRebuildComplete()).thenReturn(false)
 
-        prisonerIndexService.indexingComplete()
+    prisonerIndexService.indexingComplete()
 
-        verifyZeroInteractions(indexQueueService)
-    }
-
+    verifyZeroInteractions(indexQueueService)
+  }
 }

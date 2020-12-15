@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
-
 @Configuration
 class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: String) {
 
@@ -23,14 +22,14 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
     oauth2Client.setDefaultClientRegistrationId("nomis-api")
 
     val exchangeStrategies = ExchangeStrategies.builder()
-        .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
-        .build()
+      .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
+      .build()
 
     return WebClient.builder()
-            .baseUrl(baseUri)
-            .apply(oauth2Client.oauth2Configuration())
-            .exchangeStrategies(exchangeStrategies)
-            .build()
+      .baseUrl(baseUri)
+      .apply(oauth2Client.oauth2Configuration())
+      .exchangeStrategies(exchangeStrategies)
+      .build()
   }
 
   @Bean
@@ -39,8 +38,10 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
   }
 
   @Bean
-  fun authorizedClientManager(clientRegistrationRepository: ClientRegistrationRepository?,
-                                   oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?): OAuth2AuthorizedClientManager? {
+  fun authorizedClientManager(
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+  ): OAuth2AuthorizedClientManager? {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
     authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
