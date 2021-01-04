@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "2.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "2.1.2"
   kotlin("plugin.spring") version "1.4.21"
 }
 
@@ -22,24 +22,24 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.1")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.1")
-  implementation("com.nimbusds:nimbus-jose-jwt:9.1.5")
+  implementation("org.springdoc:springdoc-openapi-ui:1.5.2")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.2")
+  implementation("com.nimbusds:nimbus-jose-jwt:9.4")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.apache.commons:commons-lang3:3.11")
   implementation("com.google.code.gson:gson:2.8.6")
-  implementation("com.google.guava:guava:30.0-jre")
+  implementation("com.google.guava:guava:30.1-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.918"))
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.930"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.918")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.930")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("org.testcontainers:localstack:1.14.3")
-  testImplementation("org.testcontainers:elasticsearch:1.14.3")
+  testImplementation("org.testcontainers:localstack:1.15.1")
+  testImplementation("org.testcontainers:elasticsearch:1.15.1")
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.0")
