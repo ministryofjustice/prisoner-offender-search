@@ -71,6 +71,14 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match on prisoner number lowercase prisoner number uppercased before search`() {
+    globalSearch(
+      GlobalSearchCriteria("a7089ey", null, null, null, null, null),
+      "/results/globalSearch/search_results_smith.json"
+    )
+  }
+
+  @Test
   fun `can perform a match wrong prisoner number but correct name`() {
     globalSearch(
       GlobalSearchCriteria("X7089EY", "JOHN", "SMITH", null, null, null),
