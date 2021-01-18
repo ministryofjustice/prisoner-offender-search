@@ -9,7 +9,6 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.bookNumber = ob.bookingNo
   prisoner.bookingId = ob.bookingId?.toString()
   prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
-  prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
   prisoner.pncNumberCanonicalShort = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value?.canonicalPNCNumberShort()
   prisoner.pncNumberCanonicalLong = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value?.canonicalPNCNumberLong()
   prisoner.croNumber = ob.identifiers?.firstOrNull { i -> i.type == "CRO" }?.value
