@@ -1,10 +1,6 @@
 server:
   shutdown: immediate
 
-spring:
-  profiles:
-    include: stdout
-
 aws:
   provider: embedded-localstack
 

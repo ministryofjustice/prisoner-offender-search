@@ -1,0 +1,13 @@
+{
+  "role": {
+    "name": "prisoner-offender-search"
+  },
+  "customDimensions": {
+    "service.version": "${BUILD_NUMBER}"
+  },
+  "selfDiagnostics": {
+    "destination": "console",
+    "level": "INFO"
+  }
+}
+
