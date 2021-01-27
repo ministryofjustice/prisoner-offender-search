@@ -19,11 +19,14 @@ env:
   - name: API_BASE_URL_NOMIS
     value: "{{ .Values.env.API_BASE_URL_NOMIS }}"
 
-  - name: APPLICATION_INSIGHTS_IKEY
+  - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
       secretKeyRef:
         name: {{ template "app.name" . }}
         key: APPINSIGHTS_INSTRUMENTATIONKEY
+
+  - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+    value: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
 
   - name: OAUTH_CLIENT_ID
     valueFrom:

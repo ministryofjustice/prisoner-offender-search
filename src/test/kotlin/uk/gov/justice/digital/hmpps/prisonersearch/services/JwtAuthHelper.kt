@@ -27,17 +27,18 @@ class JwtAuthHelper {
   fun jwtDecoder(): JwtDecoder = NimbusJwtDecoder.withPublicKey(keyPair.public as RSAPublicKey).build()
 
   fun createJwt(
-    subject: String,
+    subject: String? = null,
     scope: List<String>? = listOf(),
     roles: List<String>? = listOf(),
     expiryTime: Duration = Duration.ofHours(1),
     jwtId: String = UUID.randomUUID().toString()
   ): String {
-    val claims = HashMap<String, Any>()
-    claims["user_name"] = subject
-    claims["client_id"] = "prisoner-offender-search-client"
-    if (!roles.isNullOrEmpty()) claims["authorities"] = roles
-    if (!scope.isNullOrEmpty()) claims["scope"] = scope
+    val claims = mutableMapOf<String, Any?>("client_id" to "prisoner-offender-search-client")
+      .apply {
+        subject?.let { this["user_name"] = subject }
+        roles?.let { this["authorities"] = roles }
+        scope?.let { this["scope"] = scope }
+      }
     return Jwts.builder()
       .setId(jwtId)
       .setSubject(subject)

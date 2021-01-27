@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockHttpServletRequest
@@ -16,16 +16,16 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import uk.gov.justice.hmpps.casenotes.utils.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
 
-@Import(JwtAuthHelper::class, ClientTrackingTelemetryModule::class)
-@ContextConfiguration(initializers = [ConfigFileApplicationContextInitializer::class])
+@Import(JwtAuthHelper::class, ClientTrackingInterceptor::class, ClientTrackingConfiguration::class)
+@ContextConfiguration(initializers = [ConfigDataApplicationContextInitializer::class])
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class)
-class ClientTrackingTelemetryModuleTest {
+class ClientTrackingConfigurationTest {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
-  private lateinit var clientTrackingTelemetryModule: ClientTrackingTelemetryModule
+  private lateinit var clientTrackingInterceptor: ClientTrackingInterceptor
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -47,22 +47,19 @@ class ClientTrackingTelemetryModuleTest {
     val req = MockHttpServletRequest()
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
     val res = MockHttpServletResponse()
-    clientTrackingTelemetryModule.onBeginRequest(req, res)
+    clientTrackingInterceptor.preHandle(req, res, "null")
     val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).hasSize(2)
-    assertThat(insightTelemetry["username"]).isEqualTo("bob")
-    assertThat(insightTelemetry["clientId"]).isEqualTo("elite2apiclient")
+    assertThat(insightTelemetry).containsExactlyInAnyOrderEntriesOf(mapOf("username" to "bob", "clientId" to "prisoner-offender-search-client"))
   }
 
   @Test
   fun shouldAddOnlyClientIdIfUsernameNullToInsightTelemetry() {
-    val token = jwtAuthHelper.createJwt(null)
+    val token = jwtAuthHelper.createJwt()
     val req = MockHttpServletRequest()
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
     val res = MockHttpServletResponse()
-    clientTrackingTelemetryModule.onBeginRequest(req, res)
+    clientTrackingInterceptor.preHandle(req, res, "null")
     val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).hasSize(1)
-    assertThat(insightTelemetry["clientId"]).isEqualTo("elite2apiclient")
+    assertThat(insightTelemetry).containsExactlyInAnyOrderEntriesOf(mapOf("clientId" to "prisoner-offender-search-client"))
   }
 }
