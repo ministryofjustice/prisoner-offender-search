@@ -11,7 +11,6 @@ import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.text.ParseException
-import javax.servlet.ServletRequest
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -38,9 +37,9 @@ class ClientTrackingInterceptor : HandlerInterceptor {
     return true
   }
 
-  private fun findUserAndClient(req: ServletRequest): Pair<String?, String?> =
-    (req as HttpServletRequest).getHeader(HttpHeaders.AUTHORIZATION)
-      .takeIf { it.startsWith("Bearer ") }
+  private fun findUserAndClient(req: HttpServletRequest): Pair<String?, String?> =
+    req.getHeader(HttpHeaders.AUTHORIZATION)
+      ?.takeIf { it.startsWith("Bearer ") }
       ?.let { getClaimsFromJWT(it) }
       ?.let { it.getClaim("user_name") as String? to it.getClaim("client_id") as String? }
       ?: null to null
