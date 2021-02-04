@@ -44,7 +44,8 @@ class TranslatorTest {
     val conditionalReleaseOverrideDate = LocalDate.now().plusMonths(3)
     val conditionalReleaseDate = LocalDate.now().plusMonths(5)
     val prisoner = translate(
-      PrisonerA(), OffenderBooking(
+      PrisonerA(),
+      OffenderBooking(
         "A1234AA",
         "Fred",
         "Bloggs",
@@ -62,7 +63,8 @@ class TranslatorTest {
   fun `when a prisoner has a sentence with conditionalReleaseDate no override then conditionalReleaseDate is used`() {
     val conditionalReleaseDate = LocalDate.now().plusMonths(5)
     val prisoner = translate(
-      PrisonerA(), OffenderBooking(
+      PrisonerA(),
+      OffenderBooking(
         "A1234AA",
         "Fred",
         "Bloggs",
