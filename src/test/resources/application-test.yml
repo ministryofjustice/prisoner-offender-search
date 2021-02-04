@@ -8,9 +8,8 @@ sqs:
   endpoint.url: http://localhost:4576
 
 elasticsearch:
-  port: 4571
-  scheme: http
-  host: localhost
+  proxy:
+    url: http://localhost:4571
 
 api:
   base:

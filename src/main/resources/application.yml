@@ -90,9 +90,8 @@ sqs:
       name: prisoner_offender_index_dlq
 
 elasticsearch:
-  port: 9200
-  scheme: http
-  host: aws-es-proxy-service
+  proxy:
+    url: http://aws-es-proxy-service:9200
 
 index:
   page:
