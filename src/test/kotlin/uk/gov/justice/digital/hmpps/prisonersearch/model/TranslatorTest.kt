@@ -38,4 +38,41 @@ class TranslatorTest {
     )
     assertThat(prisoner.topupSupervisionExpiryDate).isEqualTo(tseDate)
   }
+
+  @Test
+  fun `when a prisoner has a sentence with conditionalReleaseDate and conditionalReleaseOverrideDate then conditionalReleaseOverrideDate is used`() {
+    val conditionalReleaseOverrideDate = LocalDate.now().plusMonths(3)
+    val conditionalReleaseDate = LocalDate.now().plusMonths(5)
+    val prisoner = translate(
+      PrisonerA(), OffenderBooking(
+        "A1234AA",
+        "Fred",
+        "Bloggs",
+        LocalDate.of(1976, 5, 15),
+        false,
+        sentenceDetail = SentenceDetail(
+          conditionalReleaseDate = conditionalReleaseDate,
+          conditionalReleaseOverrideDate = conditionalReleaseOverrideDate
+        ),
+      )
+    )
+    assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseOverrideDate)
+  }
+  @Test
+  fun `when a prisoner has a sentence with conditionalReleaseDate no override then conditionalReleaseDate is used`() {
+    val conditionalReleaseDate = LocalDate.now().plusMonths(5)
+    val prisoner = translate(
+      PrisonerA(), OffenderBooking(
+        "A1234AA",
+        "Fred",
+        "Bloggs",
+        LocalDate.of(1976, 5, 15),
+        false,
+        sentenceDetail = SentenceDetail(
+          conditionalReleaseDate = conditionalReleaseDate,
+        ),
+      )
+    )
+    assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseDate)
+  }
 }
