@@ -22,7 +22,7 @@ class LocalStackConfig {
   }
 
   @Bean
-  fun localStackContainer(applicationContext: ConfigurableApplicationContext, @Value("\${elasticsearch.proxy.url}") esUrl: String) : LocalStackContainer {
+  fun localStackContainer(applicationContext: ConfigurableApplicationContext, @Value("\${elasticsearch.proxy.url}") esUrl: String): LocalStackContainer {
     log.info("Starting elasticsearch...")
     val elasticsearchContainer = ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1")
     elasticsearchContainer
