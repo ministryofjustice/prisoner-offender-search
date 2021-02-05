@@ -171,15 +171,15 @@ open class Prisoner {
   var paroleEligibilityDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @Schema(description = "Automatic Release Date", example = "2023-05-01")
+  @Schema(description = "Automatic Release Date. If automaticReleaseOverrideDate is available then it will be set as automaticReleaseDate", example = "2023-05-01")
   var automaticReleaseDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @Schema(description = "Post Recall Release Date", example = "2023-05-01")
+  @Schema(description = "Post Recall Release Date. if postRecallReleaseOverrideDate is available then it will be set as postRecallReleaseDate", example = "2023-05-01")
   var postRecallReleaseDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
-  @Schema(description = "Conditional Release Date", example = "2023-05-01")
+  @Schema(description = "Conditional Release Date. If conditionalReleaseOverrideDate is available then it will be set as conditionalReleaseDate", example = "2023-05-01")
   var conditionalReleaseDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)

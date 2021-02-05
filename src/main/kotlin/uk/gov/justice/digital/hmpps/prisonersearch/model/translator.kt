@@ -50,8 +50,10 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
 
   prisoner.receptionDate = ob.receptionDate
   prisoner.paroleEligibilityDate = ob.sentenceDetail?.paroleEligibilityDate
-  prisoner.automaticReleaseDate = ob.sentenceDetail?.automaticReleaseDate
-  prisoner.postRecallReleaseDate = ob.sentenceDetail?.postRecallReleaseDate
+  prisoner.automaticReleaseDate =
+    ob.sentenceDetail?.automaticReleaseOverrideDate ?: ob.sentenceDetail?.automaticReleaseDate
+  prisoner.postRecallReleaseDate =
+    ob.sentenceDetail?.postRecallReleaseOverrideDate ?: ob.sentenceDetail?.postRecallReleaseDate
   prisoner.conditionalReleaseDate =
     ob.sentenceDetail?.conditionalReleaseOverrideDate ?: ob.sentenceDetail?.conditionalReleaseDate
   prisoner.actualParoleDate = ob.sentenceDetail?.actualParoleDate
