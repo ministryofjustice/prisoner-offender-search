@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/prisoner-offender-search/tree/main.svg?style=svg)](https://circleci.com/gh/ministryofjustice/prisoner-offender-search)
 [![Docker](https://quay.io/repository/hmpps/prisoner-offender-search/status)](https://quay.io/repository/hmpps/prisoner-offender-search/status)
+[![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://prisoner-offender-search-dev.prison.service.justice.gov.uk/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config)
 
 The purpose of this service is to:
 * API to provides searching of offender records in NOMIS via Elastic search (ES)
