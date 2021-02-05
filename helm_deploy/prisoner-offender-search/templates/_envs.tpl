@@ -112,4 +112,10 @@ env:
         name: pos-idx-sqs-dl-instance-output
         key: sqs_pos_name
 
+  - name: ELASTICSEARCH_PROXY_URL
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch
+        key: aws_es_proxy_url
+
 {{- end -}}

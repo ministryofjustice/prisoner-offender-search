@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.config
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.annotation.Bean
@@ -21,7 +22,7 @@ class LocalStackConfig {
   }
 
   @Bean
-  fun localStackContainer(applicationContext: ConfigurableApplicationContext): LocalStackContainer {
+  fun localStackContainer(applicationContext: ConfigurableApplicationContext, @Value("\${elasticsearch.proxy.url}") esUrl: String): LocalStackContainer {
     log.info("Starting elasticsearch...")
     val elasticsearchContainer = ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch-oss:7.6.1")
     elasticsearchContainer
@@ -32,7 +33,7 @@ class LocalStackConfig {
 
     val elasticSearchPort = elasticsearchContainer.getMappedPort(9200)
     elasticsearchContainer.setCommand()
-    TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext, "elasticsearch.port=$elasticSearchPort")
+    TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext, "elasticsearch.proxy.url=${esUrl.substringBeforeLast(":") + ":$elasticSearchPort"}")
     log.info("Started elasticsearch on port {}", elasticSearchPort)
 
     log.info("Starting localstack...")

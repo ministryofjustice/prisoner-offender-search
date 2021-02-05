@@ -13,14 +13,11 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @EnableElasticsearchRepositories(basePackages = ["uk.gov.justice.digital.hmpps.prisonersearch.repository"])
 class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
 
-  @Value("\${elasticsearch.port}")
-  private val port = 0
-
-  @Value("\${elasticsearch.host}")
-  private val host: String? = null
+  @Value("\${elasticsearch.proxy.url}")
+  private val url: String? = null
 
   @Bean("elasticSearchClient")
   override fun elasticsearchClient(): RestHighLevelClient {
-    return RestClients.create(ClientConfiguration.builder().connectedTo("$host:$port").build()).rest()
+    return RestClients.create(ClientConfiguration.builder().connectedTo("${url?.substringAfter("//")}").build()).rest()
   }
 }
