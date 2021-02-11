@@ -17,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @PreAuthorize("hasRole('GLOBAL_SEARCH')")
@@ -89,9 +91,9 @@ class PrisonerSearchService(
     } ?: Result.NoMatch
   }
 
-  private fun queryBy(
-    searchCriteria: PrisonerListCriteria,
-    queryBuilder: (searchCriteria: PrisonerListCriteria) -> BoolQueryBuilder?
+  private fun <T> queryBy(
+    searchCriteria: T,
+    queryBuilder: (searchCriteria: T) -> BoolQueryBuilder?
   ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
@@ -123,12 +125,18 @@ class PrisonerSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches, searchResults.hits.totalHits?.value ?: 0)
+      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(
+        prisonerMatches,
+        searchResults.hits.totalHits?.value ?: 0
+      )
     } ?: GlobalResult.NoMatch
   }
 
-  private fun matchByIds(searchCriteria: PrisonerListCriteria): BoolQueryBuilder? {
-    return shouldMatchOneOf("prisonerNumber", searchCriteria.prisonerNumbers)
+  private fun matchByIds(criteria: PrisonerListCriteria<Any>): BoolQueryBuilder? {
+    return when (criteria) {
+      is PrisonerNumbers -> shouldMatchOneOf("prisonerNumber", criteria.values())
+      is BookingIds -> shouldMatchOneOf("bookingId", criteria.values())
+    }
   }
 
   private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
@@ -200,17 +208,19 @@ class PrisonerSearchService(
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
-  fun findByListOfPrisonerNumbers(prisonerListCriteria: PrisonerListCriteria): List<Prisoner> {
-    if (!prisonerListCriteria.isValid()) {
-      log.warn("Invalid search  - no prisoner numbers provided")
-      throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 1000 prisoner numbers")
-    }
+  fun findBy(criteria: PrisonerListCriteria<Any>): List<Prisoner> {
+    with(criteria) {
+      if (!isValid()) {
+        log.warn("Invalid search  - no $type provided")
+        throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 1000 $type")
+      }
 
-    queryBy(prisonerListCriteria) { matchByIds(it) } onMatch {
-      customEventForFindByListOfPrisonerNumbers(prisonerListCriteria.prisonerNumbers.size, it.matches.size)
-      return it.matches
+      queryBy(criteria) { matchByIds(it) } onMatch {
+        customEventForFindBy(type, values().size, it.matches.size)
+        return it.matches
+      }
+      return emptyList()
     }
-    return emptyList()
   }
 
   private fun customEventForFindBySearchCriteria(searchCriteria: SearchCriteria, numberOfResults: Int) {
@@ -229,7 +239,7 @@ class PrisonerSearchService(
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }
 
-  private fun customEventForFindByListOfPrisonerNumbers(prisonerListNumber: Int, numberOfResults: Int) {
+  private fun customEventForFindBy(type: String, prisonerListNumber: Int, numberOfResults: Int) {
     val logMap = mapOf(
       "username" to authenticationHolder.currentUsername(),
       "clientId" to authenticationHolder.currentClientId(),
@@ -239,7 +249,7 @@ class PrisonerSearchService(
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
     )
-    telemetryClient.trackEvent("POSFindByListOfPrisonerNumbers", logMap, metricsMap)
+    telemetryClient.trackEvent("POSFindByListOf$type", logMap, metricsMap)
   }
 
   private fun customEventForFindByPrisonId(

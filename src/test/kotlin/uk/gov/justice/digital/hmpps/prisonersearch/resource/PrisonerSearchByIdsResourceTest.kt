@@ -10,10 +10,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
-class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
+class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   companion object {
     private var initialiseSearchData = true
@@ -25,7 +25,7 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   fun setup() {
 
     if (initialiseSearchData) {
-      val prisonerNumbers = getTestPrisonerNumbers(12)
+      val prisonerNumbers = List(12) { i -> "AN$i" }
       prisonMockServer.stubFor(
         get(urlEqualTo("/api/offenders/ids"))
           .willReturn(
@@ -35,13 +35,13 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
               .withBody(gson.toJson(prisonerNumbers.map { IDs(it) }))
           )
       )
-      prisonerNumbers.forEach {
+      prisonerNumbers.forEachIndexed { bookingId: Int, prisonNumber: String ->
         prisonMockServer.stubFor(
-          get(urlEqualTo("/api/offenders/$it"))
+          get(urlEqualTo("/api/offenders/$prisonNumber"))
             .willReturn(
               aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody(getOffenderBookingJson(it))
+                .withBody(getOffenderBookingJson(prisonNumber, bookingId.toLong()))
             )
         )
       }
@@ -70,39 +70,34 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
-  private fun getTestPrisonerNumbers(count: Int): List<String> {
-    return List(count) { i -> "AN$i" }
-  }
-
   @Test
-  fun `prisoner number search returns bad request when no prison numbers provided`() {
-
-    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue("{\"prisonerNumbers\":[]}"))
+  fun `booking ids search returns bad request when no ids provided`() {
+    webTestClient.post().uri("/prisoner-search/ids")
+      .body(BodyInserters.fromValue("""{ "type": "BookingIds", "values":[] }"""))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isBadRequest
       .expectBody().jsonPath("developerMessage")
-      .isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 1000 PrisonerNumbers")
+      .isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 1000 BookingIds")
   }
 
   @Test
-  fun `prisoner number search returns bad request when over 1000 prison numbers provided`() {
-    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonerNumbers(getTestPrisonerNumbers(1001)))))
+  fun `booking ids search returns bad request when over 1000 prison numbers provided`() {
+    webTestClient.post().uri("/prisoner-search/ids")
+      .body(BodyInserters.fromValue(gson.toJson(BookingIds((1..1001L).toList()))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isBadRequest
       .expectBody().jsonPath("developerMessage")
-      .isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 1000 PrisonerNumbers")
+      .isEqualTo("Invalid search  - please provide a minimum of 1 and a maximum of 1000 BookingIds")
   }
 
   @Test
-  fun `prisoner number search returns offender records, single result`() {
-    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue("""{"prisonerNumbers":["AN2"]}"""))
+  fun `booking ids search returns offender records, single result`() {
+    webTestClient.post().uri("/prisoner-search/ids")
+      .body(BodyInserters.fromValue("""{"type": "BookingIds", "values":[2]}"""))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
@@ -113,22 +108,22 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `prisoner number search returns offender records, ignoring not found prison numbers`() {
-    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonerNumbers(listOf("AN2", "AN33", "AN44")))))
+  fun `ids search returns offender records, ignoring not found ids`() {
+    webTestClient.post().uri("/prisoner-search/ids")
+      .body(BodyInserters.fromValue(gson.toJson(BookingIds(listOf(2L, 300L, 400L)))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isOk
       .expectBody()
       .jsonPath("$.length()").isEqualTo(1)
-      .jsonPath("$[0].prisonerNumber").isEqualTo("AN2")
+      .jsonPath("$[0].bookingId").isEqualTo(2)
   }
 
   @Test
-  fun `prisoner number search can return over 10 hits (default max hits is 10)`() {
-    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonerNumbers(getTestPrisonerNumbers(12)))))
+  fun `ids search can return over 10 hits (default max hits is 10)`() {
+    webTestClient.post().uri("/prisoner-search/ids")
+      .body(BodyInserters.fromValue(gson.toJson(BookingIds((0..12L).toList()))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
@@ -138,18 +133,18 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `access forbidden for prison number search when no role`() {
-    webTestClient.post().uri("/prisoner-search/prisoner-numbers")
-      .body(BodyInserters.fromValue(gson.toJson(PrisonerNumbers(arrayListOf("ABC")))))
+  fun `access forbidden for ids search when no role`() {
+    webTestClient.post().uri("/prisoner-search/ids")
+      .body(BodyInserters.fromValue(gson.toJson(BookingIds(listOf(1)))))
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isForbidden
   }
 
-  private fun getOffenderBookingJson(offenderNo: String): String? {
+  private fun getOffenderBookingJson(offenderNo: String, bookingId: Long): String? {
     val templateOffender = gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
-    return gson.toJson(templateOffender.copy(offenderNo = offenderNo))
+    return gson.toJson(templateOffender.copy(offenderNo = offenderNo, bookingId = bookingId))
   }
 }
 

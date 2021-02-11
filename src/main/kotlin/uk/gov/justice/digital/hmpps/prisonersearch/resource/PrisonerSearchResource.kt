@@ -41,10 +41,16 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   fun findByCriteria(@Parameter(required = true) @RequestBody searchCriteria: SearchCriteria) =
     prisonerSearchService.findBySearchCriteria(searchCriteria)
 
+  @Deprecated(message = "Use /ids instead")
   @PostMapping("/prisoner-numbers")
   @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires GLOBAL_SEARCH role")
-  fun findByIds(@Parameter(required = true) @Valid @RequestBody prisonerNumberList: PrisonerListCriteria) =
-    prisonerSearchService.findByListOfPrisonerNumbers(prisonerNumberList)
+  fun findByNumbers(@Parameter(required = true) @Valid @RequestBody criteria: PrisonerListCriteria<Any>) =
+    prisonerSearchService.findBy(criteria)
+
+  @PostMapping("/ids")
+  @Operation(summary = "Match prisoners by a list criteria", description = "Requires GLOBAL_SEARCH role")
+  fun findByIds(@Parameter(required = true) @Valid @RequestBody criteria: PrisonerListCriteria<Any>) =
+    prisonerSearchService.findBy(criteria)
 
   @GetMapping("/prison/{prisonId}")
   @Operation(summary = "Match prisoners by prison", description = "Requires GLOBAL_SEARCH role")
