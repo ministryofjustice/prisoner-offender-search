@@ -125,7 +125,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
   }
 
   @Test
-  fun `Index Queue does not exist reports down`() {
+  fun `index  queue does not exist reports down`() {
     ReflectionTestUtils.setField(indexQueueHealth, QueueHealth::class.java, "queueName", "missing_queue", String::class.java)
     subPing(200)
 

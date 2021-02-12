@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.google.gson.Gson
@@ -48,6 +49,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @Autowired
   lateinit var gson: Gson
+
+  @Autowired
+  lateinit var objectMapper: ObjectMapper
 
   @Autowired
   lateinit var elasticSearchClient: RestHighLevelClient

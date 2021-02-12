@@ -11,6 +11,7 @@ import javax.validation.constraints.Size
 @Schema(
   description = "Search Criteria for a list of prisoners",
   oneOf = [PrisonerNumbers::class, BookingIds::class],
+  discriminatorProperty = "type",
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", defaultImpl = PrisonerNumbers::class)
@@ -19,11 +20,7 @@ sealed class PrisonerListCriteria<out T>() {
   abstract fun isValid(): Boolean
   @Schema(hidden = true)
   abstract fun values(): List<T>
-  @Schema(
-    description = "The type of the identifiers, optional but default to 'PrisonerNumbers'",
-    defaultValue = "PrisonerNumbers"
-  )
-  open val type: String = this::class.simpleName!!
+  fun type() = this::class.simpleName!!
 
   @JsonTypeName("PrisonerNumbers")
   data class PrisonerNumbers(
@@ -33,17 +30,16 @@ sealed class PrisonerListCriteria<out T>() {
     val prisonerNumbers: List<String>
   ) : PrisonerListCriteria<String>() {
 
-    @Schema(hidden = true)
     override fun isValid() = prisonerNumbers.isNotEmpty() && prisonerNumbers.size <= 1000
 
-    @Schema(hidden = true)
     override fun values() = prisonerNumbers
 
     @Schema(
-      description = "The type of the identifiers, optional but default to 'PrisonerNumbers'",
+      description = "PrisonerNumbers discriminator value",
+      example = "PrisonerNumbers",
       allowableValues = ["PrisonerNumbers"]
     )
-    override val type: String = this::class.simpleName!!
+    val type: String = type()
   }
 
   @JsonTypeName("BookingIds")
@@ -54,16 +50,15 @@ sealed class PrisonerListCriteria<out T>() {
     val values: List<Long>
   ) : PrisonerListCriteria<Long>() {
 
-    @Schema(hidden = true)
     override fun isValid() = values.isNotEmpty() && values.size <= 1000
 
-    @Schema(hidden = true)
     override fun values() = values
 
     @Schema(
-      description = "The type of the identifiers",
+      description = "BookingIds discriminator value",
+      example = "BookingIds",
       allowableValues = ["BookingIds"]
     )
-    override val type: String = this::class.simpleName!!
+    val type: String = type()
   }
 }
