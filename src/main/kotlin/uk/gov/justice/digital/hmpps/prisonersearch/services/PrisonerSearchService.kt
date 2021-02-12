@@ -211,12 +211,12 @@ class PrisonerSearchService(
   fun findBy(criteria: PrisonerListCriteria<Any>): List<Prisoner> {
     with(criteria) {
       if (!isValid()) {
-        log.warn("Invalid search  - no ${type()} provided")
-        throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 1000 ${type()}")
+        log.warn("Invalid search  - no $type provided")
+        throw BadRequestException("Invalid search  - please provide a minimum of 1 and a maximum of 1000 $type")
       }
 
       queryBy(criteria) { matchByIds(it) } onMatch {
-        customEventForFindBy(type(), values().size, it.matches.size)
+        customEventForFindBy(type, values().size, it.matches.size)
         return it.matches
       }
       return emptyList()

@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
-class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
+class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
 
   companion object {
     private var initialiseSearchData = true
@@ -72,8 +72,8 @@ class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `booking ids search returns bad request when no ids provided`() {
-    webTestClient.post().uri("/prisoner-search/ids")
-      .body(BodyInserters.fromValue("""{ "type": "BookingIds", "values":[] }"""))
+    webTestClient.post().uri("/prisoner-search/booking-ids")
+      .body(BodyInserters.fromValue("""{ "bookingIds":[] }"""))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
@@ -84,7 +84,7 @@ class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `booking ids search returns bad request when over 1000 prison numbers provided`() {
-    webTestClient.post().uri("/prisoner-search/ids")
+    webTestClient.post().uri("/prisoner-search/booking-ids")
       .body(BodyInserters.fromValue(gson.toJson(BookingIds((1..1001L).toList()))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -96,8 +96,8 @@ class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `booking ids search returns offender records, single result`() {
-    webTestClient.post().uri("/prisoner-search/ids")
-      .body(BodyInserters.fromValue("""{"type": "BookingIds", "values":[2]}"""))
+    webTestClient.post().uri("/prisoner-search/booking-ids")
+      .body(BodyInserters.fromValue("""{"bookingIds":[2]}"""))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
@@ -109,7 +109,7 @@ class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `ids search returns offender records, ignoring not found ids`() {
-    webTestClient.post().uri("/prisoner-search/ids")
+    webTestClient.post().uri("/prisoner-search/booking-ids")
       .body(BodyInserters.fromValue(gson.toJson(BookingIds(listOf(2L, 300L, 400L)))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -122,7 +122,7 @@ class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `ids search can return over 10 hits (default max hits is 10)`() {
-    webTestClient.post().uri("/prisoner-search/ids")
+    webTestClient.post().uri("/prisoner-search/booking-ids")
       .body(BodyInserters.fromValue(gson.toJson(BookingIds((0..12L).toList()))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -134,7 +134,7 @@ class PrisonerSearchByIdsResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `access forbidden for ids search when no role`() {
-    webTestClient.post().uri("/prisoner-search/ids")
+    webTestClient.post().uri("/prisoner-search/booking-ids")
       .body(BodyInserters.fromValue(gson.toJson(BookingIds(listOf(1)))))
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
