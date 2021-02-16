@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import javax.validation.Valid
@@ -43,8 +44,13 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
 
   @PostMapping("/prisoner-numbers")
   @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires GLOBAL_SEARCH role")
-  fun findByIds(@Parameter(required = true) @Valid @RequestBody prisonerNumberList: PrisonerListCriteria) =
-    prisonerSearchService.findByListOfPrisonerNumbers(prisonerNumberList)
+  fun findByNumbers(@Parameter(required = true) @Valid @RequestBody criteria: PrisonerNumbers) =
+    prisonerSearchService.findBy(criteria)
+
+  @PostMapping("/booking-ids")
+  @Operation(summary = "Match prisoners by a list of booking ids", description = "Requires GLOBAL_SEARCH role")
+  fun findByIds(@Parameter(required = true) @Valid @RequestBody criteria: BookingIds) =
+    prisonerSearchService.findBy(criteria)
 
   @GetMapping("/prison/{prisonId}")
   @Operation(summary = "Match prisoners by prison", description = "Requires GLOBAL_SEARCH role")
