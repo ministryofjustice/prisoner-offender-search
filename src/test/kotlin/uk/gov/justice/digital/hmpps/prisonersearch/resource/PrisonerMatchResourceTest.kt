@@ -64,7 +64,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on prisoner number`() {
     prisonerMatch(
       MatchRequest(null, null, null, null, null, "A7089EY"),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json"
     )
   }
 
@@ -72,7 +72,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on PNC number`() {
     prisonerMatch(
       MatchRequest(null, null, null, "12/394773H", null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json"
     )
   }
 
@@ -80,7 +80,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on PNC number short year 19 century`() {
     prisonerMatch(
       MatchRequest(null, null, null, null, "89/4444S", null),
-      "/results/globalSearch/search_results_pnc2.json"
+      "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
 
@@ -88,7 +88,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on PNC number long year 19 century`() {
     prisonerMatch(
       MatchRequest(null, null, null, "1989/4444S", null, null),
-      "/results/globalSearch/search_results_pnc2.json"
+      "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
 
@@ -96,7 +96,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on PNC number long year 19 century extra zeros`() {
     prisonerMatch(
       MatchRequest(null, null, null, null, "1989/0004444S", null),
-      "/results/globalSearch/search_results_pnc2.json"
+      "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
 
@@ -104,7 +104,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on CRO number`() {
     prisonerMatch(
       MatchRequest(null, null, null, null, "29906/12J", null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json"
     )
   }
 
@@ -112,7 +112,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on a last name only`() {
     prisonerMatch(
       MatchRequest(null, "smith", null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json"
     )
   }
 
@@ -120,7 +120,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on first and last name only single hit`() {
     prisonerMatch(
       MatchRequest("john", "smith", null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json"
     )
   }
 
@@ -128,7 +128,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on a first and last name only multiple hits include aliases`() {
     prisonerMatch(
       MatchRequest("sam", "jones", null, null, null, null),
-      "/results/globalSearch/search_results_sams_aliases.json"
+      "/results/prisonerMatch/search_results_sams_aliases.json"
     )
   }
 }
