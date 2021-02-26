@@ -30,7 +30,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchedBy.*
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchedBy
 import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
@@ -196,7 +196,7 @@ internal class MatchServiceTest {
       )
 
       val results = service.match(matchRequest)
-      assertThat(results.matchedBy).isEqualTo(ALL_SUPPLIED)
+      assertThat(results.matchedBy).isEqualTo(MatchedBy.ALL_SUPPLIED)
     }
 
     @Test
@@ -210,7 +210,7 @@ internal class MatchServiceTest {
         )
 
       val results = service.match(matchRequest)
-      assertThat(results.matchedBy).isEqualTo(ALL_SUPPLIED_ALIAS)
+      assertThat(results.matchedBy).isEqualTo(MatchedBy.ALL_SUPPLIED_ALIAS)
     }
 
     @Test
@@ -225,7 +225,7 @@ internal class MatchServiceTest {
         )
 
       val results = service.match(matchRequest)
-      assertThat(results.matchedBy).isEqualTo(HMPPS_KEY)
+      assertThat(results.matchedBy).isEqualTo(MatchedBy.HMPPS_KEY)
     }
 
     @Test
@@ -241,7 +241,7 @@ internal class MatchServiceTest {
         )
 
       val results = service.match(matchRequest)
-      assertThat(results.matchedBy).isEqualTo(EXTERNAL_KEY)
+      assertThat(results.matchedBy).isEqualTo(MatchedBy.EXTERNAL_KEY)
     }
 
     @Test
@@ -258,7 +258,7 @@ internal class MatchServiceTest {
         )
 
       val results = service.match(matchRequest)
-      assertThat(results.matchedBy).isEqualTo(EXTERNAL_KEY)
+      assertThat(results.matchedBy).isEqualTo(MatchedBy.EXTERNAL_KEY)
     }
   }
 
