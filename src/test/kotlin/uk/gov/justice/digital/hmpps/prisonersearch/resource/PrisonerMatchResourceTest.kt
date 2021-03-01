@@ -73,14 +73,14 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on PNC number`() {
     prisonerMatch(
       MatchRequest(null, "SMITH", LocalDate.of(1971, 2, 12), "12/394773H", null, null),
-      "/results/prisonerMatch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_pnc.json"
     )
   }
 
   @Test
   fun `can perform a match on PNC number short year 19 century`() {
     prisonerMatch(
-      MatchRequest(null, "TIMSSSSS", LocalDate.of(1971, 2, 12), "89/4444S", null, null),
+      MatchRequest(null, "TIMS", LocalDate.of(1971, 2, 12), "89/4444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -105,7 +105,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   fun `can perform a match on CRO number`() {
     prisonerMatch(
       MatchRequest(null, "SMITH", LocalDate.of(1990, 8, 17), null, "29906/12J", null),
-      "/results/prisonerMatch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_cro.json"
     )
   }
 
