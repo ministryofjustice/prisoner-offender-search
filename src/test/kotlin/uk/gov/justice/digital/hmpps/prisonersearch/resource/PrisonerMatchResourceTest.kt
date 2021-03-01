@@ -72,7 +72,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number`() {
     prisonerMatch(
-      MatchRequest(null, "SMITH", LocalDate.of(1971,2,12), "12/394773H", null, null),
+      MatchRequest(null, "SMITH", LocalDate.of(1971, 2, 12), "12/394773H", null, null),
       "/results/prisonerMatch/search_results_smith.json"
     )
   }
@@ -80,7 +80,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number short year 19 century`() {
     prisonerMatch(
-      MatchRequest(null, "TIMSSSSS", LocalDate.of(1971,2,12), "89/4444S", null, null),
+      MatchRequest(null, "TIMSSSSS", LocalDate.of(1971, 2, 12), "89/4444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -88,7 +88,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number long year 19 century`() {
     prisonerMatch(
-      MatchRequest(null, "TIMS", LocalDate.of(1971,2,12), "1989/4444S", null, null),
+      MatchRequest(null, "TIMS", LocalDate.of(1971, 2, 12), "1989/4444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -96,7 +96,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number long year 19 century extra zeros`() {
     prisonerMatch(
-      MatchRequest(null, "TIMS", LocalDate.of(1971,2,12), "1989/0004444S", null, null),
+      MatchRequest(null, "TIMS", LocalDate.of(1971, 2, 12), "1989/0004444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -104,7 +104,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on CRO number`() {
     prisonerMatch(
-      MatchRequest(null, "SMITH", LocalDate.of(1990,8,17), null, "29906/12J", null),
+      MatchRequest(null, "SMITH", LocalDate.of(1990, 8, 17), null, "29906/12J", null),
       "/results/prisonerMatch/search_results_smith.json"
     )
   }
