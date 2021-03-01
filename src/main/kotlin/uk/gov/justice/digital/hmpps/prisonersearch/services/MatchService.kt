@@ -81,7 +81,7 @@ class MatchService(
     with(matchRequest) {
       return croNumber.takeIf { !it.isNullOrBlank() }?.let {
         return QueryBuilders.boolQuery()
-          .mustKeyword(it.toLowerCase(), "croNumber")
+          .mustKeyword(it.toUpperCase(), "croNumber")
           .must(
             QueryBuilders.boolQuery()
               .shouldMultiMatch(lastName, "lastName", "aliases.lastName")
@@ -94,7 +94,7 @@ class MatchService(
   private fun fullMatch(matchRequest: MatchRequest): BoolQueryBuilder? {
     with(matchRequest) {
       return QueryBuilders.boolQuery()
-        .mustKeyword(croNumber?.toLowerCase(), "croNumber")
+        .mustKeyword(croNumber?.toUpperCase(), "croNumber")
         .mustMultiMatchKeyword(pncNumber?.canonicalPNCNumber(), "pncNumberCanonicalLong", "pncNumberCanonicalShort")
         .mustWhenPresent("prisonerNumber", nomsNumber)
         .apply {
@@ -106,7 +106,7 @@ class MatchService(
   private fun fullMatchAlias(matchRequest: MatchRequest): BoolQueryBuilder? {
     with(matchRequest) {
       return QueryBuilders.boolQuery()
-        .mustKeyword(croNumber?.toLowerCase(), "croNumber")
+        .mustKeyword(croNumber?.toUpperCase(), "croNumber")
         .mustMultiMatchKeyword(pncNumber?.canonicalPNCNumber(), "pncNumberCanonicalLong", "pncNumberCanonicalShort")
         .mustWhenPresent("prisonerNumber", nomsNumber)
         .apply {

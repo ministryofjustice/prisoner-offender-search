@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
+import java.time.LocalDate
 
 class PrisonerMatchResourceTest : QueueIntegrationTest() {
 
@@ -63,15 +64,15 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on prisoner number`() {
     prisonerMatch(
-      MatchRequest(null, null, null, null, null, "A7089EY"),
-      "/results/prisonerMatch/search_results_smith.json"
+      MatchRequest(null, "SMITHEEE", null, null, null, "A7089EY"),
+      "/results/prisonerMatch/search_results_noms.json"
     )
   }
 
   @Test
   fun `can perform a match on PNC number`() {
     prisonerMatch(
-      MatchRequest(null, null, null, "12/394773H", null, null),
+      MatchRequest(null, "SMITH", LocalDate.of(1971,2,12), "12/394773H", null, null),
       "/results/prisonerMatch/search_results_smith.json"
     )
   }
@@ -79,7 +80,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number short year 19 century`() {
     prisonerMatch(
-      MatchRequest(null, null, null, null, "89/4444S", null),
+      MatchRequest(null, "TIMSSSSS", LocalDate.of(1971,2,12), "89/4444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -87,7 +88,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number long year 19 century`() {
     prisonerMatch(
-      MatchRequest(null, null, null, "1989/4444S", null, null),
+      MatchRequest(null, "TIMS", LocalDate.of(1971,2,12), "1989/4444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -95,7 +96,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on PNC number long year 19 century extra zeros`() {
     prisonerMatch(
-      MatchRequest(null, null, null, null, "1989/0004444S", null),
+      MatchRequest(null, "TIMS", LocalDate.of(1971,2,12), "1989/0004444S", null, null),
       "/results/prisonerMatch/search_results_pnc2.json"
     )
   }
@@ -103,7 +104,7 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a match on CRO number`() {
     prisonerMatch(
-      MatchRequest(null, null, null, null, "29906/12J", null),
+      MatchRequest(null, "SMITH", LocalDate.of(1990,8,17), null, "29906/12J", null),
       "/results/prisonerMatch/search_results_smith.json"
     )
   }
