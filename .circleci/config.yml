@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   owasp: entur/owasp@0.0.14
-  dps: ministryofjustice/hmpps@2.2
+  hmpps: ministryofjustice/hmpps@3.0
 
 executors:
   validator:
@@ -36,7 +36,7 @@ jobs:
             done
           background: true
       - checkout
-      - dps/install_aws_cli
+      - hmpps/install_aws_cli
       - run:
           name: Wait for SQS to be ready
           command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
@@ -82,15 +82,15 @@ workflows:
           filters:
             tags:
               ignore: /.*/
-      - dps/helm_lint:
+      - hmpps/helm_lint:
           name: helm_lint
-      - dps/build_docker:
+      - hmpps/build_docker:
           name: build_docker
           filters:
             branches:
               only:
                 - main
-      - dps/deploy_env:
+      - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
           context: hmpps-common-vars
@@ -106,7 +106,7 @@ workflows:
           type: approval
           requires:
             - deploy_dev
-      - dps/deploy_env:
+      - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
           context:
@@ -118,7 +118,7 @@ workflows:
           type: approval
           requires:
             - deploy_preprod
-      - dps/deploy_env:
+      - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
           slack_notification: true
