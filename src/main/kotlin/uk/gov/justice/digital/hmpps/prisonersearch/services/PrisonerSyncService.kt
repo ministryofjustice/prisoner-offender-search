@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -7,7 +8,8 @@ import org.springframework.stereotype.Service
 @Service
 class PrisonerSyncService(
   private val nomisService: NomisService,
-  private val prisonerIndexService: PrisonerIndexService
+  private val prisonerIndexService: PrisonerIndexService,
+  private val telemetryClient: TelemetryClient
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -40,12 +42,31 @@ class PrisonerSyncService(
   }
 
   fun offenderChange(message: OffenderChangedMessage) {
-    nomisService.getOffender(message.offenderIdDisplay)?.let {
-      prisonerIndexService.sync(it)
+    if (message.offenderIdDisplay != null) {
+      nomisService.getOffender(message.offenderIdDisplay)?.let {
+        prisonerIndexService.sync(it)
+      }
+    } else {
+      customEventForMissingOffenderIdDisplay(message)
     }
   }
 
   fun deleteOffender(message: OffenderChangedMessage) {
-    prisonerIndexService.delete(message.offenderIdDisplay)
+    if (message.offenderIdDisplay != null) {
+      prisonerIndexService.delete(message.offenderIdDisplay)
+    } else {
+      customEventForMissingOffenderIdDisplay(message)
+    }
+  }
+
+  private fun customEventForMissingOffenderIdDisplay(
+    message: OffenderChangedMessage
+  ) {
+    val propertiesMap = mapOf(
+      "eventType" to message.eventType,
+      "offenderId" to message.offenderId.toString()
+    )
+
+    telemetryClient.trackEvent("POSMissingOffenderDisplayId", propertiesMap, null)
   }
 }

@@ -1,5 +1,9 @@
 package uk.gov.justice.digital.hmpps.prisonersearch
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.isNull
+import com.nhaarman.mockitokotlin2.verify
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -46,6 +50,20 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FD") } matches { it == 1 }
 
     search(SearchCriteria("A7089FD", null, null), "/results/search_results_merge1.json")
+  }
+
+  @Test
+  fun `will handle a missing Offender Display ID`() {
+    val message = "/messages/offenderUpdatedNoIdDisplay.json".readResourceAsText()
+
+    // wait until our queue has been purged
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+
+    awsSqsClient.sendMessage(queueUrl, message)
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+
+    verify(telemetryClient).trackEvent(eq("POSMissingOffenderDisplayId"), any(), isNull())
   }
 
   @Test

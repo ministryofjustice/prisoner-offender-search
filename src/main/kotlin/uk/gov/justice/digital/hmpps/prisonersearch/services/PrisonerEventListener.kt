@@ -67,4 +67,8 @@ data class ExternalPrisonerMovementMessage(
 
 data class OffenderBookingChangedMessage(val bookingId: Long)
 
-data class OffenderChangedMessage(val offenderIdDisplay: String)
+data class OffenderChangedMessage(
+  val eventType: String,
+  val offenderId: Long,
+  val offenderIdDisplay: String?
+)
