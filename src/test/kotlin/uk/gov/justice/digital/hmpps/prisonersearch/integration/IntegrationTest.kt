@@ -71,7 +71,7 @@ abstract class IntegrationTest {
 
   internal fun Any.asJson() = gson.toJson(this)
 
-  internal fun setAuthorisation(user: String = "prison-to-nhs-api-client", roles: List<String> = listOf()): (HttpHeaders) -> Unit {
+  internal fun setAuthorisation(user: String = "prisoner-search-client", roles: List<String> = listOf()): (HttpHeaders) -> Unit {
     val token = jwtHelper.createJwt(
       subject = user,
       scope = listOf("read"),

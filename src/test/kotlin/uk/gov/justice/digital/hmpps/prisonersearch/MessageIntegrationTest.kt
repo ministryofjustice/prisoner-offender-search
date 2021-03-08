@@ -49,6 +49,18 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `will handle a missing Offender Display ID`() {
+    val message = "/messages/offenderUpdatedNoIdDisplay.json".readResourceAsText()
+
+    // wait until our queue has been purged
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+
+    awsSqsClient.sendMessage(queueUrl, message)
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+  }
+
+  @Test
   fun `will consume a delete request and remove`() {
     search(SearchCriteria("A7089FC", null, null), "/results/search_results_to_delete.json")
 
