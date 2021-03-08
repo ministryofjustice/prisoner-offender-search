@@ -69,5 +69,4 @@ class PrisonerSyncService(
 
     telemetryClient.trackEvent("POSMissingOffenderDisplayId", propertiesMap, null)
   }
-
 }
