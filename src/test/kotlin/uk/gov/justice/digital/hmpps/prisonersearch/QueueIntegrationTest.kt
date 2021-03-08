@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.google.gson.Gson
+import com.microsoft.applicationinsights.TelemetryClient
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -58,6 +59,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @SpyBean
   lateinit var indexQueueService: IndexQueueService
+
+  @SpyBean
+  lateinit var telemetryClient: TelemetryClient
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes = awsSqsClient.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
