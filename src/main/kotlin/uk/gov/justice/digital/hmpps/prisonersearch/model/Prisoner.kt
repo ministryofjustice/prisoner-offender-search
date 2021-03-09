@@ -142,6 +142,14 @@ open class Prisoner {
   var homeDetentionCurfewActualDate: LocalDate? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)
+  @Schema(description = "HDC End Date", example = "2023-05-02")
+  var homeDetentionCurfewEndDate: LocalDate? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Schema(description = "Top-up supervision start date", example = "2023-04-29")
+  var topupSupervisionStartDate: LocalDate? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
   @Schema(description = "Top-up supervision expiry date", example = "2023-05-01")
   var topupSupervisionExpiryDate: LocalDate? = null
 

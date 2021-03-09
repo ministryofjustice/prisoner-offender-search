@@ -40,6 +40,42 @@ class TranslatorTest {
   }
 
   @Test
+  fun `topupSupervisionStartDate is present`() {
+
+    val tssDate = LocalDate.of(2021, 5, 15)
+    val prisoner = translate(
+      PrisonerA(),
+      OffenderBooking(
+        "A1234AA",
+        "Fred",
+        "Bloggs",
+        LocalDate.of(1976, 5, 15),
+        false,
+        sentenceDetail = SentenceDetail(topupSupervisionStartDate = tssDate)
+      )
+    )
+    assertThat(prisoner.topupSupervisionStartDate).isEqualTo(tssDate)
+  }
+
+  @Test
+  fun `homeDetentionCurfewEndDate is present`() {
+
+    val hdcend = LocalDate.of(2021, 5, 15)
+    val prisoner = translate(
+      PrisonerA(),
+      OffenderBooking(
+        "A1234AA",
+        "Fred",
+        "Bloggs",
+        LocalDate.of(1976, 5, 15),
+        false,
+        sentenceDetail = SentenceDetail(homeDetentionCurfewEndDate = hdcend)
+      )
+    )
+    assertThat(prisoner.homeDetentionCurfewEndDate).isEqualTo(hdcend)
+  }
+
+  @Test
   fun `when a prisoner has a sentence with dateOverride for conditionalRelease, automaticRelease and postRecallRelease then corresponding overrideDate is used`() {
     val conditionalReleaseOverrideDate = LocalDate.now().plusMonths(3)
     val automaticReleaseOverrideDate = LocalDate.now().plusMonths(2)
