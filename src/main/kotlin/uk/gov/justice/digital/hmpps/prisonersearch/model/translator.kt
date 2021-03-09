@@ -17,6 +17,9 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.prisonName = ob.assignedLivingUnit?.agencyName
   prisoner.prisonId = ob.agencyId
   prisoner.status = ob.status
+  prisoner.inOutStatus = ob.inOutStatus
+  prisoner.lastMovementTypeCode = ob.lastMovementTypeCode
+  prisoner.lastMovementReasonCode = ob.lastMovementReasonCode
 
   prisoner.category = ob.categoryCode
   prisoner.csra = ob.csra

@@ -384,6 +384,8 @@
       "birthPlace": "MANCHESTER",
       "birthCountryCode": "ENG",
       "inOutStatus": "IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
       "identifiers": [
         {
           "type": "CRO",

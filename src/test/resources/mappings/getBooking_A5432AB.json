@@ -52,7 +52,9 @@
         }
       ],
       "status": "ACTIVE IN",
-      "legalStatus": "SENTENCED"
+      "legalStatus": "SENTENCED",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24"
     }
   }
 }
