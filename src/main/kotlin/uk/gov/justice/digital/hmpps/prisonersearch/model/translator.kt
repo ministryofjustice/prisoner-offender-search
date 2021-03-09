@@ -43,6 +43,8 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.licenceExpiryDate = ob.sentenceDetail?.licenceExpiryDate
   prisoner.homeDetentionCurfewEligibilityDate = ob.sentenceDetail?.homeDetentionCurfewEligibilityDate
   prisoner.homeDetentionCurfewActualDate = ob.sentenceDetail?.homeDetentionCurfewActualDate
+  prisoner.homeDetentionCurfewEndDate = ob.sentenceDetail?.homeDetentionCurfewEndDate
+  prisoner.topupSupervisionStartDate = ob.sentenceDetail?.topupSupervisionStartDate
   prisoner.topupSupervisionExpiryDate = ob.sentenceDetail?.topupSupervisionExpiryDate
   prisoner.additionalDaysAwarded = ob.sentenceDetail?.additionalDaysAwarded
   prisoner.nonDtoReleaseDate = ob.sentenceDetail?.nonDtoReleaseDate
