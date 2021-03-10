@@ -411,6 +411,7 @@
         "homeDetentionCurfewEligibilityDate": "2020-12-20",
         "paroleEligibilityDate": "2020-12-30",
         "homeDetentionCurfewActualDate": "2019-06-22",
+        "homeDetentionCurfewEndDate": "2019-06-22",
         "bookingId": 1058711,
         "sentenceStartDate": "2016-09-09",
         "additionalDaysAwarded": 27,
