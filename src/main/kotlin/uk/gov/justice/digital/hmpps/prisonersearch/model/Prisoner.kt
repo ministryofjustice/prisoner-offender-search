@@ -73,6 +73,15 @@ open class Prisoner {
   @Schema(required = true, description = "Status of the prisoner", example = "ACTIVE IN")
   var status: String? = null
 
+  @Schema(description = "Last Movement Type Code of prisoner", example = "CRT")
+  var lastMovementTypeCode: String? = null
+
+  @Schema(description = "Last Movement Reason of prisoner", example = "CA")
+  var lastMovementReasonCode: String? = null
+
+  @Schema(description = "In/Out Status", example = "IN", allowableValues = ["IN,OUT"])
+  var inOutStatus: String? = null
+
   @Field(type = FieldType.Keyword)
   @Schema(description = "Prison ID", example = "MDI")
   var prisonId: String? = null

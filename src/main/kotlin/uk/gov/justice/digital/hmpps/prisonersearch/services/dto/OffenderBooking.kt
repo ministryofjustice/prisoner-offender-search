@@ -14,6 +14,8 @@ data class OffenderBooking(
   val aliases: List<Alias>? = null,
   val agencyId: String? = null,
   val inOutStatus: String? = null,
+  var lastMovementTypeCode: String? = null,
+  var lastMovementReasonCode: String? = null,
   val religion: String? = null,
   val language: String? = null,
   val alerts: List<Alert>? = null,

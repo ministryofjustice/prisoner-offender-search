@@ -16,6 +16,9 @@
     "prisonId": "LEI",
     "prisonName": "Leeds Prison",
     "cellLocation": "H-4-008",
-    "legalStatus": "REMAND"
+    "legalStatus": "REMAND",
+    "inOutStatus": "IN",
+    "lastMovementTypeCode": "ADM",
+    "lastMovementReasonCode": "24"
   }
 ]

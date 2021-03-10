@@ -18,6 +18,9 @@
     "prisonId": "MDI",
     "prisonName": "Moorland Prison",
     "cellLocation": "A-1-002",
-    "legalStatus": "REMAND"
+    "legalStatus": "REMAND",
+    "inOutStatus": "IN",
+    "lastMovementTypeCode": "ADM",
+    "lastMovementReasonCode": "24"
   }
 ]

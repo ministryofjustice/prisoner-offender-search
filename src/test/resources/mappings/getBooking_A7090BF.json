@@ -32,6 +32,8 @@
         "sexCode": "M"
       },
       "inOutStatus": "OUT",
+      "lastMovementTypeCode": "REL",
+      "lastMovementReasonCode": "CR",
       "identifiers": [
         {
           "type": "CRO",

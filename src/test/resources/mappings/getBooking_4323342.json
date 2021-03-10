@@ -65,7 +65,9 @@
         }
       ],
       "status": "ACTIVE IN",
-      "legalStatus": "REMAND"
+      "legalStatus": "REMAND",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24"
     }
   }
 }

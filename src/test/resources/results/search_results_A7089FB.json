@@ -19,6 +19,9 @@
     "cellLocation": "A-1-003",
     "legalStatus": "SENTENCED",
     "recall": true,
-    "indeterminateSentence": false
+    "indeterminateSentence": false,
+    "inOutStatus": "IN",
+    "lastMovementTypeCode": "ADM",
+    "lastMovementReasonCode": "24"
   }
 ]
