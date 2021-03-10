@@ -13,7 +13,9 @@ The purpose of this service is to:
 
 This service subscribes to the prison offender events
 
-When this event is received the latest offender record is retrieved via the `prison-api` and upserted into the offender index.
+When this event is received a message is put onto the event queue.  The event queue then processes that message -
+the latest offender record is retrieved via the `prison-api` and upserted into the offender index.
+If the message processing fails then the message is transferred onto the event dead letter queue (DLQ).
 
 ### Index rebuilds
 

@@ -105,7 +105,7 @@ class PrisonerIndexResource(
   @PutMapping("/transfer-index-dlq")
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
-    summary = "Transfers all DLQ messages to the main queue",
+    summary = "Transfers all index dead letter queue messages to the main index queue",
     description = "Requires PRISONER_INDEX role"
   )
   @ApiResponses(
@@ -119,7 +119,7 @@ class PrisonerIndexResource(
   @PutMapping("/transfer-event-dlq")
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @Operation(
-    summary = "Transfers all DLQ messages to the main queue",
+    summary = "Transfers all event dead letter queue messages to the main event queue",
     description = "Requires PRISONER_INDEX role"
   )
   @ApiResponses(
