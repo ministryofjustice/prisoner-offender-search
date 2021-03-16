@@ -150,11 +150,13 @@ class PrisonerIndexService(
   }
 
   fun indexingComplete(ignoreThreshold: Boolean): IndexStatus {
-    val currentIndexStatus = indexStatusService.getCurrentIndex()
-    val indexCount = countIndex(currentIndexStatus.currentIndex.otherIndex())
-    if (ignoreThreshold.not() && indexCount <= indexProperties.completeThreshold) {
-      log.info("Ignoring index build request, index ${currentIndexStatus.currentIndex.otherIndex()} has count $indexCount which is less than threshold ${indexProperties.completeThreshold}.")
-      return currentIndexStatus
+    if (ignoreThreshold.not()) {
+      val currentIndexStatus = indexStatusService.getCurrentIndex()
+      val indexCount = countIndex(currentIndexStatus.currentIndex.otherIndex())
+      if (indexCount <= indexProperties.completeThreshold) {
+        log.info("Ignoring index build request, index ${currentIndexStatus.currentIndex.otherIndex()} has count $indexCount which is less than threshold ${indexProperties.completeThreshold}.")
+        return currentIndexStatus
+      }
     }
 
     if (indexStatusService.markRebuildComplete()) {
