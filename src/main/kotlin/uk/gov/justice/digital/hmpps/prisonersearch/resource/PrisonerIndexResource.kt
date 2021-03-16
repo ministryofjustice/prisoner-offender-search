@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
@@ -48,7 +49,7 @@ class PrisonerIndexResource(
     description = "Swaps to the newly built index, requires PRISONER_INDEX role"
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
-  fun indexComplete() = prisonerIndexService.indexingComplete()
+  fun indexComplete(@RequestParam(name = "ignoreThreshold", required = false) ignoreThreshold: Boolean = false) = prisonerIndexService.indexingComplete(ignoreThreshold)
 
   @PutMapping("/switch-index")
   @Operation(
@@ -136,7 +137,7 @@ class PrisonerIndexResource(
     description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`"
   )
   fun indexQueueHousekeeping() {
-    prisonerIndexService.indexingComplete()
+    prisonerIndexService.indexingComplete(ignoreThreshold = false)
     queueAdminService.transferIndexMessages()
     queueAdminService.transferEventMessages()
   }

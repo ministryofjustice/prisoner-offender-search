@@ -6,12 +6,12 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.elasticsearch.client.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
@@ -31,7 +31,7 @@ class PrisonerIndexService(
   private val indexStatusService: IndexStatusService,
   private val searchClient: SearchClient,
   private val telemetryClient: TelemetryClient,
-  @Value("\${index.page.size:1000}") private val pageSize: Int
+  private val indexProperties: IndexProperties,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -149,7 +149,16 @@ class PrisonerIndexService(
     log.debug("Requested {} offender index syncs", count)
   }
 
-  fun indexingComplete(): IndexStatus {
+  fun indexingComplete(ignoreThreshold: Boolean): IndexStatus {
+    if (ignoreThreshold.not()) {
+      val currentIndexStatus = indexStatusService.getCurrentIndex()
+      val indexCount = countIndex(currentIndexStatus.currentIndex.otherIndex())
+      if (indexCount <= indexProperties.completeThreshold) {
+        log.info("Ignoring index build request, index ${currentIndexStatus.currentIndex.otherIndex()} has count $indexCount which is less than threshold ${indexProperties.completeThreshold}.")
+        return currentIndexStatus
+      }
+    }
+
     if (indexStatusService.markRebuildComplete()) {
       indexQueueService.clearAllMessages()
     }
@@ -166,11 +175,11 @@ class PrisonerIndexService(
           PrisonerIndexRequest(
             IndexRequestType.OFFENDER_LIST,
             null,
-            PageRequest.of(page, pageSize)
+            PageRequest.of(page, indexProperties.pageSize)
           )
         )
         page += 1
-      } while ((page) * pageSize < totalRows && indexStatusService.getCurrentIndex().inProgress)
+      } while ((page) * indexProperties.pageSize < totalRows && indexStatusService.getCurrentIndex().inProgress)
     }
     log.debug("Offender lists have been sent: {} requests for a total of {} offenders", page, totalRows)
     return totalRows

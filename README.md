@@ -49,6 +49,7 @@ Indexes can be switched without rebuilding, if they are both marked as "inProgre
 ### Housekeeping Cronjob
 There is a Kubernetes CronJob which runs on a schedule to perform the following tasks:
 * Checks if an index build has completed and if so then marks the build as complete (which switches the search to the new index)
+* A threshold is set for each environment (in the helm values file) and the index will not be marked as complete until this threshold is met. This is to prevent switching to an index that does not look correct and will require a manual intervention to complete the index build (e.g. calling the `/mark-complete` endpoint manually).
 
 The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not secured by Spring Security. To prevent external calls to the endpoint it has been secured in the ingress instead. 
 

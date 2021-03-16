@@ -22,4 +22,5 @@ env:
   JAVA_OPTS: "-Xmx512m"
   API_BASE_URL_OAUTH: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
   API_BASE_URL_NOMIS: "https://api-dev.prison.service.justice.gov.uk"
+  INDEX_COMPLETE_THRESHOLD: 500000
 

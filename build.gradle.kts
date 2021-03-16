@@ -42,4 +42,5 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.1")
+  testImplementation("org.mockito:mockito-inline:3.7.7")
 }
