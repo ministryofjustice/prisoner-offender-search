@@ -86,6 +86,7 @@ class IndexStatusService(
       return true
     }
 
+    log.info("Ignoring index build request with currentIndexStatus=$currentIndexStatus and indexQueueStatus=$indexQueueStatus")
     return false
   }
 }

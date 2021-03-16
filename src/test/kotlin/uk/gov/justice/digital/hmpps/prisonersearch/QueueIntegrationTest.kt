@@ -16,6 +16,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.reactive.function.BodyInserters
+import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
@@ -59,6 +60,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @SpyBean
   lateinit var indexQueueService: IndexQueueService
+
+  @SpyBean
+  lateinit var indexProperties: IndexProperties
 
   @SpyBean
   lateinit var telemetryClient: TelemetryClient

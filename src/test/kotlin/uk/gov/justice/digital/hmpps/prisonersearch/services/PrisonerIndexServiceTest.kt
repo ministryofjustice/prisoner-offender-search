@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 
@@ -18,13 +19,23 @@ class PrisonerIndexServiceTest {
   private val indexStatusService = mock<IndexStatusService>()
   private val searchClient = mock<SearchClient>()
   private val telemetryClient = mock<TelemetryClient>()
-  private val prisonerIndexService = PrisonerIndexService(nomisService, prisonerARepository, prisonerBRepository, indexQueueService, indexStatusService, searchClient, telemetryClient, 1000)
+  private val indexProperties = mock<IndexProperties>()
+  private val prisonerIndexService = PrisonerIndexService(
+    nomisService,
+    prisonerARepository,
+    prisonerBRepository,
+    indexQueueService,
+    indexStatusService,
+    searchClient,
+    telemetryClient,
+    indexProperties
+  )
 
   @Test
   fun `indexingComplete - clear messages if index build is complete`() {
     whenever(indexStatusService.markRebuildComplete()).thenReturn(true)
 
-    prisonerIndexService.indexingComplete()
+    prisonerIndexService.indexingComplete(true)
 
     verify(indexQueueService).clearAllMessages()
   }
@@ -33,7 +44,7 @@ class PrisonerIndexServiceTest {
   fun `indexingComplete - do not clear messages if index build is not complete`() {
     whenever(indexStatusService.markRebuildComplete()).thenReturn(false)
 
-    prisonerIndexService.indexingComplete()
+    prisonerIndexService.indexingComplete(true)
 
     verifyZeroInteractions(indexQueueService)
   }

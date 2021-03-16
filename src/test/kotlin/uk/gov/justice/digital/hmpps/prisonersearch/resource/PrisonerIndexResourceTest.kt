@@ -297,6 +297,69 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Nested
+  inner class MarkBuildComplete {
+
+    @Test
+    fun `will automatically complete build if ok`() {
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount)
+    }
+
+    @Test
+    fun `will not complete if index size not reached threshold`() {
+      indexPrisoners()
+      whenever(indexProperties.completeThreshold).thenReturn(21)
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_A.name)
+        .jsonPath("index-status.inProgress").isEqualTo(true)
+    }
+
+    @Test
+    fun `will complete if index size not reached threshold but ignoring threshold`() {
+      indexPrisoners()
+      whenever(indexProperties.completeThreshold).thenReturn(21)
+
+      webTestClient.put().uri("/prisoner-index/mark-complete?ignoreThreshold=true")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      webTestClient.get()
+        .uri("/info")
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody()
+        .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+        .jsonPath("index-status.inProgress").isEqualTo(false)
+    }
+  }
+
+  @Nested
   inner class HousekeepingBuildComplete {
 
     @Test
