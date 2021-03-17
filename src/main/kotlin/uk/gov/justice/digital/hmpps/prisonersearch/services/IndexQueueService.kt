@@ -41,17 +41,15 @@ class IndexQueueService(
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0
   }
 
-  fun getNumberOfMessagesCurrentlyInFlight(): Int {
-    val queueAttributes = indexAwsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessagesNotVisible"))
-    return queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0
-  }
+  fun getIndexQueueStatus(): IndexQueueStatus {
+    var queueAttributes = indexAwsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible")).attributes
 
-  fun getIndexQueueStatus(): IndexQueueStatus =
-    IndexQueueStatus(
-      messagesOnQueue = getNumberOfMessagesCurrentlyOnIndexQueue(),
-      messagesInFlight = getNumberOfMessagesCurrentlyInFlight(),
-      messagesOnDlq = getNumberOfMessagesCurrentlyOnIndexDLQ()
+    return IndexQueueStatus(
+      queueAttributes["ApproximateNumberOfMessages"]?.toInt() ?: 0,
+      getNumberOfMessagesCurrentlyOnIndexDLQ(),
+      queueAttributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0
     )
+  }
 }
 
 data class PrisonerIndexRequest(
