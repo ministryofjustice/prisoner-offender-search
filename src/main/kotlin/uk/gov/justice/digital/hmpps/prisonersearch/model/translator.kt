@@ -69,6 +69,7 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.mostSeriousOffence = ob.offenceHistory?.firstOrNull { off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
   prisoner.recall = ob.recall
   prisoner.legalStatus = ob.legalStatus
+  prisoner.imprisonmentStatus = ob.imprisonmentStatus
   prisoner.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
   return prisoner
 }
