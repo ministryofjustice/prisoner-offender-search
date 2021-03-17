@@ -13,6 +13,7 @@ import com.nhaarman.mockitokotlin2.check
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
@@ -148,6 +149,7 @@ internal class QueueAdminServiceTest {
     @Test
     internal fun `will purge event dlq of messages`() {
       whenever(eventAwsSqsDlqClient.getQueueUrl("event-dlq")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:event-dlq"))
+      stubDlqMessageCount(1)
 
       queueAdminService.clearAllDlqMessagesForEvent()
       verify(eventAwsSqsDlqClient).purgeQueue(
@@ -156,6 +158,42 @@ internal class QueueAdminServiceTest {
         }
       )
     }
+
+    @Test
+    internal fun `will not purge event dlq if there are no messages`() {
+      whenever(eventAwsSqsDlqClient.getQueueUrl("event-dlq")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:event-dlq"))
+      stubDlqMessageCount(0)
+
+      queueAdminService.clearAllDlqMessagesForEvent()
+
+      verify(eventAwsSqsDlqClient).getQueueUrl("event-dlq")
+      verify(eventAwsSqsDlqClient).getQueueAttributes("arn:eu-west-1:event-dlq", listOf("ApproximateNumberOfMessages"))
+      verifyNoMoreInteractions(eventAwsSqsDlqClient)
+    }
+
+    @Test
+    internal fun `will send a telemetry event`() {
+      whenever(eventAwsSqsDlqClient.getQueueUrl("event-dlq")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:event-dlq"))
+      stubDlqMessageCount(1)
+
+      queueAdminService.clearAllDlqMessagesForEvent()
+
+      verify(telemetryClient).trackEvent("PURGED_EVENT_DLQ", mapOf("messages-on-queue" to "1"), null)
+    }
+
+    @Test
+    internal fun `will not send a telemetry event if there are no messages`() {
+      whenever(eventAwsSqsDlqClient.getQueueUrl("event-dlq")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:event-dlq"))
+      stubDlqMessageCount(0)
+
+      queueAdminService.clearAllDlqMessagesForEvent()
+
+      verifyZeroInteractions(telemetryClient)
+    }
+
+    private fun stubDlqMessageCount(count: Int) =
+      whenever(eventAwsSqsDlqClient.getQueueAttributes("arn:eu-west-1:event-dlq", listOf("ApproximateNumberOfMessages")))
+        .thenReturn(GetQueueAttributesResult().withAttributes(mutableMapOf("ApproximateNumberOfMessages" to count.toString())))
   }
 
   @Nested
@@ -220,6 +258,26 @@ internal class QueueAdminServiceTest {
       verify(eventAwsSqsClient).sendMessage(eventQueueUrl, dataComplianceDeleteOffenderMessage("Z1234AA"))
       verify(eventAwsSqsClient).sendMessage(eventQueueUrl, dataComplianceDeleteOffenderMessage("Z1234BB"))
       verify(eventAwsSqsClient).sendMessage(eventQueueUrl, dataComplianceDeleteOffenderMessage("Z1234CC"))
+    }
+
+    @Test
+    internal fun `will send a telemetry event`() {
+      stubDlqMessageCount(1)
+      whenever(eventAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
+        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(dataComplianceDeleteOffenderMessage("Z1234AA"))))
+
+      queueAdminService.transferEventMessages()
+
+      verify(telemetryClient).trackEvent("TRANSFERRED_EVENT_DLQ", mapOf("messages-on-queue" to "1"), null)
+    }
+
+    @Test
+    internal fun `will not send a telemetry event if there are no messages`() {
+      stubDlqMessageCount(0)
+
+      queueAdminService.transferEventMessages()
+
+      verifyZeroInteractions(telemetryClient)
     }
 
     private fun stubDlqMessageCount(count: Int) =
@@ -305,8 +363,6 @@ internal class QueueAdminServiceTest {
     @Test
     internal fun `will not send a telemetry event if there are no messages`() {
       stubDlqMessageCount(0)
-      whenever(indexAwsSqsDlqClient.receiveMessage(any<ReceiveMessageRequest>()))
-        .thenReturn(ReceiveMessageResult().withMessages(Message().withBody(populateOffenderMessage("Z1234AA"))))
 
       queueAdminService.transferIndexMessages()
 
