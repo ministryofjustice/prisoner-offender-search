@@ -127,4 +127,20 @@ class TranslatorTest {
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseDate)
     assertThat(prisoner.postRecallReleaseDate).isEqualTo(postRecallReleaseDate)
   }
+
+  @Test
+  fun `imprisonmentStatus is present`() {
+    val prisoner = translate(
+      PrisonerA(),
+      OffenderBooking(
+        "A1234AA",
+        "Fred",
+        "Bloggs",
+        LocalDate.of(1976, 5, 15),
+        false,
+        imprisonmentStatus = "LIFE"
+      )
+    )
+    assertThat(prisoner.imprisonmentStatus).isEqualTo("LIFE")
+  }
 }
