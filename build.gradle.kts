@@ -35,11 +35,11 @@ dependencies {
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.959"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
   implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.959")
+  implementation("org.awaitility:awaitility-kotlin:4.0.3")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.testcontainers:localstack:1.15.2")
   testImplementation("org.testcontainers:elasticsearch:1.15.2")
-  testImplementation("org.awaitility:awaitility-kotlin:4.0.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.1")
   testImplementation("org.mockito:mockito-inline:3.7.7")

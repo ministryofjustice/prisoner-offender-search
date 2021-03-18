@@ -3,6 +3,9 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import com.amazonaws.util.IOUtils
 import com.google.gson.JsonParser
 import com.microsoft.applicationinsights.TelemetryClient
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -110,10 +113,11 @@ class PrisonerIndexService(
     return indexStatusService.getCurrentIndex()
   }
 
-  private fun checkExistsAndReset(prisonerIndex: SyncIndex) {
+  internal fun checkExistsAndReset(prisonerIndex: SyncIndex) {
     if (checkIfIndexExists(prisonerIndex.indexName)) {
       searchClient.lowLevelClient().performRequest(Request("DELETE", "/${prisonerIndex.indexName}"))
     }
+    await untilCallTo { checkIfIndexExists(prisonerIndex.indexName) } matches { it == false }
     createPrisonerIndex(prisonerIndex)
   }
 
