@@ -105,9 +105,7 @@ class QueueAdminService(
           mapOf("messages-on-queue" to total.toString()),
           null
         )
-      } ?: also {
-      log.info("No messages to transfer from Event DLQ messages to main queue")
-    }
+      }
   }
 
   private fun getEventDlqMessageCount() =
@@ -133,8 +131,6 @@ class QueueAdminService(
           null
         )
         log.info("Transfer all Index DLQ messages to main queue - found $total message(s)")
-      } ?: also {
-      log.info("No messages to transfer from Index DLQ messages to main queue")
-    }
+      }
   }
 }
