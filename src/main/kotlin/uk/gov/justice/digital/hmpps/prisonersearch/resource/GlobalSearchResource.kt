@@ -34,11 +34,7 @@ class GlobalSearchResource(
     @PageableDefault pageable: Pageable
   ) = globalSearchService.findByGlobalSearchCriteria(globalSearchCriteria, pageable)
 
-  @GetMapping(
-    "/synthetic-monitor",
-    produces = [MediaType.APPLICATION_JSON_VALUE],
-    consumes = [MediaType.APPLICATION_JSON_VALUE]
-  )
+  @GetMapping("/synthetic-monitor")
   fun syntheticMonitor() {
     val start = System.currentTimeMillis()
     val results = globalSearchService.findByGlobalSearchCriteria(
