@@ -95,5 +95,5 @@ elasticsearch:
 
 index:
   page-size: 1000
-  complete-threshold: 500000
+  complete-threshold: 700000
 

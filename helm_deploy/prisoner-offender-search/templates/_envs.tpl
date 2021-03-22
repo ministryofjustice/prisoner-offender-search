@@ -19,6 +19,9 @@ env:
   - name: API_BASE_URL_NOMIS
     value: "{{ .Values.env.API_BASE_URL_NOMIS }}"
 
+  - name: INDEX_COMPLETE_THRESHOLD
+    value: "{{ .Values.env.INDEX_COMPLETE_THRESHOLD }}"
+
   - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
       secretKeyRef:
