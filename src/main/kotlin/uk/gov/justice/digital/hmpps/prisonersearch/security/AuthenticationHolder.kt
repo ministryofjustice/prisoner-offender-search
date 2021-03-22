@@ -10,13 +10,15 @@ class AuthenticationHolder {
   val authentication: Authentication
     get() = SecurityContextHolder.getContext().authentication
 
-  fun currentUsername(): String? {
-    val auth = authentication as AuthAwareAuthenticationToken
-    return auth.userName
-  }
+  fun currentUsername(): String? =
+    when (authentication) {
+      is AuthAwareAuthenticationToken -> (authentication as AuthAwareAuthenticationToken).userName
+      else -> "anonymous"
+    }
 
-  fun currentClientId(): String? {
-    val auth = authentication as AuthAwareAuthenticationToken
-    return auth.clientId
-  }
+  fun currentClientId(): String? =
+    when (authentication) {
+      is AuthAwareAuthenticationToken -> (authentication as AuthAwareAuthenticationToken).clientId
+      else -> "anonymous"
+    }
 }

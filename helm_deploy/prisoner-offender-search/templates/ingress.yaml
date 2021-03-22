@@ -17,6 +17,10 @@ metadata:
         deny all;
         return 401;
       }
+      location /synthetic-monitor {
+        deny all;
+        return 401;
+      }
 
 spec:
   tls:
