@@ -23,6 +23,8 @@ env:
   API_BASE_URL_OAUTH: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
   API_BASE_URL_NOMIS: "https://api-preprod.prison.service.justice.gov.uk"
   INDEX_COMPLETE_THRESHOLD: 700000
+
+cron:
   SYNTHETIC_MONITOR_CRON_EXPRESSION: "1 * * * *"
 
 allowlist:

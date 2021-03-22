@@ -22,9 +22,6 @@ env:
   - name: INDEX_COMPLETE_THRESHOLD
     value: "{{ .Values.env.INDEX_COMPLETE_THRESHOLD }}"
 
-  - name: SYNTHETIC_MONITOR_CRON_EXPRESSION
-    value: "{{ .Values.env.SYNTHETIC_MONITOR_CRON_EXPRESSION }}"
-
   - name: APPINSIGHTS_INSTRUMENTATIONKEY
     valueFrom:
       secretKeyRef:

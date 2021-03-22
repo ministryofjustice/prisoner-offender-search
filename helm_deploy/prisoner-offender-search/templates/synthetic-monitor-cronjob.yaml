@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
-  schedule: "{{ .Values.env.SYNTHETIC_MONITOR_CRON_EXPRESSION }}"
+  schedule: "{{ .Values.cron.SYNTHETIC_MONITOR_CRON_EXPRESSION }}"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 600
