@@ -23,7 +23,10 @@ class IndexStatus(
   var endIndexTime: LocalDateTime?,
 
   @Field(type = FieldType.Boolean)
-  var inProgress: Boolean
+  var inProgress: Boolean,
+
+  @Field(type = FieldType.Boolean)
+  var inError: Boolean = false
 
 ) {
 

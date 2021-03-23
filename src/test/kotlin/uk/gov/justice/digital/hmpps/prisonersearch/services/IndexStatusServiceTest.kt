@@ -44,14 +44,47 @@ class IndexStatusServiceTest {
 
       assertThat(indexStatusService.markRebuildComplete()).isTrue
     }
+
+    @Test
+    fun `complete build fails if index status in error`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = true)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+
+      assertThat(indexStatusService.markRebuildComplete()).isFalse
+    }
+  }
+
+  @Nested
+  inner class SwitchIndex {
+
+    @Test
+    fun `switch index fails if index status in error`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = true)))
+
+      assertThat(indexStatusService.switchIndex()).isFalse
+    }
+  }
+
+  @Nested
+  inner class CancelIndex {
+    @Test
+    fun `cancelling index resets index error state to false`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = true)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+      assertThat(indexStatusService.getCurrentIndex().inError).isTrue
+
+      assertThat(indexStatusService.cancelIndexing()).isTrue
+      assertThat(indexStatusService.getCurrentIndex().inError).isFalse
+    }
   }
 }
 
-fun anIndexStatus(inProgress: Boolean = true) =
+fun anIndexStatus(inProgress: Boolean = true, inError: Boolean = false) =
   IndexStatus(
     id = "STATUS",
     currentIndex = INDEX_A,
     startIndexTime = LocalDateTime.now().minusHours(1L),
     endIndexTime = LocalDateTime.now().minusMinutes(1L),
-    inProgress = inProgress
+    inProgress = inProgress,
+    inError = inError
   )

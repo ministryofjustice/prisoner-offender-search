@@ -6,10 +6,12 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.elasticsearch.ElasticsearchException
 import org.elasticsearch.client.Request
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.elasticsearch.UncategorizedElasticsearchException
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.stereotype.Service
@@ -24,6 +26,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
+import kotlin.jvm.Throws
 
 @Service
 class PrisonerIndexService(
@@ -93,24 +97,32 @@ class PrisonerIndexService(
     return JsonParser.parseString(IOUtils.toString(response.entity.content)).asJsonObject["count"].asInt
   }
 
+  @Throws(ElasticSearchIndexingException::class)
   fun buildIndex(): IndexStatus {
-    if (indexStatusService.markRebuildStarting()) {
-      val currentIndex = indexStatusService.getCurrentIndex().currentIndex
-      val otherIndexCount = countIndex(currentIndex.otherIndex())
-      log.info(
-        "Current index is {} [{}], rebuilding index {} [{}]",
-        currentIndex,
-        countIndex(currentIndex),
-        currentIndex.otherIndex(),
-        otherIndexCount
-      )
+    try {
+      if (indexStatusService.markRebuildStarting()) {
+        val currentIndex = indexStatusService.getCurrentIndex().currentIndex
+        val otherIndexCount = countIndex(currentIndex.otherIndex())
+        log.info(
+          "Current index is {} [{}], rebuilding index {} [{}]",
+          currentIndex,
+          countIndex(currentIndex),
+          currentIndex.otherIndex(),
+          otherIndexCount
+        )
+        checkExistsAndReset(currentIndex.otherIndex())
 
-      checkExistsAndReset(currentIndex.otherIndex())
-
-      log.info("Sending rebuild request")
-      indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.REBUILD))
+        log.info("Sending rebuild request")
+        indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.REBUILD))
+      }
+      return indexStatusService.getCurrentIndex()
+    } catch (ese: ElasticsearchException) {
+      indexStatusService.markIndexBuildFailure()
+      throw ElasticSearchIndexingException(ese)
+    } catch (uee: UncategorizedElasticsearchException) {
+      indexStatusService.markIndexBuildFailure()
+      throw ElasticSearchIndexingException(uee)
     }
-    return indexStatusService.getCurrentIndex()
   }
 
   internal fun checkExistsAndReset(prisonerIndex: SyncIndex) {
@@ -183,7 +195,7 @@ class PrisonerIndexService(
           )
         )
         page += 1
-      } while ((page) * indexProperties.pageSize < totalRows && indexStatusService.getCurrentIndex().inProgress)
+      } while ((page) * indexProperties.pageSize < totalRows && indexStatusService.getCurrentIndex().inProgress && indexStatusService.getCurrentIndex().inError.not())
     }
     log.debug("Offender lists have been sent: {} requests for a total of {} offenders", page, totalRows)
     return totalRows
