@@ -47,6 +47,6 @@ class GlobalSearchResource(
       ),
       PageRequest.of(0, 10)
     )
-    telemetryClient.trackEvent("synthetic-monitor", mapOf("count" to "${results.totalElements}", "timeMs" to (System.currentTimeMillis() - start).toString()), null)
+    telemetryClient.trackEvent("synthetic-monitor", mapOf("results" to "${results.totalElements}", "timeMs" to (System.currentTimeMillis() - start).toString()), null)
   }
 }
