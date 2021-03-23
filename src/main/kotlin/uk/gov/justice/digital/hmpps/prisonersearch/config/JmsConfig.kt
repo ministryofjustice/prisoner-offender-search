@@ -136,6 +136,18 @@ class JmsConfig {
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
+  fun awsSqsIndexDlqASyncClient(
+    @Value("\${sqs.index.aws.dlq.access.key.id}") accessKey: String,
+    @Value("\${sqs.index.aws.dlq.secret.access.key}") secretKey: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQSAsync =
+    AmazonSQSAsyncClientBuilder.standard()
+      .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
+      .withRegion(region)
+      .build()
+
+  @Bean
+  @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
   fun awsSqsIndexDlqClient(
     @Value("\${sqs.index.aws.dlq.access.key.id}") accessKey: String,
     @Value("\${sqs.index.aws.dlq.secret.access.key}") secretKey: String,

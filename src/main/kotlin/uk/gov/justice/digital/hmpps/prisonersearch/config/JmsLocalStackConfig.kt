@@ -66,6 +66,16 @@ class JmsLocalStackConfig {
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
 
+  @Bean("awsSqsIndexDlqASyncClient")
+  fun awsSqsIndexDlqASyncClientLocalstack(
+    @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
+    @Value("\${sqs.endpoint.region}") region: String
+  ): AmazonSQSAsync =
+    AmazonSQSAsyncClientBuilder.standard()
+      .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
+      .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
+      .build()
+
   @Bean("queueUrl")
   fun queueUrl(
     @Qualifier("awsSqsClient") awsSqsClient: AmazonSQS,

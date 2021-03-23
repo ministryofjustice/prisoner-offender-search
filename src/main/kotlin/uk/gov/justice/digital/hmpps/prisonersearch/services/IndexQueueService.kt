@@ -16,6 +16,7 @@ class IndexQueueService(
   @Autowired @Qualifier("awsSqsIndexASyncClient") private val awsSqsIndexASyncClient: AmazonSQSAsync,
   @Autowired @Qualifier("indexQueueUrl") private val indexQueueUrl: String,
   @Qualifier("awsSqsIndexClient") private val indexAwsSqsClient: AmazonSQS,
+  @Qualifier("awsSqsIndexDlqASyncClient") private val awsSqsIndexDlqASyncClient: AmazonSQSAsync,
   @Qualifier("awsSqsIndexDlqClient") private val indexAwsSqsDlqClient: AmazonSQS,
   @Value("\${sqs.index.dlq.name}") private val indexDlqName: String,
   private val gson: Gson
@@ -33,23 +34,26 @@ class IndexQueueService(
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int {
     val queueAttributes = indexAwsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0
+    return queueAttributes.attributes["ApproximateNumberOfMessages"].toIntOrZero()
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexDLQ(): Int {
     val queueAttributes = indexAwsSqsDlqClient.getQueueAttributes(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0
+    return queueAttributes.attributes["ApproximateNumberOfMessages"].toIntOrZero()
   }
 
   fun getIndexQueueStatus(): IndexQueueStatus {
-    var queueAttributes = indexAwsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible")).attributes
+    val queueAttributesAsyncFuture = awsSqsIndexASyncClient.getQueueAttributesAsync(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
+    val dlqAttributesAsyncFuture = awsSqsIndexDlqASyncClient.getQueueAttributesAsync(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
 
     return IndexQueueStatus(
-      queueAttributes["ApproximateNumberOfMessages"]?.toInt() ?: 0,
-      getNumberOfMessagesCurrentlyOnIndexDLQ(),
-      queueAttributes["ApproximateNumberOfMessagesNotVisible"]?.toInt() ?: 0
+      messagesOnQueue = queueAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessages"].toIntOrZero(),
+      messagesInFlight = queueAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessagesNotVisible"].toIntOrZero(),
+      messagesOnDlq = dlqAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessages"].toIntOrZero(),
     )
   }
+  private fun String?.toIntOrZero() =
+    this?.toInt() ?: 0
 }
 
 data class PrisonerIndexRequest(
