@@ -34,8 +34,8 @@ class IndexStatusService(
   fun markRebuildStarting(): Boolean {
     val currentIndexStatus = getCurrentIndex()
 
-    if (currentIndexStatus.inProgress) {
-      log.warn("Index marked as already in progress")
+    if (currentIndexStatus.inProgress.and(currentIndexStatus.inError.not())) {
+      log.warn("Index marked as already in progress or in error")
       return false
     }
     currentIndexStatus.inProgress = true
@@ -56,6 +56,7 @@ class IndexStatusService(
     val currentIndexStatus = getCurrentIndex()
     if (currentIndexStatus.inProgress) {
       currentIndexStatus.inProgress = false
+      currentIndexStatus.inError = false
       indexStatusRepository.save(currentIndexStatus)
       log.warn("Indexing cancelled")
       return true
@@ -77,7 +78,7 @@ class IndexStatusService(
   fun markRebuildComplete(): Boolean {
     val currentIndexStatus = getCurrentIndex()
     val indexQueueStatus = indexQueueService.getIndexQueueStatus()
-    if (currentIndexStatus.inProgress && indexQueueStatus.active.not()) {
+    if (currentIndexStatus.inProgress && indexQueueStatus.active.not() && currentIndexStatus.inError.not()) {
       currentIndexStatus.inProgress = false
       currentIndexStatus.endIndexTime = LocalDateTime.now()
       currentIndexStatus.toggleIndex()
@@ -88,6 +89,10 @@ class IndexStatusService(
 
     log.info("Ignoring index build request with currentIndexStatus=$currentIndexStatus and indexQueueStatus=$indexQueueStatus")
     return false
+  }
+
+  fun markIndexBuildFailure() {
+    getCurrentIndex().inError = true
   }
 }
 

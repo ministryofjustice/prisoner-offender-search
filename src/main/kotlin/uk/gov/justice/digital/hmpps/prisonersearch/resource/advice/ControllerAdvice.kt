@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
+import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.InvalidRequestException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.NotFoundException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.UnauthorisedException
@@ -34,6 +35,15 @@ class ControllerAdvice {
   @ExceptionHandler(RestClientException::class)
   fun handleException(e: RestClientException): ResponseEntity<ErrorResponse> {
     log.error("Unexpected exception", e)
+    return ResponseEntity
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .body(ErrorResponse(status = HttpStatus.INTERNAL_SERVER_ERROR.value(), developerMessage = e.message))
+  }
+
+  @ExceptionHandler(ElasticSearchIndexingException::class)
+  fun handleException(e: ElasticSearchIndexingException): ResponseEntity<ErrorResponse> {
+    log.error("Unexpected exception", e)
+
     return ResponseEntity
       .status(HttpStatus.INTERNAL_SERVER_ERROR)
       .body(ErrorResponse(status = HttpStatus.INTERNAL_SERVER_ERROR.value(), developerMessage = e.message))
