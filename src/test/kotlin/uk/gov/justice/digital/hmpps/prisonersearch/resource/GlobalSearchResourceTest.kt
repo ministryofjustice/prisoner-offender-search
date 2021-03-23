@@ -469,7 +469,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
       verify(telemetryClient).trackEvent(
         eq("synthetic-monitor"),
         check<Map<String, String>> {
-          assertThat(it["count"]).containsOnlyDigits()
+          assertThat(it["results"]).containsOnlyDigits()
           assertThat(it["timeMs"]).containsOnlyDigits()
         },
         isNull()
