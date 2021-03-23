@@ -1,6 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import com.nhaarman.mockitokotlin2.check
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.isNull
+import com.nhaarman.mockitokotlin2.verify
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
@@ -440,5 +446,34 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
       2,
       "/results/globalSearch/search_results_sam_pagination3.json"
     )
+  }
+
+  @Nested
+  inner class SyntheticMonitor {
+
+    @Test
+    fun `endpoint is unsecured`() {
+      webTestClient.get().uri("/synthetic-monitor")
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+    }
+
+    @Test
+    fun `telemetry is recorded`() {
+      webTestClient.get().uri("/synthetic-monitor")
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+
+      verify(telemetryClient).trackEvent(
+        eq("synthetic-monitor"),
+        check<Map<String, String>> {
+          assertThat(it["count"]).containsOnlyDigits()
+          assertThat(it["timeMs"]).containsOnlyDigits()
+        },
+        isNull()
+      )
+    }
   }
 }

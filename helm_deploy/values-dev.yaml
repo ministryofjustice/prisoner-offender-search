@@ -24,3 +24,6 @@ env:
   API_BASE_URL_NOMIS: "https://api-dev.prison.service.justice.gov.uk"
   INDEX_COMPLETE_THRESHOLD: 500000
 
+cron:
+  SYNTHETIC_MONITOR_CRON_EXPRESSION: "*/10 * * * *"
+

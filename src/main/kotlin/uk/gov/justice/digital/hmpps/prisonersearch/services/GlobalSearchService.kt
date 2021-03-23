@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
@@ -31,7 +30,6 @@ class GlobalSearchService(
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
   fun findByGlobalSearchCriteria(globalSearchCriteria: GlobalSearchCriteria, pageable: Pageable): Page<Prisoner> {
     validateSearchForm(globalSearchCriteria)
     if (globalSearchCriteria.prisonerIdentifier != null) {

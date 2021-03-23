@@ -5,4 +5,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "index")
-data class IndexProperties(val pageSize: Int, val completeThreshold: Int)
+data class IndexProperties(val pageSize: Int, val completeThreshold: Long)

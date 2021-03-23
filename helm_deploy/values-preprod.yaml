@@ -24,6 +24,9 @@ env:
   API_BASE_URL_NOMIS: "https://api-preprod.prison.service.justice.gov.uk"
   INDEX_COMPLETE_THRESHOLD: 700000
 
+cron:
+  SYNTHETIC_MONITOR_CRON_EXPRESSION: "*/10 * * * *"
+
 allowlist:
   office: "217.33.148.210/32"
   health-kick: "35.177.252.195/32"
