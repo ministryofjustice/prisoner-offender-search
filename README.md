@@ -35,13 +35,21 @@ Once the index has finished, if there are no errors then the (housekeeping cronj
 
 If the index build fails - there are messages left on the index dead letter queue - then the new index will remain inactive until the DLQ is empty. It may take user intervention to clear the DLQ if some messages are genuinely unprocessable (rather than just failed due to e.g. network issues).  
 
+#### ElasticSearch Runtime exceptions
+Two ES runtime exceptions, ElasticsearchException and ElasticSearchIndexingException, are caught during the re-indexing process to safeguard the integrity of the index status. Once caught,
+the inError status flag is set on the IndexStatus.  The flag ensures that manipulation of the index is forbidden when in this state.
+Only cancelling the index process will reset the flag and subsequently allow a rebuild of the index to be invoked.
+```
+PUT /prisoner/index/cancel-index
+```
+
 #### Index switch
 
 Given the state of the each index is itself held in ES under the `in-progress` index with a single "document" when the INDEX_A/INDEX_B indexes switch there are actually two changes:
 * The document in `offender-index-status` to indicate which index is currently active
 * The ES `current-index` is switched to point at the active index. This means external clients can safely use the `offender` index without any knowledge of the INDEX_A/INDEX_B indexes. 
 
-Indexes can be switched without rebuilding, if they are both marked as "inProgress": false
+Indexes can be switched without rebuilding, if they are both marked as "inProgress": false and "inError":false
 ```
     PUT /prisoner/index/switch-index
 ```

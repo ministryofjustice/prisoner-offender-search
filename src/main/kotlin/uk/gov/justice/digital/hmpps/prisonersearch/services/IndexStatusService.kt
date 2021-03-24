@@ -34,8 +34,8 @@ class IndexStatusService(
   fun markRebuildStarting(): Boolean {
     val currentIndexStatus = getCurrentIndex()
 
-    if (currentIndexStatus.inProgress.and(currentIndexStatus.inError.not())) {
-      log.warn("Index marked as already in progress or in error")
+    if (currentIndexStatus.inProgress.or(currentIndexStatus.inError)) {
+      log.warn("Unable to mark rebuild for current index {}", currentIndexStatus)
       return false
     }
     currentIndexStatus.inProgress = true
@@ -67,7 +67,8 @@ class IndexStatusService(
 
   fun switchIndex(): Boolean {
     val currentIndexStatus = getCurrentIndex()
-    if (currentIndexStatus.inProgress) {
+    if (currentIndexStatus.inProgress.or(currentIndexStatus.inError)) {
+      log.warn("Unable to switch index for current index {}", currentIndexStatus)
       return false
     }
     currentIndexStatus.toggleIndex()
