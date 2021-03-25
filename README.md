@@ -311,6 +311,71 @@ One last check of the info endpoint should confirm the new state, e.g.
 
 Pay careful attention to `"currentIndex": "INDEX_A"` - this shows the actual index being used by clients.
 
+##Restore from a snapshot (if both indexes have become corrupt/empty)
+
+If we are restoring from the snapshot it means that the current index and other index are broken, we need to delete them to be able to restore from the snapshot.
+Every night we have a scheduled job that takes the snapshot of the whole cluster which is called `latest` and this should be restored
+
+1. To restore we need to port-forward to the es instance (replace NAMESPACE with the affected namespace)
+
+   `kubectl -n <NAMESPACE> port-forward svc/es-proxy 9200:9200`
+
+2. Delete the current indexes
+
+   `curl -XDELETE 'http://localhost:9200/_all'`
+
+3. Then we can start the restore (SNAPSHOT_NAME for the overnight snapshot is `latest`)
+
+   `curl -XPOST 'http://localhost:9200/_snapshot/<NAMESPACE>/<SNAPSHOT_NAME>/_restore' --data '{"include_global_state": true}'`
+
+The `include_global_state: true` is set true so that we copy the global state of the cluster snapshot over. The default for restoring, 
+however, is `include_global_state: False`. If only restoring a single index, it could be bad to overwrite the global state but as we are 
+restoring the full cluster we set it to true
+
+###To view the state of the indexes while restoring from a snapshot
+
+####cluster health
+
+`curl -XGET 'http://localhost:9200/_cluster/health'`
+
+The cluster health status is: green, yellow or red. On the shard level, a red status indicates that the specific shard is not allocated in the cluster, yellow means that the primary shard is allocated but replicas are not, and green means that all shards are allocated. The index level status is controlled by the worst shard status. The cluster status is controlled by the worst index status.
+
+####Shards
+`curl -XGET 'http://localhost:9200/_cat/shards'`
+
+The shards command is the detailed view of what nodes contain which shards. It will tell you if it’s a primary or replica, the number of docs, the bytes it takes on disk, and the node where it’s located.
+
+####Recovery
+`curl -XGET 'http://localhost:9200/_cat/recovery'`
+
+Returns information about ongoing and completed shard recoveries
+
+
+###To take a manual snapshot, perform the following steps:
+
+1. You can't take a snapshot if one is currently in progress. To check, run the following command:
+   
+   `curl -XGET 'http://localhost:9200/_snapshot/_status'`
+2. Run the following command to take a manual snapshot:
+   
+   `curl -XPUT 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
+
+you can now use the restore commands above to restore the snapshot if needed
+
+####to remove a snapshot
+`curl -XDELETE 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
+
+###Other command which will help when looking at restoring a snapshot
+
+To see all snapshot repositories, run the following command (normally there will only be one, as we have one per namespace):
+
+`curl -XGET 'http://localhost:9200/_snapshot?pretty'`
+
+To see all snapshots for the namespace run the following command:
+
+`curl -XGET 'http://localhost:9200/_snapshot/<NAMESPACE>/_all?pretty'`
+
+
 ### Useful App Insights Queries
 ####General logs (filtering out the offender update)
 ``` kusto
