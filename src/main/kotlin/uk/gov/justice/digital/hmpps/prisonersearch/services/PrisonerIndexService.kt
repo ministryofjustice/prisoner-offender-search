@@ -97,7 +97,7 @@ class PrisonerIndexService(
     return JsonParser.parseString(IOUtils.toString(response.entity.content)).asJsonObject["count"].asInt
   }
 
-  @Throws(ElasticSearchIndexingException::class)
+  @Throws(ElasticSearchIndexingException::class, ResponseStatusException::class)
   fun buildIndex(): IndexStatus {
     try {
       if (indexStatusService.markRebuildStarting()) {
@@ -114,6 +114,9 @@ class PrisonerIndexService(
 
         log.info("Sending rebuild request")
         indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.REBUILD))
+      } else {
+        log.info("Index not restarted as index is marked in progress or in error")
+        throw ResponseStatusException(CONFLICT, "Unable to build index - it is marked as in progress or in error")
       }
       return indexStatusService.getCurrentIndex()
     } catch (ese: ElasticsearchException) {
@@ -144,11 +147,12 @@ class PrisonerIndexService(
     return indexStatusService.getCurrentIndex()
   }
 
+  @Throws(ResponseStatusException::class)
   fun switchIndex(): IndexStatus {
     val switched = indexStatusService.switchIndex()
     if (!switched) {
-      log.info("Index not switched as one is marked in progress")
-      throw ResponseStatusException(CONFLICT, "unable to switch indexes one is marked as in progress")
+      log.info("Index not switched as one is marked in progress or in error")
+      throw ResponseStatusException(CONFLICT, "Unable to switch indexes - one is marked as in progress or in error")
     }
     val currentIndex = indexStatusService.getCurrentIndex()
     log.info("Index switched, index {} is now current.", currentIndex.currentIndex)
@@ -165,9 +169,14 @@ class PrisonerIndexService(
     log.debug("Requested {} offender index syncs", count)
   }
 
+  @Throws(ResponseStatusException::class)
   fun indexingComplete(ignoreThreshold: Boolean): IndexStatus {
+    val currentIndexStatus = indexStatusService.getCurrentIndex()
+    if (currentIndexStatus.inError) {
+      log.info("Index not marked as complete as it is in error")
+      throw ResponseStatusException(CONFLICT, "Unable to marked index complete as it is in error")
+    }
     if (ignoreThreshold.not()) {
-      val currentIndexStatus = indexStatusService.getCurrentIndex()
       val indexCount = countIndex(currentIndexStatus.currentIndex.otherIndex())
       if (indexCount <= indexProperties.completeThreshold) {
         log.info("Ignoring index build request, index ${currentIndexStatus.currentIndex.otherIndex()} has count $indexCount which is less than threshold ${indexProperties.completeThreshold}.")

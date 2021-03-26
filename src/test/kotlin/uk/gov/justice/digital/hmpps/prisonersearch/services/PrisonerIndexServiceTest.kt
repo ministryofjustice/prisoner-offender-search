@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.IndexOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
@@ -49,6 +50,7 @@ class PrisonerIndexServiceTest {
     @Test
     fun `clear messages if index build is complete`() {
       whenever(indexStatusService.markRebuildComplete()).thenReturn(true)
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, true))
 
       prisonerIndexService.indexingComplete(true)
 
@@ -58,6 +60,7 @@ class PrisonerIndexServiceTest {
     @Test
     fun `do not clear messages if index build is not complete`() {
       whenever(indexStatusService.markRebuildComplete()).thenReturn(false)
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, true))
 
       prisonerIndexService.indexingComplete(true)
 

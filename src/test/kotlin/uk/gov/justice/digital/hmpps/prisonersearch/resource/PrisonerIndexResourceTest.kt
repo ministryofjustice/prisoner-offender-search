@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.elasticsearch.client.Request
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.index.reindex.DeleteByQueryRequest
@@ -12,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.services.offenderChangedMessage
@@ -241,30 +244,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `conflict returned if one index is rebuilding when trying to switch indexes`() {
-    // index B
-    indexPrisoners()
-
-    webTestClient.put().uri("/prisoner-index/mark-complete")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-      .exchange()
-      .expectStatus().isOk
-
-    resetStubs()
-    // Start indexing A
-    indexPrisoners()
-
-    webTestClient.put().uri("/prisoner-index/switch-index")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-      .exchange()
-      .expectStatus().isEqualTo(409)
-      .expectBody()
-      .jsonPath("$.message").value<String> { message ->
-        assertThat(message).isEqualTo("unable to switch indexes one is marked as in progress")
-      }
-  }
-
-  @Test
   fun `can transfer items from dlq to normal queue`() {
     webTestClient.put().uri("/prisoner-index/transfer-index-dlq")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -294,6 +273,181 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
+  }
+
+  @Nested
+  inner class BuildErrorConflict {
+    @Test
+    fun `conflict returned if index is rebuilding when trying to switch indexes`() {
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/switch-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if alternate index is rebuilding when trying to switch indexes`() {
+      // index B
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      resetStubs()
+      // Start indexing A
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/switch-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is rebuilding and inError when trying to switch indexes`() {
+      indexPrisoners()
+      updateIndexErrorStatus(inProgress = true, inError = true)
+
+      webTestClient.put().uri("/prisoner-index/switch-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is inError when trying to switch indexes`() {
+      indexPrisoners()
+      updateIndexErrorStatus(inProgress = false, inError = true)
+
+      webTestClient.put().uri("/prisoner-index/switch-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is rebuilding when trying to initiate another build`() {
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/build-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if alternate index is rebuilding trying to initiate another build`() {
+      // index B
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      resetStubs()
+      // Start indexing A
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/build-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is rebuilding and inError when trying to initiate another build`() {
+      indexPrisoners()
+      updateIndexErrorStatus(inProgress = true, inError = true)
+
+      webTestClient.put().uri("/prisoner-index/build-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is inError when trying to initiate another build`() {
+      indexPrisoners()
+      updateIndexErrorStatus(inProgress = false, inError = true)
+
+      webTestClient.put().uri("/prisoner-index/build-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is inError when trying to markComplete`() {
+      indexPrisoners()
+      updateIndexErrorStatus(inProgress = false, inError = true)
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to marked index complete as it is in error")
+        }
+    }
+
+    @Test
+    fun `conflict returned if index is rebuilding and inError when trying to markComplete`() {
+      indexPrisoners()
+      updateIndexErrorStatus(inProgress = true, inError = true)
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+        .expectBody()
+        .jsonPath("$.message").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to marked index complete as it is in error")
+        }
+    }
+
+    private fun updateIndexErrorStatus(inProgress: Boolean, inError: Boolean) {
+      val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
+      resetIndexStatus.setJsonEntity(gson.toJson(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, inProgress, inError)))
+      elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
+    }
   }
 
   @Nested
