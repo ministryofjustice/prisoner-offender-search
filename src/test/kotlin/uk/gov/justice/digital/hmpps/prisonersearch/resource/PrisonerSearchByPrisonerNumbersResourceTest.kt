@@ -110,6 +110,8 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("$.length()").isEqualTo(1)
       .jsonPath("$[0].prisonerNumber").isEqualTo("AN2")
+      .jsonPath("$[0].imprisonmentStatus").isEqualTo("LIFE")
+      .jsonPath("$[0].imprisonmentStatusDescription").isEqualTo("Life imprisonment")
   }
 
   @Test

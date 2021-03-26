@@ -116,6 +116,9 @@ open class Prisoner {
   @Schema(description = "The prisoner's imprisonment status code.", example = "LIFE")
   var imprisonmentStatus: String? = null
 
+  @Schema(description = "The prisoner's imprisonment status description.", example = "Serving Life Imprisonment")
+  var imprisonmentStatusDescription: String? = null
+
   @Schema(required = true, description = "Most serious offence for this sentence", example = "Robbery")
   var mostSeriousOffence: String? = null
 
