@@ -93,12 +93,13 @@ class QueueAdminService(
       .takeIf { it > 0 }
       ?.also { total ->
         repeat(total) {
-          eventAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(eventDlqUrl).withMaxNumberOfMessages(1)).messages
-            .forEach { msg ->
-              eventAwsSqsClient.sendMessage(eventQueueUrl, msg.body)
-              eventAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(eventDlqUrl, msg.receiptHandle))
-              log.info("Transferred message with from Event DLQ: $msg")
-            }
+          val receivedMessageResult = eventAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(eventDlqUrl).withMaxNumberOfMessages(1)).messages
+          receivedMessageResult[0]?.let { msg ->
+            eventAwsSqsClient.sendMessage(eventQueueUrl, msg.body)
+            eventAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(eventDlqUrl, msg.receiptHandle))
+            log.info("Transferred message from Event DLQ: $msg")
+          }
+            ?: log.info("Expected to transfer message from Event DLQ, but no message was received")
         }
         telemetryClient.trackEvent(
           TelemetryEvents.TRANSFERRED_EVENT_DLQ.name,
@@ -118,12 +119,13 @@ class QueueAdminService(
       .takeIf { it > 0 }
       ?.also { total ->
         repeat(total) {
-          indexAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(indexDlqUrl).withMaxNumberOfMessages(1)).messages
-            .forEach { msg ->
-              indexAwsSqsClient.sendMessage(indexQueueUrl, msg.body)
-              indexAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(indexDlqUrl, msg.receiptHandle))
-              log.info("Transferred message with from Index DLQ: $msg")
-            }
+          val receivedMessageResult = indexAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(indexDlqUrl).withMaxNumberOfMessages(1)).messages
+          receivedMessageResult[0]?.let { msg ->
+            indexAwsSqsClient.sendMessage(indexQueueUrl, msg.body)
+            indexAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(indexDlqUrl, msg.receiptHandle))
+            log.info("Transferred message from Index DLQ: $msg")
+          }
+            ?: log.info("Expected message to transfer from Index DLQ, but no message was received")
         }
         telemetryClient.trackEvent(
           TelemetryEvents.TRANSFERRED_INDEX_DLQ.name,
