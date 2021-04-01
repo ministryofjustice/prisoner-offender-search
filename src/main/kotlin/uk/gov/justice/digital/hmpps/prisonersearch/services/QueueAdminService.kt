@@ -72,7 +72,7 @@ class QueueAdminService(
   }
 
   fun clearAllDlqMessagesForEvent() {
-    getEventDlqMessageCount()
+    eventAwsSqsDlqClient.getMessageCount(eventDlqUrl)
       .takeIf { it > 0 }
       ?.also { total ->
         eventAwsSqsDlqClient.purgeQueue(PurgeQueueRequest(eventDlqUrl))
@@ -89,50 +89,48 @@ class QueueAdminService(
   }
 
   fun transferEventMessages() {
-    getEventDlqMessageCount()
+    eventAwsSqsDlqClient.getMessageCount(eventDlqUrl)
       .takeIf { it > 0 }
-      ?.also { total ->
-        repeat(total) {
-          val receivedMessageResult = eventAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(eventDlqUrl).withMaxNumberOfMessages(1)).messages
-          receivedMessageResult[0]?.let { msg ->
-            eventAwsSqsClient.sendMessage(eventQueueUrl, msg.body)
-            eventAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(eventDlqUrl, msg.receiptHandle))
-            log.info("Transferred message from Event DLQ: $msg")
+      ?.run {
+        repeat(this) {
+          eventAwsSqsDlqClient.receiveFirstMessageOrNull(eventDlqUrl)?.run {
+            eventAwsSqsClient.sendMessage(eventQueueUrl, this.body)
+            eventAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(eventDlqUrl, this.receiptHandle))
+            log.info("Transferred message from Event DLQ: $this")
           }
             ?: log.info("Expected to transfer message from Event DLQ, but no message was received")
         }
         telemetryClient.trackEvent(
           TelemetryEvents.TRANSFERRED_EVENT_DLQ.name,
-          mapOf("messages-on-queue" to total.toString()),
+          mapOf("messages-on-queue" to this.toString()),
           null
         )
       }
   }
 
-  private fun getEventDlqMessageCount() =
-    eventAwsSqsDlqClient.getQueueAttributes(eventDlqUrl, listOf("ApproximateNumberOfMessages"))
-      .attributes["ApproximateNumberOfMessages"]
-      ?.toInt() ?: 0
-
   fun transferIndexMessages() {
     indexQueueService.getNumberOfMessagesCurrentlyOnIndexDLQ()
       .takeIf { it > 0 }
-      ?.also { total ->
-        repeat(total) {
-          val receivedMessageResult = indexAwsSqsDlqClient.receiveMessage(ReceiveMessageRequest(indexDlqUrl).withMaxNumberOfMessages(1)).messages
-          receivedMessageResult[0]?.let { msg ->
-            indexAwsSqsClient.sendMessage(indexQueueUrl, msg.body)
-            indexAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(indexDlqUrl, msg.receiptHandle))
-            log.info("Transferred message from Index DLQ: $msg")
+      ?.run {
+        repeat(this) {
+          indexAwsSqsDlqClient.receiveFirstMessageOrNull(indexDlqUrl)?.run {
+            indexAwsSqsClient.sendMessage(indexQueueUrl, this.body)
+            indexAwsSqsDlqClient.deleteMessage(DeleteMessageRequest(indexDlqUrl, this.receiptHandle))
+            log.info("Transferred message from Index DLQ: $this")
           }
             ?: log.info("Expected message to transfer from Index DLQ, but no message was received")
         }
         telemetryClient.trackEvent(
           TelemetryEvents.TRANSFERRED_INDEX_DLQ.name,
-          mapOf("messages-on-queue" to total.toString()),
+          mapOf("messages-on-queue" to this.toString()),
           null
         )
-        log.info("Transfer all Index DLQ messages to main queue - found $total message(s)")
+        log.info("Transfer all Index DLQ messages to main queue - found $this message(s)")
       }
   }
 }
+
+private fun AmazonSQS.getMessageCount(queueUrl: String) = this.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
+  .attributes["ApproximateNumberOfMessages"]?.toInt() ?: 0
+
+private fun AmazonSQS.receiveFirstMessageOrNull(queueUrl: String) = this.receiveMessage(ReceiveMessageRequest(queueUrl).withMaxNumberOfMessages(1)).messages.firstOrNull()
