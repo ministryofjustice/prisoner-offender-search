@@ -107,6 +107,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AB") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    Thread.sleep(500)
   }
 
   fun setupIndexes() {
