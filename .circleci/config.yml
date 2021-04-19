@@ -6,7 +6,7 @@ orbs:
 executors:
   validator:
     docker:
-      - image: circleci/openjdk:11-jdk
+      - image: cimg/openjdk:16.0
       - image: localstack/localstack:0.11.2
         environment:
           - SERVICES=sqs,sns,es
@@ -59,7 +59,7 @@ jobs:
       - run:
           environment:
             - AWS_PROVIDER: localstack
-          command: ./gradlew check
+          command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
       - save_cache:
           paths:
             - ~/.gradle
