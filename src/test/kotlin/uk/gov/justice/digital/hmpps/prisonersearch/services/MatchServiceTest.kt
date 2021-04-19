@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.times
@@ -22,10 +21,10 @@ import org.elasticsearch.search.SearchHits
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.json.JsonTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
@@ -33,17 +32,17 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchedBy
 import java.time.LocalDate
 
-@ExtendWith(MockitoExtension::class)
+@JsonTest
 internal class MatchServiceTest {
-
   private lateinit var service: MatchService
 
-  private val objectMapper: ObjectMapper = jacksonObjectMapper()
+  @Autowired
+  lateinit var objectMapper: ObjectMapper
 
-  @Mock
+  @MockBean
   lateinit var searchClient: SearchClient
 
-  @Mock
+  @MockBean
   lateinit var indexStatusService: IndexStatusService
 
   @BeforeEach
