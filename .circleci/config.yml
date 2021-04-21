@@ -8,6 +8,7 @@ jobs:
     executor:
       name: hmpps/localstack
       jdk_tag: "16.0"
+      localstack_tag: "0.12.9.1"
       services: "sqs,sns,es"
     steps:
       - run:
@@ -21,14 +22,8 @@ jobs:
       - checkout
       - hmpps/install_aws_cli
       - run:
-          name: Wait for SQS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4576
-      - run:
-          name: Wait for SNS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4575
-      - run:
-          name: Wait for ES to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4578
+          name: Wait for SQS, SNS and ES to be ready
+          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
       - run:
           name: Set up es domain
           command: src/test/resources/localstack/setup-es.sh

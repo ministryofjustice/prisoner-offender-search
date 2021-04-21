@@ -28,7 +28,7 @@ class LocalStackConfig {
     elasticsearchContainer
       .withEnv("HOSTNAME_EXTERNAL", "localhost")
       .withClasspathResourceMapping("/localstack/setup-es.sh", "/docker-entrypoint-initaws.d/setup-es.sh", BindMode.READ_WRITE)
-      .withExposedPorts(9200, 4578)
+      .withExposedPorts(9200, 4566)
       .start()
 
     val elasticSearchPort = elasticsearchContainer.getMappedPort(9200)

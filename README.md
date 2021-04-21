@@ -145,7 +145,7 @@ curl --location --request POST "http://localhost:8080/prisoner-search/match" --h
 
 #### View ES indexes
 ```bash
-curl --location --request POST "http://localhost:4571/prisoner-search-a/_search" | jq
+curl --location --request POST "http://localhost:4566/prisoner-search-a/_search" | jq
 ```
 
 ### Alternative running
@@ -163,7 +163,7 @@ There are two handy scripts to add messages to the queue with data that matches 
 
 Purging a local queue
 ```bash
-aws --endpoint-url=http://localhost:4576 sqs purge-queue --queue-url http://localhost:4576/queue/prisoner_offender_index_queue
+aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/queue/prisoner_offender_index_queue
 ```
 
 
