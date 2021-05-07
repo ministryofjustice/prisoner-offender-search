@@ -25,9 +25,9 @@ class IndexQueueStatusTest {
     awsSqsIndexDlqASyncClient = awsSqsIndexDlqASyncClient, indexAwsSqsDlqClient = indexAwsSqsDlqClient, gson = Gson(), indexDlqName = "index-dlq"
   )
 
-  companion object {
+  private companion object {
     @JvmStatic
-    private fun activeTestSource() = listOf(
+    fun activeTestSource() = listOf(
       Arguments.of(0, 0, 0, false),
       Arguments.of(1, 0, 0, true),
       Arguments.of(0, 1, 0, true),
