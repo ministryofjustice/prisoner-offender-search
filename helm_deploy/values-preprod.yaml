@@ -27,6 +27,8 @@ env:
 cron:
   SYNTHETIC_MONITOR_CRON_EXPRESSION: "*/10 * * * *"
 
+alertManagerReceiver: digital-prison-service-dev
+
 allowlist:
   office: "217.33.148.210/32"
   health-kick: "35.177.252.195/32"
