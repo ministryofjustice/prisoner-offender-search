@@ -27,3 +27,4 @@ env:
 cron:
   SYNTHETIC_MONITOR_CRON_EXPRESSION: "*/10 * * * *"
 
+alertManagerReceiver: digital-prison-service-dev
