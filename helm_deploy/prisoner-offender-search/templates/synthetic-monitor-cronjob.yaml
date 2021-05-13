@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: synthetic-monitor-cronjob
+  name: {{ include "app.fullname" . }}-synthetic-monitor
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
