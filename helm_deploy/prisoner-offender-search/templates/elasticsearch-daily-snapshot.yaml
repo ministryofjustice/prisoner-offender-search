@@ -62,7 +62,7 @@ data:
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: elasticsearch-snapshot
+  name: {{ include "app.fullname" . }}-elasticsearch-snapshot
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
@@ -112,25 +112,3 @@ spec:
             configMap:
               name: elasticsearch-snapshot-script
               defaultMode: 0755
----
-apiVersion: monitoring.coreos.com/v1
-kind: PrometheusRule
-metadata:
-  labels:
-    {{- include "app.labels" . | nindent 4 }}
-    app: dps-elasticsearch-snapshot-job
-    prometheus: cloud-platform
-  name: dps-prometheus-rules-es-snapshot
-spec:
-  groups:
-  - name: kubernetes-apps
-    rules:
-    - alert: Elasticsearch-snapshot-job-failed
-      annotations:
-        message:  Elasticsearch snapshot {{ "{{" }} $labels.namespace {{ "}}" }}/{{ "{{" }} $labels.job_name {{ "}}" }} failed to complete.
-        runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubejobfailed
-      expr: kube_job_status_failed{namespace="{{ .Release.Namespace }}",job_name=~"elasticsearch-snapshot.*"} > 0
-      for: 1m
-      labels:
-        severity: {{ .Values.alertManagerReceiver }}
-
