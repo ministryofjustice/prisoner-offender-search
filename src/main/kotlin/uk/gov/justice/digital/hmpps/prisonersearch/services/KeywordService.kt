@@ -54,8 +54,8 @@ class KeywordService(
     val searchSourceBuilder = createSourceBuilder(keywordRequest)
     val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
 
-    // TODO: Useful for now but comment this
-    log.info("Keyword query JSON: {}", searchSourceBuilder.toString())
+    // Useful for logging the JSON elastic search query that is executed
+    // log.info("Keyword query JSON: {}", searchSourceBuilder.toString())
 
     return try {
       val searchResponse = elasticSearchClient.search(searchRequest)
@@ -100,7 +100,7 @@ class KeywordService(
     with(sanitisedKeywordRequest) {
 
       andWords.takeIf { !it.isNullOrBlank() }?.let {
-        // Will match only if all of these words are present across all text fields - can be spread over multiple.
+        // Will match only if all of these words are present across all text fields
         keywordQuery.must(
           QueryBuilders.boolQuery()
             .minimumShouldMatch(1)
@@ -111,7 +111,7 @@ class KeywordService(
                 .fuzzyTranspositions(fuzzyMatch!!)
                 .operator(Operator.AND)
             )
-            // Also try to match within the nested aliases
+            // Also try to match terms within the nested aliases
             .should(
               QueryBuilders.nestedQuery(
                 "aliases",
@@ -127,11 +127,11 @@ class KeywordService(
       }
 
       orWords.takeIf { !it.isNullOrBlank() }?.let {
-        // Will match ANY of these words in any text fields
+        // Will match ANY of these words in the text fields
         keywordQuery
           .must(
-            // Match in the main prisoner document
             QueryBuilders.boolQuery()
+              // Match in the main document
               .minimumShouldMatch(1)
               .should(
                 QueryBuilders.multiMatchQuery(it)
@@ -139,7 +139,7 @@ class KeywordService(
                   .fuzzyTranspositions(fuzzyMatch!!)
                   .operator(Operator.OR)
               )
-              // Also try to match within the nested aliases
+              // Match within the nested aliases
               .should(
                 QueryBuilders.nestedQuery(
                   "aliases",
@@ -154,7 +154,7 @@ class KeywordService(
       }
 
       notWords.takeIf { !it.isNullOrBlank() }?.let {
-        // Will exclude these words from matching if occur in any text fields
+        // Will exclude these words from matching if they occur in the main document
         keywordQuery.mustNot(
           QueryBuilders.multiMatchQuery(it)
             .lenient(true)
@@ -164,7 +164,7 @@ class KeywordService(
       }
 
       exactPhrase.takeIf { !it.isNullOrBlank() }?.let {
-        // Will match only the exact phrase in any text field
+        // Will match only the exact phrase in text fields in the main document
         keywordQuery.must(
           QueryBuilders.multiMatchQuery(it)
             .lenient(true)
@@ -175,7 +175,7 @@ class KeywordService(
       }
 
       prisonIds.takeIf { it != null && it.isNotEmpty() && it[0].isNotBlank() }?.let {
-        // Filter to only the prison location codes specified by the client
+        // Filter to return only those documents that contain the prison locations specified by the client
         keywordQuery.filterWhenPresent("prisonId", it)
       }
     }
@@ -192,7 +192,8 @@ class KeywordService(
     } else {
       log.info("Keyword search: Matches found. Page ${pageable.pageNumber} with ${prisoners.size} prisoners, totalHits ${searchResponse.hits.totalHits?.value}")
       val response = PageImpl(prisoners, pageable, searchResponse.hits.totalHits!!.value)
-      log.info("Response content = ${gson.toJson(response)}")
+      // Useful when checking the content of test results
+      // log.info("Response content = ${gson.toJson(response)}")
       response
     }
   }
@@ -239,7 +240,7 @@ class KeywordService(
 
   /*
   ** Some fields are defined as @Keyword in the ES mapping annotations so will not match when the query
-  ** tokens are provided in lowercase. Detect these and add or replace an uppercase variant.
+  ** tokens are provided in lower or mixed case. Detect these and replace with an uppercase variant.
   */
 
   private fun addUppercaseKeywordTokens(tokens: String?): String? {

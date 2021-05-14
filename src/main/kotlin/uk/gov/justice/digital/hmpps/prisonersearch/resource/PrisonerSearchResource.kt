@@ -17,7 +17,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
-import java.util.*
 import javax.validation.Valid
 
 @RestController

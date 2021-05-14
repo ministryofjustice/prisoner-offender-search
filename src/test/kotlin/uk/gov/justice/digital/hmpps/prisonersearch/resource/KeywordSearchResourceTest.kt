@@ -243,4 +243,12 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
       "/results/keywordSearch/search_results_smith.json"
     )
   }
+
+  @Test
+  fun `can find those prisoner who are on remand in Moorland`() {
+    keywordSearch(
+      KeywordRequest(exactPhrase = "remand", prisonIds = listOf("MDI")),
+      "/results/keywordSearch/search_results_remand_moorland.json"
+    )
+  }
 }

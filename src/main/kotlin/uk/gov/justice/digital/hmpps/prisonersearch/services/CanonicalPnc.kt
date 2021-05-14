@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import java.util.*
-
 internal fun String.canonicalPNCNumber(): String = if (isPNCNumber()) combinePNC(splitPNC()) else this
 
 internal fun String.canonicalPNCNumberShort(): String? =
