@@ -1,0 +1,71 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7090AF",
+      "pncNumber": "12/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1903834",
+      "bookNumber": "V63584",
+      "firstName": "JIMBOB",
+      "lastName": "JACKS",
+      "dateOfBirth": "1990-08-15",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "prisonId": "LEI",
+      "prisonName": "HMP Leeds",
+      "cellLocation": "B-C1-010",
+      "aliases": [
+        {
+          "firstName": "DANNY",
+          "lastName": "COLIN",
+          "dateOfBirth": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+        },
+        {
+          "firstName": "SAM",
+          "lastName": "ORANGE",
+          "dateOfBirth": "1991-07-05",
+          "gender": "Female",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+        },
+        {
+          "firstName": "SAM",
+          "middleNames": "JAMES",
+          "lastName": "JONES",
+          "dateOfBirth": "1983-06-17",
+          "gender": "Male"
+        }
+      ],
+      "legalStatus": "REMAND"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": false,
+      "unsorted": true,
+      "empty": true
+    },
+    "pageSize": 10,
+    "pageNumber": 0,
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalPages": 1,
+  "totalElements": 1,
+  "last": true,
+  "number": 0,
+  "size": 10,
+  "numberOfElements": 1,
+  "sort": {
+    "sorted": false,
+    "unsorted": true,
+    "empty": true
+  },
+  "first": true,
+  "empty": false
+}

@@ -26,9 +26,10 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 
-@ActiveProfiles(profiles = ["test", "test-queue"])
+@ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
 abstract class QueueIntegrationTest : IntegrationTest() {
 
   @Autowired
@@ -160,6 +161,16 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun globalSearch(globalSearchCriteria: GlobalSearchCriteria, fileAssert: String) {
     webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun keywordSearch(keywordRequest: KeywordRequest, fileAssert: String) {
+    webTestClient.post().uri("/keyword")
+      .body(BodyInserters.fromValue(gson.toJson(keywordRequest)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
