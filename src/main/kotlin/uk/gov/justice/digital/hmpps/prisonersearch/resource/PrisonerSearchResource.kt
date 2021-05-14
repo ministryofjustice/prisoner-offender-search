@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import java.util.*
 import javax.validation.Valid
 
 @RestController
@@ -57,5 +58,5 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   fun findByPrison(
     @Valid @PathVariable prisonId: String,
     @PageableDefault pageable: Pageable
-  ) = prisonerSearchService.findByPrison(prisonId.toUpperCase(), pageable)
+  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable)
 }

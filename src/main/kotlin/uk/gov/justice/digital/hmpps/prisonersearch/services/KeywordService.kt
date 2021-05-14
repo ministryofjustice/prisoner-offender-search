@@ -147,9 +147,9 @@ class KeywordService(
                     .lenient(true)
                     .fuzzyTranspositions(fuzzyMatch)
                     .operator(Operator.OR),
-                ScoreMode.Max
+                  ScoreMode.Max
+                )
               )
-            )
           )
       }
 
@@ -177,7 +177,6 @@ class KeywordService(
       prisonIds.takeIf { it != null && it.isNotEmpty() && it[0].isNotBlank() }?.let {
         // Filter to only the prison location codes specified by the client
         keywordQuery.filterWhenPresent("prisonId", it)
-
       }
     }
 

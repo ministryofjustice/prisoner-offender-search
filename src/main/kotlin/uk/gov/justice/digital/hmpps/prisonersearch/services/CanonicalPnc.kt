@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
+import java.util.*
+
 internal fun String.canonicalPNCNumber(): String = if (isPNCNumber()) combinePNC(splitPNC()) else this
 
 internal fun String.canonicalPNCNumberShort(): String? =
@@ -16,7 +18,7 @@ internal fun String.canonicalPNCNumberLong(): String? =
     else -> null
   }
 
-private fun combinePNC(pnc: Pnc) = with(pnc) { "$year/$serialNumber$checksum".toUpperCase() }
+private fun combinePNC(pnc: Pnc) = with(pnc) { "$year/$serialNumber$checksum".uppercase() }
 
 private fun String.splitPNC(): Pnc {
   val (year, serial) = split("/")
