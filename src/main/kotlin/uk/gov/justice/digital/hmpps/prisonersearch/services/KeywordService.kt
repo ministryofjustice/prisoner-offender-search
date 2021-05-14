@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
+import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.common.unit.TimeValue
@@ -86,16 +87,42 @@ class KeywordService(
       keywordQuery.should(QueryBuilders.matchAllQuery())
     }
 
-    with(keywordRequest) {
+    val sanitisedKeywordRequest = KeywordRequest(
+      orWords = addUppercaseKeywordTokens(keywordRequest.orWords),
+      andWords = addUppercaseKeywordTokens(keywordRequest.andWords),
+      exactPhrase = addUppercaseKeywordTokens(keywordRequest.exactPhrase),
+      notWords = addUppercaseKeywordTokens(keywordRequest.notWords),
+      prisonIds = keywordRequest.prisonIds,
+      fuzzyMatch = keywordRequest.fuzzyMatch ?: false,
+      pagination = keywordRequest.pagination,
+    )
+
+    with(sanitisedKeywordRequest) {
 
       andWords.takeIf { !it.isNullOrBlank() }?.let {
         // Will match only if all of these words are present across all text fields - can be spread over multiple.
         keywordQuery.must(
-          QueryBuilders.multiMatchQuery(it)
-            .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
-            .lenient(true)
-            .fuzzyTranspositions(keywordRequest.fuzzyMatch!!)
-            .operator(Operator.AND)
+          QueryBuilders.boolQuery()
+            .minimumShouldMatch(1)
+            .should(
+              QueryBuilders.multiMatchQuery(it)
+                .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
+                .lenient(true)
+                .fuzzyTranspositions(fuzzyMatch!!)
+                .operator(Operator.AND)
+            )
+            // Also try to match within the nested aliases
+            .should(
+              QueryBuilders.nestedQuery(
+                "aliases",
+                QueryBuilders.multiMatchQuery(it)
+                  .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
+                  .lenient(true)
+                  .fuzzyTranspositions(fuzzyMatch)
+                  .operator(Operator.AND),
+                ScoreMode.Max
+              )
+            )
         )
       }
 
@@ -103,10 +130,26 @@ class KeywordService(
         // Will match ANY of these words in any text fields
         keywordQuery
           .must(
-            QueryBuilders.multiMatchQuery(it)
-              .lenient(true)
-              .fuzzyTranspositions(keywordRequest.fuzzyMatch!!)
-              .operator(Operator.OR)
+            // Match in the main prisoner document
+            QueryBuilders.boolQuery()
+              .minimumShouldMatch(1)
+              .should(
+                QueryBuilders.multiMatchQuery(it)
+                  .lenient(true)
+                  .fuzzyTranspositions(fuzzyMatch!!)
+                  .operator(Operator.OR)
+              )
+              // Also try to match within the nested aliases
+              .should(
+                QueryBuilders.nestedQuery(
+                  "aliases",
+                  QueryBuilders.multiMatchQuery(it)
+                    .lenient(true)
+                    .fuzzyTranspositions(fuzzyMatch)
+                    .operator(Operator.OR),
+                ScoreMode.Max
+              )
+            )
           )
       }
 
@@ -115,7 +158,7 @@ class KeywordService(
         keywordQuery.mustNot(
           QueryBuilders.multiMatchQuery(it)
             .lenient(true)
-            .fuzzyTranspositions(keywordRequest.fuzzyMatch!!)
+            .fuzzyTranspositions(false)
             .operator(Operator.OR)
         )
       }
@@ -125,24 +168,16 @@ class KeywordService(
         keywordQuery.must(
           QueryBuilders.multiMatchQuery(it)
             .lenient(true)
-            .fuzzyTranspositions(keywordRequest.fuzzyMatch!!)
+            .fuzzyTranspositions(false)
+            .operator(Operator.AND)
             .type(MultiMatchQueryBuilder.Type.PHRASE)
         )
       }
 
-      prisonIds.let {
+      prisonIds.takeIf { it != null && it.isNotEmpty() && it[0].isNotBlank() }?.let {
         // Filter to only the prison location codes specified by the client
-        keywordQuery.filter(
-          QueryBuilders.boolQuery()
-            .should(
-              QueryBuilders.boolQuery()
-                .filter(QueryBuilders.matchQuery("prisonId", it!!.joinToString(separator = " ")))
-            )
-            //.should(
-            // QueryBuilders.boolQuery()
-            //   .mustNot(QueryBuilders.existsQuery("prisonId"))
-            //)
-        )
+        keywordQuery.filterWhenPresent("prisonId", it)
+
       }
     }
 
@@ -202,4 +237,34 @@ class KeywordService(
     )
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }
+
+  /*
+  ** Some fields are defined as @Keyword in the ES mapping annotations so will not match when the query
+  ** tokens are provided in lowercase. Detect these and add or replace an uppercase variant.
+  */
+
+  private fun addUppercaseKeywordTokens(tokens: String?): String? {
+    if (tokens.isNullOrEmpty()) {
+      return tokens
+    }
+    var newTokens = ""
+    val arrayOfTokens = tokens.split("\\s")
+    arrayOfTokens.forEach {
+      newTokens += if (it.isPrisonerNumber() || it.isCroNumber() || it.isPncNumber()) {
+        it.uppercase()
+      } else {
+        it
+      }
+    }
+    return newTokens
+  }
+
+  private fun String.isPrisonerNumber() =
+    matches("^[a-zA-Z]\\d{4}[a-zA-Z]{2}$".toRegex())
+
+  private fun String.isPncNumber() =
+    matches("^\\d{4}/([0-9]+)[a-zA-Z]$".toRegex()) || matches("^\\d{2}/([0-9]+)[a-zA-Z]$".toRegex())
+
+  private fun String.isCroNumber() =
+    matches("^([0-9]+)/([0-9]+)[a-zA-Z]$".toRegex())
 }

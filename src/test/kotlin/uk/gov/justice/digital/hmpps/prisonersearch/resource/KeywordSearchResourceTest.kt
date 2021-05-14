@@ -127,7 +127,7 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `can perform a keyword EXACT phrase search on first name`() {
     keywordSearch(
-      KeywordRequest(exactPhrase = "john", prisonIds = listOf("MDI", "LEI")),
+      KeywordRequest(exactPhrase = "john", prisonIds = listOf("LEI", "MDI")),
       "/results/keywordSearch/search_results_john.json"
     )
   }
@@ -181,9 +181,9 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can perform a keyword AND search to match last name, alias and gender in alias`() {
+  fun `can perform a combined AND and OR search for alias name and gender`() {
     keywordSearch(
-      KeywordRequest(andWords = "jacks orange female", prisonIds = listOf("LEI")),
+      KeywordRequest(andWords = "orange female", orWords = "jimbob jacks", prisonIds = listOf("LEI")),
       "/results/keywordSearch/search_results_sam5.json"
     )
   }
@@ -197,10 +197,10 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can perform a keyword OR search and filter by a NOT search`() {
+  fun `can perform a keyword OR search and filter by a NOT term`() {
     keywordSearch(
-      KeywordRequest(orWords = "sam", notWords = "jones", prisonIds = listOf("MDI", "AGI", "LEI")),
-      "/results/keywordSearch/search_results_sam.json"
+      KeywordRequest(orWords = "sam", notWords = "female", prisonIds = listOf("MDI", "AGI", "LEI")),
+      "/results/keywordSearch/search_results_sam_no_female.json"
     )
   }
 
