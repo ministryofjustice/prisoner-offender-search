@@ -101,7 +101,7 @@ class GlobalSearchService(
 
   internal fun String.prisonerNumberOrCanonicalPNCNumber(): String =
     when {
-      isPrisonerNumber() -> this.toUpperCase()
+      isPrisonerNumber() -> this.uppercase()
       else -> this.canonicalPNCNumber()
     }
 
