@@ -93,7 +93,7 @@ class KeywordService(
       exactPhrase = addUppercaseKeywordTokens(keywordRequest.exactPhrase),
       notWords = addUppercaseKeywordTokens(keywordRequest.notWords),
       prisonIds = keywordRequest.prisonIds,
-      fuzzyMatch = keywordRequest.fuzzyMatch ?: false,
+      fuzzyMatch = keywordRequest.fuzzyMatch,
       pagination = keywordRequest.pagination,
     )
 
@@ -108,7 +108,7 @@ class KeywordService(
               QueryBuilders.multiMatchQuery(it)
                 .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
                 .lenient(true)
-                .fuzzyTranspositions(fuzzyMatch!!)
+                .fuzzyTranspositions(fuzzyMatch ?: false)
                 .operator(Operator.AND)
             )
             // Also try to match terms within the nested aliases
@@ -118,7 +118,7 @@ class KeywordService(
                 QueryBuilders.multiMatchQuery(it)
                   .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
                   .lenient(true)
-                  .fuzzyTranspositions(fuzzyMatch)
+                  .fuzzyTranspositions(fuzzyMatch ?: false)
                   .operator(Operator.AND),
                 ScoreMode.Max
               )
@@ -136,7 +136,7 @@ class KeywordService(
               .should(
                 QueryBuilders.multiMatchQuery(it)
                   .lenient(true)
-                  .fuzzyTranspositions(fuzzyMatch!!)
+                  .fuzzyTranspositions(fuzzyMatch ?: false)
                   .operator(Operator.OR)
               )
               // Match within the nested aliases
@@ -145,7 +145,7 @@ class KeywordService(
                   "aliases",
                   QueryBuilders.multiMatchQuery(it)
                     .lenient(true)
-                    .fuzzyTranspositions(fuzzyMatch)
+                    .fuzzyTranspositions(fuzzyMatch ?: false)
                     .operator(Operator.OR),
                   ScoreMode.Max
                 )
@@ -251,12 +251,12 @@ class KeywordService(
     val arrayOfTokens = tokens.split("\\s")
     arrayOfTokens.forEach {
       newTokens += if (it.isPrisonerNumber() || it.isCroNumber() || it.isPncNumber()) {
-        it.uppercase()
+        "${it.uppercase()} "
       } else {
-        it
+        "$it "
       }
     }
-    return newTokens
+    return newTokens.trim()
   }
 
   private fun String.isPrisonerNumber() =
