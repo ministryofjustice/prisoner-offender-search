@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.2.0-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.2.1"
   kotlin("plugin.spring") version "1.5.0"
 }
 
@@ -32,17 +32,17 @@ dependencies {
   implementation("com.google.guava:guava:30.1.1-jre")
 
   implementation("org.springframework:spring-jms")
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1013"))
+  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1020"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.1013")
-  implementation("org.awaitility:awaitility-kotlin:4.0.3")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.1020")
+  implementation("org.awaitility:awaitility-kotlin:4.1.0")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("org.testcontainers:localstack:1.15.3")
   testImplementation("org.testcontainers:elasticsearch:1.15.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.1")
-  testImplementation("org.mockito:mockito-inline:3.9.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
+  testImplementation("org.mockito:mockito-inline:3.10.0")
 }
 
 tasks {
