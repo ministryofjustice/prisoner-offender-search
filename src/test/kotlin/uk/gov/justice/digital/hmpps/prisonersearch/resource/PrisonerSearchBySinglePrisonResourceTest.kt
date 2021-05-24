@@ -211,6 +211,12 @@ class PrisonerSearchBySinglePrisonResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match on prisonId with restrictive patients`() {
+    prisonSearch("MDI", "/results/search_results_mdi.json", true)
+  }
+
+
+  @Test
   fun `can perform a match on lowercase prisonId`() {
     prisonSearch("lni", "/results/search_results_lni.json")
   }

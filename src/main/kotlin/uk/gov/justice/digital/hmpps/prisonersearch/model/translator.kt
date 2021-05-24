@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.model
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLong
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import java.time.LocalDate.now
 
 fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.prisonerNumber = ob.offenderNo
@@ -72,5 +73,13 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.imprisonmentStatus = ob.imprisonmentStatus
   prisoner.imprisonmentStatusDescription = ob.imprisonmentStatusDescription
   prisoner.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
+
+  prisoner.restrictedPatient = ob.restrictivePatient != null
+  prisoner.supportingPrisonId = ob.restrictivePatient?.supportingPrison?.agencyId
+  prisoner.dischargedHospitalId = ob.restrictivePatient?.dischargedHospital?.agencyId
+  prisoner.dischargedHospitalDescription = ob.restrictivePatient?.dischargedHospital?.description
+  prisoner.dischargeDate = ob.restrictivePatient?.dischargeDate
+  prisoner.dischargedDetails = ob.restrictivePatient?.dischargeDetails
+
   return prisoner
 }

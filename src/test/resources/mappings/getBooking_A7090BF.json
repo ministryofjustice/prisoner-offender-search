@@ -123,6 +123,20 @@
         "paroleEligibilityDate": "2020-02-03",
         "actualParoleDate": "2020-02-03"
       },
+      "restrictivePatient": {
+        "supportingPrison": {
+          "agencyId": "MDI",
+          "agencyType": "INST",
+          "active": true
+        },
+        "dischargedHospital": {
+          "agencyId": "HAZLWD",
+          "description": "Hazelwood House",
+          "agencyType": "HSHOSP",
+          "active": true
+        },
+        "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
+      },
       "locationDescription": "Outside - released from Leeds"
     }
   }

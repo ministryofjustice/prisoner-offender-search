@@ -4,19 +4,16 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import java.time.LocalDate
 import javax.validation.Valid
 
 @RestController
@@ -56,6 +53,7 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @Operation(summary = "Match prisoners by prison", description = "Requires GLOBAL_SEARCH role")
   fun findByPrison(
     @Valid @PathVariable prisonId: String,
+    @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients : Boolean,
     @PageableDefault pageable: Pageable
-  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable)
+  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable, includeRestrictedPatients)
 }
