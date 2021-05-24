@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -13,7 +12,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
-import java.time.LocalDate
 import javax.validation.Valid
 
 @RestController
@@ -53,7 +51,7 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @Operation(summary = "Match prisoners by prison", description = "Requires GLOBAL_SEARCH role")
   fun findByPrison(
     @Valid @PathVariable prisonId: String,
-    @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients : Boolean,
+    @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients: Boolean,
     @PageableDefault pageable: Pageable
   ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable, includeRestrictedPatients)
 }

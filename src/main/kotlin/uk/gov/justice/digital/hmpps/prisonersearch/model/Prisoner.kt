@@ -215,12 +215,12 @@ open class Prisoner {
   )
   var locationDescription: String? = null
 
-  var restrictedPatient : Boolean = false
+  var restrictedPatient: Boolean = false
   var supportingPrisonId: String? = null
-  var dischargedHospitalId : String? = null
-  var dischargedHospitalDescription : String? = null
-  var dischargeDate : LocalDate? = null
-  var dischargedDetails : String? = null
+  var dischargedHospitalId: String? = null
+  var dischargedHospitalDescription: String? = null
+  var dischargeDate: LocalDate? = null
+  var dischargedDetails: String? = null
 }
 
 @Document(indexName = "prisoner-search-a")

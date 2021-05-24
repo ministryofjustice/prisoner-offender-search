@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.prisonersearch.model
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLong
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
-import java.time.LocalDate.now
 
 fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.prisonerNumber = ob.offenderNo

@@ -282,7 +282,6 @@ inline infix fun Result.onMatch(block: (Result.Match) -> Nothing) =
     is Result.Match -> block(this)
   }
 
-
 private fun BoolQueryBuilder.withDefaults(searchCriteria: SearchCriteria): BoolQueryBuilder {
   return this
     .filterWhenPresent("prisonId", searchCriteria.prisonIds)

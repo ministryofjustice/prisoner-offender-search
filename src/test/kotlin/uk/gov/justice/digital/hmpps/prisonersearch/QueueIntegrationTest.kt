@@ -198,7 +198,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
-  fun prisonSearch(prisonId: String, fileAssert: String, includeRestrictedPatients : Boolean = false) {
+  fun prisonSearch(prisonId: String, fileAssert: String, includeRestrictedPatients: Boolean = false) {
     webTestClient.get().uri("/prisoner-search/prison/$prisonId?include-restricted-patients=$includeRestrictedPatients")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
