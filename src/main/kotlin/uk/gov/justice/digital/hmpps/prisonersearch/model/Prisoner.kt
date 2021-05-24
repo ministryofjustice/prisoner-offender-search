@@ -215,11 +215,23 @@ open class Prisoner {
   )
   var locationDescription: String? = null
 
+  @Schema(required = true, description = "Indicates a restricted patient", example = "true")
   var restrictedPatient: Boolean = false
+
+  @Schema(description = "Supporting prison ID for POM", example = "LEI")
   var supportingPrisonId: String? = null
+
+  @Schema(description = "Which hospital the offender has been discharged to", example = "HAZLWD")
   var dischargedHospitalId: String? = null
+
+  @Schema(description = "Hospital name to which the offender was discharged", example = "HAZLWD")
   var dischargedHospitalDescription: String? = null
+
+  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Schema(description = "Date of discharge", example = "2020-05-01")
   var dischargeDate: LocalDate? = null
+
+  @Schema(description = "Any additional discharge details", example = "Psychiatric Hospital Discharge to Hazelwood House")
   var dischargedDetails: String? = null
 }
 
