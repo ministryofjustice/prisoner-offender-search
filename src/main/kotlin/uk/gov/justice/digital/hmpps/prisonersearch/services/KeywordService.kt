@@ -55,7 +55,7 @@ class KeywordService(
     val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
 
     // Useful for logging the JSON elastic search query that is executed
-    // log.info("Keyword query JSON: {}", searchSourceBuilder.toString())
+    log.info("Keyword query JSON: {}", searchSourceBuilder.toString())
 
     return try {
       val searchResponse = elasticSearchClient.search(searchRequest)
@@ -193,7 +193,7 @@ class KeywordService(
       log.info("Keyword search: Matches found. Page ${pageable.pageNumber} with ${prisoners.size} prisoners, totalHits ${searchResponse.hits.totalHits?.value}")
       val response = PageImpl(prisoners, pageable, searchResponse.hits.totalHits!!.value)
       // Useful when checking the content of test results
-      // log.info("Response content = ${gson.toJson(response)}")
+      log.info("Response content = ${gson.toJson(response)}")
       response
     }
   }

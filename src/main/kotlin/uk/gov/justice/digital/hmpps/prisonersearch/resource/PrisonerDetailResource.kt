@@ -17,31 +17,31 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonersearch.services.KeywordService
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerDetailService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 import javax.validation.Valid
 
 @RestController
 @Validated
-@RequestMapping(value = ["/keyword"], produces = [MediaType.APPLICATION_JSON_VALUE])
+@RequestMapping(value = ["/prisoner-detail"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @PreAuthorize("hasRole('ROLE_GLOBAL_SEARCH')")
-class PrisonerKeywordResource(private val keywordService: KeywordService) {
+class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  // A hack to allow swagger to determine the response schema which includes generic content
-  abstract class KeywordResponse : Page<Prisoner>
+  // A hack to allow swagger to determine the response schema with a generic content
+  abstract class PrisonerDetailResponse : Page<Prisoner>
 
   @Operation(
-    summary = "Work in progress - find prisoners by keywords. It will return the best matching prisoners based on the request",
-    description = "Specify the keywords to match against the indexed text for prisoners. Requires role GLOBAL_SEARCH",
+    summary = "Work in progress - find prisoners by specific field values and return a paginated list matching prisoners",
+    description = "Specify specific field values to match against the indexed values for prisoners. Requires role GLOBAL_SEARCH",
     security = [SecurityRequirement(name = "GLOBAL_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = KeywordRequest::class)
+          schema = Schema(implementation = PrisonerDetailRequest::class)
         )
       ]
     ),
@@ -50,7 +50,7 @@ class PrisonerKeywordResource(private val keywordService: KeywordService) {
       ApiResponse(
         responseCode = "200",
         description = "Search successfully performed",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = KeywordResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = PrisonerDetailResponse::class))]
       ),
       ApiResponse(
         responseCode = "400",
@@ -70,7 +70,7 @@ class PrisonerKeywordResource(private val keywordService: KeywordService) {
     ]
   )
   @PostMapping
-  fun keywordSearch(
-    @Valid @RequestBody keywordRequest: KeywordRequest
-  ): Page<Prisoner> = keywordService.findByKeyword(keywordRequest)
+  fun prisonerDetailSearch(
+    @Valid @RequestBody prisonerDetailRequest: PrisonerDetailRequest
+  ): Page<Prisoner> = prisonerDetailService.findByPrisonerDetail(prisonerDetailRequest)
 }
