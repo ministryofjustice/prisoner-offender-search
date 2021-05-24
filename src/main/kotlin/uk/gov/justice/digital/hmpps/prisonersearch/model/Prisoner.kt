@@ -224,7 +224,7 @@ open class Prisoner {
   @Schema(description = "Which hospital the offender has been discharged to", example = "HAZLWD")
   var dischargedHospitalId: String? = null
 
-  @Schema(description = "Hospital name to which the offender was discharged", example = "HAZLWD")
+  @Schema(description = "Hospital name to which the offender was discharged", example = "Hazelwood House")
   var dischargedHospitalDescription: String? = null
 
   @Field(type = FieldType.Date, format = DateFormat.date)

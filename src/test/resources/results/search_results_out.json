@@ -33,7 +33,7 @@
       "youthOffender": false,
       "status": "INACTIVE OUT",
       "lastMovementTypeCode": "REL",
-      "lastMovementReasonCode": "CR",
+      "lastMovementReasonCode": "HP",
       "prisonId": "OUT",
       "prisonName": "Outside",
       "mostSeriousOffence": "Section 18 - wounding with intent",
