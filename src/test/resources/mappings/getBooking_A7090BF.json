@@ -33,7 +33,7 @@
       },
       "inOutStatus": "OUT",
       "lastMovementTypeCode": "REL",
-      "lastMovementReasonCode": "CR",
+      "lastMovementReasonCode": "HP",
       "identifiers": [
         {
           "type": "CRO",
@@ -53,7 +53,7 @@
         }
       ],
       "status": "INACTIVE OUT",
-      "legalStatus": null,
+      "legalStatus": "SENTENCED",
       "recall": false,
       "offenceHistory": [
         {

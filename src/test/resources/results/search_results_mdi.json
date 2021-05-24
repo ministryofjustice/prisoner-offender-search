@@ -174,6 +174,33 @@
       "prisonName": "Moorland Prison",
       "cellLocation": "A-1-003",
       "legalStatus": "REMAND"
+    },
+    {
+      "prisonerNumber": "A7090BF",
+      "pncNumber": "12/394773W",
+      "croNumber": "29906/12L",
+      "bookingId": "1909838",
+      "bookNumber": "V61587",
+      "firstName": "FRANK",
+      "lastName": "FELLOWS",
+      "dateOfBirth": "1999-06-01",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "nationality": "British",
+      "lastMovementTypeCode": "REL",
+      "lastMovementReasonCode": "HP",
+      "status": "INACTIVE OUT",
+      "prisonId": "OUT",
+      "prisonName": "Outside",
+      "legalStatus": "SENTENCED",
+      "restrictivePatient": true,
+      "supportingPrisonId": "MDI",
+      "dischargedHospitalId": "HAZLWD",
+      "dischargedHospitalDescription": "Hazelwood House",
+      "dischargeDate": "2020-02-03",
+      "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
     }
   ],
   "pageable": {
