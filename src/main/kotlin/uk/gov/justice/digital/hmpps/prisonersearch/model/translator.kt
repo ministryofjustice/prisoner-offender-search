@@ -72,5 +72,13 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.imprisonmentStatus = ob.imprisonmentStatus
   prisoner.imprisonmentStatusDescription = ob.imprisonmentStatusDescription
   prisoner.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
+
+  prisoner.restrictedPatient = ob.restrictivePatient != null
+  prisoner.supportingPrisonId = ob.restrictivePatient?.supportingPrison?.agencyId
+  prisoner.dischargedHospitalId = ob.restrictivePatient?.dischargedHospital?.agencyId
+  prisoner.dischargedHospitalDescription = ob.restrictivePatient?.dischargedHospital?.description
+  prisoner.dischargeDate = ob.restrictivePatient?.dischargeDate
+  prisoner.dischargeDetails = ob.restrictivePatient?.dischargeDetails
+
   return prisoner
 }

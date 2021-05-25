@@ -18,7 +18,7 @@
       "assignedLivingUnitId": 731727,
       "activeFlag": false,
       "assignedLivingUnit": {
-        "agencyId": "LNI",
+        "agencyId": "OUT",
         "locationId": null,
         "description": null,
         "agencyName": "Outside"
@@ -33,7 +33,7 @@
       },
       "inOutStatus": "OUT",
       "lastMovementTypeCode": "REL",
-      "lastMovementReasonCode": "CR",
+      "lastMovementReasonCode": "HP",
       "identifiers": [
         {
           "type": "CRO",
@@ -53,7 +53,7 @@
         }
       ],
       "status": "INACTIVE OUT",
-      "legalStatus": null,
+      "legalStatus": "SENTENCED",
       "recall": false,
       "offenceHistory": [
         {
@@ -123,7 +123,22 @@
         "paroleEligibilityDate": "2020-02-03",
         "actualParoleDate": "2020-02-03"
       },
-      "locationDescription": "Outside - released from Leeds"
+      "restrictivePatient": {
+        "supportingPrison": {
+          "agencyId": "MDI",
+          "agencyType": "INST",
+          "active": true
+        },
+        "dischargedHospital": {
+          "agencyId": "HAZLWD",
+          "description": "Hazelwood House",
+          "agencyType": "HSHOSP",
+          "active": true
+        },
+        "dischargeDate": "2020-02-03",
+        "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
+      },
+      "locationDescription": "Outside - Psychiatric Hospital Discharge to Hazelwood House"
     }
   }
 }

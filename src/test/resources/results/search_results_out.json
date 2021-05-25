@@ -13,7 +13,7 @@
       "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
       "youthOffender": false,
       "religion": "Christian",
-      "status": "ACTIVE IN",
+      "status": "ACTIVE OUT",
       "prisonId": "OUT",
       "prisonName": "out",
       "cellLocation": "H-1-004",
@@ -33,7 +33,7 @@
       "youthOffender": false,
       "status": "INACTIVE OUT",
       "lastMovementTypeCode": "REL",
-      "lastMovementReasonCode": "CR",
+      "lastMovementReasonCode": "HP",
       "prisonId": "OUT",
       "prisonName": "Outside",
       "mostSeriousOffence": "Section 18 - wounding with intent",
@@ -46,7 +46,13 @@
       "postRecallReleaseDate": "2020-02-03",
       "conditionalReleaseDate": "2020-02-03",
       "actualParoleDate": "2020-02-03",
-      "locationDescription": "Outside - released from Leeds"
+      "locationDescription": "Outside - Psychiatric Hospital Discharge to Hazelwood House",
+      "restrictedPatient": true,
+      "supportingPrisonId": "MDI",
+      "dischargedHospitalId": "HAZLWD",
+      "dischargedHospitalDescription": "Hazelwood House",
+      "dischargeDate": "2020-02-03",
+      "dischargeDetails": "Psychiatric Hospital Discharge to Hazelwood House"
     }
   ],
   "pageable": {
