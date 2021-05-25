@@ -216,11 +216,11 @@
     "unpaged": false
   },
   "totalPages": 1,
-  "totalElements": 6,
+  "totalElements": 7,
   "last": true,
   "number": 0,
   "size": 10,
-  "numberOfElements": 6,
+  "numberOfElements": 7,
   "sort": {
     "sorted": false,
     "unsorted": true,

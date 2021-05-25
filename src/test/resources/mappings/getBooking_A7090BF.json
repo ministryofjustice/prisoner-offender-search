@@ -18,7 +18,7 @@
       "assignedLivingUnitId": 731727,
       "activeFlag": false,
       "assignedLivingUnit": {
-        "agencyId": "LNI",
+        "agencyId": "OUT",
         "locationId": null,
         "description": null,
         "agencyName": "Outside"
