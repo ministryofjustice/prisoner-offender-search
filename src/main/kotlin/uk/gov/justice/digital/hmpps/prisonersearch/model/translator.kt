@@ -78,7 +78,7 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.dischargedHospitalId = ob.restrictivePatient?.dischargedHospital?.agencyId
   prisoner.dischargedHospitalDescription = ob.restrictivePatient?.dischargedHospital?.description
   prisoner.dischargeDate = ob.restrictivePatient?.dischargeDate
-  prisoner.dischargedDetails = ob.restrictivePatient?.dischargeDetails
+  prisoner.dischargeDetails = ob.restrictivePatient?.dischargeDetails
 
   return prisoner
 }

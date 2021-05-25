@@ -232,7 +232,7 @@ open class Prisoner {
   var dischargeDate: LocalDate? = null
 
   @Schema(description = "Any additional discharge details", example = "Psychiatric Hospital Discharge to Hazelwood House")
-  var dischargedDetails: String? = null
+  var dischargeDetails: String? = null
 }
 
 @Document(indexName = "prisoner-search-a")

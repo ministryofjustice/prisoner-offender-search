@@ -44,7 +44,7 @@
         }
       ],
       "inOutStatus": "IN",
-      "lastMovementTypeCode": "ADM",
+      "lastMovementTypeCode": "TAP",
       "lastMovementReasonCode": "24",
       "identifiers": [
         {
@@ -64,7 +64,7 @@
           "caseloadType": "INST"
         }
       ],
-      "status": "ACTIVE IN",
+      "status": "ACTIVE OUT",
       "legalStatus": "REMAND"
     }
   }
