@@ -64,176 +64,198 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   @Test
   fun `find by whole prisoner number`() {
     detailSearch(
-      PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by whole lowercase prisoner number `() {
     detailSearch(
-      PrisonerDetailRequest(nomsNumber = "a7089Ey", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(nomsNumber = "a7089Ey", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by prisoner number with a wildcard single letter`() {
     detailSearch(
-      PrisonerDetailRequest(nomsNumber = "A7089?Y", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(nomsNumber = "A7089?Y", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by prisoner number with wildcard suffix`() {
     detailSearch(
-      PrisonerDetailRequest(nomsNumber = "A7089*", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_wildcard_A7089.json"
+      detailRequest = PrisonerDetailRequest(nomsNumber = "A7089*", prisonIds = listOf("MDI")),
+      expectedCount = 3,
+      expectedPrisoners = listOf("A7089EY", "A7089FA", "A7089FB"),
     )
   }
 
   @Test
   fun `find by whole PNC number with short year`() {
     detailSearch(
-      PrisonerDetailRequest(pncNumber = "12/394773H", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(pncNumber = "12/394773H", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by whole PNC number with long year`() {
     detailSearch(
-      PrisonerDetailRequest(pncNumber = "2015/1234S", prisonIds = listOf("WSI")),
-      "/results/detailSearch/search_results_pnc.json"
+      detailRequest = PrisonerDetailRequest(pncNumber = "2015/1234S", prisonIds = listOf("WSI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A9999AA"),
     )
   }
 
   @Test
   fun `find by lowercase PNC number with short year`() {
     detailSearch(
-      PrisonerDetailRequest(pncNumber = "12/394773h", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(pncNumber = "12/394773h", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by lowercase PNC with long year`() {
     detailSearch(
-      PrisonerDetailRequest(pncNumber = "2012/394773h", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(pncNumber = "2012/394773h", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by PNC number with wildcard single digit`() {
     detailSearch(
-      PrisonerDetailRequest(pncNumber = "12/39477?H", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(pncNumber = "12/39477?H", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by PNC number with a wildcard suffix and matching surname`() {
     detailSearch(
-      PrisonerDetailRequest(pncNumber = "12/394773*", lastName = "smith", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(pncNumber = "12/394773*", lastName = "smith", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by whole CRO number`() {
     detailSearch(
-      PrisonerDetailRequest(croNumber = "29906/12J", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(croNumber = "29906/12J", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by lowercase CRO number `() {
     detailSearch(
-      PrisonerDetailRequest(croNumber = "29906/12j", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(croNumber = "29906/12j", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by CRO number with wildcard single letter`() {
     detailSearch(
-      PrisonerDetailRequest(croNumber = "29906/1?J", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(croNumber = "29906/1?J", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY")
     )
   }
 
   @Test
   fun `find by CRO number with wildcard suffix`() {
     detailSearch(
-      PrisonerDetailRequest(croNumber = "29906/*J", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(croNumber = "29906/*J", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by criteria that do not match any prisoners - empty result`() {
     detailSearch(
-      PrisonerDetailRequest(firstName = "trevor", pncNumber = "29906/12J", prisonIds = listOf("MDI")),
-      "/results/detailSearch/empty.json"
+      detailRequest = PrisonerDetailRequest(firstName = "trevor", pncNumber = "29906/12J", prisonIds = listOf("MDI")),
+      expectedCount = 0,
+      expectedPrisoners = emptyList(),
     )
   }
 
   @Test
   fun `find by first name`() {
     detailSearch(
-      PrisonerDetailRequest(firstName = "john", prisonIds = listOf("LEI", "MDI")),
-      "/results/detailSearch/search_results_john.json"
+      detailRequest = PrisonerDetailRequest(firstName = "john", prisonIds = listOf("LEI", "MDI")),
+      expectedCount = 2,
+      expectedPrisoners = listOf("A7089EZ", "A7089EY"),
     )
   }
 
   @Test
   fun `find by last name`() {
     detailSearch(
-      PrisonerDetailRequest(lastName = "smith", prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_smith.json"
+      detailRequest = PrisonerDetailRequest(lastName = "smith", prisonIds = listOf("MDI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 
   @Test
   fun `find by first and last names`() {
     detailSearch(
-      PrisonerDetailRequest(firstName = "sam", lastName = "jones", prisonIds = listOf("MDI", "AGI", "LEI")),
-      "/results/detailSearch/search_results_sams.json"
+      detailRequest = PrisonerDetailRequest(firstName = "sam", lastName = "jones", prisonIds = listOf("MDI", "AGI", "LEI")),
+      expectedCount = 7,
+      expectedPrisoners = listOf("A7090AB", "A7090AC", "A7090AD", "A7090BA", "A7090BB", "A7090BC", "A7090AF"),
     )
   }
 
   @Test
   fun `find by first and last names in alias`() {
     detailSearch(
-      PrisonerDetailRequest(firstName = "danny", lastName = "colin", prisonIds = listOf("LEI")),
-      "/results/detailSearch/search_results_alias_danny_colin.json"
+      detailRequest = PrisonerDetailRequest(firstName = "danny", lastName = "colin", prisonIds = listOf("LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7090AF"),
     )
   }
 
   @Test
   fun `find by first and last names in alias with wildcard letters`() {
     detailSearch(
-      PrisonerDetailRequest(firstName = "dann?", lastName = "col?n", prisonIds = listOf("LEI")),
-      "/results/detailSearch/search_results_alias_danny_colin.json"
+      detailRequest = PrisonerDetailRequest(firstName = "dann?", lastName = "col?n", prisonIds = listOf("LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7090AF"),
     )
   }
 
   @Test
   fun `find by main first and last name with single wildcard letters`() {
     detailSearch(
-      PrisonerDetailRequest(firstName = "jimb?b", lastName = "j?cks", prisonIds = listOf("LEI")),
-      "/results/detailSearch/search_results_alias_danny_colin.json"
+      detailRequest = PrisonerDetailRequest(firstName = "jimb?b", lastName = "j?cks", prisonIds = listOf("LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7090AF"),
     )
   }
 
   @Test
   fun `no-terms query should match all prisoners in the specified location`() {
     detailSearch(
-      PrisonerDetailRequest(prisonIds = listOf("MDI")),
-      "/results/detailSearch/search_results_all_MDI.json"
+      detailRequest = PrisonerDetailRequest(prisonIds = listOf("MDI")),
+      expectedCount = 6,
+      expectedPrisoners = listOf("A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB"),
     )
   }
 }
