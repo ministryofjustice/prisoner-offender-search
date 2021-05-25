@@ -11,6 +11,7 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -29,17 +30,15 @@ class PrisonerDetailService(
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
   private val authenticationHolder: AuthenticationHolder,
+  @Value("\${search.detailed.max-results}") private val maxSearchResults: Int = 200,
+  @Value("\${search.detailed.timeout-seconds}") private val searchTimeoutSeconds: Long = 10L,
 ) {
-  // Inject properties via constructor @Value
-  private val maxSearchResults = 200
-  private val searchTimeoutSeconds = 10L
-
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
   private fun validateDetailRequest(detailRequest: PrisonerDetailRequest) {
-    if (detailRequest.prisonIds?.isEmpty() != false) {
+    if (detailRequest.prisonIds.isNullOrEmpty()) {
       log.warn("Invalid prisoner detail search  - no prisonIds specified to filter by")
       throw BadRequestException("Invalid prisoner detail search  - please provide prison locations to filter by")
     }
@@ -102,7 +101,7 @@ class PrisonerDetailService(
         )
       }
 
-      // Match by lastName, exact or by wildcard match and include aliases - reduced score for wildcard matches
+      // Match by lastName, exact or by wildcard match and include aliases - reduce score for alias/wildcard matches
       lastName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
@@ -117,7 +116,7 @@ class PrisonerDetailService(
         )
       }
 
-      // Match by prisonerNumber, exact or by wildcard - reduced score for wildcard matches
+      // Match by prisonerNumber, exact or by wildcard - reduce score for wildcard matches
       nomsNumber.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
@@ -126,7 +125,7 @@ class PrisonerDetailService(
         )
       }
 
-      // Match by pncNumber, exact or by wildcard in all field variants - reduced score for wildcard matches
+      // Match by pncNumber, exact or by wildcard in all field variants - reduce score for wildcard matches
       pncNumber.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
@@ -142,7 +141,7 @@ class PrisonerDetailService(
         )
       }
 
-      // Match by croNumber, exact or by wildcard - reduced score for wildcard matches
+      // Match by croNumber, exact or by wildcard - reduce score for wildcard matches
       croNumber.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()

@@ -205,6 +205,14 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a keyword OR search and filter by multiple NOT terms`() {
+    keywordSearch(
+      KeywordRequest(orWords = "sam", notWords = "female christian", prisonIds = listOf("MDI", "AGI", "LEI")),
+      "/results/keywordSearch/search_results_sam_no_christian_female.json"
+    )
+  }
+
+  @Test
   fun `can perform a keyword no-terms query to match all prisoners in one location`() {
     keywordSearch(
       KeywordRequest(prisonIds = listOf("MDI")),

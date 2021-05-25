@@ -2,17 +2,18 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
-import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MultiMatchQueryBuilder
 import org.elasticsearch.index.query.Operator
+import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -31,17 +32,15 @@ class KeywordService(
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
   private val authenticationHolder: AuthenticationHolder,
+  @Value("\${search.keyword.max-results}") private val maxSearchResults: Int = 200,
+  @Value("\${search.keyword.timeout-seconds}") private val searchTimeoutSeconds: Long = 10L,
 ) {
-  // Inject properties via constructor @Value
-  private val maxSearchResults = 200
-  private val searchTimeoutSeconds = 10L
-
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
   private fun validateKeywordRequest(keywordRequest: KeywordRequest) {
-    if (keywordRequest.prisonIds?.isEmpty() != false) {
+    if (keywordRequest.prisonIds.isNullOrEmpty()) {
       log.warn("Invalid keyword search  - no prisonIds specified to filter by")
       throw BadRequestException("Invalid keyword search  - please provide prison locations to filter by")
     }
@@ -82,81 +81,41 @@ class KeywordService(
 
   private fun buildKeywordQuery(keywordRequest: KeywordRequest): BoolQueryBuilder {
     val keywordQuery = QueryBuilders.boolQuery()
-
     if (noKeyWordsSpecified(keywordRequest)) {
       keywordQuery.should(QueryBuilders.matchAllQuery())
     }
 
+    // Pattern match terms which might be NomsId, PNC or CRO & uppercase them
     val sanitisedKeywordRequest = KeywordRequest(
       orWords = addUppercaseKeywordTokens(keywordRequest.orWords),
       andWords = addUppercaseKeywordTokens(keywordRequest.andWords),
       exactPhrase = addUppercaseKeywordTokens(keywordRequest.exactPhrase),
       notWords = addUppercaseKeywordTokens(keywordRequest.notWords),
       prisonIds = keywordRequest.prisonIds,
-      fuzzyMatch = keywordRequest.fuzzyMatch,
+      fuzzyMatch = keywordRequest.fuzzyMatch ?: false,
       pagination = keywordRequest.pagination,
     )
 
     with(sanitisedKeywordRequest) {
 
       andWords.takeIf { !it.isNullOrBlank() }?.let {
-        // Will match only if all of these words are present across all text fields
-        keywordQuery.must(
-          QueryBuilders.boolQuery()
-            .minimumShouldMatch(1)
-            .should(
-              QueryBuilders.multiMatchQuery(it)
-                .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
-                .lenient(true)
-                .fuzzyTranspositions(fuzzyMatch ?: false)
-                .operator(Operator.AND)
-            )
-            // Also try to match terms within the nested aliases
-            .should(
-              QueryBuilders.nestedQuery(
-                "aliases",
-                QueryBuilders.multiMatchQuery(it)
-                  .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
-                  .lenient(true)
-                  .fuzzyTranspositions(fuzzyMatch ?: false)
-                  .operator(Operator.AND),
-                ScoreMode.Max
-              )
-            )
+        // Will include the prisoner document if all of the words specified match in any of the fields
+        keywordQuery.must().add(
+          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.CROSS_FIELDS)
         )
       }
 
       orWords.takeIf { !it.isNullOrBlank() }?.let {
-        // Will match ANY of these words in the text fields
-        keywordQuery
-          .must(
-            QueryBuilders.boolQuery()
-              // Match in the main document
-              .minimumShouldMatch(1)
-              .should(
-                QueryBuilders.multiMatchQuery(it)
-                  .lenient(true)
-                  .fuzzyTranspositions(fuzzyMatch ?: false)
-                  .operator(Operator.OR)
-              )
-              // Match within the nested aliases
-              .should(
-                QueryBuilders.nestedQuery(
-                  "aliases",
-                  QueryBuilders.multiMatchQuery(it)
-                    .lenient(true)
-                    .fuzzyTranspositions(fuzzyMatch ?: false)
-                    .operator(Operator.OR),
-                  ScoreMode.Max
-                )
-              )
-          )
+        // Will include the prisoner document if any of the words specified match in any of the fields
+        keywordQuery.must().add(
+          generateMatchQuery(it, fuzzyMatch!!, Operator.OR, MultiMatchQueryBuilder.Type.BEST_FIELDS)
+        )
       }
 
       notWords.takeIf { !it.isNullOrBlank() }?.let {
-        // Will exclude these words from matching if they occur in the main document
+        // Will exclude the prisoners with any of these words matching anywhere in document
         keywordQuery.mustNot(
-          QueryBuilders.multiMatchQuery(it)
+          QueryBuilders.multiMatchQuery(it, "*", "aliases.*", "alerts.*")
             .lenient(true)
             .fuzzyTranspositions(false)
             .operator(Operator.OR)
@@ -164,13 +123,9 @@ class KeywordService(
       }
 
       exactPhrase.takeIf { !it.isNullOrBlank() }?.let {
-        // Will match only the exact phrase in text fields in the main document
-        keywordQuery.must(
-          QueryBuilders.multiMatchQuery(it)
-            .lenient(true)
-            .fuzzyTranspositions(false)
-            .operator(Operator.AND)
-            .type(MultiMatchQueryBuilder.Type.PHRASE)
+        // Will include prisoner where this exact phrase appears anywhere in the document
+        keywordQuery.must().add(
+          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.PHRASE)
         )
       }
 
@@ -181,6 +136,27 @@ class KeywordService(
     }
 
     return keywordQuery
+  }
+
+  private fun generateMatchQuery(
+    term: String,
+    fuzzyMatch: Boolean,
+    operator: Operator,
+    multiMatchType: MultiMatchQueryBuilder.Type,
+  ): QueryBuilder {
+    return QueryBuilders.multiMatchQuery(term, "*", "aliases.*", "alerts.*")
+      // Boost the scores for specific fields so real names and IDs are ranked higher than alias matches
+      .field("lastName", 10f)
+      .field("firstName", 10f)
+      .field("prisonerNumber", 10f)
+      .field("pncNumber", 10f)
+      .field("pncCanonicalShort", 10f)
+      .field("pncCanonicalLong", 10f)
+      .field("croNumber", 10f)
+      .lenient(true)
+      .type(multiMatchType)
+      .fuzzyTranspositions(fuzzyMatch)
+      .operator(operator)
   }
 
   private fun createKeywordResponse(paginationRequest: PaginationRequest, searchResponse: SearchResponse): Page<Prisoner> {

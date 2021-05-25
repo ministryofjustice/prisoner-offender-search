@@ -92,11 +92,11 @@ open class Prisoner {
   @Schema(description = "In prison cell location", example = "A-1-002")
   var cellLocation: String? = null
 
-  @Field(type = FieldType.Nested)
+  @Field(type = FieldType.Nested, includeInParent = true)
   @Schema(description = "Aliases Names and Details")
   var aliases: List<PrisonerAlias>? = null
 
-  @Field(type = FieldType.Nested)
+  @Field(type = FieldType.Nested, includeInParent = true)
   @Schema(description = "Alerts")
   var alerts: List<PrisonerAlert>? = null
 
