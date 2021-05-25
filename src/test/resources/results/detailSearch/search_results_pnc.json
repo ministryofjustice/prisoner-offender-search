@@ -1,0 +1,61 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A9999AA",
+      "pncNumber": "2015/001234S",
+      "pncNumberCanonicalShort": "15/1234S",
+      "pncNumberCanonicalLong": "2015/1234S",
+      "croNumber": "43252/15S",
+      "bookingId": "1808231",
+      "bookNumber": "V61587",
+      "firstName": "PAUL",
+      "lastName": "BOOTH",
+      "dateOfBirth": "1976-03-01",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "status": "ACTIVE IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
+      "inOutStatus": "IN",
+      "prisonId": "WSI",
+      "prisonName": "Wormwood Scrubs",
+      "mostSeriousOffence": "Section 18 - wounding with intent",
+      "recall": false,
+      "indeterminateSentence": false,
+      "licenceExpiryDate": "2020-02-03",
+      "receptionDate": "2015-10-01",
+      "paroleEligibilityDate": "2020-02-03",
+      "automaticReleaseDate": "2020-02-03",
+      "postRecallReleaseDate": "2020-02-03",
+      "conditionalReleaseDate": "2020-02-03",
+      "actualParoleDate": "2020-02-03",
+      "locationDescription": "Wormwood Scrubs"
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": false,
+      "unsorted": true,
+      "empty": true
+    },
+    "offset": 0,
+    "pageSize": 10,
+    "pageNumber": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 1,
+  "totalPages": 1,
+  "last": true,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "sorted": false,
+    "unsorted": true,
+    "empty": true
+  },
+  "numberOfElements": 1,
+  "first": true,
+  "empty": false
+}

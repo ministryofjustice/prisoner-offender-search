@@ -6,7 +6,6 @@ import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
-import org.elasticsearch.index.query.MultiMatchQueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.slf4j.Logger
@@ -84,35 +83,29 @@ class PrisonerDetailService(
       detailQuery.should(QueryBuilders.matchAllQuery())
     }
 
+    val fuzzyMatch = detailRequest.fuzzyMatch ?: false
+
     with(detailRequest) {
 
-      // Match by firstName, exact or by wildcard and include aliases - reduced score for wildcard matches
+      // Match by firstName, exact or by wildcard and include aliases - reduce score for alias matches
       firstName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(
-              QueryBuilders.multiMatchQuery(it.uppercase())
-                .field("firstName", 10f)
-                .field("aliases.firstName", 5f)
-                .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
-            )
-            .should(QueryBuilders.wildcardQuery("firstName", it.uppercase()).boost(2f))
-            .should(QueryBuilders.wildcardQuery("aliases.firstName", it.uppercase()).boost(1f))
+            .should(QueryBuilders.matchQuery("firstName", it).fuzzyTranspositions(fuzzyMatch).boost(5f))
+            .should(QueryBuilders.matchQuery("aliases.firstName", it).fuzzyTranspositions(fuzzyMatch).boost(2f))
+            .should(QueryBuilders.wildcardQuery("firstName", it).boost(5f))
+            .should(QueryBuilders.wildcardQuery("aliases.firstName", it).boost(2f))
         )
       }
 
-      // Match by lastName, exact or by wildcard match and include aliases - reduce score for alias/wildcard matches
+      // Match by lastName, exact or by wildcard match and include aliases - reduce score for alias matches
       lastName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(
-              QueryBuilders.multiMatchQuery(it.uppercase())
-                .field("lastName", 10f)
-                .field("aliases.lastName", 5f)
-                .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
-            )
-            .should(QueryBuilders.wildcardQuery("lastName", it.uppercase()).boost(2f))
-            .should(QueryBuilders.wildcardQuery("aliases.lastName", it.uppercase()).boost(1f))
+            .should(QueryBuilders.matchQuery("lastName", it).fuzzyTranspositions(fuzzyMatch).boost(5f))
+            .should(QueryBuilders.matchQuery("aliases.lastName", it).fuzzyTranspositions(fuzzyMatch).boost(2f))
+            .should(QueryBuilders.wildcardQuery("lastName", it).boost(5f))
+            .should(QueryBuilders.wildcardQuery("aliases.lastName", it).boost(2f))
         )
       }
 
@@ -120,7 +113,7 @@ class PrisonerDetailService(
       nomsNumber.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(QueryBuilders.matchQuery("prisonerNumber", it.uppercase()).boost(10f))
+            .should(QueryBuilders.matchQuery("prisonerNumber", it.uppercase()).boost(5f))
             .should(QueryBuilders.wildcardQuery("prisonerNumber", it.uppercase()).boost(2f))
         )
       }
@@ -129,12 +122,9 @@ class PrisonerDetailService(
       pncNumber.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(
-              QueryBuilders.multiMatchQuery(it.uppercase())
-                .field("pncNumber", 10f)
-                .field("pncNumberCanonicalLong", 10f)
-                .field("pncNumberCanonicalShort", 10f)
-            )
+            .should(QueryBuilders.matchQuery("pncNumber", it.uppercase()).boost(5f))
+            .should(QueryBuilders.matchQuery("pncNumberCanonicalLong", it.uppercase()).boost(5f))
+            .should(QueryBuilders.matchQuery("pncNumberCanonicalShort", it.uppercase()).boost(5f))
             .should(QueryBuilders.wildcardQuery("pncNumber", it.uppercase()).boost(2f))
             .should(QueryBuilders.wildcardQuery("pncNumberCanonicalLong", it.uppercase()).boost(2f))
             .should(QueryBuilders.wildcardQuery("pncNumberCanonicalShort", it.uppercase()).boost(2f))
@@ -145,7 +135,7 @@ class PrisonerDetailService(
       croNumber.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(QueryBuilders.matchQuery("croNumber", it.uppercase()).boost(10f))
+            .should(QueryBuilders.matchQuery("croNumber", it.uppercase()).boost(5f))
             .should(QueryBuilders.wildcardQuery("croNumber", it.uppercase()).boost(2f))
         )
       }

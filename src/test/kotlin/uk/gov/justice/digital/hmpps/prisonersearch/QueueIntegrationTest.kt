@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
 abstract class QueueIntegrationTest : IntegrationTest() {
@@ -171,6 +172,16 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun keywordSearch(keywordRequest: KeywordRequest, fileAssert: String) {
     webTestClient.post().uri("/keyword")
       .body(BodyInserters.fromValue(gson.toJson(keywordRequest)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun detailSearch(detailRequest: PrisonerDetailRequest, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-detail")
+      .body(BodyInserters.fromValue(gson.toJson(detailRequest)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
