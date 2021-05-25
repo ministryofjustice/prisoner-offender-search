@@ -60,8 +60,8 @@ class PrisonerSearchService(
     return emptyList()
   }
 
-  fun findByPrison(prisonId: String, pageable: Pageable): Page<Prisoner> {
-    queryBy(prisonId, pageable) { locationMatch(it) } onMatch {
+  fun findByPrison(prisonId: String, pageable: Pageable, includeRestrictedPatients: Boolean = false): Page<Prisoner> {
+    queryBy(prisonId, pageable) { if (includeRestrictedPatients) includeRestricted(it) else locationMatch(it) } onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
     }
@@ -132,14 +132,14 @@ class PrisonerSearchService(
     } ?: GlobalResult.NoMatch
   }
 
-  private fun matchByIds(criteria: PrisonerListCriteria<Any>): BoolQueryBuilder? {
+  private fun matchByIds(criteria: PrisonerListCriteria<Any>): BoolQueryBuilder {
     return when (criteria) {
       is PrisonerNumbers -> shouldMatchOneOf("prisonerNumber", criteria.values())
       is BookingIds -> shouldMatchOneOf("bookingId", criteria.values())
     }
   }
 
-  private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
+  private fun idMatch(searchCriteria: SearchCriteria): BoolQueryBuilder {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
         .mustMultiMatchKeyword(
@@ -155,7 +155,11 @@ class PrisonerSearchService(
     }
   }
 
-  private fun locationMatch(prisonId: String): BoolQueryBuilder? =
+  private fun includeRestricted(prisonId: String): BoolQueryBuilder =
+    QueryBuilders.boolQuery()
+      .mustMultiMatch(prisonId, "prisonId", "supportingPrisonId")
+
+  private fun locationMatch(prisonId: String): BoolQueryBuilder =
     QueryBuilders.boolQuery().must("prisonId", prisonId)
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
@@ -271,15 +275,14 @@ sealed class Result {
   data class Match(val matches: List<Prisoner>) : Result()
 }
 
-inline infix fun Result.onMatch(block: (Result.Match) -> Nothing): Unit? {
-  return when (this) {
+inline infix fun Result.onMatch(block: (Result.Match) -> Nothing) =
+  when (this) {
     is Result.NoMatch -> {
     }
     is Result.Match -> block(this)
   }
-}
 
-private fun BoolQueryBuilder.withDefaults(searchCriteria: SearchCriteria): BoolQueryBuilder? {
+private fun BoolQueryBuilder.withDefaults(searchCriteria: SearchCriteria): BoolQueryBuilder {
   return this
     .filterWhenPresent("prisonId", searchCriteria.prisonIds)
 }
