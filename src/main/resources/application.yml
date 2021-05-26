@@ -93,6 +93,14 @@ elasticsearch:
   proxy:
     url: http://aws-es-proxy-service:9200
 
+search:
+  keyword:
+    timeout-seconds: 10
+    max-results: 200
+  detailed:
+    timeout-seconds: 10
+    max-results: 100
+
 index:
   page-size: 1000
   complete-threshold: 700000

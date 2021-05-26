@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -21,6 +22,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
+import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
@@ -28,6 +30,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
 abstract class QueueIntegrationTest : IntegrationTest() {
@@ -168,14 +171,42 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
-  fun keywordSearch(keywordRequest: KeywordRequest, fileAssert: String) {
-    webTestClient.post().uri("/keyword")
+  fun keywordSearch(
+    keywordRequest: KeywordRequest,
+    expectedCount: Int = 0,
+    expectedPrisoners: List<String> = emptyList(),
+  ) {
+    val response = webTestClient.post().uri("/keyword")
       .body(BodyInserters.fromValue(gson.toJson(keywordRequest)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isOk
-      .expectBody().json(fileAssert.readResourceAsText())
+      .expectBody(RestResponsePage::class.java)
+      .returnResult().responseBody
+
+    assertThat(response.numberOfElements).isEqualTo(expectedCount)
+    assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
+    assertThat(response.content).extracting("prisonerNumber").containsAll(expectedPrisoners)
+  }
+
+  fun detailSearch(
+    detailRequest: PrisonerDetailRequest,
+    expectedCount: Int = 0,
+    expectedPrisoners: List<String> = emptyList(),
+  ) {
+    val response = webTestClient.post().uri("/prisoner-detail")
+      .body(BodyInserters.fromValue(gson.toJson(detailRequest)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody(RestResponsePage::class.java)
+      .returnResult().responseBody
+
+    assertThat(response.numberOfElements).isEqualTo(expectedCount)
+    assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
+    assertThat(response.content).extracting("prisonerNumber").containsAll(expectedPrisoners)
   }
 
   fun prisonerMatch(matchRequest: MatchRequest, fileAssert: String) {

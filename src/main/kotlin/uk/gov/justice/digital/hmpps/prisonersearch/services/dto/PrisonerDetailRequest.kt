@@ -2,34 +2,40 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class KeywordRequest(
+data class PrisonerDetailRequest(
   @Schema(
-    description = "Match where any of the keywords are present in any text field",
-    example = "smith james john",
+    description = "Prisoner first name",
+    example = "john",
     required = false,
   )
-  val orWords: String? = null,
+  val firstName: String? = null,
 
   @Schema(
-    description = "Match where all keywords are present in any text field",
-    example = "smith james",
+    description = "Prisoner last name",
+    example = "smith",
     required = false,
   )
-  val andWords: String? = null,
+  val lastName: String? = null,
 
   @Schema(
-    description = "Filter results where any of these words are present in any text field",
-    example = "jonas",
+    description = "Prisoner number (aka. offenderId, nomisId)",
+    example = "A1234AA",
     required = false,
   )
-  val notWords: String? = null,
+  val nomsNumber: String? = null,
 
   @Schema(
-    description = "Match only prisoners where the full phrase is present in any text field",
-    example = "John Smith",
+    description = "Police National Computer (PNC) number",
+    example = "2018/0123456X",
     required = false,
   )
-  val exactPhrase: String? = null,
+  val pncNumber: String? = null,
+
+  @Schema(
+    description = "Criminal Records Office (CRO) number",
+    example = "SF80/655108T",
+    required = false,
+  ) val croNumber: String? = null,
 
   @Schema(
     description = "Fuzzy matching. Allow a one character difference in spelling in word lengths below five and two differences above.",
@@ -39,7 +45,7 @@ data class KeywordRequest(
   val fuzzyMatch: Boolean? = false,
 
   @Schema(
-    description = "List of prison codes to filter results",
+    description = "List of prison codes to filter results by",
     example = "['LEI', 'MDI']",
     required = true,
   )
