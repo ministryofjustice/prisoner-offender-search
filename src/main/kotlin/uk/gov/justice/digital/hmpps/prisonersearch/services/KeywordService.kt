@@ -146,6 +146,7 @@ class KeywordService(
   ): QueryBuilder {
     return QueryBuilders.multiMatchQuery(term, "*", "aliases.*", "alerts.*")
       // Boost the scores for specific fields so real names and IDs are ranked higher than alias matches
+      .analyzer("whitespace")
       .field("lastName", 10f)
       .field("firstName", 10f)
       .field("prisonerNumber", 10f)

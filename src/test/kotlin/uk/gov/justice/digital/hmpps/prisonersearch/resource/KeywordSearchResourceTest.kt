@@ -166,6 +166,24 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a keyword AND search on multiple words narrowed down to one prisoner number`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(andWords = "sam jones A7090AC", prisonIds = listOf("MDI", "AGI", "LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7090AC"),
+    )
+  }
+
+  @Test
+  fun `can perform a keyword OR search on multiple words and include an unrelated prisoner number`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(orWords = "sam jones A7089EZ", prisonIds = listOf("MDI", "AGI", "LEI")),
+      expectedCount = 9,
+      expectedPrisoners = listOf("A7089EZ", "A7090AB", "A7090AC", "A7090AD", "A7090BA", "A7090BB", "A7090BC", "A7090AA", "A7090AF"),
+    )
+  }
+
+  @Test
   fun `can perform a keyword OR search for all male gender prisoners in Moorland`() {
     keywordSearch(
       keywordRequest = KeywordRequest(orWords = "male", prisonIds = listOf("MDI")),
