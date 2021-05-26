@@ -47,7 +47,7 @@ open class Prisoner {
   @Schema(required = true, description = "Last name", example = "Larsen")
   var lastName: String? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(required = true, description = "Date of Birth", example = "1975-04-02")
   var dateOfBirth: LocalDate? = null
 
@@ -128,50 +128,50 @@ open class Prisoner {
   @Schema(description = "Indicates the the offender has an indeterminate sentence", example = "true")
   var indeterminateSentence: Boolean? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Start Date for this sentence", example = "2020-04-03")
   var sentenceStartDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Actual of most likely Release Date", example = "2023-05-02")
   var releaseDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Release Date Confirmed", example = "2023-05-01")
   var confirmedReleaseDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Sentence Expiry Date", example = "2023-05-01")
   var sentenceExpiryDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Licence Expiry Date", example = "2023-05-01")
   var licenceExpiryDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "HDC Eligibility Date", example = "2023-05-01")
   var homeDetentionCurfewEligibilityDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "HDC Actual Date", example = "2023-05-01")
   var homeDetentionCurfewActualDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "HDC End Date", example = "2023-05-02")
   var homeDetentionCurfewEndDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Top-up supervision start date", example = "2023-04-29")
   var topupSupervisionStartDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Top-up supervision expiry date", example = "2023-05-01")
   var topupSupervisionExpiryDate: LocalDate? = null
 
   @Schema(description = "Days added to sentence term due to adjustments.", example = "10")
   var additionalDaysAwarded: Int? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(
     description = "Release date for Non determinant sentence (if applicable). This will be based on one of ARD, CRD, NPD or PRRD.",
     example = "2023-05-01"
@@ -185,27 +185,27 @@ open class Prisoner {
   )
   var nonDtoReleaseDateType: String? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Date prisoner was received into the prison", example = "2023-05-01")
   var receptionDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Parole  Eligibility Date", example = "2023-05-01")
   var paroleEligibilityDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Automatic Release Date. If automaticReleaseOverrideDate is available then it will be set as automaticReleaseDate", example = "2023-05-01")
   var automaticReleaseDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Post Recall Release Date. if postRecallReleaseOverrideDate is available then it will be set as postRecallReleaseDate", example = "2023-05-01")
   var postRecallReleaseDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Conditional Release Date. If conditionalReleaseOverrideDate is available then it will be set as conditionalReleaseDate", example = "2023-05-01")
   var conditionalReleaseDate: LocalDate? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Actual Parole Date", example = "2023-05-01")
   var actualParoleDate: LocalDate? = null
 
@@ -227,7 +227,7 @@ open class Prisoner {
   @Schema(description = "Hospital name to which the offender was discharged", example = "Hazelwood House")
   var dischargedHospitalDescription: String? = null
 
-  @Field(type = FieldType.Date, format = DateFormat.date)
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Date of discharge", example = "2020-05-01")
   var dischargeDate: LocalDate? = null
 
