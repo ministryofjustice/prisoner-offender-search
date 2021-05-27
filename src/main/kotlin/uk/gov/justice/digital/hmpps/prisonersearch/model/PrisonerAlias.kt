@@ -16,7 +16,7 @@ data class PrisonerAlias(
   @Schema(description = "Last name", example = "Lorsen")
   val lastName: String,
 
-  @Field(type = FieldType.Date, format = DateFormat.custom, pattern = "yyyy-MM-dd")
+  @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(description = "Date of birth", example = "1975-04-02")
   val dateOfBirth: LocalDate,
 
