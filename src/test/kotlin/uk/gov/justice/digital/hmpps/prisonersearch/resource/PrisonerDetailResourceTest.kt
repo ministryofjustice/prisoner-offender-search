@@ -224,9 +224,27 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `find by mixed case first and last names`() {
+    detailSearch(
+      detailRequest = PrisonerDetailRequest(firstName = "Sam", lastName = "Jones", prisonIds = listOf("MDI", "AGI", "LEI")),
+      expectedCount = 7,
+      expectedPrisoners = listOf("A7090AB", "A7090AC", "A7090AD", "A7090BA", "A7090BB", "A7090BC", "A7090AF"),
+    )
+  }
+
+  @Test
   fun `find by first and last names in alias`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(firstName = "danny", lastName = "colin", prisonIds = listOf("LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7090AF"),
+    )
+  }
+
+  @Test
+  fun `find by mixed case first and last names in alias`() {
+    detailSearch(
+      detailRequest = PrisonerDetailRequest(firstName = "DANny", lastName = "COLin", prisonIds = listOf("LEI")),
       expectedCount = 1,
       expectedPrisoners = listOf("A7090AF"),
     )
@@ -245,6 +263,15 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   fun `find by main first and last name with single wildcard letters`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(firstName = "jimb?b", lastName = "j?cks", prisonIds = listOf("LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7090AF"),
+    )
+  }
+
+  @Test
+  fun `find by mixed case first and last name with single wildcard letters`() {
+    detailSearch(
+      detailRequest = PrisonerDetailRequest(firstName = "JIMb?b", lastName = "j?cKs", prisonIds = listOf("LEI")),
       expectedCount = 1,
       expectedPrisoners = listOf("A7090AF"),
     )

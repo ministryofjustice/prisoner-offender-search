@@ -225,12 +225,12 @@ class KeywordService(
       return tokens
     }
     var newTokens = ""
-    val arrayOfTokens = tokens.split("\\s")
+    val arrayOfTokens = tokens.split("\\s+".toRegex())
     arrayOfTokens.forEach {
       newTokens += if (it.isPrisonerNumber() || it.isCroNumber() || it.isPncNumber()) {
         "${it.uppercase()} "
       } else {
-        "$it "
+        "${it.lowercase()} "
       }
     }
     return newTokens.trim()

@@ -91,10 +91,10 @@ class PrisonerDetailService(
       firstName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(QueryBuilders.matchQuery("firstName", it).fuzzyTranspositions(fuzzyMatch).boost(5f))
-            .should(QueryBuilders.matchQuery("aliases.firstName", it).fuzzyTranspositions(fuzzyMatch).boost(2f))
-            .should(QueryBuilders.wildcardQuery("firstName", it).boost(5f))
-            .should(QueryBuilders.wildcardQuery("aliases.firstName", it).boost(2f))
+            .should(QueryBuilders.matchQuery("firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
+            .should(QueryBuilders.matchQuery("aliases.firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(2f))
+            .should(QueryBuilders.wildcardQuery("firstName", it.lowercase()).boost(5f))
+            .should(QueryBuilders.wildcardQuery("aliases.firstName", it.lowercase()).boost(2f))
         )
       }
 
@@ -102,10 +102,10 @@ class PrisonerDetailService(
       lastName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
           QueryBuilders.boolQuery()
-            .should(QueryBuilders.matchQuery("lastName", it).fuzzyTranspositions(fuzzyMatch).boost(5f))
-            .should(QueryBuilders.matchQuery("aliases.lastName", it).fuzzyTranspositions(fuzzyMatch).boost(2f))
-            .should(QueryBuilders.wildcardQuery("lastName", it).boost(5f))
-            .should(QueryBuilders.wildcardQuery("aliases.lastName", it).boost(2f))
+            .should(QueryBuilders.matchQuery("lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
+            .should(QueryBuilders.matchQuery("aliases.lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(2f))
+            .should(QueryBuilders.wildcardQuery("lastName", it.lowercase()).boost(5f))
+            .should(QueryBuilders.wildcardQuery("aliases.lastName", it.lowercase()).boost(2f))
         )
       }
 

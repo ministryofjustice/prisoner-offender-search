@@ -34,8 +34,12 @@ class PrisonerKeywordResource(private val keywordService: KeywordService) {
   abstract class KeywordResponse : Page<Prisoner>
 
   @Operation(
-    summary = "Work in progress - find prisoners by keywords. It will return the best matching prisoners based on the request",
-    description = "Specify the keywords to match against the indexed text for prisoners. Requires role GLOBAL_SEARCH",
+    summary = "Search for prisoners by keyword or identifiers within a list of prisons and return a paginated result set",
+    description = """ 
+      Words and identifiers can be provided in either or mixed case and will be matched against all indexed text and keyword fields.
+      Identifiers within the [and, or, not, exact] terms are detected and converted to the appropriate case.
+      Requires role GLOBAL_SEARCH.
+      """,
     security = [SecurityRequirement(name = "GLOBAL_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
