@@ -34,8 +34,14 @@ class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailSe
   abstract class PrisonerDetailResponse : Page<Prisoner>
 
   @Operation(
-    summary = "Work in progress - find prisoners by specific field values and return a paginated list matching prisoners",
-    description = "Specify specific field values to match against the indexed values for prisoners. Requires role GLOBAL_SEARCH",
+    summary = "Find prisoners by exact or wildcard terms for specified fields and return a paginated result set",
+    description = """
+      Search terms and identifiers can be provided in either or mixed case and are converted to the appropriate case.
+      This endpoint will find both exact values (full term matched) or wildcards supporting the '*' and '?' symbols.
+      The '*' symbol will match any number of characters e.g. firstName='J*' will match 'John', 'Jane', and 'James'.  
+      The '?' symbol will match any letter substituted at that position. e.g. firstName='t?ny' will match 'Tony' and 'Tiny'
+      Requires role GLOBAL_SEARCH.
+      """,
     security = [SecurityRequirement(name = "GLOBAL_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [

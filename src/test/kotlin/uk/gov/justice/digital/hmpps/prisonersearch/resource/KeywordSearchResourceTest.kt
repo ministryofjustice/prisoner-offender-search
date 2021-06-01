@@ -157,6 +157,15 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a keyword AND search on mixed case names`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(andWords = "SAm jONes", prisonIds = listOf("MDI", "AGI", "LEI")),
+      expectedCount = 7,
+      expectedPrisoners = listOf("A7090AB", "A7090AC", "A7090AD", "A7090BA", "A7090BB", "A7090BC", "A7090AF"),
+    )
+  }
+
+  @Test
   fun `can perform a keyword AND search on both names in aliases`() {
     keywordSearch(
       keywordRequest = KeywordRequest(andWords = "danny colin", prisonIds = listOf("LEI")),
@@ -205,6 +214,15 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a keyword OR search to match last name in alias`() {
     keywordSearch(
       keywordRequest = KeywordRequest(orWords = "cordian", prisonIds = listOf("LEI")),
+      expectedCount = 1,
+      expectedPrisoners = listOf("A7089EZ"),
+    )
+  }
+
+  @Test
+  fun `can perform a keyword OR search to match mixed case last name in alias`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(orWords = "CORdian", prisonIds = listOf("LEI")),
       expectedCount = 1,
       expectedPrisoners = listOf("A7089EZ"),
     )
