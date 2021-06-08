@@ -12,3 +12,7 @@ generic-service:
 # Sets where alerts will be delivered, via Alertmanager receiver
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service-dev
+
+# CloudPlatform AlertManager receiver to route promethues alerts to slack
+generic-prometheus-alerts:
+  alertSeverity: hmpps_tech_non_prod
