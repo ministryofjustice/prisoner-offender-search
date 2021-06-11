@@ -23,7 +23,7 @@ import javax.validation.Valid
 @RestController
 @Validated
 @RequestMapping(value = ["/match-prisoners"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@PreAuthorize("hasAnyRole('GLOBAL_SEARCH','ROLE_PRISONER_SEARCH')")
+@PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH','ROLE_PRISONER_SEARCH')")
 class PrisonerMatchResource(private val matchService: MatchService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
