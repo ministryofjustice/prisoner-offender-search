@@ -33,28 +33,28 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @PostMapping("/match")
   @Operation(
     summary = "Match prisoners by criteria, to search across a list of specific prisons use /match-prisoners",
-    description = "Requires GLOBAL_SEARCH role"
+    description = "Requires GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role"
   )
   fun findByCriteria(@Parameter(required = true) @RequestBody prisonSearch: PrisonSearch) =
     prisonerSearchService.findBySearchCriteria(prisonSearch.toSearchCriteria())
 
   @PostMapping("/match-prisoners")
-  @Operation(summary = "Match prisoners by criteria", description = "Requires GLOBAL_SEARCH role")
+  @Operation(summary = "Match prisoners by criteria", description = "Requires GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByCriteria(@Parameter(required = true) @RequestBody searchCriteria: SearchCriteria) =
     prisonerSearchService.findBySearchCriteria(searchCriteria)
 
   @PostMapping("/prisoner-numbers")
-  @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires GLOBAL_SEARCH role")
+  @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByNumbers(@Parameter(required = true) @Valid @RequestBody criteria: PrisonerNumbers) =
     prisonerSearchService.findBy(criteria)
 
   @PostMapping("/booking-ids")
-  @Operation(summary = "Match prisoners by a list of booking ids", description = "Requires GLOBAL_SEARCH role")
+  @Operation(summary = "Match prisoners by a list of booking ids", description = "Requires GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByIds(@Parameter(required = true) @Valid @RequestBody criteria: BookingIds) =
     prisonerSearchService.findBy(criteria)
 
   @GetMapping("/prison/{prisonId}")
-  @Operation(summary = "Match prisoners by prison, or if a restricted patient supported by a POM", description = "Requires GLOBAL_SEARCH role")
+  @Operation(summary = "Match prisoners by prison, or if a restricted patient supported by a POM", description = "Requires GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByPrison(
     @Valid @PathVariable prisonId: String,
     @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients: Boolean,

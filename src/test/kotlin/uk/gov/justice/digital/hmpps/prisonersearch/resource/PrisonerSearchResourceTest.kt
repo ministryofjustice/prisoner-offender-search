@@ -90,6 +90,36 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `search by prisonId success for GLOBAL_SEARCH role`() {
+
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `search by prisonId success for ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `search by prisonId success for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
   fun `can perform a match on prisoner number`() {
     search(SearchCriteria("A7089EY", null, null), "/results/search_results_smith.json")
   }
