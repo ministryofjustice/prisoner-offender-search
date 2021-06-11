@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
-@PreAuthorize("hasAnyRole('GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
+@PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
 @Service
 class PrisonerSearchService(
   private val searchClient: SearchClient,
