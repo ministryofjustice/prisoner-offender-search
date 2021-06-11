@@ -1,7 +1,13 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
@@ -87,6 +93,36 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isNotFound
+  }
+
+  @Test
+  fun `search by prisonId success for GLOBAL_SEARCH role`() {
+
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `search by prisonId success for ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `search by prisonId success for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.get().uri("/prisoner-search/prison/")
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
   }
 
   @Test

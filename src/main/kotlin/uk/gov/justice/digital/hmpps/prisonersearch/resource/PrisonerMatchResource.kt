@@ -23,7 +23,7 @@ import javax.validation.Valid
 @RestController
 @Validated
 @RequestMapping(value = ["/match-prisoners"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@PreAuthorize("hasRole('ROLE_GLOBAL_SEARCH')")
+@PreAuthorize("hasAnyRole('GLOBAL_SEARCH','ROLE_PRISONER_SEARCH')")
 class PrisonerMatchResource(private val matchService: MatchService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -31,8 +31,8 @@ class PrisonerMatchResource(private val matchService: MatchService) {
 
   @Operation(
     summary = "Match for an prisoner in Prisoner ElasticSearch. It will return the best group of matching prisoners based on the request",
-    description = "Specify the request criteria to match against, role required is GLOBAL_SEARCH",
-    security = [SecurityRequirement(name = "GLOBAL_SEARCH")],
+    description = "Specify the request criteria to match against, role required is GLOBAL_SEARCH or ROLE_PRISONER_SEARCH",
+    security = [SecurityRequirement(name = "GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(

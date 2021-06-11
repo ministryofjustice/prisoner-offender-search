@@ -62,6 +62,38 @@ class PrisonerMatchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match for GLOBAL_SEARCH role`() {
+    webTestClient.post().uri("/match-prisoners")
+      .body(BodyInserters.fromValue(gson.toJson(MatchRequest(null, "SMITHEEE"))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a match for ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.post().uri("/match-prisoners")
+      .body(BodyInserters.fromValue(gson.toJson(MatchRequest(null, "SMITHEEE"))))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a match for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.post().uri("/match-prisoners")
+      .body(BodyInserters.fromValue(gson.toJson(MatchRequest(null, "SMITHEEE"))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
   fun `can perform a match on prisoner number`() {
     prisonerMatch(
       MatchRequest(null, "SMITHEEE", null, null, null, "A7089EY"),
