@@ -112,7 +112,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   @Test
   fun `search by prisonId success for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
 
-    webTestClient.get().uri("/prisoner-search/prison/")
+    webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
