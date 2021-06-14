@@ -48,6 +48,36 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a keyword search for ROLE_GLOBAL_SEARCH role`() {
+    webTestClient.post().uri("/keyword")
+      .body(BodyInserters.fromValue(gson.toJson(KeywordRequest(orWords = "smith jones", prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a keyword search for ROLE_PRISONER_SEARCH role`() {
+    webTestClient.post().uri("/keyword")
+      .body(BodyInserters.fromValue(gson.toJson(KeywordRequest(orWords = "smith jones", prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a keyword search for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+    webTestClient.post().uri("/keyword")
+      .body(BodyInserters.fromValue(gson.toJson(KeywordRequest(orWords = "smith jones", prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
   fun `bad request when no filtering prison IDs provided`() {
     webTestClient.post().uri("/keyword")
       .body(BodyInserters.fromValue(gson.toJson(KeywordRequest(orWords = "smith jones", prisonIds = emptyList()))))

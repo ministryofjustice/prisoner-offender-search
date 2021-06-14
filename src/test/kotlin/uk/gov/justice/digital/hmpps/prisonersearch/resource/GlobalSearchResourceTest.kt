@@ -69,6 +69,39 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a match for ROLE_GLOBAL_SEARCH role`() {
+
+    webTestClient.post().uri("/global-search")
+      .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a match for ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.post().uri("/global-search")
+      .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a match for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.post().uri("/global-search")
+      .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
   fun `can perform a match on prisoner number`() {
     globalSearch(
       GlobalSearchCriteria("A7089EY", null, null, null, null, null),

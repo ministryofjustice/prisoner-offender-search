@@ -27,8 +27,8 @@ class GlobalSearchResource(
     produces = [MediaType.APPLICATION_JSON_VALUE],
     consumes = [MediaType.APPLICATION_JSON_VALUE]
   )
-  @PreAuthorize("hasRole('GLOBAL_SEARCH')")
-  @Operation(summary = "Match prisoners by criteria", description = "Requires GLOBAL_SEARCH role")
+  @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
+  @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role")
   fun globalFindByCriteria(
     @RequestBody globalSearchCriteria: GlobalSearchCriteria,
     @PageableDefault pageable: Pageable

@@ -24,7 +24,7 @@ import javax.validation.Valid
 @RestController
 @Validated
 @RequestMapping(value = ["/prisoner-detail"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@PreAuthorize("hasRole('ROLE_GLOBAL_SEARCH')")
+@PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
 class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -40,9 +40,9 @@ class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailSe
       This endpoint will find both exact values (full term matched) or wildcards supporting the '*' and '?' symbols.
       The '*' symbol will match any number of characters e.g. firstName='J*' will match 'John', 'Jane', and 'James'.  
       The '?' symbol will match any letter substituted at that position. e.g. firstName='t?ny' will match 'Tony' and 'Tiny'
-      Requires role GLOBAL_SEARCH.
+      Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
       """,
-    security = [SecurityRequirement(name = "GLOBAL_SEARCH")],
+    security = [SecurityRequirement(name = "ROLE_GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(
