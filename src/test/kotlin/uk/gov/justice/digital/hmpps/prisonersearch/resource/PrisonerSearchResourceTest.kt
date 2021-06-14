@@ -90,7 +90,7 @@ class PrisonerSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `search by prisonId success for GLOBAL_SEARCH role`() {
+  fun `search by prisonId success for ROLE_GLOBAL_SEARCH role`() {
 
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))

@@ -24,7 +24,7 @@ import javax.validation.Valid
 @RestController
 @Validated
 @RequestMapping(value = ["/keyword"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@PreAuthorize("hasRole('ROLE_GLOBAL_SEARCH')")
+@PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
 class PrisonerKeywordResource(private val keywordService: KeywordService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -38,9 +38,9 @@ class PrisonerKeywordResource(private val keywordService: KeywordService) {
     description = """ 
       Words and identifiers can be provided in either or mixed case and will be matched against all indexed text and keyword fields.
       Identifiers within the [and, or, not, exact] terms are detected and converted to the appropriate case.
-      Requires role GLOBAL_SEARCH.
+      Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
       """,
-    security = [SecurityRequirement(name = "GLOBAL_SEARCH")],
+    security = [SecurityRequirement(name = "ROLE_GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(

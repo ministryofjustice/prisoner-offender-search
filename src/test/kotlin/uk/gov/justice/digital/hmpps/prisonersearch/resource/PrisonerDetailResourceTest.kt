@@ -62,6 +62,39 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a detail search for ROLE_GLOBAL_SEARCH role`() {
+
+    webTestClient.post().uri("/prisoner-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a detail search for ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.post().uri("/prisoner-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a detail search for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+
+    webTestClient.post().uri("/prisoner-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
   fun `find by whole prisoner number`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")),
