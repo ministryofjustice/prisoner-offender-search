@@ -39,6 +39,7 @@ generic-service:
     SPRING_PROFILES_ACTIVE: "logstash"
     INDEX_COMPLETE_THRESHOLD: 700000
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+    APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
