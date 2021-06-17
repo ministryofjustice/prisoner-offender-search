@@ -9,6 +9,7 @@ jobs:
       name: hmpps/localstack
       jdk_tag: "16.0"
       services: "sqs,sns,es,elasticsearch"
+      localstack_tag: "0.12.10"
     steps:
       - run:
           command: |
