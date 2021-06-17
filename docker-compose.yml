@@ -18,18 +18,9 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - API_BASE_URL_OAUTH=http://oauth:8080/auth
       - API_BASE_URL_NOMIS=http://prisonapi:8080
-      - SQS_ENDPOINT_URL=http://localstack:4566
+      - SQS_ENDPOINT_URL=http://localstack:4576
       - ELASTICSEARCH_HOST=localstack
-      - AWS_PROVIDER=localstack
-      - SQS_AWS_ACCESS_KEY_ID=foobar
-      - SQS_AWS_SECRET_ACCESS_KEY=foobar
-      - SQS_AWS_DLQ_ACCESS_KEY_ID=foobar
-      - SQS_AWS_DLQ_SECRET_ACCESS_KEY=foobar
-      - SQS_INDEX_AWS_ACCESS_KEY_ID=foobar
-      - SQS_INDEX_AWS_SECRET_ACCESS_KEY=foobar
-      - SQS_INDEX_AWS_DLQ_ACCESS_KEY_ID=foobar
-      - SQS_INDEX_AWS_DLQ_SECRET_ACCESS_KEY=foobar
-      - SQS_DEFAULT_REGION=eu-west-2
+      - ELASTICSEARCH_PROXY_URL=http://localstack:4571
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
       - OAUTH_CLIENT_SECRET=clientsecret
 
@@ -76,6 +67,7 @@ services:
       - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DEFAULT_REGION=eu-west-2
+      - HOSTNAME_EXTERNAL=localstack
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
