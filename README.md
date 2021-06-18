@@ -77,10 +77,14 @@ The elasticsearch part of localstack takes a long time to start and will only be
 ```
 in the localstack logs.
 
+Starting the services is therefore a two step process -
+1. Start everything apart from prisoner offender search and wait for localstack to start fully
+2. Start prisoner offender search
+
 #### Running prisoner offender search in docker
 To start up localstack and other dependencies with prisoner offender search running in docker too:
 ```bash
-docker-compose up --scale prisoner-offender-search=0
+docker-compose up localstack oauth prisonapi
 ```
 Once localstack has started then run
 ```bash
