@@ -63,14 +63,53 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 
 ### Running
 
-`localstack` is used to emulate the AWS SQS and Elastic Search service. When running the integration test this will be started automatically. If you want the tests to use an already running version of `localstack` run the tests with the environment `AWS_PROVIDER=localstack`. This has the benefit of running the test quicker without the overhead of starting the `localstack` container.
+`localstack` is used to emulate the AWS SQS and Elastic Search service.  
+Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues.
+Localstack listens on two main ports - 4566 for sns and sqs and 4571 for elasticsearch.
 
-Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this should contain commands to create the appropriate queues.
+Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender search in a docker container, or in intellij and in tests.
+If running search in docker `ES_HOSTNAME` needs to be set to `localstack` otherwise it should be set to `localhost`.
+This is because when clients connect it returns a url for subsequent calls and the hostname is then different when in docker versus connecting from a laptop.
 
-Running all services locally:
-```bash
-docker-compose up 
+The elasticsearch part of localstack takes a long time to start and will only be up and running fully until you see
 ```
+[INFO] Running on http://0.0.0.0:4571 (CTRL + C to quit)
+```
+in the localstack logs.
+
+#### Running prisoner offender search in docker
+To start up localstack and other dependencies with prisoner offender search running in docker too:
+```bash
+docker-compose up --scale prisoner-offender-search=0
+```
+Once localstack has started then run
+```bash
+docker-compose up --detach
+```
+to start prisoner offender search too.  To check that it has all started correctly then go to http://localhost:8080/health and check that the `status` is `UP`.
+
+#### Running prisoner offender search in intellij or on the command line
+To start up localstack and other dependencies with prisoner offender search running in intellij
+```bash
+ES_HOSTNAME=localhost docker-compose up --scale prisoner-offender-search=0
+```
+To then run prisoner offender search from the command line
+```
+SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun 
+```
+Alternatively create a Spring Boot run configuration with active profile of `dev` and main class `uk.gov.justice.digital.hmpps.prisonersearch.PrisonerOffenderSearch`.
+
+#### Running the tests
+If just running the tests then
+```bash
+docker-compose up -f docker-compose-localstack-tests.yml
+```
+will just start localstack as the other dependencies are mocked out.
+```bash
+./gradlew test
+```
+will then run all the tests.
+#### Deleting localstack data between runs
 Since localstack persists data between runs it maybe necessary to delete the localstack temporary data:
 
 Mac
@@ -89,29 +128,6 @@ For a Mac it recommended running all components *except* prisoner-offender-searc
 ```bash
 SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun 
 ```
-
-Queues and topics and an ES instance will automatically be created when the `localstack` container starts.
-
-Running all services except this application (hence allowing you to run this in the IDE)
-
-```bash
-docker-compose up --scale prisoner-offender-search=0 
-```
-
-Depending on the speed of your machine when running all services you may need to scale `prisoner-offender-search=0` until localstack starts. This is a workaround for an issue whereby Spring Boot gives up trying to connect to SQS when the services first starts up.
-
-### Running tests
-
-#### Test containers
-
-`./gradlew test` will run all tests and will by default use test containers to start any required docker containers, e.g localstack
-Note that TestContainers will start Elastic Search in its own container rather than using the one built into localstack.
-
-#### External localstack
-
-`AWS_PROVIDER=localstack ./gradlew test` will override the default behaviour and will expect localstack to already be started externally. In this mode the following services must be started `sqs,sns,es`
-
-`docker-compose up localstack` will start the required AWS services.  
 
 ### When running locally you can add some prisoners into elastic with the following:-
 

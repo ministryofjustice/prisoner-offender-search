@@ -19,4 +19,4 @@ aws --endpoint-url=http://localhost:4566 sns subscribe \
     --protocol sqs \
     --notification-endpoint http://localhost:4566/queue/prisoner_offender_search_queue \
     --attributes '{"FilterPolicy":"{\"eventType\":[ \"OFFENDER-INSERTED\", \"OFFENDER-UPDATED\", \"OFFENDER-DELETED\", \"EXTERNAL_MOVEMENT_RECORD-INSERTED\", \"ASSESSMENT-CHANGED\", \"OFFENDER_BOOKING-REASSIGNED\", \"OFFENDER_BOOKING-CHANGED\", \"OFFENDER_DETAILS-CHANGED\", \"BOOKING_NUMBER-CHANGED\", \"SENTENCE_DATES-CHANGED\", \"IMPRISONMENT_STATUS-CHANGED\", \"BED_ASSIGNMENT_HISTORY-INSERTED\", \"DATA_COMPLIANCE_DELETE-OFFENDER\", \"CONFIRMED_RELEASE_DATE-CHANGED\", \"OFFENDER_ALIAS-CHANGED\", \"OFFENDER_PROFILE_DETAILS-INSERTED\", \"OFFENDER_PROFILE_DETAILS-UPDATED\"] }"}'
-echo All Ready
+echo "Topics and queues created, now wait for elasticsearch to start before connecting"
