@@ -31,6 +31,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
 abstract class QueueIntegrationTest : IntegrationTest() {
@@ -70,6 +71,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @SpyBean
   lateinit var telemetryClient: TelemetryClient
+
+  @SpyBean
+  lateinit var hmppsQueueService: HmppsQueueService
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes = awsSqsClient.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))

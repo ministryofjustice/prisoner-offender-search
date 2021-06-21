@@ -13,17 +13,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
-import uk.gov.justice.digital.hmpps.prisonersearch.services.offenderChangedMessage
-import uk.gov.justice.digital.hmpps.prisonersearch.services.populateOffenderMessage
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   private val indexCount = 20
+
+  @Value("\${sqs.dlq.name}") private lateinit var dlqName: String
+  @Value("\${sqs.index.dlq.name}") private lateinit var indexDlqName: String
 
   @BeforeEach
   fun init() {
@@ -245,7 +247,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can transfer items from dlq to normal queue`() {
-    webTestClient.put().uri("/prisoner-index/transfer-index-dlq")
+    webTestClient.put().uri("/queue-admin/retry-dlq/$indexDlqName")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
@@ -253,7 +255,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can purge items from dlq`() {
-    webTestClient.put().uri("/prisoner-index/purge-index-dlq")
+    webTestClient.put().uri("/queue-admin/purge-queue/$indexDlqName")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
@@ -261,7 +263,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can transfer items from event dlq to normal queue`() {
-    webTestClient.put().uri("/prisoner-index/transfer-event-dlq")
+    webTestClient.put().uri("/queue-admin/retry-dlq/$dlqName")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
@@ -269,7 +271,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can purge items from event dlq `() {
-    webTestClient.put().uri("/prisoner-index/purge-event-dlq")
+    webTestClient.put().uri("/queue-admin/purge-queue/$dlqName")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
@@ -561,7 +563,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Nested
-  inner class HousekeepingIndexDlq {
+  inner class QueueAdminIndexDlq {
 
     @Test
     fun `will add good DLQ messages to the index`() {
@@ -569,7 +571,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
       awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
 
-      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+      webTestClient.put().uri("/queue-admin/retry-dlq/$indexDlqName")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
 
@@ -586,12 +589,13 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     }
 
     @Test
-    fun `will only complete after 2nd housekeeping call if there are good messages on the DLQ`() {
+    fun `will only complete after housekeeping call if there are good messages on the DLQ`() {
       indexPrisoners()
 
       awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
 
-      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+      webTestClient.put().uri("/queue-admin/retry-dlq/$indexDlqName")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
 
@@ -614,7 +618,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Nested
-  inner class HousekeepingEventDlq {
+  inner class QueueAdminEventDlq {
     @Test
     fun `will add good messages to the index`() {
       indexPrisoners()
@@ -625,7 +629,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
       awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1234AA"))
 
-      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+      webTestClient.put().uri("/queue-admin/retry-dlq/$dlqName")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
 
@@ -653,7 +658,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       // this offender is not stubbed in prison API - hence the message is "bad"
       awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1235AB"))
 
-      webTestClient.put().uri("/prisoner-index/queue-housekeeping")
+      webTestClient.put().uri("/queue-admin/retry-dlq/$dlqName")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
 
@@ -673,3 +679,44 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 }
 
 private fun String.readResourceAsText(): String = PrisonerIndexResourceTest::class.java.getResource(this).readText()
+
+fun populateOffenderMessage(offenderNumber: String) =
+  """
+  {
+    "requestType": "OFFENDER",
+    "prisonerNumber":"$offenderNumber"
+  }
+  """.trimIndent()
+
+fun offenderChangedMessage(offenderNumber: String) =
+  """
+    {
+  "Type": "Notification",
+  "MessageId": "20e13002-d1be-56e7-be8c-66cdd7e23341",
+  "TopicArn": "arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-f221e27fcfcf78f6ab4f4c3cc165eee7",
+  "Message": "{\"eventType\":\"OFFENDER-UPDATED\",\"eventDatetime\":\"2020-02-25T11:24:32.935401\",\"offenderIdDisplay\":\"$offenderNumber\",\"nomisEventType\":\"OFFENDER-UPDATED\"}",
+  "Timestamp": "2020-02-25T11:25:16.169Z",
+  "SignatureVersion": "1",
+  "Signature": "h5p3FnnbsSHxj53RFePh8HR40cbVvgEZa6XUVTlYs/yuqfDsi17MPA+bX4ijKmmTT2l6xG2xYhcmRAbJWQ4wrwncTBm2azgiwSO5keRNWYVdiC0rI484KLZboP1SDsE+Y7hOU/R0dz49q7+0yd+QIocPteKB/8xG7/6kjGStAZKf3cEdlxOwLhN+7RU1Yk2ENuwAJjVRtvlAa76yKB3xvL2hId7P7ZLmHGlzZDNZNYxbg9C8HGxteOzZ9ZeeQsWDf9jmZ+5+7dKXQoW9LeqwHxEAq2vuwSZ8uwM5JljXbtS5w1P0psXPYNoin2gU1F5MDK8RPzjUtIvjINx08rmEOA==",
+  "SigningCertURL": "https://sns.eu-west-2.amazonaws.com/SimpleNotificationService-a86cb10b4e1f29c941702d737128f7b6.pem",
+  "UnsubscribeURL": "https://sns.eu-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-f221e27fcfcf78f6ab4f4c3cc165eee7:92545cfe-de5d-43e1-8339-c366bf0172aa",
+  "MessageAttributes": {
+    "eventType": {
+      "Type": "String",
+      "Value": "OFFENDER-UPDATED"
+    },
+    "id": {
+      "Type": "String",
+      "Value": "cb4645f2-d0c1-4677-806a-8036ed54bf69"
+    },
+    "contentType": {
+      "Type": "String",
+      "Value": "text/plain;charset=UTF-8"
+    },
+    "timestamp": {
+      "Type": "Number.java.lang.Long",
+      "Value": "1582629916147"
+    }
+  }
+}
+  """.trimIndent()

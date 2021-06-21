@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
-import uk.gov.justice.digital.hmpps.prisonersearch.services.QueueAdminService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.NotFoundException
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
@@ -24,7 +23,6 @@ import javax.validation.constraints.Pattern
 @RequestMapping("/prisoner-index", produces = [MediaType.APPLICATION_JSON_VALUE])
 class PrisonerIndexResource(
   private val prisonerIndexService: PrisonerIndexService,
-  private val queueAdminService: QueueAdminService
 ) {
 
   @PutMapping("/build-index")
@@ -90,62 +88,6 @@ class PrisonerIndexResource(
     return indexedPrisoner.takeIf { it != null } ?: throw NotFoundException("$prisonerNumber not found")
   }
 
-  @PutMapping("/purge-index-dlq")
-  @PreAuthorize("hasRole('PRISONER_INDEX')")
-  @Operation(
-    summary = "Purges the index dead letter queue",
-    description = "Requires PRISONER_INDEX role"
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-    ]
-  )
-  fun purgeIndexDlq(): Unit = queueAdminService.clearAllDlqMessagesForIndex()
-
-  @PutMapping("/purge-event-dlq")
-  @PreAuthorize("hasRole('PRISONER_INDEX')")
-  @Operation(
-    summary = "Purges the event dead letter queue",
-    description = "Requires PRISONER_INDEX role"
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-    ]
-  )
-  fun purgeEventDlq(): Unit = queueAdminService.clearAllDlqMessagesForEvent()
-
-  @PutMapping("/transfer-index-dlq")
-  @PreAuthorize("hasRole('PRISONER_INDEX')")
-  @Operation(
-    summary = "Transfers all index dead letter queue messages to the main index queue",
-    description = "Requires PRISONER_INDEX role"
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-    ]
-  )
-  fun transferIndexDlq(): Unit = queueAdminService.transferIndexMessages()
-
-  @PutMapping("/transfer-event-dlq")
-  @PreAuthorize("hasRole('PRISONER_INDEX')")
-  @Operation(
-    summary = "Transfers all event dead letter queue messages to the main event queue",
-    description = "Requires PRISONER_INDEX role"
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(responseCode = "401", description = "Unauthorised, requires a valid Oauth2 token"),
-      ApiResponse(responseCode = "403", description = "Forbidden, requires an authorisation with role PRISONER_INDEX")
-    ]
-  )
-  fun transferEventDlq(): Unit = queueAdminService.transferEventMessages()
-
   @PutMapping("/queue-housekeeping")
   @Operation(
     summary = "Performs automated housekeeping tasks such as marking builds completed",
@@ -157,7 +99,5 @@ class PrisonerIndexResource(
     ]
   ) fun indexQueueHousekeeping() {
     prisonerIndexService.indexingComplete(ignoreThreshold = false)
-    queueAdminService.transferIndexMessages()
-    queueAdminService.transferEventMessages()
   }
 }

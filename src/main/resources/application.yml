@@ -89,6 +89,9 @@ sqs:
     dlq:
       name: prisoner_offender_index_dlq
 
+hmpps.sqs:
+  queueAdminRole: ROLE_PRISONER_INDEX
+
 elasticsearch:
   proxy:
     url: http://aws-es-proxy-service:9200

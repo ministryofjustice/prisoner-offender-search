@@ -12,19 +12,30 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import uk.gov.justice.hmpps.sqs.HmppsQueue
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Configuration
 @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "localstack")
-class JmsLocalStackConfig {
+class JmsLocalStackConfig(private val hmppsQueueService: HmppsQueueService) {
+
   @Bean("awsSqsClient")
   fun awsSqsClientLocalstack(
     @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-    @Value("\${sqs.endpoint.region}") region: String
+    @Value("\${sqs.endpoint.region}") region: String,
+    @Value("\${sqs.queue.name}") queueName: String,
+    awsSqsDlqClient: AmazonSQS,
+    @Value("\${sqs.dlq.name}") dlqName: String,
   ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
+      .also {
+        hmppsQueueService.registerHmppsQueue(
+          HmppsQueue(it, queueName, awsSqsDlqClient, dlqName)
+        )
+      }
 
   @Bean("awsSqsDlqClient")
   fun awsSqsDlqClientLocalstack(
@@ -49,12 +60,20 @@ class JmsLocalStackConfig {
   @Bean("awsSqsIndexClient")
   fun awsSqsIndexClientLocalstack(
     @Value("\${sqs.endpoint.url}") serviceEndpoint: String,
-    @Value("\${sqs.endpoint.region}") region: String
+    @Value("\${sqs.endpoint.region}") region: String,
+    @Value("\${sqs.index.queue.name}") queueName: String,
+    awsSqsIndexDlqClient: AmazonSQS,
+    @Value("\${sqs.index.dlq.name}") dlqName: String,
   ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
+      .also {
+        hmppsQueueService.registerHmppsQueue(
+          HmppsQueue(it, queueName, awsSqsIndexDlqClient, dlqName)
+        )
+      }
 
   @Bean("awsSqsIndexDlqClient")
   fun awsSqsIndexDlqClientLocalstack(
