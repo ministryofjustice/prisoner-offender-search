@@ -24,6 +24,7 @@ class ResourceServerConfiguration : WebSecurityConfigurerAdapter() {
           "/health/**", "/info",
           "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
           "/prisoner-index/queue-housekeeping", "/synthetic-monitor", // These endpoints are secured in the ingress rather than the app so that they can be called from within the namespace without requiring authentication
+          "/queue-admin/retry-all-dlqs",
         ).permitAll()
           .anyRequest()
           .authenticated()
