@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @Configuration
@@ -31,11 +30,7 @@ class JmsLocalStackConfig(private val hmppsQueueService: HmppsQueueService) {
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
-      .also {
-        hmppsQueueService.registerHmppsQueue(
-          HmppsQueue(it, queueName, awsSqsDlqClient, dlqName)
-        )
-      }
+      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
 
   @Bean("awsSqsDlqClient")
   fun awsSqsDlqClientLocalstack(
@@ -69,11 +64,7 @@ class JmsLocalStackConfig(private val hmppsQueueService: HmppsQueueService) {
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
-      .also {
-        hmppsQueueService.registerHmppsQueue(
-          HmppsQueue(it, queueName, awsSqsIndexDlqClient, dlqName)
-        )
-      }
+      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsIndexDlqClient, dlqName) }
 
   @Bean("awsSqsIndexDlqClient")
   fun awsSqsIndexDlqClientLocalstack(

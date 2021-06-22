@@ -17,11 +17,12 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.jms.annotation.EnableJms
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory
 import org.springframework.jms.support.destination.DynamicDestinationResolver
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import javax.jms.Session
 
 @Configuration
 @EnableJms
-class JmsConfig {
+class JmsConfig(private val hmppsQueueService: HmppsQueueService) {
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
@@ -91,12 +92,16 @@ class JmsConfig {
   fun awsSqsClient(
     @Value("\${sqs.aws.access.key.id}") accessKey: String,
     @Value("\${sqs.aws.secret.access.key}") secretKey: String,
-    @Value("\${sqs.endpoint.region}") region: String
+    @Value("\${sqs.endpoint.region}") region: String,
+    @Value("\${sqs.queue.name}") queueName: String,
+    @Value("\${sqs.dlq.name}") dlqName: String,
+    awsSqsDlqClient: AmazonSQS,
   ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
       .build()
+      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
@@ -127,12 +132,16 @@ class JmsConfig {
   fun awsSqsIndexClient(
     @Value("\${sqs.index.aws.access.key.id}") accessKey: String,
     @Value("\${sqs.index.aws.secret.access.key}") secretKey: String,
-    @Value("\${sqs.endpoint.region}") region: String
+    @Value("\${sqs.endpoint.region}") region: String,
+    @Value("\${sqs.index.queue.name}") queueName: String,
+    @Value("\${sqs.index.dlq.name}") dlqName: String,
+    awsSqsIndexDlqClient: AmazonSQS,
   ): AmazonSQS =
     AmazonSQSClientBuilder.standard()
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
       .build()
+      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsIndexDlqClient, dlqName) }
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
