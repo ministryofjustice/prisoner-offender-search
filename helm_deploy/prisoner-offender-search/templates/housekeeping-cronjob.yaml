@@ -21,4 +21,5 @@ spec:
                 - /bin/sh
                 - -c
                 - curl -XPUT http://prisoner-offender-search/prisoner-index/queue-housekeeping
+                - curl -XPUT http://prisoner-offender-search/queue-admin/retry-all-dlqs
           restartPolicy: Never
