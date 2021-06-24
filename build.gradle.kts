@@ -39,8 +39,6 @@ dependencies {
   implementation("org.awaitility:awaitility-kotlin:4.1.0")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-  testImplementation("org.testcontainers:localstack:1.15.3")
-  testImplementation("org.testcontainers:elasticsearch:1.15.3")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
   testImplementation("org.mockito:mockito-inline:3.10.0")

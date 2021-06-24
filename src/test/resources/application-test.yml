@@ -2,7 +2,7 @@ server:
   shutdown: immediate
 
 aws:
-  provider: embedded-localstack
+  provider: localstack
 
 sqs:
   endpoint.url: http://localhost:4566
