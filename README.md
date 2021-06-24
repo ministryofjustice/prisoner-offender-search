@@ -63,58 +63,54 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 
 ### Running
 
-`localstack` is used to emulate the AWS SQS and Elastic Search service.  
-Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues.
-Localstack listens on two main ports - 4566 for sns and sqs and 4571 for elasticsearch.
+`localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on two main ports - 4566 for sns and sqs and 4571 for elasticsearch.&nbsp;<sup><em>1</em></sup>
 
-Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender search in a docker container, or in intellij and in tests.
-If running search in docker `ES_HOSTNAME` needs to be set to `localstack` otherwise it should be set to `localhost`.
-This is because when clients connect it returns a url for subsequent calls and the hostname is then different when in docker versus connecting from a laptop.
+Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender search in a Docker container, or in IntelliJ and in tests. If running search in Docker, `ES_HOSTNAME` needs to be set to `localstack`. Otherwise it should be set to `localhost`. This is because when clients connect it returns a url for subsequent calls and the hostname is then different when in Docker versus connecting from a laptop.&nbsp;<sup><em>2</em></sup>
 
-The elasticsearch part of localstack takes a long time to start and will only be up and running fully until you see
+The elasticsearch part of localstack takes a long time to start and will not be up and running fully until you see the following entry in the localstack logs:
 ```
 [INFO] Running on http://0.0.0.0:4571 (CTRL + C to quit)
 ```
-in the localstack logs.
 
-Starting the services is therefore a two step process -
+Starting the services is therefore a two step process:
 1. Start everything apart from prisoner offender search and wait for localstack to start fully
 2. Start prisoner offender search
 
-#### Running prisoner offender search in docker
-To start up localstack and other dependencies with prisoner offender search running in docker too:
+#### Running prisoner offender search in Docker
+To start up localstack and other dependencies with prisoner offender search running in Docker too:&nbsp; <sup><em>3</em></sup>
 ```bash
 docker-compose up localstack oauth prisonapi
 ```
-Once localstack has started then run
+Once localstack has started then, in another terminal, run the following command to start prisoner offender search too:
 ```bash
-docker-compose up --detach
+docker-compose up prison-offender-search --detach
 ```
-to start prisoner offender search too.  To check that it has all started correctly then go to http://localhost:8080/health and check that the `status` is `UP`.
+  To check that it has all started correctly then go to http://localhost:8080/health and check that the `status` is `UP`. The `docker ps` Docker command is another way to see what state the services are in.
 
-#### Running prisoner offender search in intellij or on the command line
-To start up localstack and other dependencies with prisoner offender search running in intellij
+#### Running prisoner offender search in IntelliJ or on the command line
+To start up localstack and other dependencies with prisoner offender search running in IntelliJ:
 ```bash
 ES_HOSTNAME=localhost docker-compose up --scale prisoner-offender-search=0
 ```
-To then run prisoner offender search from the command line
+To then run prisoner offender search from the command line:
 ```
 SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun 
 ```
 Alternatively create a Spring Boot run configuration with active profile of `dev` and main class `uk.gov.justice.digital.hmpps.prisonersearch.PrisonerOffenderSearch`.
 
 #### Running the tests
-If just running the tests then
+If just running the tests then the following will just start localstack as the other dependencies are mocked out:
+
 ```bash
 docker-compose up -f docker-compose-localstack-tests.yml
 ```
-will just start localstack as the other dependencies are mocked out.
+Then the following command will run all the tests:
 ```bash
 ./gradlew test
 ```
-will then run all the tests.
+
 #### Deleting localstack data between runs
-Since localstack persists data between runs it maybe necessary to delete the localstack temporary data:
+Since localstack persists data between runs it may be necessary to delete the localstack temporary data:
 
 Mac
 ```bash
@@ -124,16 +120,20 @@ Linux
 ```bash
 sudo rm -rf /tmp/localstack
 ```
+Docker&nbsp;<sup><em>4</em></sup>
+```bash
+docker volume rm -f prisoner-offender-search_localstack-vol
+```
 
-*Please note the above will not work on a Mac using docker desktop since the docker network host mode is not supported on a Mac*
+*Please note the above will not work on a Mac using Docker Desktop since the Docker network host mode is not supported on a Mac*
 
-For a Mac it recommended running all components *except* prisoner-offender-search (see below) then running prisoner-offender-search externally:
+On Mac it is recommended to run all components *except* prisoner-offender-search (see below). Then run prisoner-offender-search externally:
 
 ```bash
 SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun 
 ```
 
-### When running locally you can add some prisoners into elastic with the following:-
+### When running locally you can add some prisoners into Elastic with the following:-
 
 #### Get a token
 ```bash
@@ -150,7 +150,7 @@ curl --location --request PUT "http://localhost:8080/prisoner-index/build-index"
 curl --location --request GET "http://localhost:8080/info" | jq -r
 ```
 
-If 52 records then mark complete
+#### If 53 records then mark complete
 ```bash
 curl --location --request PUT "http://localhost:8080/prisoner-index/mark-complete" --header "Authorization: Bearer $TOKEN" | jq -r
 ```
@@ -169,7 +169,7 @@ curl --location --request POST "http://localhost:4571/prisoner-search-a/_search"
 ```
 
 ### Alternative running
-Or to just run `localstack` which is useful when running against an a non-local test system Env need to be `spring.profiles.active=localstack` and `sqs.provider=full-localstack`
+Or to just run `localstack` which is useful when running against an a non-local test system, you will  need the `spring.profiles.active=localstack` and `sqs.provider=full-localstack` environment variables:
 
 ```bash
 TMPDIR=/private$TMPDIR docker-compose up localstack
@@ -179,16 +179,16 @@ In all of the above the application should use the host network to communicate w
 
 ### Experimenting with messages
 
-There are two handy scripts to add messages to the queue with data that matches either the dev environment or data in the test Docker version of the apps
+There are two handy scripts to add messages to the queue with data that matches either the dev environment or data in the test Docker version of the apps.
 
-Purging a local queue
+Purging a local queue:
 ```bash
 aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/queue/prisoner_offender_index_queue
 ```
 
 
 
-## Regression test
+## Regression tests
 
 Recommended regression tests is as follows:
 
@@ -208,7 +208,7 @@ Recommended regression tests is as follows:
 ```
 So long as the index is being populated and the ` "index-queue-backlog"` figure is decreasing after some time (e.g. 10 minutes) it demonstrates the application is working.
 
-Check the health endpoint to show the Index DLQ is not building up with errors e.g: `https://prisoner-search-dev.hmpps.service.justice.gov.uk/health`
+Check the health endpoint to show the Index DLQ is not building up with errors (e.g. `https://prisoner-search-dev.hmpps.service.justice.gov.uk/health`):
 
 ``` 
     "indexQueueHealth": {
@@ -221,9 +221,9 @@ Check the health endpoint to show the Index DLQ is not building up with errors e
       }
     }
 ```
-would be a valid state since the `MessagesOnDLQ` would be zero
+The above result indicates a valid state since the `MessagesOnDLQ` would be zero.
 
-The build can either be left to run or cancelled using the following endpoint 
+The build can either be left to run or cancelled using the following endpoint: 
  ``` 
 curl --location --request PUT 'https://prisoner-search-dev.hmpps.service.justice.gov.uk/prisoner-index/cancel-index' \
 --header 'Content-Type: application/json' \
@@ -236,13 +236,11 @@ curl --location --request PUT 'https://prisoner-search-dev.hmpps.service.justice
 
 Access to the raw Elastic Search indexes is only possible from the Cloud Platform `prisoner-offender-search` family of namespaces. 
 
-For instance 
+For instance, the following curl command in any environment would return a list all indexes e.g.:
 
 ```
 curl http://aws-es-proxy-service:9200/_cat/indices
-```
-in any environment would return a list all indexes e.g.
-```
+
 green open prisoner-search-a     tlGst8dmS2aE8knxfxJsfQ 5 1 2545309 1144511   1.1gb 578.6mb
 green open offender-index-status v9traPPRS9uo7Ui0J6ixOQ 1 1       1       0  10.7kb   5.3kb
 green open prisoner-search-b     OMcdEir_TgmTP-tzybwp7Q 5 1 2545309  264356 897.6mb 448.7mb
@@ -255,12 +253,12 @@ green open .kibana_1             f-CWilxMRyyihpBWBON1yw 1 1      39       6 176.
 To rebuild an index the credentials used must have the ROLE `PRISONER_INDEX` therefore it is recommend to use client credentials with the `ROLE_PRISONER_INDEX` added and pass in your username when getting a token.
 In the test and local dev environments the `prisoner-offender-search-client` has conveniently been given the `ROLE_PRISONER_INDEX`.
 
-The rebuilding of the index can be sped up by increasing the number of pods handling the reindex e.g.
+The rebuilding of the index can be sped up by increasing the number of pods handling the reindex e.g.:
 
 ```
 kubectl -n prisoner-offender-search-dev scale --replicas=8 deployment/prisoner-offender-search
 ``` 
-After obtaining a token for the environment invoke the reindex with a curl command or Postman e.g.
+After obtaining a token for the environment invoke the reindex with a curl command or Postman e.g.:
 
 ```
 curl --location --request PUT 'https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/prisoner-index/build-index' \
@@ -268,10 +266,9 @@ curl --location --request PUT 'https://prisoner-offender-search-dev.hmpps.servic
 --header 'Authorization: Bearer <some token>>'
 ``` 
 
-For production environments where access is blocked by inclusion lists this will need to be done from within a Cloud Platform pod
+For production environments where access is blocked by inclusion lists this will need to be done from within a Cloud Platform pod.
 
-Next monitor the progress of the rebuilding via the info endpoint e.g. https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/info
-This will return details like the following:
+Next monitor the progress of the rebuilding via the info endpoint (e.g. https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/info). This will return details like the following:
 
 ```
     "index-status": {
@@ -287,8 +284,7 @@ This will return details like the following:
     "index-queue-backlog": "700000"
 ```
  
- when `"index-queue-backlog": "0"` has reached zero then all indexing messages have been processed. Check the dead letter queue is empty via the health check e.g https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/health
- This should show the queues DLQ count at zero, e.g.
+ When `"index-queue-backlog": "0"` has reached zero then all indexing messages have been processed. Check the dead letter queue is empty via the health check (e.g https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/health). This should show the queues DLQ count at zero, e.g.:
  ``` 
     "indexQueueHealth": {
       "status": "UP",
@@ -301,7 +297,7 @@ This will return details like the following:
     },
  ```
   
- The indexing is ready to marked as complete using another call to the service e.g
+ The indexing is ready to marked as complete using another call to the service e.g:
  
  ``` 
 curl --location --request PUT 'https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/prisoner-index/mark-complete' \
@@ -310,7 +306,7 @@ curl --location --request PUT 'https://prisoner-offender-search-dev.hmpps.servic
 
  ```  
 
-One last check of the info endpoint should confirm the new state, e.g.
+One last check of the info endpoint should confirm the new state, e.g.:
 
 ```
       "index-status": {
@@ -331,7 +327,7 @@ One last check of the info endpoint should confirm the new state, e.g.
 
 Pay careful attention to `"currentIndex": "INDEX_A"` - this shows the actual index being used by clients.
 
-##Restore from a snapshot (if both indexes have become corrupt/empty)
+## Restore from a snapshot (if both indexes have become corrupt/empty)
 
 If we are restoring from the snapshot it means that the current index and other index are broken, we need to delete them to be able to restore from the snapshot.
 Every night we have a scheduled job that takes the snapshot of the whole cluster which is called `latest` and this should be restored
@@ -352,26 +348,26 @@ The `include_global_state: true` is set true so that we copy the global state of
 however, is `include_global_state: False`. If only restoring a single index, it could be bad to overwrite the global state but as we are 
 restoring the full cluster we set it to true
 
-###To view the state of the indexes while restoring from a snapshot
+### To view the state of the indexes while restoring from a snapshot
 
-####cluster health
+#### Cluster health
 
 `curl -XGET 'http://localhost:9200/_cluster/health'`
 
 The cluster health status is: green, yellow or red. On the shard level, a red status indicates that the specific shard is not allocated in the cluster, yellow means that the primary shard is allocated but replicas are not, and green means that all shards are allocated. The index level status is controlled by the worst shard status. The cluster status is controlled by the worst index status.
 
-####Shards
+#### Shards
 `curl -XGET 'http://localhost:9200/_cat/shards'`
 
 The shards command is the detailed view of what nodes contain which shards. It will tell you if it’s a primary or replica, the number of docs, the bytes it takes on disk, and the node where it’s located.
 
-####Recovery
+#### Recovery
 `curl -XGET 'http://localhost:9200/_cat/recovery'`
 
 Returns information about ongoing and completed shard recoveries
 
 
-###To take a manual snapshot, perform the following steps:
+### To take a manual snapshot, perform the following steps:
 
 1. You can't take a snapshot if one is currently in progress. To check, run the following command:
    
@@ -382,7 +378,7 @@ Returns information about ongoing and completed shard recoveries
 
 you can now use the restore commands above to restore the snapshot if needed
 
-####to remove a snapshot
+#### To remove a snapshot
 `curl -XDELETE 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
 
 ###Other command which will help when looking at restoring a snapshot
@@ -397,7 +393,7 @@ To see all snapshots for the namespace run the following command:
 
 
 ### Useful App Insights Queries
-####General logs (filtering out the offender update)
+#### General logs (filtering out the offender update)
 ``` kusto
 traces
 | where cloud_RoleName == "prisoner-offender-search"
@@ -405,14 +401,14 @@ traces
 | order by timestamp desc
 ```
 
-####General logs including spring startup
+#### General logs including spring startup
 ``` kusto
 traces
 | where cloud_RoleInstance startswith "prisoner-offender-search"
 | order by timestamp desc
 ```
 
-####Interesting exceptions
+#### Interesting exceptions
 ``` kusto
 exceptions
 | where cloud_RoleName == "prisoner-offender-search"
@@ -422,7 +418,7 @@ exceptions
 | order by timestamp desc
 ```
 
-####Indexing requests
+#### Indexing requests
 ``` kusto
 requests
 | where cloud_RoleName == "prisoner-offender-search"
@@ -430,7 +426,7 @@ requests
 | order by timestamp desc 
 ```
 
-####Prison API requests during index build
+#### Prison API requests during index build
 ``` kusto
 requests
 requests
@@ -446,3 +442,22 @@ requests
 | where customDimensions.clientId == "prisoner-offender-search-client"
 | order by timestamp desc ```
 ```
+<br />
+<br />
+<br />
+<br />
+<br />
+
+
+
+
+——
+<br />
+
+<sup><sup><sup><em>1</em></sup><em>&nbsp;Before&nbsp;running&nbsp;locally&nbsp;when&nbsp;using&nbsp;Docker&nbsp;Desktop&nbsp;on&nbsp;Windows,&nbsp;do&nbsp;&nbsp;"<code>dos2unix&nbsp;setup-xxx.sh</code>"&nbsp;in&nbsp;Git&nbsp;Bash.&nbsp;That&nbsp;prevents&nbsp;the&nbsp;"<code>invalid&nbsp;optionnt-initaws.d/setup-es.sh:&nbsp;line&nbsp;2:&nbsp;set:&nbsp;-</code>"&nbsp;error&nbsp;you&nbsp;would&nbsp;get&nbsp;otherwise.</em></sup></sup>
+<br />
+<sup><sup><sup><em>2</em></sup><em>&nbsp;A&nbsp;workaround&nbsp;might&nbsp;be&nbsp;adding&nbsp;"<code>localstack</code>"&nbsp;as&nbsp;a&nbsp;host&nbsp;name&nbsp;entry&nbsp;in&nbsp;your&nbsp;OS'&nbsp;<code>/etc/hosts</code>&nbsp;file.</em></sup></sup>
+<br />
+<sup><sup><sup><em>3</em></sup><em>&nbsp;When&nbsp;using&nbsp;Docker&nbsp;Desktop&nbsp;on&nbsp;Windows,&nbsp;do&nbsp;"<code>docker compose -f docker-compose-wsl.yml up...</code>"&nbsp;instead.</em></sup></sup>
+<br />
+<sup><sup><sup><em>4</em></sup><em>&nbsp;Assumes&nbsp;the&nbsp;<code>localstack-vol</code>&nbsp;name&nbsp;that&nbsp;is&nbsp;preset&nbsp;in&nbsp;<code>docker-compose-wsl.yml</code>.</em></sup></sup>
