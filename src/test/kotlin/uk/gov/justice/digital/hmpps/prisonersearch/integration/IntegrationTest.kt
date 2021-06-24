@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.integration
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.google.gson.Gson
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -79,5 +80,25 @@ abstract class IntegrationTest {
       roles = roles
     )
     return { it.set(HttpHeaders.AUTHORIZATION, "Bearer $token") }
+  }
+
+  protected fun subPing(status: Int) {
+    oauthMockServer.stubFor(
+      WireMock.get("/auth/health/ping").willReturn(
+        WireMock.aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "pong" else "some error")
+          .withStatus(status)
+      )
+    )
+
+    prisonMockServer.stubFor(
+      WireMock.get("/health/ping").willReturn(
+        WireMock.aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "pong" else "some error")
+          .withStatus(status)
+      )
+    )
   }
 }
