@@ -101,7 +101,7 @@ class JmsConfig(private val hmppsQueueService: HmppsQueueService) {
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
       .build()
-      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
+      .also { hmppsQueueService.registerHmppsQueue("eventsQueue", it, queueName, awsSqsDlqClient, dlqName) }
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")
@@ -141,7 +141,7 @@ class JmsConfig(private val hmppsQueueService: HmppsQueueService) {
       .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
       .withRegion(region)
       .build()
-      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsIndexDlqClient, dlqName) }
+      .also { hmppsQueueService.registerHmppsQueue("indexQueue", it, queueName, awsSqsIndexDlqClient, dlqName) }
 
   @Bean
   @ConditionalOnProperty(name = ["sqs.provider"], havingValue = "aws")

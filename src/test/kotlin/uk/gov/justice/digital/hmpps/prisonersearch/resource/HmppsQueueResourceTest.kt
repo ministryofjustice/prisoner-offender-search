@@ -55,7 +55,7 @@ class HmppsQueueResourceTest : QueueIntegrationTest() {
       val queueName = "any queue"
       val dlqName = "any dlq"
       doReturn(PurgeQueueRequest(dlqName, awsSqsClient, "any url")).whenever(hmppsQueueService).findQueueToPurge(any())
-      doReturn(HmppsQueue(awsSqsClient, queueName, awsSqsDlqClient, dlqName)).whenever(hmppsQueueService).findByDlqName(dlqName)
+      doReturn(HmppsQueue("any queue id", awsSqsClient, queueName, awsSqsDlqClient, dlqName)).whenever(hmppsQueueService).findByDlqName(dlqName)
       doReturn(PurgeQueueResult(0)).whenever(hmppsQueueService).purgeQueue(any())
 
       webTestClient.put()
@@ -76,7 +76,7 @@ class HmppsQueueResourceTest : QueueIntegrationTest() {
     internal fun `transfer - satisfies the correct role`() {
       val queueName = "any queue"
       val dlqName = "any dlq"
-      doReturn(HmppsQueue(awsSqsClient, queueName, awsSqsDlqClient, dlqName)).whenever(hmppsQueueService).findByDlqName(dlqName)
+      doReturn(HmppsQueue("any queue id", awsSqsClient, queueName, awsSqsDlqClient, dlqName)).whenever(hmppsQueueService).findByDlqName(dlqName)
       doReturn(RetryDlqResult(0, listOf())).whenever(hmppsQueueService).retryDlqMessages(any())
 
       webTestClient.put()
