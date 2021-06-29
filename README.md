@@ -65,8 +65,7 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 
 `localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on two main ports: 4566 for sns and sqs and 4571 for elasticsearch.
 
-&nbsp;<sup><em>(If you get an "<code>invalid optionnt-initaws.d/setup-es.sh: line 2: set: -</code>" error when running `localstack` in Docker Desktop for Windows, consider "[Configuring Git to handle line endings
-](https://docs.github.com/en/get-started/getting-started-with-git/configuring-git-to-handle-line-endings)")</em></sup>
+&nbsp;<sup><em>(If you get an "<code>invalid optionnt-initaws.d/setup-es.sh: line 2: set: -</code>" error when running `localstack` in Docker Desktop for Windows, consider "[Configuring Git to handle line endings](https://docs.github.com/en/get-started/getting-started-with-git/configuring-git-to-handle-line-endings)")</em></sup>
 
 Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender search in a Docker container, or in IntelliJ and in tests. If running search in Docker, `ES_HOSTNAME` needs to be set to `localstack`. Otherwise it should be set to `localhost`. This is because when clients connect it returns a url for subsequent calls and the hostname is then different when in Docker versus connecting from a laptop.
 
