@@ -63,9 +63,14 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 
 ### Running
 
-`localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on two main ports - 4566 for sns and sqs and 4571 for elasticsearch.&nbsp;<sup><em>1</em></sup>
+`localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on two main ports: 4566 for sns and sqs and 4571 for elasticsearch.
 
-Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender search in a Docker container, or in IntelliJ and in tests. If running search in Docker, `ES_HOSTNAME` needs to be set to `localstack`. Otherwise it should be set to `localhost`. This is because when clients connect it returns a url for subsequent calls and the hostname is then different when in Docker versus connecting from a laptop.&nbsp;<sup><em>2</em></sup>
+&nbsp;<sup><em>(If you get an "<code>invalid optionnt-initaws.d/setup-es.sh: line 2: set: -</code>" error when running `localstack` in Docker Desktop for Windows, consider "[Configuring Git to handle line endings
+](https://docs.github.com/en/get-started/getting-started-with-git/configuring-git-to-handle-line-endings)")</em></sup>
+
+Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender search in a Docker container, or in IntelliJ and in tests. If running search in Docker, `ES_HOSTNAME` needs to be set to `localstack`. Otherwise it should be set to `localhost`. This is because when clients connect it returns a url for subsequent calls and the hostname is then different when in Docker versus connecting from a laptop.
+
+&nbsp;<sup><em>(A workaround might be adding "<code>localstack</code>" as a host name entry in your OS' <code>/etc/hosts</code> file)</em></sup>
 
 The elasticsearch part of localstack takes a long time to start and will not be up and running fully until you see the following entry in the localstack logs:
 ```
@@ -77,13 +82,15 @@ Starting the services is therefore a two step process:
 2. Start prisoner offender search
 
 #### Running prisoner offender search in Docker
-To start up localstack and other dependencies with prisoner offender search running in Docker too:&nbsp; <sup><em>3</em></sup>
+To start up localstack and other dependencies with prisoner offender search running in Docker too:
+
+&nbsp; <sup><em>(When using Docker Desktop for Windows, do "<code>docker compose -f docker-compose-wsl.yml up</code>" instead)</em></sup>
 ```bash
 docker-compose up localstack oauth prisonapi
 ```
 Once localstack has started then, in another terminal, run the following command to start prisoner offender search too:
 ```bash
-docker-compose up prison-offender-search --detach
+docker-compose up prisoner-offender-search --detach
 ```
   To check that it has all started correctly then go to http://localhost:8080/health and check that the `status` is `UP`. The `docker ps` Docker command is another way to see what state the services are in.
 
@@ -120,10 +127,11 @@ Linux
 ```bash
 sudo rm -rf /tmp/localstack
 ```
-Docker&nbsp;<sup><em>4</em></sup>
+Docker Desktop for Windows
 ```bash
 docker volume rm -f prisoner-offender-search_localstack-vol
 ```
+&nbsp;<sup><em>(Assumes the <code>localstack-vol</code> name that is preset in <code>docker-compose-wsl.yml</code>)</em></sup>
 
 *Please note the above will not work on a Mac using Docker Desktop since the Docker network host mode is not supported on a Mac*
 
@@ -442,22 +450,3 @@ requests
 | where customDimensions.clientId == "prisoner-offender-search-client"
 | order by timestamp desc ```
 ```
-<br />
-<br />
-<br />
-<br />
-<br />
-
-
-
-
-——
-<br />
-
-<sup><sup><sup><em>1</em></sup><em>&nbsp;Before&nbsp;running&nbsp;locally&nbsp;when&nbsp;using&nbsp;Docker&nbsp;Desktop&nbsp;on&nbsp;Windows,&nbsp;do&nbsp;&nbsp;"<code>dos2unix&nbsp;setup-xxx.sh</code>"&nbsp;in&nbsp;Git&nbsp;Bash.&nbsp;That&nbsp;prevents&nbsp;the&nbsp;"<code>invalid&nbsp;optionnt-initaws.d/setup-es.sh:&nbsp;line&nbsp;2:&nbsp;set:&nbsp;-</code>"&nbsp;error&nbsp;you&nbsp;would&nbsp;get&nbsp;otherwise.</em></sup></sup>
-<br />
-<sup><sup><sup><em>2</em></sup><em>&nbsp;A&nbsp;workaround&nbsp;might&nbsp;be&nbsp;adding&nbsp;"<code>localstack</code>"&nbsp;as&nbsp;a&nbsp;host&nbsp;name&nbsp;entry&nbsp;in&nbsp;your&nbsp;OS'&nbsp;<code>/etc/hosts</code>&nbsp;file.</em></sup></sup>
-<br />
-<sup><sup><sup><em>3</em></sup><em>&nbsp;When&nbsp;using&nbsp;Docker&nbsp;Desktop&nbsp;on&nbsp;Windows,&nbsp;do&nbsp;"<code>docker compose -f docker-compose-wsl.yml up...</code>"&nbsp;instead.</em></sup></sup>
-<br />
-<sup><sup><sup><em>4</em></sup><em>&nbsp;Assumes&nbsp;the&nbsp;<code>localstack-vol</code>&nbsp;name&nbsp;that&nbsp;is&nbsp;preset&nbsp;in&nbsp;<code>docker-compose-wsl.yml</code>.</em></sup></sup>
