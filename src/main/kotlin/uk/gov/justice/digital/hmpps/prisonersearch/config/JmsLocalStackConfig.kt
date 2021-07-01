@@ -30,7 +30,7 @@ class JmsLocalStackConfig(private val hmppsQueueService: HmppsQueueService) {
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
-      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsDlqClient, dlqName) }
+      .also { hmppsQueueService.registerHmppsQueue("eventsQueue", it, queueName, awsSqsDlqClient, dlqName) }
 
   @Bean("awsSqsDlqClient")
   fun awsSqsDlqClientLocalstack(
@@ -64,7 +64,7 @@ class JmsLocalStackConfig(private val hmppsQueueService: HmppsQueueService) {
       .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region))
       .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
       .build()
-      .also { hmppsQueueService.registerHmppsQueue(it, queueName, awsSqsIndexDlqClient, dlqName) }
+      .also { hmppsQueueService.registerHmppsQueue("indexQueue", it, queueName, awsSqsIndexDlqClient, dlqName) }
 
   @Bean("awsSqsIndexDlqClient")
   fun awsSqsIndexDlqClientLocalstack(

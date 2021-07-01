@@ -108,7 +108,7 @@ Alternatively create a Spring Boot run configuration with active profile of `dev
 If just running the tests then the following will just start localstack as the other dependencies are mocked out:
 
 ```bash
-docker-compose up -f docker-compose-localstack-tests.yml
+docker-compose -f docker-compose-localstack-tests.yml up
 ```
 Then the following command will run all the tests:
 ```bash
