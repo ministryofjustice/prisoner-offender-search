@@ -85,9 +85,9 @@ To start up localstack and other dependencies with prisoner offender search runn
 ```bash
 docker-compose up localstack oauth prisonapi
 ```
-If running on Docker Desktop for Windows there is a separate docker compose script instead, so do:
+If running on Docker Desktop for Windows there is a separate docker compose script for localstack as well, so do:
 ```bash
-docker compose -f docker-compose-windows.yml up localstack oauth prisonapi
+docker compose -f docker-compose.yml -f docker-compose-localstack-windows.yml up localstack oauth prisonapi
 ```
 
 
@@ -130,7 +130,7 @@ Linux
 ```bash
 sudo rm -rf /tmp/localstack
 ```
-Docker Desktop for Windows (started using `docker-compose-windows.yml`)
+Docker Desktop for Windows (started using `docker-compose-localstack-windows.yml`)
 ```bash
 docker volume rm -f prisoner-offender-search_localstack-vol
 ```
