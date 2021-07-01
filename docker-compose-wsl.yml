@@ -1,0 +1,75 @@
+version: "3"
+services:
+  prisoner-offender-search:
+    image: quay.io/hmpps/prisoner-offender-search:latest
+    networks:
+      - hmpps
+    container_name: prisoner-offender-search
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+      - API_BASE_URL_OAUTH=http://oauth-server:8080/auth
+      - API_BASE_URL_NOMIS=http://prison-api:8080
+      - SQS_ENDPOINT_URL=http://localstack:4566
+      - ELASTICSEARCH_HOST=localstack
+      - ELASTICSEARCH_PROXY_URL=http://localstack:4571
+      - OAUTH_CLIENT_ID=prisoner-offender-search-client
+      - OAUTH_CLIENT_SECRET=clientsecret
+
+  prisonapi:
+    image: quay.io/hmpps/prison-api:latest
+    networks:
+      - hmpps
+    container_name: prisonapi
+    depends_on:
+      - oauth
+    ports:
+      - "8093:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=nomis-hsqldb
+
+  oauth:
+    image: quay.io/hmpps/hmpps-auth:latest
+    networks:
+      - hmpps
+    container_name: oauth
+    ports:
+      - "8090:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  localstack:
+    image: localstack/localstack:0.12.10
+    networks:
+      - hmpps
+    container_name: localstack
+    ports:
+      - "4566-4597:4566-4597"
+      - 8999:8080
+    environment:
+      - SERVICES=sqs,sns,es
+      - ES_PORT_EXTERNAL=4571
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEFAULT_REGION=eu-west-2
+      - HOSTNAME_EXTERNAL=${ES_HOSTNAME:-localstack}
+    volumes:
+      - "localstack-vol:/tmp/localstack" # use a volume, not a path
+      - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
+
+networks:
+  hmpps:
+
+volumes:
+  localstack-vol: # volume mounts (vs bind mounts) are advised when running on Windows
