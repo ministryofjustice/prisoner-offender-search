@@ -4,10 +4,6 @@ server:
 aws:
   provider: localstack
 
-sqs:
-  endpoint:
-    url: http://localhost:4566
-
 elasticsearch:
   proxy:
     url: http://localhost:4571
@@ -33,3 +29,18 @@ spring:
 index:
   page-size: 1000
   complete-threshold: 50
+
+hmpps.sqs:
+  provider: localstack
+  queues:
+    eventqueue:
+      queueName: event-queue
+      dlqName: event-dlq
+    indexqueue:
+      queueName: index-queue
+      dlqName: index-dlq
+
+hmpps.sns:
+  topics:
+    eventTopic:
+      topicArn: arn:aws:sns:eu-west-2:000000000000:event-topic

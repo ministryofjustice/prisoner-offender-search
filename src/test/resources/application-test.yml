@@ -4,8 +4,20 @@ server:
 aws:
   provider: localstack
 
-sqs:
-  endpoint.url: http://localhost:4566
+hmpps.sqs:
+  provider: localstack
+  queues:
+    eventqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+    indexqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+
+hmpps.sns:
+  topics:
+    eventTopic:
+      topicArn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
 elasticsearch:
   proxy:
