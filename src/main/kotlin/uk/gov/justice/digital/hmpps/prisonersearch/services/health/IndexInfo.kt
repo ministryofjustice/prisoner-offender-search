@@ -1,23 +1,23 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.health
 
-import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
 import com.amazonaws.services.sqs.model.QueueAttributeName
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.info.Info
 import org.springframework.boot.actuate.info.InfoContributor
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexStatusService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.MissingQueueException
 
 @Component
 class IndexInfo(
   private val indexStatusService: IndexStatusService,
   private val prisonerIndexService: PrisonerIndexService,
-  @Value("\${sqs.index.queue.name}") private val indexQueueName: String,
-  @Qualifier("awsSqsIndexClient") private val indexAwsSqsClient: AmazonSQS
+  hmppsQueueService: HmppsQueueService,
 ) : InfoContributor {
+
+  private val indexQueue = hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found")
 
   override fun contribute(builder: Info.Builder) {
     val indexStatus = indexStatusService.getCurrentIndex()
@@ -34,9 +34,8 @@ class IndexInfo(
 
   private fun safeQueueCount(): String {
     return try {
-      val url = indexAwsSqsClient.getQueueUrl(indexQueueName)
-      val queueAttributes = indexAwsSqsClient.getQueueAttributes(
-        GetQueueAttributesRequest(url.queueUrl).withAttributeNames(
+      val queueAttributes = indexQueue.sqsClient.getQueueAttributes(
+        GetQueueAttributesRequest(indexQueue.queueUrl).withAttributeNames(
           QueueAttributeName.ApproximateNumberOfMessages
         )
       )

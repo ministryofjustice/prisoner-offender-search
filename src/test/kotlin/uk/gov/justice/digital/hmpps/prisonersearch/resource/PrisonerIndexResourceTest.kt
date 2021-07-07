@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
@@ -23,9 +22,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   private val indexCount = 20
-
-  @Value("\${sqs.dlq.name}") private lateinit var dlqName: String
-  @Value("\${sqs.index.dlq.name}") private lateinit var indexDlqName: String
 
   @BeforeEach
   fun init() {
@@ -263,7 +259,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can transfer items from event dlq to normal queue`() {
-    webTestClient.put().uri("/queue-admin/retry-dlq/$dlqName")
+    webTestClient.put().uri("/queue-admin/retry-dlq/$eventDlqName")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
@@ -271,7 +267,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can purge items from event dlq `() {
-    webTestClient.put().uri("/queue-admin/purge-queue/$dlqName")
+    webTestClient.put().uri("/queue-admin/purge-queue/$eventDlqName")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
@@ -569,7 +565,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     fun `will add good DLQ messages to the index`() {
       indexPrisoners()
 
-      awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
+      indexQueueSqsDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
 
       webTestClient.put().uri("/queue-admin/retry-dlq/$indexDlqName")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -592,7 +588,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     fun `will only complete after housekeeping call if there are good messages on the DLQ`() {
       indexPrisoners()
 
-      awsSqsIndexDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
+      indexQueueSqsDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))
 
       webTestClient.put().uri("/queue-admin/retry-dlq/$indexDlqName")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -627,9 +623,9 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1234AA"))
+      eventQueueSqsDlqClient.sendMessage(eventDlqUrl, offenderChangedMessage("Z1234AA"))
 
-      webTestClient.put().uri("/queue-admin/retry-dlq/$dlqName")
+      webTestClient.put().uri("/queue-admin/retry-dlq/$eventDlqName")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk
@@ -656,9 +652,9 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .expectStatus().isOk
 
       // this offender is not stubbed in prison API - hence the message is "bad"
-      awsSqsDlqClient.sendMessage(dlqUrl, offenderChangedMessage("Z1235AB"))
+      eventQueueSqsDlqClient.sendMessage(eventDlqUrl, offenderChangedMessage("Z1235AB"))
 
-      webTestClient.put().uri("/queue-admin/retry-dlq/$dlqName")
+      webTestClient.put().uri("/queue-admin/retry-dlq/$eventDlqName")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
         .exchange()
         .expectStatus().isOk

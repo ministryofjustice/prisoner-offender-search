@@ -44,7 +44,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     // wait until our queue has been purged
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(queueUrl, message)
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FD") } matches { it == 1 }
@@ -59,7 +59,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     // wait until our queue has been purged
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(queueUrl, message)
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
@@ -75,7 +75,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     // wait until our queue has been purged
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(queueUrl, message)
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     Thread.sleep(500)
@@ -91,7 +91,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     // wait until our queue has been purged
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(queueUrl, message)
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     Thread.sleep(500)
@@ -131,7 +131,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     // wait until our queue has been purged
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    awsSqsClient.sendMessage(queueUrl, message)
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }

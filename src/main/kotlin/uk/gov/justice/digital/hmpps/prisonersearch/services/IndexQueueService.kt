@@ -1,50 +1,48 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.amazonaws.services.sqs.AmazonSQS
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import com.amazonaws.services.sqs.model.PurgeQueueRequest
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.google.gson.Gson
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import uk.gov.justice.hmpps.sqs.HmppsQueueService
+import uk.gov.justice.hmpps.sqs.MissingQueueException
 
 @Service
 class IndexQueueService(
-  @Autowired @Qualifier("awsSqsIndexASyncClient") private val awsSqsIndexASyncClient: AmazonSQSAsync,
-  @Autowired @Qualifier("indexQueueUrl") private val indexQueueUrl: String,
-  @Qualifier("awsSqsIndexClient") private val indexAwsSqsClient: AmazonSQS,
-  @Qualifier("awsSqsIndexDlqASyncClient") private val awsSqsIndexDlqASyncClient: AmazonSQSAsync,
-  @Qualifier("awsSqsIndexDlqClient") private val indexAwsSqsDlqClient: AmazonSQS,
-  @Value("\${sqs.index.dlq.name}") private val indexDlqName: String,
+  hmppsQueueService: HmppsQueueService,
   private val gson: Gson
 ) {
 
-  val indexDlqUrl: String by lazy { indexAwsSqsDlqClient.getQueueUrl(indexDlqName).queueUrl }
+  private val indexQueue = hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found")
+
+  private val indexQueueSqsClient = indexQueue.sqsClient as AmazonSQSAsync
+  private val indexQueueSqsDlqClient = indexQueue.sqsDlqClient as AmazonSQSAsync
+  private val indexQueueUrl: String = indexQueue.queueUrl
+  private val indexDlqUrl: String = indexQueue.dlqUrl
 
   fun sendIndexRequestMessage(payload: PrisonerIndexRequest) {
-    awsSqsIndexASyncClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
+    indexQueueSqsClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
   }
 
   fun clearAllMessages() {
-    awsSqsIndexASyncClient.purgeQueueAsync(PurgeQueueRequest(indexQueueUrl))
+    indexQueueSqsClient.purgeQueueAsync(PurgeQueueRequest(indexQueueUrl))
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int {
-    val queueAttributes = indexAwsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
+    val queueAttributes = indexQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"].toIntOrZero()
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexDLQ(): Int {
-    val queueAttributes = indexAwsSqsDlqClient.getQueueAttributes(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
+    val queueAttributes = indexQueueSqsDlqClient.getQueueAttributes(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"].toIntOrZero()
   }
 
   fun getIndexQueueStatus(): IndexQueueStatus {
-    val queueAttributesAsyncFuture = awsSqsIndexASyncClient.getQueueAttributesAsync(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val dlqAttributesAsyncFuture = awsSqsIndexDlqASyncClient.getQueueAttributesAsync(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
+    val queueAttributesAsyncFuture = indexQueueSqsClient.getQueueAttributesAsync(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
+    val dlqAttributesAsyncFuture = indexQueueSqsDlqClient.getQueueAttributesAsync(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
 
     return IndexQueueStatus(
       messagesOnQueue = queueAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessages"].toIntOrZero(),
