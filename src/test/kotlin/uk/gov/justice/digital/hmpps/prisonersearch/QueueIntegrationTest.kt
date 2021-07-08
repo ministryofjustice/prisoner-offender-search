@@ -12,6 +12,7 @@ import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -31,28 +32,19 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
-import uk.gov.justice.hmpps.sqs.HmppsQueueService
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
 abstract class QueueIntegrationTest : IntegrationTest() {
 
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
-  lateinit var queueUrl: String
+  @Qualifier("eventqueue-sqs-dlq-client")
+  lateinit var eventQueueSqsDlqClient: AmazonSQS
 
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
-  lateinit var dlqUrl: String
-
-  @Autowired
-  lateinit var indexQueueUrl: String
-
-  @Autowired
-  lateinit var indexDlqUrl: String
-
-  @Autowired
-  lateinit var awsSqsDlqClient: AmazonSQS
-
-  @Autowired
-  lateinit var awsSqsIndexDlqClient: AmazonSQS
+  @Qualifier("indexqueue-sqs-dlq-client")
+  lateinit var indexQueueSqsDlqClient: AmazonSQS
 
   @Autowired
   lateinit var gson: Gson
@@ -72,16 +64,13 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   @SpyBean
   lateinit var telemetryClient: TelemetryClient
 
-  @SpyBean
-  lateinit var hmppsQueueService: HmppsQueueService
-
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
-    val queueAttributes = awsSqsClient.getQueueAttributes(queueUrl, listOf("ApproximateNumberOfMessages"))
+    val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
-    val queueAttributes = awsSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
+    val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 

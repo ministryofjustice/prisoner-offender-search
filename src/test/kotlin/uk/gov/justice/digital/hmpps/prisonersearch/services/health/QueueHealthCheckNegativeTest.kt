@@ -5,13 +5,13 @@ import com.amazonaws.auth.AnonymousAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueHealth
+import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 
 @Import(QueueHealthCheckNegativeTest.TestConfig::class)
 class QueueHealthCheckNegativeTest : IntegrationTest() {
@@ -19,12 +19,9 @@ class QueueHealthCheckNegativeTest : IntegrationTest() {
   @TestConfiguration
   class TestConfig {
     @Bean
-    fun badQueueHealth(
-      @Value("\${sqs.endpoint.url}") localstackUrl: String,
-      @Value("\${sqs.endpoint.region}") region: String,
-    ): HmppsQueueHealth {
+    fun badQueueHealth(hmppsSqsProperties: HmppsSqsProperties): HmppsQueueHealth {
       val sqsClient = AmazonSQSClientBuilder.standard()
-        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(localstackUrl, region))
+        .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(hmppsSqsProperties.localstackUrl, hmppsSqsProperties.region))
         .withCredentials(AWSStaticCredentialsProvider(AnonymousAWSCredentials()))
         .build()
       return HmppsQueueHealth(HmppsQueue("missingQueueId", sqsClient, "missingQueue", sqsClient, "missingDlq"))

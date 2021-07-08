@@ -2,33 +2,11 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.health
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 
 @ExtendWith(SpringExtension::class)
 class HealthCheckIntegrationTest : IntegrationTest() {
-
-  @Autowired
-  @Value("\${sqs.queue.name}")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private lateinit var queueName: String
-
-  @Autowired
-  @Value("\${sqs.dlq.name}")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private lateinit var dlqName: String
-
-  @Autowired
-  @Value("\${sqs.index.queue.name}")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private lateinit var indexQueueName: String
-
-  @Autowired
-  @Value("\${sqs.index.dlq.name}")
-  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private lateinit var indexDlqName: String
 
   @Test
   fun `Health page reports ok`() {
@@ -99,12 +77,12 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("status").isEqualTo("UP")
-      .jsonPath("components.eventsQueue-health.details.queueName").isEqualTo(queueName)
-      .jsonPath("components.eventsQueue-health.details.messagesOnQueue").isEqualTo(0)
-      .jsonPath("components.eventsQueue-health.details.messagesInFlight").isEqualTo(0)
-      .jsonPath("components.eventsQueue-health.details.dlqName").isEqualTo(dlqName)
-      .jsonPath("components.eventsQueue-health.details.dlqStatus").isEqualTo("UP")
-      .jsonPath("components.eventsQueue-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.eventqueue-health.details.queueName").isEqualTo(eventQueueName)
+      .jsonPath("components.eventqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.eventqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.eventqueue-health.details.dlqName").isEqualTo(eventDlqName)
+      .jsonPath("components.eventqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.eventqueue-health.details.messagesOnDlq").isEqualTo(0)
   }
 
   @Test
@@ -118,12 +96,12 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("status").isEqualTo("UP")
-      .jsonPath("components.indexQueue-health.details.queueName").isEqualTo(indexQueueName)
-      .jsonPath("components.indexQueue-health.details.messagesOnQueue").isEqualTo(0)
-      .jsonPath("components.indexQueue-health.details.messagesInFlight").isEqualTo(0)
-      .jsonPath("components.indexQueue-health.details.dlqName").isEqualTo(indexDlqName)
-      .jsonPath("components.indexQueue-health.details.dlqStatus").isEqualTo("UP")
-      .jsonPath("components.indexQueue-health.details.messagesOnDlq").isEqualTo(0)
+      .jsonPath("components.indexqueue-health.details.queueName").isEqualTo(indexQueueName)
+      .jsonPath("components.indexqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.indexqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.indexqueue-health.details.dlqName").isEqualTo(indexDlqName)
+      .jsonPath("components.indexqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.indexqueue-health.details.messagesOnDlq").isEqualTo(0)
   }
 
   @Test

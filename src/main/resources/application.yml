@@ -75,22 +75,12 @@ aws:
   region: eu-west-2
   provider: aws
 
-sqs:
-  provider: ${aws.provider}
-  queue:
-    name: prisoner_offender_search_queue
-  dlq:
-    name: prisoner_offender_search_dlq
-  endpoint:
-    region: ${aws.region}
-  index:
-    queue:
-      name: prisoner_offender_index_queue
-    dlq:
-      name: prisoner_offender_index_dlq
-
 hmpps.sqs:
   queueAdminRole: ROLE_PRISONER_INDEX
+  queues:
+    indexqueue:
+      asyncQueueClient: true
+      asyncDlqClient: true
 
 elasticsearch:
   proxy:

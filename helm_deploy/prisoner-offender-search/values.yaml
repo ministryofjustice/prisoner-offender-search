@@ -56,21 +56,21 @@ generic-service:
       OAUTH_CLIENT_ID: "PRISONER_OFFENDER_SEARCH_CLIENT_ID"
       OAUTH_CLIENT_SECRET: "PRISONER_OFFENDER_SEARCH_SECRET"
     pos-sqs-instance-output:
-      SQS_AWS_ACCESS_KEY_ID: "access_key_id"
-      SQS_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      SQS_QUEUE_NAME: "sqs_pos_name"
+      HMPPS_SQS_QUEUES_EVENTQUEUE_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_EVENTQUEUE_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_EVENTQUEUE_QUEUE_NAME: "sqs_pos_name"
     pos-sqs-dl-instance-output:
-      SQS_AWS_DLQ_ACCESS_KEY_ID: "access_key_id"
-      SQS_AWS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
-      SQS_DLQ_NAME: "sqs_pos_name"
+      HMPPS_SQS_QUEUES_EVENTQUEUE_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_EVENTQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_EVENTQUEUE_DLQ_NAME: "sqs_pos_name"
     pos-idx-sqs-instance-output:
-      SQS_INDEX_AWS_ACCESS_KEY_ID: "access_key_id"
-      SQS_INDEX_AWS_SECRET_ACCESS_KEY: "secret_access_key"
-      SQS_INDEX_QUEUE_NAME: "sqs_pos_name"
+      HMPPS_SQS_QUEUES_INDEXQUEUE_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_INDEXQUEUE_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_INDEXQUEUE_QUEUE_NAME: "sqs_pos_name"
     pos-idx-sqs-dl-instance-output:
-      SQS_INDEX_AWS_DLQ_ACCESS_KEY_ID: "access_key_id"
-      SQS_INDEX_AWS_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
-      SQS_INDEX_DLQ_NAME: "sqs_pos_name"
+      HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_NAME: "sqs_pos_name"
     elasticsearch:
       ELASTICSEARCH_PROXY_URL: "aws_es_proxy_url"
 

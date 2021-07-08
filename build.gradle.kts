@@ -34,7 +34,8 @@ dependencies {
   implementation("org.springframework:spring-jms")
   implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1020"))
   implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("uk.gov.justice.service.hmpps:hmpps-spring-boot-sqs:0.4.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-spring-boot-sqs:0.6.0")
+  implementation("com.amazonaws:aws-java-sdk-sns")
   implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.1020")
   implementation("org.awaitility:awaitility-kotlin:4.1.0")
 

@@ -21,7 +21,7 @@ class PrisonerIndexListener(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  @JmsListener(destination = "\${sqs.index.queue.name}", containerFactory = "jmsIndexListenerContainerFactory")
+  @JmsListener(destination = "indexqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
   fun processIndexRequest(requestJson: String?, msg: javax.jms.Message) {
     log.debug(requestJson)
     try {
