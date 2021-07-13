@@ -1,0 +1,8 @@
+version: "3"
+services:
+  localstack:
+    volumes:
+      - "localstack-vol:/tmp/localstack" # use a volume, not a path
+
+volumes:
+  localstack-vol: # volume mounts (vs bind mounts) are advised when running on Windows
