@@ -39,6 +39,23 @@ services:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=nomis-hsqldb
 
+  restricted-patients:
+    image: quay.io/hmpps/hmpps-restricted-patients-api:latest
+    networks:
+      - hmpps
+    container_name: restricted-patients
+    depends_on:
+      - oauth
+      - prisonapi
+    ports:
+      - "8095:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+      - PRISON_API_ENDPOINT_URL=http://prisonapi:8093
+
   oauth:
     image: quay.io/hmpps/hmpps-auth:latest
     networks:

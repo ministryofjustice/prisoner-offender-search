@@ -29,6 +29,12 @@ spring:
             client-secret: ${oauth.client.secret}
             authorization-grant-type: client_credentials
             scope: read
+        restricted-patients-api:
+          provider: hmpps-auth
+          client-id: ${restricted-patients.client.id}
+          client-secret: ${restricted-patients.client.secret}
+          authorization-grant-type: client_credentials
+          scope: read
         provider:
           hmpps-auth:
             token-uri: ${api.base.url.oauth}/oauth/token

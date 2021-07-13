@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
+import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.RestrictedPatientMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -64,12 +65,14 @@ abstract class IntegrationTest {
   companion object {
     internal val prisonMockServer = PrisonMockServer()
     internal val oauthMockServer = OAuthMockServer()
+    internal val restrictedPatientMockServer = RestrictedPatientMockServer()
 
     @BeforeAll
     @JvmStatic
     fun startMocks() {
       prisonMockServer.start()
       oauthMockServer.start()
+      restrictedPatientMockServer.start()
     }
 
     @AfterAll
@@ -77,6 +80,7 @@ abstract class IntegrationTest {
     fun stopMocks() {
       prisonMockServer.stop()
       oauthMockServer.stop()
+      restrictedPatientMockServer.stop()
     }
   }
 
@@ -91,6 +95,7 @@ abstract class IntegrationTest {
     prisonMockServer.resetAll()
     oauthMockServer.resetAll()
     oauthMockServer.stubGrantToken()
+    restrictedPatientMockServer.resetAll()
   }
 
   internal fun Any.asJson() = gson.toJson(this)
@@ -116,6 +121,15 @@ abstract class IntegrationTest {
     )
 
     prisonMockServer.stubFor(
+      WireMock.get("/health/ping").willReturn(
+        WireMock.aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "pong" else "some error")
+          .withStatus(status)
+      )
+    )
+
+    restrictedPatientMockServer.stubFor(
       WireMock.get("/health/ping").willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
