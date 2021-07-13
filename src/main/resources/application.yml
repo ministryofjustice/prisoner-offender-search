@@ -31,8 +31,8 @@ spring:
             scope: read
         restricted-patients-api:
           provider: hmpps-auth
-          client-id: ${oauth.client.id}
-          client-secret: ${oauth.client.secret}
+          client-id: ${restricted-patients.client.id}
+          client-secret: ${restricted-patients.client.secret}
           authorization-grant-type: client_credentials
           scope: read
         provider:
