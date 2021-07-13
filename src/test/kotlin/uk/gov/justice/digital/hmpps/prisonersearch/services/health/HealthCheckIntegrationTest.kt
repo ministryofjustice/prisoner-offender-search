@@ -20,6 +20,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .expectBody()
       .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("OK")
+      .jsonPath("components.restrictedPatientsApiHealth.details.HttpStatus").isEqualTo("OK")
       .jsonPath("status").isEqualTo("UP")
   }
 
@@ -49,6 +50,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .jsonPath("status").isEqualTo("DOWN")
       .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
       .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
+      .jsonPath("components.restrictedPatientsApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
   }
 
   @Test
@@ -63,6 +65,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .expectBody()
       .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
       .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
+      .jsonPath("components.restrictedPatientsApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
       .jsonPath("status").isEqualTo("DOWN")
   }
 

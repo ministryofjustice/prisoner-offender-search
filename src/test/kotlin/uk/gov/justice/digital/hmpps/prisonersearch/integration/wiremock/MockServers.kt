@@ -21,3 +21,5 @@ class OAuthMockServer : WireMockServer(8090) {
     )
   }
 }
+
+class RestrictedPatientMockServer : WireMockServer(8095)

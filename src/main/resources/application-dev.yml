@@ -13,6 +13,7 @@ api:
     url:
       oauth: http://localhost:8090/auth
       nomis: http://localhost:8093
+      restricted-patients: http://localhost:8095
 
 oauth:
   client:

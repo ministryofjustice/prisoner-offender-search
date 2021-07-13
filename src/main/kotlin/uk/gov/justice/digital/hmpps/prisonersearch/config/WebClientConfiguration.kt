@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.config
 
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.codec.ClientCodecConfigurer
@@ -14,10 +15,38 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: String) {
+class WebClientConfiguration(
+  @Value("\${api.base.url.nomis}") val prisonBaseUri: String
+) {
 
   @Bean
-  fun prisonWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? {
+  fun prisonWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? =
+    buildWebClient(prisonBaseUri, authorizedClientManager)
+
+  @Bean
+  @ConditionalOnProperty(value = ["api.base.url.restricted-patients"], havingValue = "true")
+  fun restrictedPatientsWebClient(
+    @Value("\${api.base.url.restricted-patients}") restrictedPatientsBaseUri: String,
+    authorizedClientManager: OAuth2AuthorizedClientManager?
+  ): WebClient? =
+    buildWebClient(restrictedPatientsBaseUri, authorizedClientManager)
+
+  @Bean
+  fun webClient(): WebClient? = WebClient.builder().build()
+
+  @Bean
+  fun authorizedClientManager(
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+  ): OAuth2AuthorizedClientManager? {
+    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
+    val authorizedClientManager =
+      AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
+    return authorizedClientManager
+  }
+
+  private fun buildWebClient(baseUri: String, authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("nomis-api")
 
@@ -30,21 +59,5 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
       .apply(oauth2Client.oauth2Configuration())
       .exchangeStrategies(exchangeStrategies)
       .build()
-  }
-
-  @Bean
-  fun webClient(): WebClient? {
-    return WebClient.builder().build()
-  }
-
-  @Bean
-  fun authorizedClientManager(
-    clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
-  ): OAuth2AuthorizedClientManager? {
-    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
-    val authorizedClientManager = AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
-    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
-    return authorizedClientManager
   }
 }
