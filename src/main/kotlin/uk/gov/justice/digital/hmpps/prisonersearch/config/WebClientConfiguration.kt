@@ -36,7 +36,7 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
   @Bean
   @ConditionalOnProperty(value = ["api.base.url.restricted-patients"])
   fun restrictedPatientsWebClient(
-    @Value("\${aapi.base.url.restricted-patients}") restrictedPatientBaseUrl: String,
+    @Value("\${api.base.url.restricted-patients}") restrictedPatientBaseUrl: String,
     authorizedClientManager: OAuth2AuthorizedClientManager?
   ): WebClient? {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
