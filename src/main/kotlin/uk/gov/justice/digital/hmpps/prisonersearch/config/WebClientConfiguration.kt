@@ -15,38 +15,10 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class WebClientConfiguration(
-  @Value("\${api.base.url.nomis}") val prisonBaseUri: String
-) {
+class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: String) {
 
   @Bean
-  fun prisonWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? =
-    buildWebClient(prisonBaseUri, authorizedClientManager)
-
-  @Bean
-  @ConditionalOnProperty(value = ["api.base.url.restricted-patients"], havingValue = "true")
-  fun restrictedPatientsWebClient(
-    @Value("\${api.base.url.restricted-patients}") restrictedPatientsBaseUri: String,
-    authorizedClientManager: OAuth2AuthorizedClientManager?
-  ): WebClient? =
-    buildWebClient(restrictedPatientsBaseUri, authorizedClientManager)
-
-  @Bean
-  fun webClient(): WebClient? = WebClient.builder().build()
-
-  @Bean
-  fun authorizedClientManager(
-    clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
-  ): OAuth2AuthorizedClientManager? {
-    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
-    val authorizedClientManager =
-      AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
-    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
-    return authorizedClientManager
-  }
-
-  private fun buildWebClient(baseUri: String, authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient {
+  fun prisonWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("nomis-api")
 
@@ -59,5 +31,42 @@ class WebClientConfiguration(
       .apply(oauth2Client.oauth2Configuration())
       .exchangeStrategies(exchangeStrategies)
       .build()
+  }
+
+  @Bean
+  @ConditionalOnProperty(value = ["api.base.url.restricted-patients"], havingValue = "true")
+  fun restrictedPatientsWebClient(
+    @Value("\${aapi.base.url.restricted-patients}") restrictedPatientBaseUrl: String,
+    authorizedClientManager: OAuth2AuthorizedClientManager?
+  ): WebClient? {
+    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+    oauth2Client.setDefaultClientRegistrationId("restricted-patients-api")
+
+    val exchangeStrategies = ExchangeStrategies.builder()
+      .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
+      .build()
+
+    return WebClient.builder()
+      .baseUrl(restrictedPatientBaseUrl)
+      .apply(oauth2Client.oauth2Configuration())
+      .exchangeStrategies(exchangeStrategies)
+      .build()
+  }
+
+  @Bean
+  fun webClient(): WebClient? {
+    return WebClient.builder().build()
+  }
+
+  @Bean
+  fun authorizedClientManager(
+    clientRegistrationRepository: ClientRegistrationRepository?,
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+  ): OAuth2AuthorizedClientManager? {
+    val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
+    val authorizedClientManager =
+      AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService)
+    authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider)
+    return authorizedClientManager
   }
 }
