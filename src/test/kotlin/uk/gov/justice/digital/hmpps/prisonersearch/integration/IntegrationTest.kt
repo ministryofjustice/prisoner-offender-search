@@ -150,7 +150,7 @@ abstract class IntegrationTest {
       with(hmppsSqsProperties) {
         val config = queues["eventqueue"]
           ?: throw MissingQueueException("HmppsSqsProperties config for eventqueue not found")
-        hmppsQueueFactory.createSqsClient(config, hmppsSqsProperties, eventQueueSqsDlqClient)
+        hmppsQueueFactory.createSqsClient("eventqueue", config, hmppsSqsProperties, eventQueueSqsDlqClient)
       }
   }
 }

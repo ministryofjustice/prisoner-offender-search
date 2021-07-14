@@ -13,10 +13,8 @@ hmpps.sqs:
     indexqueue:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
-
-hmpps.sns:
   topics:
-    eventTopic:
+    eventtopic:
       topicArn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
 elasticsearch:
