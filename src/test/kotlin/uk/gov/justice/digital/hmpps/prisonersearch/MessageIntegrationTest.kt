@@ -53,6 +53,21 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `will make a request for restricted patient data`() {
+    val message = "/messages/offenderDetailsChangedForRP.json".readResourceAsText()
+
+    // wait until our queue has been purged
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A123ZZZ") } matches { it == 1 }
+
+    restrictedPatientMockServer.verifyGetRestrictedPatientRequest("A123ZZZ")
+  }
+
+  @Test
   fun `will handle a missing Offender Display ID`() {
     val message = "/messages/offenderUpdatedNoIdDisplay.json".readResourceAsText()
 

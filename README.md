@@ -83,11 +83,11 @@ Starting the services is therefore a two step process:
 #### Running prisoner offender search in Docker
 To start up localstack and other dependencies with prisoner offender search running in Docker too:
 ```bash
-docker-compose up localstack oauth prisonapi
+docker-compose up localstack oauth prisonapi restricted-patients
 ```
 If running on Docker Desktop for Windows there is a separate docker compose script instead, so do:
 ```bash
-docker compose -f docker-compose-windows.yml up localstack oauth prisonapi
+docker compose -f docker-compose-windows.yml up localstack oauth prisonapi restricted-patients
 ```
 
 
