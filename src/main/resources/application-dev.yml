@@ -45,8 +45,6 @@ hmpps.sqs:
     indexqueue:
       queueName: index-queue
       dlqName: index-dlq
-
-hmpps.sns:
   topics:
-    eventTopic:
-      topicArn: arn:aws:sns:eu-west-2:000000000000:event-topic
+    eventtopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:event-topic
