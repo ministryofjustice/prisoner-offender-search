@@ -5,7 +5,7 @@
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://prisoner-offender-search-dev.prison.service.justice.gov.uk/swagger-ui/index.html?configUrl=/v3/api-docs/swagger-config)
 
 The purpose of this service is to:
-* API to provides searching of offender records in NOMIS via Elastic search (ES)
+* API to allow for searching of offender records in NOMIS via Elastic search (ES)
 * Keep the Elastic Search (ES) prison index up to date with changes from Prison systems (NOMIS)
 * Rebuild the index when required without an outage
 
