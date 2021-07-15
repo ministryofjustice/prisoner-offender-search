@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.microsoft.applicationinsights.TelemetryClient
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.from
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -74,28 +76,43 @@ class PrisonerSyncServiceTest {
       verify(restrictedPatientService).getRestrictedPatient("A1234AA")
     }
 
-    @Test
-    fun `maps the restricted patient data`() {
-      val prison = Agency(agencyId = "MDI",agencyType = "INST", active = true )
-      val hospital = Agency(agencyId = "HAZLWD",agencyType = "HSHOSP", active = true )
-      val now = LocalDateTime.now()
+    @Nested
+    inner class Mapping {
+      @Test
+      fun `maps the restricted patient data`() {
+        val prison = Agency(agencyId = "MDI", agencyType = "INST", active = true)
+        val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true)
+        val now = LocalDateTime.now()
 
-      whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(RestrictedPatientDto(
-        id = 1,
-        prisonerNumber = "A1234AA",
-        fromLocation = prison,
-        supportingPrison = prison,
-        hospitalLocation = hospital,
-        dischargeTime = now,
-        commentText = "test"
-      ))
+        whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(
+          RestrictedPatientDto(
+            id = 1,
+            prisonerNumber = "A1234AA",
+            fromLocation = prison,
+            supportingPrison = prison,
+            hospitalLocation = hospital,
+            dischargeTime = now,
+            commentText = "test"
+          )
+        )
 
-      val offenderBooking = prisonerSyncService.withRestrictedPatientIfOut(makeOffenderBooking())
+        val offenderBooking = prisonerSyncService.withRestrictedPatientIfOut(makeOffenderBooking())
 
-      assertThat(offenderBooking.restrictivePatient)
-        .extracting("supportingPrison", "dischargedHospital", "dischargeDate", "dischargeDetails")
-        .contains(prison, hospital, now.toLocalDate(), "test")
+        assertThat(offenderBooking.restrictivePatient)
+          .extracting("supportingPrison", "dischargedHospital", "dischargeDate", "dischargeDetails")
+          .contains(prison, hospital, now.toLocalDate(), "test")
+      }
+
+      @Test
+      fun `handle no restricted patient`() {
+        whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(null)
+
+        val offenderBooking = prisonerSyncService.withRestrictedPatientIfOut(makeOffenderBooking())
+
+        assertThat(offenderBooking.restrictivePatient).isNull()
+      }
     }
+
 
     @Test
     fun `calls withRestrictedPatientIfOut on offenderBookingChange`() {
