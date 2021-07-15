@@ -12,8 +12,8 @@ data class RestrictivePatient(
 
 data class Agency(
   val agencyId: String,
-  val description: String?,
-  val longDescription: String?,
+  val description: String? = null,
+  val longDescription: String? = null,
   val agencyType: String,
   val active: Boolean
 )
@@ -26,5 +26,4 @@ data class RestrictedPatientDto(
   val supportingPrison: Agency,
   val dischargeTime: LocalDateTime,
   val commentText: String? = null,
-  val active: Boolean? = true,
 )

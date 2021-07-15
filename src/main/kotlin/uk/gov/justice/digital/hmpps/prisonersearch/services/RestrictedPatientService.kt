@@ -9,7 +9,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatien
 
 @Service
 @ConditionalOnProperty(value = ["api.base.url.restricted-patients"])
-class RestrictedPatientService(@Qualifier("restrictedPatientsWebClient") val webClient: WebClient) {
+class RestrictedPatientService(private @Qualifier("restrictedPatientsWebClient") val webClient: WebClient) {
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto? =
     webClient.get().uri("/restricted-patient/prison-number/$prisonerNumber")
       .retrieve()
