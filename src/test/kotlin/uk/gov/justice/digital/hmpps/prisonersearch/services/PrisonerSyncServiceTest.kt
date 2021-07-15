@@ -113,7 +113,6 @@ class PrisonerSyncServiceTest {
       }
     }
 
-
     @Test
     fun `calls withRestrictedPatientIfOut on offenderBookingChange`() {
       prisonerSyncService.offenderBookingChange(OffenderBookingChangedMessage(1000L))
@@ -137,7 +136,6 @@ class PrisonerSyncServiceTest {
       )
       verify(restrictedPatientService).getRestrictedPatient("A1234AA")
     }
-
   }
 
   private fun makeOffenderBooking(
@@ -155,6 +153,4 @@ class PrisonerSyncServiceTest {
     false,
     assignedLivingUnit = assignedLivingUnit
   )
-
-
 }
