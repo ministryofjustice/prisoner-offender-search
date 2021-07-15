@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/restricted-patient/prison-number/A123ZZZ"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 1,
+      "prisonerNumber": "A123ZZZ",
+      "fromLocation": {
+        "agencyId": "MDI",
+        "description": "Moorland (HMP & YOI)",
+        "longDescription": "HMP & YOI Moorland Prison near Doncaster",
+        "agencyType": "INST",
+        "active": true
+      },
+      "hospitalLocation": {
+        "agencyId": "HAZLWD",
+        "description": "Hazelwood House",
+        "longDescription": "Hazelwood House",
+        "agencyType": "HSHOSP",
+        "active": true
+      },
+      "supportingPrison": {
+        "agencyId": "MDI",
+        "description": "Moorland (HMP & YOI)",
+        "longDescription": "HMP & YOI Moorland Prison near Doncaster",
+        "agencyType": "INST",
+        "active": true
+      },
+      "dischargeTime": "2020-10-10T21:00",
+      "commentText": "Prisoner was released on bail",
+      "active": true,
+      "createUserId": "ITAG_USER"
+    }
+  }
+}

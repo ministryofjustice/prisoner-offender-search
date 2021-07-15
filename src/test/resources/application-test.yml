@@ -35,6 +35,11 @@ oauth:
     id: prisoner-offender-search-client
     secret: clientsecret
 
+restricted-patients:
+  client:
+    id: prisoner-search-to-restricted-patients-api
+    secret: clientsecret
+
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0

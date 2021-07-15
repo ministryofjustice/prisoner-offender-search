@@ -1,0 +1,44 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A123ZZZ"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 2345612,
+      "offenderId": 2345612,
+      "bookingNo": "T66688",
+      "offenderNo": "A123ZZZ",
+      "firstName": "Restricted",
+      "lastName": "Patient",
+      "agencyId": "OUT",
+      "activeFlag": false,
+      "assignedLivingUnit": {
+        "agencyId": "OUT",
+        "agencyName": "Outside"
+      },
+      "dateOfBirth": "1990-02-03",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+      },
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "No"
+        }
+      ],
+      "inOutStatus": "OUT",
+      "status": "INACTIVE OUT",
+      "legalStatus": "SENTENCED",
+      "lastMovementTypeCode": "REL",
+      "lastMovementReasonCode": "HP"
+    }
+  }
+}
