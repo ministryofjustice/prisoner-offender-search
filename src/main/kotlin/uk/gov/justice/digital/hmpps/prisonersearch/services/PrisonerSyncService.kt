@@ -4,13 +4,10 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 
 @Service
 class PrisonerSyncService(
   private val nomisService: NomisService,
-  private val restrictedPatientService: RestrictedPatientService,
   private val prisonerIndexService: PrisonerIndexService,
   private val telemetryClient: TelemetryClient
 ) {
@@ -20,13 +17,13 @@ class PrisonerSyncService(
 
   fun externalMovement(message: ExternalPrisonerMovementMessage) {
     nomisService.getOffender(message.bookingId)?.let {
-      prisonerIndexService.sync(withRestrictedPatientIfOut(it))
+      prisonerIndexService.sync(it)
     }
   }
 
   fun offenderBookingChange(message: OffenderBookingChangedMessage) {
     nomisService.getOffender(message.bookingId)?.let {
-      prisonerIndexService.sync(withRestrictedPatientIfOut(it))
+      prisonerIndexService.sync(it)
     }
   }
 
@@ -40,14 +37,14 @@ class PrisonerSyncService(
     }
 
     nomisService.getOffender(bookingId)?.let {
-      prisonerIndexService.sync(withRestrictedPatientIfOut(it))
+      prisonerIndexService.sync(it)
     }
   }
 
   fun offenderChange(message: OffenderChangedMessage) {
     if (message.offenderIdDisplay != null) {
       nomisService.getOffender(message.offenderIdDisplay)?.let {
-        prisonerIndexService.sync(withRestrictedPatientIfOut(it))
+        prisonerIndexService.sync(it)
       }
     } else {
       customEventForMissingOffenderIdDisplay(message)
@@ -60,20 +57,6 @@ class PrisonerSyncService(
     } else {
       customEventForMissingOffenderIdDisplay(message)
     }
-  }
-
-  fun withRestrictedPatientIfOut(booking: OffenderBooking): OffenderBooking {
-    if (booking.assignedLivingUnit?.agencyId != "OUT") return booking
-    val restrictivePatient = restrictedPatientService.getRestrictedPatient(booking.offenderNo) ?: return booking
-
-    return booking.copy(
-      restrictivePatient = RestrictivePatient(
-        supportingPrison = restrictivePatient.supportingPrison,
-        dischargedHospital = restrictivePatient.hospitalLocation,
-        dischargeDate = restrictivePatient.dischargeTime.toLocalDate(),
-        dischargeDetails = restrictivePatient.commentText
-      )
-    )
   }
 
   private fun customEventForMissingOffenderIdDisplay(

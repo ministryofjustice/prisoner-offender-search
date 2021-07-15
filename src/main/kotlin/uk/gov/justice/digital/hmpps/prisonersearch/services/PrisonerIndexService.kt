@@ -26,8 +26,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
-import kotlin.jvm.Throws
 
 @Service
 class PrisonerIndexService(
@@ -39,6 +39,7 @@ class PrisonerIndexService(
   private val searchClient: SearchClient,
   private val telemetryClient: TelemetryClient,
   private val indexProperties: IndexProperties,
+  private val restrictedPatientService: RestrictedPatientService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -64,9 +65,10 @@ class PrisonerIndexService(
   }
 
   fun sync(offenderBooking: OffenderBooking): Prisoner {
+    val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
 
-    val prisonerA = translate(PrisonerA(), offenderBooking)
-    val prisonerB = translate(PrisonerB(), offenderBooking)
+    val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
+    val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
     val storedPrisoner: Prisoner
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
@@ -161,7 +163,11 @@ class PrisonerIndexService(
 
   fun addOffendersToBeIndexed(pageRequest: PageRequest) {
     var count = 0
-    log.debug("Sending offender indexing requests row {} --> {}", pageRequest.offset + 1, pageRequest.offset + pageRequest.pageSize)
+    log.debug(
+      "Sending offender indexing requests row {} --> {}",
+      pageRequest.offset + 1,
+      pageRequest.offset + pageRequest.pageSize
+    )
     nomisService.getOffendersIds(pageRequest.offset, pageRequest.pageSize).offenderIds?.forEach {
       indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.OFFENDER, it.offenderNumber))
       count += 1
@@ -208,5 +214,19 @@ class PrisonerIndexService(
     }
     log.debug("Offender lists have been sent: {} requests for a total of {} offenders", page, totalRows)
     return totalRows
+  }
+
+  fun withRestrictedPatientIfOut(booking: OffenderBooking): OffenderBooking {
+    if (booking.assignedLivingUnit?.agencyId != "OUT") return booking
+    val restrictivePatient = restrictedPatientService.getRestrictedPatient(booking.offenderNo) ?: return booking
+
+    return booking.copy(
+      restrictivePatient = RestrictivePatient(
+        supportingPrison = restrictivePatient.supportingPrison,
+        dischargedHospital = restrictivePatient.hospitalLocation,
+        dischargeDate = restrictivePatient.dischargeTime.toLocalDate(),
+        dischargeDetails = restrictivePatient.commentText
+      )
+    )
   }
 }
