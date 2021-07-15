@@ -33,7 +33,6 @@ class PrisonerSyncServiceTest {
 
   @Nested
   inner class WithRestrictedPatient {
-
     @Test
     fun `calls restricted patient service when the offender is OUT`() {
       prisonerSyncService.withRestrictedPatientIfOut(makeOffenderBooking())
@@ -56,46 +55,47 @@ class PrisonerSyncServiceTest {
 
       verify(restrictedPatientService, never()).getRestrictedPatient("A1234AA")
     }
-  }
 
-  @Test
-  fun `calls withRestrictedPatientIfOut on externalMovement`() {
-    prisonerSyncService.externalMovement(
-      ExternalPrisonerMovementMessage(
-        bookingId = 123,
-        movementSeq = 1,
-        offenderIdDisplay = "123",
-        fromAgencyLocationId = "OUT",
-        toAgencyLocationId = "INT",
-        directionCode = "OUT",
-        movementType = "Test"
+    @Test
+    fun `calls withRestrictedPatientIfOut on externalMovement`() {
+      prisonerSyncService.externalMovement(
+        ExternalPrisonerMovementMessage(
+          bookingId = 123,
+          movementSeq = 1,
+          offenderIdDisplay = "123",
+          fromAgencyLocationId = "OUT",
+          toAgencyLocationId = "INT",
+          directionCode = "OUT",
+          movementType = "Test"
+        )
       )
-    )
-    verify(restrictedPatientService).getRestrictedPatient("A1234AA")
-  }
+      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+    }
 
-  @Test
-  fun `calls withRestrictedPatientIfOut on offenderBookingChange`() {
-    prisonerSyncService.offenderBookingChange(OffenderBookingChangedMessage(1000L))
-    verify(restrictedPatientService).getRestrictedPatient("A1234AA")
-  }
+    @Test
+    fun `calls withRestrictedPatientIfOut on offenderBookingChange`() {
+      prisonerSyncService.offenderBookingChange(OffenderBookingChangedMessage(1000L))
+      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+    }
 
-  @Test
-  fun `calls withRestrictedPatientIfOut on offenderBookNumberChange`() {
-    prisonerSyncService.offenderBookNumberChange(OffenderBookingChangedMessage(1000L))
-    verify(restrictedPatientService).getRestrictedPatient("A1234AA")
-  }
+    @Test
+    fun `calls withRestrictedPatientIfOut on offenderBookNumberChange`() {
+      prisonerSyncService.offenderBookNumberChange(OffenderBookingChangedMessage(1000L))
+      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+    }
 
-  @Test
-  fun `calls withRestrictedPatientIfOut on offenderChange`() {
-    prisonerSyncService.offenderChange(
-      OffenderChangedMessage(
-        eventType = "APP",
-        offenderId = 1L,
-        offenderIdDisplay = "A1234AA"
+    @Test
+    fun `calls withRestrictedPatientIfOut on offenderChange`() {
+      prisonerSyncService.offenderChange(
+        OffenderChangedMessage(
+          eventType = "APP",
+          offenderId = 1L,
+          offenderIdDisplay = "A1234AA"
+        )
       )
-    )
-    verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+    }
+
   }
 
   private fun makeOffenderBooking(
@@ -113,4 +113,6 @@ class PrisonerSyncServiceTest {
     false,
     assignedLivingUnit = assignedLivingUnit
   )
+
+
 }
