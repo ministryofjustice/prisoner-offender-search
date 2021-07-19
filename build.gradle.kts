@@ -31,11 +31,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.8.6")
   implementation("com.google.guava:guava:30.1.1-jre")
 
-  implementation("org.springframework:spring-jms")
-  implementation(platform("com.amazonaws:aws-java-sdk-bom:1.11.1020"))
-  implementation("com.amazonaws:amazon-sqs-java-messaging-lib:1.0.8")
-  implementation("uk.gov.justice.service.hmpps:hmpps-spring-boot-sqs:0.7.1")
-  implementation("com.amazonaws:aws-java-sdk-sns")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:0.8.0")
   implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.11.1020")
   implementation("org.awaitility:awaitility-kotlin:4.1.0")
 
