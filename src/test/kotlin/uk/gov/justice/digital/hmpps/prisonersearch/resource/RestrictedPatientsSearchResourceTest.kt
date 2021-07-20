@@ -1,5 +1,10 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.verify
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.withinPercentage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -290,5 +295,23 @@ class RestrictedPatientsSearchResourceTest : QueueIntegrationTest() {
         "/results/restrictedPatientsSearch/search_results_hosp_pagination2.json"
       )
     }
+  }
+
+  @Test
+  fun `telemetry is recorded`() {
+    webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
+      .body(BodyInserters.fromValue(gson.toJson(RestrictedPatientSearchCriteria(null, null, null))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+
+    verify(telemetryClient).trackEvent(
+      eq("POSFindRestrictedPatientsByCriteria"),
+      any(),
+      com.nhaarman.mockitokotlin2.check<Map<String, Double>> {
+        Assertions.assertThat(it["numberOfResults"]).isCloseTo(4.0, withinPercentage(1))
+      }
+    )
   }
 }

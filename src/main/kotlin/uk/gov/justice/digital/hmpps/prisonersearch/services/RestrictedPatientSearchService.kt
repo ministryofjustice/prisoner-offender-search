@@ -145,7 +145,7 @@ class RestrictedPatientSearchService(
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
     )
-    telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
+    telemetryClient.trackEvent("POSFindRestrictedPatientsByCriteria", propertiesMap, metricsMap)
   }
 }
 
