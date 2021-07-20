@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
-  private val indexCount = 20
+  private val indexCount = 23
 
   @BeforeEach
   fun init() {
@@ -473,7 +473,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     @Test
     fun `will not complete if index size not reached threshold`() {
       indexPrisoners()
-      whenever(indexProperties.completeThreshold).thenReturn(21)
+      whenever(indexProperties.completeThreshold).thenReturn(indexCount + 1L)
 
       webTestClient.put().uri("/prisoner-index/mark-complete")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
