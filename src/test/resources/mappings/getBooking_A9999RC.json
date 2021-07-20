@@ -1,0 +1,129 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A9999RC"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1999993,
+      "bookingNo": "V61587",
+      "offenderNo": "A9999RC",
+      "firstName": "HOSP",
+      "lastName": "PATIENTTWO",
+      "agencyId": "OUT",
+      "assignedLivingUnitId": 731727,
+      "activeFlag": false,
+      "assignedLivingUnit": {
+        "agencyId": "OUT",
+        "locationId": null,
+        "description": null,
+        "agencyName": "Outside"
+      },
+      "facialImageId": 1171172,
+      "dateOfBirth": "1999-06-01",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "inOutStatus": "OUT",
+      "lastMovementTypeCode": "REL",
+      "lastMovementReasonCode": "HP",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "29906/12L",
+          "offenderNo": "A9999RC",
+          "bookingId": 1999993,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "12/394773W",
+          "offenderNo": "A9999RC",
+          "bookingId": 1999993,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "aliases": [
+        {
+          "firstName": "PSYHOSP",
+          "lastName": "PATIENTONE",
+          "age": 29,
+          "dob": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+          "nameType": "Alias Name",
+          "createDate": "2011-06-02"
+        }
+      ],
+      "status": "INACTIVE OUT",
+      "legalStatus": "SENTENCED",
+      "recall": false,
+      "offenceHistory": [
+        {
+          "bookingId": 1999993,
+          "offenceDescription": "Having article with blade or which was sharply pointed in public place",
+          "offenceCode": "CJ88117",
+          "statuteCode": "CJ88",
+          "mostSerious": false,
+          "primaryResultCode": "1501",
+          "primaryResultDescription": "Recall to Prison",
+          "primaryResultConviction": true,
+          "secondaryResultConviction": false,
+          "courtDate": "2020-03-20",
+          "caseId": 2915258
+        }
+      ],
+      "receptionDate": "2015-10-01",
+      "sentenceTerms": [
+        {
+          "bookingId": 1999993,
+          "sentenceSequence": 2,
+          "termSequence": 1,
+          "sentenceType": "ADIMP_ORA",
+          "sentenceTypeDescription": "ORA CJA03 Standard Determinate Sentence",
+          "startDate": "2020-05-05",
+          "weeks": 14,
+          "lifeSentence": false,
+          "caseId": "2986589",
+          "sentenceTermCode": "IMP",
+          "lineSeq": 1,
+          "sentenceStartDate": "2020-05-05"
+        }
+      ],
+      "sentenceDetail": {
+        "bookingId": 1999993,
+        "automaticReleaseDate": "2020-02-03",
+        "conditionalReleaseDate": "2020-02-03",
+        "postRecallReleaseDate": "2020-02-03",
+        "licenceExpiryDate": "2020-02-03",
+        "paroleEligibilityDate": "2020-02-03",
+        "actualParoleDate": "2020-02-03"
+      },
+      "restrictivePatient": {
+        "supportingPrison": {
+          "agencyId": "DNI",
+          "agencyType": "INST",
+          "active": true
+        },
+        "dischargedHospital": {
+          "agencyId": "YEWTHO",
+          "description": "Yew Trees",
+          "agencyType": "HOSPITAL",
+          "active": true
+        },
+        "dischargeDate": "2020-02-03",
+        "dischargeDetails": "Psychiatric Hospital Discharge to Yew Trees"
+      },
+      "locationDescription": "Outside - Psychiatric Hospital Discharge to Yew Trees"
+    }
+  }
+}

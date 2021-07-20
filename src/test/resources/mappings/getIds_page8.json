@@ -4,10 +4,10 @@
     "urlPath": "/api/offenders/ids",
     "headers" : {
       "Page-Offset": {
-        "equalTo": "0"
+        "equalTo": "21"
       },
       "Page-Limit": {
-        "equalTo": "1"
+        "equalTo": "3"
       }
     }
   },
@@ -15,11 +15,17 @@
     "status": 200,
     "headers": {
       "Content-Type": "application/json",
-      "Total-Records": "24"
+      "Total-Records": "20"
     },
     "jsonBody": [
       {
-        "offenderNumber": "A7089EY"
+        "offenderNumber": "A9999RA"
+      },
+      {
+        "offenderNumber": "A9999RB"
+      },
+      {
+        "offenderNumber": "A9999RC"
       }
     ]
   }

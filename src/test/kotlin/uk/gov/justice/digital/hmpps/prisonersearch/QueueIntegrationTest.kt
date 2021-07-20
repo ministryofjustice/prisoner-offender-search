@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
+import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
@@ -102,6 +103,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BF") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AA") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AB") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RA") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RB") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RC") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
     Thread.sleep(500)
@@ -215,6 +219,26 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun globalSearchPagination(globalSearchCriteria: GlobalSearchCriteria, size: Long, page: Long, fileAssert: String) {
     webTestClient.post().uri("/global-search?size=$size&page=$page")
       .body(BodyInserters.fromValue(gson.toJson(globalSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun restrictedPatientSearch(restrictedPatientSearchCriteria: RestrictedPatientSearchCriteria, fileAssert: String) {
+    webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
+      .body(BodyInserters.fromValue(gson.toJson(restrictedPatientSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun restrictedPatientSearchPagination(restrictedPatientSearchCriteria: RestrictedPatientSearchCriteria, size: Long, page: Long, fileAssert: String) {
+    webTestClient.post().uri("/restricted-patient-search/match-restricted-patients?size=$size&page=$page")
+      .body(BodyInserters.fromValue(gson.toJson(restrictedPatientSearchCriteria)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()

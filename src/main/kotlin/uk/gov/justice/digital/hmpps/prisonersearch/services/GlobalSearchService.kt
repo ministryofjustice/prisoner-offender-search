@@ -99,14 +99,6 @@ class GlobalSearchService(
     }
   }
 
-  internal fun String.prisonerNumberOrCanonicalPNCNumber(): String =
-    when {
-      isPrisonerNumber() -> this.uppercase()
-      else -> this.canonicalPNCNumber()
-    }
-
-  private fun String.isPrisonerNumber() = matches("^[a-zA-Z]\\d{4}[a-zA-Z]{2}$".toRegex())
-
   private fun nameMatch(globalSearchCriteria: GlobalSearchCriteria): BoolQueryBuilder? {
     with(globalSearchCriteria) {
       return QueryBuilders.boolQuery()

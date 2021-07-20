@@ -236,9 +236,6 @@ class KeywordService(
     return newTokens.trim()
   }
 
-  private fun String.isPrisonerNumber() =
-    matches("^[a-zA-Z]\\d{4}[a-zA-Z]{2}$".toRegex())
-
   private fun String.isPncNumber() =
     matches("^\\d{4}/([0-9]+)[a-zA-Z]$".toRegex()) || matches("^\\d{2}/([0-9]+)[a-zA-Z]$".toRegex())
 
