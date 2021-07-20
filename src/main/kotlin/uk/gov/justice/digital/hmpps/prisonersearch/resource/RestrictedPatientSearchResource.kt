@@ -24,7 +24,9 @@ class RestrictedPatientSearchResource(private val restrictedPatientSearchService
 
   @PostMapping("/match-restricted-patients")
   @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
-  fun findByCriteria(@Parameter(required = true) @RequestBody searchCriteria: RestrictedPatientSearchCriteria,
-                     @PageableDefault pageable: Pageable) =
+  fun findByCriteria(
+    @Parameter(required = true) @RequestBody searchCriteria: RestrictedPatientSearchCriteria,
+    @PageableDefault pageable: Pageable
+  ) =
     restrictedPatientSearchService.findBySearchCriteria(searchCriteria, pageable)
 }

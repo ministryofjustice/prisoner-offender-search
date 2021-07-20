@@ -103,7 +103,8 @@ class RestrictedPatientsSearchResourceTest : QueueIntegrationTest() {
     fun `does not match when number is of active prisoner`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("A7089EY", null, null),
-        "/results/restrictedPatientsSearch/empty.json")
+        "/results/restrictedPatientsSearch/empty.json"
+      )
     }
 
     @Test

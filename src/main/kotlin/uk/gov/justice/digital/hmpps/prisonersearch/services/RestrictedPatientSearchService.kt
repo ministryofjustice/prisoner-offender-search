@@ -37,8 +37,7 @@ class RestrictedPatientSearchService(
         customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
         return PageImpl(it.matches, pageable, it.totalHits)
       }
-    }
-    else {
+    } else {
       if (searchCriteria.prisonerIdentifier != null) {
         queryBy(searchCriteria, pageable) { idMatch(it) } onMatch {
           customEventForFindBySearchCriteria(searchCriteria, it.matches.size)
@@ -72,8 +71,10 @@ class RestrictedPatientSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) RestrictedPatientResult.NoMatch else RestrictedPatientResult.Match(prisonerMatches,
-        searchResults.hits.totalHits?.value ?: 0)
+      return if (prisonerMatches.isEmpty()) RestrictedPatientResult.NoMatch else RestrictedPatientResult.Match(
+        prisonerMatches,
+        searchResults.hits.totalHits?.value ?: 0
+      )
     } ?: RestrictedPatientResult.NoMatch
   }
 

@@ -25,7 +25,11 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.services.*
+import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
+import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
