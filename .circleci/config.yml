@@ -10,7 +10,7 @@ executors:
       - image: localstack/localstack-full:0.12.10
         environment:
           - SERVICES=sqs,sns,es
-#          - ES_PORT_EXTERNAL=4571
+          - ES_PORT_EXTERNAL=4571
           - DEBUG=${DEBUG- }
           - DATA_DIR=/tmp/localstack/data
           - DOCKER_HOST=unix:///var/run/docker.sock
