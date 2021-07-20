@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/restricted-patient/prison-number/A9999RC"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 1,
+      "prisonerNumber": "A9999RC",
+      "fromLocation": {
+        "agencyId": "DNI",
+        "description": "Doncaster",
+        "longDescription": "Doncaster Prison",
+        "agencyType": "INST",
+        "active": true
+      },
+      "hospitalLocation": {
+        "agencyId": "YEWTHO",
+        "description": "Yew Trees",
+        "longDescription": "Yew Trees",
+        "agencyType": "HOSPITAL",
+        "active": true
+      },
+      "supportingPrison": {
+        "agencyId": "DNI",
+        "description": "Doncaster",
+        "longDescription": "Doncaster Prison",
+        "agencyType": "INST",
+        "active": true
+      },
+      "dischargeTime": "2020-02-06T22:00",
+      "commentText": "Hospital Discharge to Yew Trees",
+      "active": true,
+      "createUserId": "ITAG_USER"
+    }
+  }
+}
