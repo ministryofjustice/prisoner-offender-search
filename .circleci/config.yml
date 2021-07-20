@@ -6,7 +6,7 @@ orbs:
 jobs:
   validate:
     executor:
-      name: hmpps/localstack
+      name: hmpps/localstack_full
       jdk_tag: "16.0"
       services: "sqs,sns,es,elasticsearch"
       localstack_tag: "0.12.10"
