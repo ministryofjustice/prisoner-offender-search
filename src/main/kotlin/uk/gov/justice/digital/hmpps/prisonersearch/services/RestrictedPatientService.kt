@@ -9,10 +9,15 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatientDto
 
+interface RestrictedPatientService {
+  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto?
+}
+
 @Service
 @ConditionalOnProperty(value = ["api.base.url.restricted-patients"])
-class RestrictedPatientService(@Qualifier("restrictedPatientsWebClient") val webClient: WebClient) {
-  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto? {
+class RestrictedPatientServiceImpl(@Qualifier("restrictedPatientsWebClient") val webClient: WebClient) :
+  RestrictedPatientService {
+  override fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto? {
     try {
       return webClient.get().uri("/restricted-patient/prison-number/$prisonerNumber")
         .retrieve()
@@ -28,6 +33,6 @@ class RestrictedPatientService(@Qualifier("restrictedPatientsWebClient") val web
 
 @Service
 @ConditionalOnExpression("T(org.apache.commons.lang3.StringUtils).isBlank('\${api.base.url.restricted-patients:}')")
-class StubRestrictedPatientService {
-  fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto? = null
+class StubRestrictedPatientService : RestrictedPatientService {
+  override fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto? = null
 }

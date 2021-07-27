@@ -134,7 +134,10 @@ class RestrictedPatientSearchService(
     return indexStatusService.getCurrentIndex().currentIndex.indexName
   }
 
-  private fun customEventForFindBySearchCriteria(searchCriteria: RestrictedPatientSearchCriteria, numberOfResults: Int) {
+  private fun customEventForFindBySearchCriteria(
+    searchCriteria: RestrictedPatientSearchCriteria,
+    numberOfResults: Int
+  ) {
     val propertiesMap = mapOf(
       "username" to authenticationHolder.currentUsername(),
       "clientId" to authenticationHolder.currentClientId(),
