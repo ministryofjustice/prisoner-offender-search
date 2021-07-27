@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatientDto
 
-
 interface RestrictedPatientService {
   fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto?
 }
