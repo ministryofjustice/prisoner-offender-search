@@ -63,7 +63,7 @@ class RestrictedPatientSearchService(
     val query = queryBuilder(searchCriteria)
     return query?.let {
       val searchSourceBuilder = SearchSourceBuilder().apply {
-        query(query.withDefaults())
+        query(query.withDefaults(searchCriteria))
         size(pageable.pageSize)
         from(pageable.offset.toInt())
         sort("prisonerNumber")
@@ -164,6 +164,7 @@ inline infix fun RestrictedPatientResult.onMatch(block: (RestrictedPatientResult
     is RestrictedPatientResult.Match -> block(this)
   }
 
-private fun BoolQueryBuilder.withDefaults(): BoolQueryBuilder {
+private fun BoolQueryBuilder.withDefaults(searchCriteria: RestrictedPatientSearchCriteria): BoolQueryBuilder {
   return this.must("restrictedPatient", true)
+    .filterWhenPresent("supportingPrisonId", searchCriteria.supportingPrisonIds)
 }

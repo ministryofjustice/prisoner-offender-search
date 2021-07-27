@@ -13,6 +13,8 @@ data class RestrictedPatientSearchCriteria(
   val firstName: String?,
   @Schema(description = "Last Name", example = "Smith")
   val lastName: String?,
+  @Schema(description = "List of supporting Prison Ids to restrict the search by. Unrestricted if not supplied or null", example = "[\"MDI\"]")
+  val supportingPrisonIds: List<String>? = null,
 ) {
   @Schema(hidden = true)
   fun isEmpty() = firstName.isNullOrBlank() && lastName.isNullOrBlank() && prisonerIdentifier.isNullOrBlank()

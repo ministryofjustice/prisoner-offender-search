@@ -275,6 +275,25 @@ class RestrictedPatientsSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Nested
+  inner class SupportingPrisonIds {
+    @Test
+    fun `finds restricted patients with a single supporting prison`() {
+      restrictedPatientSearch(
+        RestrictedPatientSearchCriteria(null, null, null, listOf("DNI")),
+        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI.json"
+      )
+    }
+
+    @Test
+    fun `finds restricted patients with a multiple supporting prisons`() {
+      restrictedPatientSearch(
+        RestrictedPatientSearchCriteria(null, null, null, listOf("DNI", "MDI", "NONE")),
+        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI_MDI.json"
+      )
+    }
+  }
+
+  @Nested
   inner class Pagination {
     @Test
     fun `can perform search which returns 1 result from first page`() {
