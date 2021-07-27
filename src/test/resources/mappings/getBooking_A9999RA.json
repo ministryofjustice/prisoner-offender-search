@@ -96,21 +96,6 @@
         "paroleEligibilityDate": "2020-02-03",
         "actualParoleDate": "2020-02-03"
       },
-      "restrictivePatient": {
-        "supportingPrison": {
-          "agencyId": "DNI",
-          "agencyType": "INST",
-          "active": true
-        },
-        "dischargedHospital": {
-          "agencyId": "HOLFRD",
-          "description": "Holford House",
-          "agencyType": "HSHOSP",
-          "active": true
-        },
-        "dischargeDate": "2020-02-03",
-        "dischargeDetails": "Psychiatric Hospital Discharge to Holford House"
-      },
       "locationDescription": "Outside - Psychiatric Hospital Discharge to Holford House"
     }
   }

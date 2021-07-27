@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/restricted-patient/prison-number/A7090BF"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 1,
+      "prisonerNumber": "A7090BF",
+      "fromLocation": {
+        "agencyId": "MDI",
+        "description": "Moorlands",
+        "longDescription": "Moorlands Prison",
+        "agencyType": "INST",
+        "active": true
+      },
+      "hospitalLocation": {
+        "agencyId": "HAZLWD",
+        "description": "Hazelwood House",
+        "longDescription": "Hazelwood House",
+        "agencyType": "HSHOSP",
+        "active": true
+      },
+      "supportingPrison": {
+        "agencyId": "MDI",
+        "description": "Moorlands",
+        "longDescription": "Moorlands Prison",
+        "agencyType": "INST",
+        "active": true
+      },
+      "dischargeTime": "2020-02-03T21:00",
+      "commentText": "Psychiatric Hospital Discharge to Hazelwood House",
+      "active": true,
+      "createUserId": "ITAG_USER"
+    }
+  }
+}
