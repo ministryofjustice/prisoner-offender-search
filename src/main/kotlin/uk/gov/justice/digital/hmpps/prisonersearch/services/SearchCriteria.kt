@@ -16,9 +16,7 @@ data class SearchCriteria(
   @Schema(description = "List of Prison Ids (can include OUT and TRN) to restrict the search by. Unrestricted if not supplied or null", example = "[\"MDI\"]")
   val prisonIds: List<String>? = null,
   @Schema(description = "Include aliases in search", example = "false", required = false, defaultValue = "false")
-  val includeAliases: Boolean = false,
-  @Schema(description = "Include restricted patients in search", example = "false", required = false, defaultValue = "false")
-  val includeRestrictivePatients: Boolean = false
+  val includeAliases: Boolean = false
 ) {
   @Schema(hidden = true)
   fun isValid() = !(firstName.isNullOrBlank() && lastName.isNullOrBlank() && prisonerIdentifier.isNullOrBlank())
