@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import com.microsoft.applicationinsights.TelemetryClient
 import io.swagger.v3.oas.annotations.Operation
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -31,7 +32,7 @@ class GlobalSearchResource(
   @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role")
   fun globalFindByCriteria(
     @RequestBody globalSearchCriteria: GlobalSearchCriteria,
-    @PageableDefault pageable: Pageable
+    @ParameterObject @PageableDefault pageable: Pageable
   ) = globalSearchService.findByGlobalSearchCriteria(globalSearchCriteria, pageable)
 
   @GetMapping("/synthetic-monitor")
