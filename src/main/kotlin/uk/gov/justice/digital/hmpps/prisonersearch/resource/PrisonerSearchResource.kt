@@ -54,10 +54,9 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     prisonerSearchService.findBy(criteria)
 
   @GetMapping("/prison/{prisonId}")
-  @Operation(summary = "Match prisoners by prison, or if a restricted patient supported by a POM", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  @Operation(summary = "Match prisoners by prison", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByPrison(
     @Valid @PathVariable prisonId: String,
-    @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients: Boolean,
     @PageableDefault pageable: Pageable
-  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable, includeRestrictedPatients)
+  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable)
 }
