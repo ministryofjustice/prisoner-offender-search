@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.MediaType
@@ -26,7 +27,7 @@ class RestrictedPatientSearchResource(private val restrictedPatientSearchService
   @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByCriteria(
     @Parameter(required = true) @RequestBody searchCriteria: RestrictedPatientSearchCriteria,
-    @PageableDefault pageable: Pageable
+    @ParameterObject @PageableDefault pageable: Pageable
   ) =
     restrictedPatientSearchService.findBySearchCriteria(searchCriteria, pageable)
 }
