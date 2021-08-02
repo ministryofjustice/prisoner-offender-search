@@ -291,6 +291,14 @@ class RestrictedPatientsSearchResourceTest : QueueIntegrationTest() {
         "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI_MDI.json"
       )
     }
+
+    @Test
+    fun `finds restricted patients filtered by name and supporting prison`() {
+      restrictedPatientSearch(
+        RestrictedPatientSearchCriteria(null, null, "patientone", listOf("MDI")),
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+      )
+    }
   }
 
   @Nested
