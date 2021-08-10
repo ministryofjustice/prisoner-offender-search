@@ -44,14 +44,14 @@ abstract class IntegrationTest {
   protected val eventQueue by lazy { hmppsQueueService.findByQueueId("eventqueue") ?: throw MissingQueueException("HmppsQueue eventqueue not found") }
   protected val indexQueue by lazy { hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found") }
 
-  val eventQueueName: String by lazy { eventQueue.queueName }
-  val eventQueueUrl: String by lazy { eventQueue.queueUrl }
-  val eventDlqName: String by lazy { eventQueue.dlqName }
-  val eventDlqUrl: String by lazy { eventQueue.dlqUrl }
-  val indexQueueName: String by lazy { indexQueue.queueName }
-  val indexQueueUrl: String by lazy { indexQueue.queueUrl }
-  val indexDlqName: String by lazy { indexQueue.dlqName }
-  val indexDlqUrl: String by lazy { indexQueue.dlqUrl }
+  val eventQueueName by lazy { eventQueue.queueName }
+  val eventQueueUrl by lazy { eventQueue.queueUrl }
+  val eventDlqName by lazy { eventQueue.dlqName as String }
+  val eventDlqUrl by lazy { eventQueue.dlqUrl as String }
+  val indexQueueName by lazy { indexQueue.queueName }
+  val indexQueueUrl by lazy { indexQueue.queueUrl }
+  val indexDlqName by lazy { indexQueue.dlqName as String }
+  val indexDlqUrl by lazy { indexQueue.dlqUrl as String }
 
   @Autowired
   private lateinit var gson: Gson
