@@ -19,8 +19,8 @@ class IndexQueueService(
 
   private val indexQueueSqsClient = indexQueue.sqsClient as AmazonSQSAsync
   private val indexQueueSqsDlqClient = indexQueue.sqsDlqClient as AmazonSQSAsync
-  private val indexQueueUrl: String = indexQueue.queueUrl
-  private val indexDlqUrl: String = indexQueue.dlqUrl
+  private val indexQueueUrl = indexQueue.queueUrl
+  private val indexDlqUrl = indexQueue.dlqUrl as String
 
   fun sendIndexRequestMessage(payload: PrisonerIndexRequest) {
     indexQueueSqsClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
