@@ -1,31 +1,16 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@3.8
-
-executors:
-  validator:
-    docker:
-      - image: cimg/openjdk:16.0
-      - image: localstack/localstack-full:0.12.10
-        environment:
-          - SERVICES=sqs,sns,es
-          - ES_PORT_EXTERNAL=4571
-          - DEBUG=${DEBUG- }
-          - DATA_DIR=/tmp/localstack/data
-          - DOCKER_HOST=unix:///var/run/docker.sock
-          - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
-          - AWS_EXECUTION_ENV=True
-          - DEFAULT_REGION=eu-west-2
-          - TMPDIR=/private
-    environment:
-      # Setting max gradle workers to 2 (which means 2 running concurrently, not max 2!) - because although this doesn't stop the ktlint workers from starting it does seem to prevent the test executor from needing as much memory.
-      _JAVA_OPTIONS: -Xmx256m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -XX:ParallelGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-XX:+UseContainerSupport -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=2
-    working_directory: ~/app
+  hmpps: ministryofjustice/hmpps@3.10
 
 jobs:
   validate:
-    executor: validator
+    executor:
+      name: hmpps/localstack
+      jdk_tag: "16.0"
+      localstack_tag: "0.12.10"
+      localstack_type: "localstack-full"
+      services: "sqs,sns,es"
     steps:
       - run:
           command: |
@@ -37,15 +22,12 @@ jobs:
           background: true
       - checkout
       - hmpps/install_aws_cli
-      - run:
-          name: Wait for SQS to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4566
+      - hmpps/wait_till_ready
       - run:
           name: Set up es domain
           command: src/test/resources/localstack/setup-es.sh
-      - run:
-          name: Wait for ES to be ready
-          command: curl -4 --connect-timeout 30 --retry-connrefused --retry 20 --retry-delay 5 http://localhost:4571
+      - hmpps/wait_till_ready:
+          port: 4571
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
