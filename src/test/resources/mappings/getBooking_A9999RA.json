@@ -94,7 +94,8 @@
         "postRecallReleaseDate": "2020-02-03",
         "licenceExpiryDate": "2020-02-03",
         "paroleEligibilityDate": "2020-02-03",
-        "actualParoleDate": "2020-02-03"
+        "actualParoleDate": "2020-02-03",
+        "tariffDate": "2022-01-04"
       },
       "locationDescription": "Outside - Psychiatric Hospital Discharge to Holford House"
     }
