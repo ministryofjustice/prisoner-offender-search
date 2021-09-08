@@ -33,21 +33,25 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.apache.commons:commons-lang3:3.12.0")
-  implementation("com.google.code.gson:gson:2.8.7")
+  implementation("com.google.code.gson:gson:2.8.8")
   implementation("com.google.guava:guava:30.1.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:0.9.0")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.50")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.2")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.62")
   implementation("org.awaitility:awaitility-kotlin:4.1.0")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
-  testImplementation("org.mockito:mockito-inline:3.11.2")
+  testImplementation("org.mockito:mockito-inline:3.12.4")
+}
+
+java {
+  toolchain.languageVersion.set(JavaLanguageVersion.of(16))
 }
 
 tasks {
-  compileKotlin {
+  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
       jvmTarget = "16"
     }
