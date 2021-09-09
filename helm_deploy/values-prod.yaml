@@ -9,6 +9,13 @@ generic-service:
     API_BASE_URL_NOMIS: "https://api.prison.service.justice.gov.uk"
     INDEX_COMPLETE_THRESHOLD: 500000
 
+  # Additional allowlist rules
+  # See also allowlist values helm_deploy/prisoner-offender-search/values.yaml
+  allowlist:
+    prum-prod-platform-1: "18.170.20.75/32"
+    prum-prod-platform-2: "35.177.223.199/32"
+    prum-prod-platform-3: "18.170.155.82/32"
+
 # Sets where alerts will be delivered, via Alertmanager receiver
 generic-prometheus-alerts:
   alertSeverity: digital-prison-service
