@@ -242,6 +242,37 @@ curl --location --request PUT 'https://prisoner-search-dev.hmpps.service.justice
  ```
 ## Support
 
+### Custom Alerts
+
+#### Synthetic Monitor
+
+There is a Cronjob called `synthetic-monitor` which performs a simple prisoner search every 10 minutes. It then records the number of results and the request duration as telemetry events on Application Insights.
+
+You can see those telemetry events over time with these App Insights log queries:
+
+```kusto
+customEvents
+| where cloud_RoleName == "prisoner-offender-search"
+| where name == "synthetic-monitor"
+| extend timems=toint(customDimensions.timeMs),results=toint(customDimensions.results)
+| summarize avg(timems),max(timems) by bin(timestamp, 15m)
+| render timechart 
+```
+
+```kusto
+customEvents
+| where cloud_RoleName == "prisoner-offender-search"
+| where name == "synthetic-monitor"
+| extend timems=toint(customDimensions.timeMs),results=toint(customDimensions.results)
+| summarize avg(results),max(results) by bin(timestamp, 15m)
+| render timechart 
+```
+
+An alert has been created for each metric in Application Insights. 
+
+* `Prisoner Offender Search - response time (synthetic monitor)` - checks if the average response time for the search is higher than an arbitrary limit. This indicates that the system is performing slowly and you should investigate the load on the system.
+* `Prisoner Offender Search - result size (synthetic monitor` - checks if the number of results returned by the search has dropped below an arbitrary limit. This indicates that either the data in the system has drastically changed or that there is some kind of bug with the search meaning not all results are being found.
+
 ### Raw Elastic Search access
 
 Access to the raw Elastic Search indexes is only possible from the Cloud Platform `prisoner-offender-search` family of namespaces.
@@ -337,7 +368,7 @@ One last check of the info endpoint should confirm the new state, e.g.:
 
 Pay careful attention to `"currentIndex": "INDEX_A"` - this shows the actual index being used by clients.
 
-## Restore from a snapshot (if both indexes have become corrupt/empty)
+### Restore from a snapshot (if both indexes have become corrupt/empty)
 
 If we are restoring from the snapshot it means that the current index and other index are broken, we need to delete them to be able to restore from the snapshot.
 Every night we have a scheduled job that takes the snapshot of the whole cluster which is called `latest` and this should be restored
@@ -358,26 +389,26 @@ The `include_global_state: true` is set true so that we copy the global state of
 however, is `include_global_state: False`. If only restoring a single index, it could be bad to overwrite the global state but as we are
 restoring the full cluster we set it to true
 
-### To view the state of the indexes while restoring from a snapshot
+#### To view the state of the indexes while restoring from a snapshot
 
-#### Cluster health
+##### Cluster health
 
 `curl -XGET 'http://localhost:9200/_cluster/health'`
 
 The cluster health status is: green, yellow or red. On the shard level, a red status indicates that the specific shard is not allocated in the cluster, yellow means that the primary shard is allocated but replicas are not, and green means that all shards are allocated. The index level status is controlled by the worst shard status. The cluster status is controlled by the worst index status.
 
-#### Shards
+##### Shards
 `curl -XGET 'http://localhost:9200/_cat/shards'`
 
 The shards command is the detailed view of what nodes contain which shards. It will tell you if it’s a primary or replica, the number of docs, the bytes it takes on disk, and the node where it’s located.
 
-#### Recovery
+##### Recovery
 `curl -XGET 'http://localhost:9200/_cat/recovery'`
 
 Returns information about ongoing and completed shard recoveries
 
 
-### To take a manual snapshot, perform the following steps:
+#### To take a manual snapshot, perform the following steps:
 
 1. You can't take a snapshot if one is currently in progress. To check, run the following command:
 
@@ -388,10 +419,10 @@ Returns information about ongoing and completed shard recoveries
 
 you can now use the restore commands above to restore the snapshot if needed
 
-#### To remove a snapshot
+##### To remove a snapshot
 `curl -XDELETE 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
 
-###Other command which will help when looking at restoring a snapshot
+#### Other command which will help when looking at restoring a snapshot
 
 To see all snapshot repositories, run the following command (normally there will only be one, as we have one per namespace):
 
