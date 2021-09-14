@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.model
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SentenceDetail
 import java.time.LocalDate
@@ -103,6 +104,7 @@ class TranslatorTest {
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseOverrideDate)
     assertThat(prisoner.postRecallReleaseDate).isEqualTo(postRecallReleaseOverrideDate)
   }
+
   @Test
   fun `when a prisoner has a sentence with no dateOverride for conditionalRelease, automaticRelease and postRecallRelease then corresponding releaseDate is used`() {
     val conditionalReleaseDate = LocalDate.now().plusMonths(5)
@@ -144,5 +146,33 @@ class TranslatorTest {
     )
     assertThat(prisoner.imprisonmentStatus).isEqualTo("LIFE")
     assertThat(prisoner.imprisonmentStatusDescription).isEqualTo("Serving Life Imprisonment")
+  }
+
+  @Test
+  fun `maps alerts correctly`() {
+    val prisoner = translate(
+      PrisonerA(),
+      OffenderBooking(
+        "A1234AA",
+        "Fred",
+        "Bloggs",
+        LocalDate.of(1976, 5, 15),
+        false,
+        alerts = listOf(
+          Alert(
+            alertId = 1,
+            active = true,
+            expired = false,
+            alertCode = "x-code",
+            alertType = "x-type",
+            dateCreated = LocalDate.now()
+          )
+        )
+      )
+    )
+
+    assertThat(prisoner.alerts?.first())
+      .extracting("alertType", "alertCode", "active", "expired")
+      .contains("x-type", "x-code", true, false)
   }
 }

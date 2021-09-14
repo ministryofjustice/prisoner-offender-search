@@ -4,18 +4,18 @@ import java.time.LocalDate
 
 data class Alert(
   val alertId: Long,
-  val offenderNo: String?,
+  val offenderNo: String? = null,
   val alertType: String,
-  val alertTypeDescription: String?,
+  val alertTypeDescription: String? = null,
   val alertCode: String,
-  val alertCodeDescription: String?,
-  val comment: String?,
+  val alertCodeDescription: String? = null,
+  val comment: String? = null,
   val dateCreated: LocalDate,
-  val dateExpires: LocalDate?,
+  val dateExpires: LocalDate? = null,
   val expired: Boolean,
   val active: Boolean,
-  val addedByFirstName: String?,
-  val addedByLastName: String?,
-  val expiredByFirstName: String?,
-  val expiredByLastName: String?
+  val addedByFirstName: String? = null,
+  val addedByLastName: String? = null,
+  val expiredByFirstName: String? = null,
+  val expiredByLastName: String? = null
 )
