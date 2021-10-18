@@ -40,7 +40,7 @@ Two ES runtime exceptions, ElasticsearchException and ElasticSearchIndexingExcep
 the inError status flag is set on the IndexStatus.  The flag ensures that manipulation of the index is forbidden when in this state.
 Only cancelling the index process will reset the flag and subsequently allow a rebuild of the index to be invoked.
 ```
-PUT /prisoner/index/cancel-index
+    PUT /prisoner/index/cancel-index
 ```
 
 #### Index switch
@@ -89,7 +89,6 @@ If running on Docker Desktop for Windows there is a separate docker compose scri
 ```bash
 docker compose -f docker-compose-windows.yml up localstack oauth prisonapi restricted-patients
 ```
-
 
 Once localstack has started then, in another terminal, run the following command to start prisoner offender search too:
 ```bash
@@ -196,8 +195,6 @@ Purging a local queue:
 aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/queue/prisoner_offender_index_queue
 ```
 
-
-
 ## Regression tests
 
 Recommended regression tests is as follows:
@@ -219,7 +216,6 @@ Recommended regression tests is as follows:
 So long as the index is being populated and the ` "index-queue-backlog"` figure is decreasing after some time (e.g. 10 minutes) it demonstrates the application is working.
 
 Check the health endpoint to show the Index DLQ is not building up with errors (e.g. `https://prisoner-search-dev.hmpps.service.justice.gov.uk/health`):
-
 ```
     "indexQueueHealth": {
       "status": "UP",
@@ -238,8 +234,8 @@ The build can either be left to run or cancelled using the following endpoint:
 curl --location --request PUT 'https://prisoner-search-dev.hmpps.service.justice.gov.uk/prisoner-index/cancel-index' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <some token>'
-
  ```
+
 ## Support
 
 ### Custom Alerts
@@ -325,8 +321,8 @@ Next monitor the progress of the rebuilding via the info endpoint (e.g. https://
     "index-queue-backlog": "700000"
 ```
 
- When `"index-queue-backlog": "0"` has reached zero then all indexing messages have been processed. Check the dead letter queue is empty via the health check (e.g https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/health). This should show the queues DLQ count at zero, e.g.:
- ```
+When `"index-queue-backlog": "0"` has reached zero then all indexing messages have been processed. Check the dead letter queue is empty via the health check (e.g https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/health). This should show the queues DLQ count at zero, e.g.:
+```
     "indexQueueHealth": {
       "status": "UP",
       "details": {
@@ -336,34 +332,31 @@ Next monitor the progress of the rebuilding via the info endpoint (e.g. https://
         "MessagesOnDLQ": 0
       }
     },
- ```
+```
 
- The indexing is ready to marked as complete using another call to the service e.g:
+The indexing is ready to marked as complete using another call to the service e.g:
 
- ```
+```
 curl --location --request PUT 'https://prisoner-offender-search-dev.hmpps.service.justice.gov.uk/prisoner-index/mark-complete' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer <some token>'
-
- ```
+```
 
 One last check of the info endpoint should confirm the new state, e.g.:
 
 ```
-      "index-status": {
-      "id": "STATUS",
-      "currentIndex": "INDEX_B",
-      "startIndexTime": "2020-09-23T10:08:33",
-      "endIndexTime": "2020-09-25T11:27:22",
-      "inProgress": false
-      },
-      "index-size": {
-      "INDEX_A": 702344,
-      "INDEX_B": 702344
-      },
-
-     "index-queue-backlog": "0"
-
+    "index-status": {
+    "id": "STATUS",
+    "currentIndex": "INDEX_B",
+    "startIndexTime": "2020-09-23T10:08:33",
+    "endIndexTime": "2020-09-25T11:27:22",
+    "inProgress": false
+    },
+    "index-size": {
+    "INDEX_A": 702344,
+    "INDEX_B": 702344
+    },
+    "index-queue-backlog": "0"
 ```
 
 Pay careful attention to `"currentIndex": "INDEX_A"` - this shows the actual index being used by clients.
@@ -407,7 +400,6 @@ The shards command is the detailed view of what nodes contain which shards. It w
 
 Returns information about ongoing and completed shard recoveries
 
-
 #### To take a manual snapshot, perform the following steps:
 
 1. You can't take a snapshot if one is currently in progress. To check, run the following command:
@@ -432,8 +424,8 @@ To see all snapshots for the namespace run the following command:
 
 `curl -XGET 'http://localhost:9200/_snapshot/<NAMESPACE>/_all?pretty'`
 
-
 ### Useful App Insights Queries
+
 #### General logs (filtering out the offender update)
 ``` kusto
 traces
@@ -470,7 +462,6 @@ requests
 #### Prison API requests during index build
 ``` kusto
 requests
-requests
 | where cloud_RoleName == "prison-api"
 | where name == "GET OffenderResourceImpl/getOffenderNumbers"
 | where customDimensions.clientId == "prisoner-offender-search-client"
@@ -481,5 +472,5 @@ requests
 | where cloud_RoleName == "prison-api"
 | where name == "GET OffenderResourceImpl/getOffender"
 | where customDimensions.clientId == "prisoner-offender-search-client"
-| order by timestamp desc ```
+| order by timestamp desc
 ```
