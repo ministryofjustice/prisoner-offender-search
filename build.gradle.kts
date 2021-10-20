@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.9"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "3.3.10"
   kotlin("plugin.spring") version "1.5.31"
 }
 
@@ -25,10 +25,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.5.10")
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.10")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.10")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.10")
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.5.11")
+  implementation("org.springdoc:springdoc-openapi-ui:1.5.11")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.11")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.11")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -37,13 +37,12 @@ dependencies {
   implementation("com.google.guava:guava:31.0.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.2")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.78")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.91")
   implementation("org.awaitility:awaitility-kotlin:4.1.0")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
-  testImplementation("org.mockito:mockito-inline:3.12.4")
+  testImplementation("org.mockito:mockito-inline:4.0.0")
 }
 
 java {
