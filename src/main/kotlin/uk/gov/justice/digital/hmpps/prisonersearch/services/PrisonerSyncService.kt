@@ -43,13 +43,13 @@ class PrisonerSyncService(
     }
   }
 
-  private fun syncWithBookingId(bookingId : Long) {
+  private fun syncWithBookingId(bookingId: Long) {
     nomisService.getNomsNumberForBooking(bookingId)?.run {
       syncByNomsNumber(this)
     }
   }
 
-  private fun syncByNomsNumber(offenderIdDisplay : String) {
+  private fun syncByNomsNumber(offenderIdDisplay: String) {
     nomisService.getOffender(offenderIdDisplay)?.run {
       prisonerIndexService.sync(this)
     }

@@ -60,12 +60,12 @@ class NomisService(
       .block(offenderTimeout)
   }
 }
-data class BookingInfo (
-  val content : BookingContent
+data class BookingInfo(
+  val content: BookingContent
 )
 
-data class BookingContent (
-  val offenderNo : String
+data class BookingContent(
+  val offenderNo: String
 )
 
 data class OffenderId(
