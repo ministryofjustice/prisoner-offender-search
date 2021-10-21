@@ -39,7 +39,7 @@ class NomisService(
       .bodyToMono(BookingInfo::class.java)
       .onErrorResume(NotFound::class.java) { Mono.empty() }
       .block(offenderTimeout)
-      .content.offenderNo
+      .content.firstOrNull()?.offenderNo
   }
 
   fun getOffender(offenderNo: String): OffenderBooking? {
@@ -61,7 +61,7 @@ class NomisService(
   }
 }
 data class BookingInfo(
-  val content: BookingContent
+  val content: List<BookingContent> = listOf()
 )
 
 data class BookingContent(
