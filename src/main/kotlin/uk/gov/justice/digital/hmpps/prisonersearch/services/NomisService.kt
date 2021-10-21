@@ -32,12 +32,14 @@ class NomisService(
       } ?: OffenderResponse()
   }
 
-  fun getOffender(bookingId: Long): OffenderBooking? {
+  fun getNomsNumberForBooking(bookingId: Long): String? {
     return prisonWebClient.get()
-      .uri("/api/bookings/$bookingId?extraInfo=true")
+      .uri("/api/bookings/v2/bookingId=$bookingId")
       .retrieve()
-      .bodyToMono(OffenderBooking::class.java)
+      .bodyToMono(BookingInfo::class.java)
+      .onErrorResume(NotFound::class.java) { Mono.empty() }
       .block(offenderTimeout)
+      .content.offenderNo
   }
 
   fun getOffender(offenderNo: String): OffenderBooking? {
@@ -58,6 +60,13 @@ class NomisService(
       .block(offenderTimeout)
   }
 }
+data class BookingInfo (
+  val content : BookingContent
+)
+
+data class BookingContent (
+  val offenderNo : String
+)
 
 data class OffenderId(
   val offenderNumber: String

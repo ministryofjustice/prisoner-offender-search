@@ -16,15 +16,11 @@ class PrisonerSyncService(
   }
 
   fun externalMovement(message: ExternalPrisonerMovementMessage) {
-    nomisService.getOffender(message.bookingId)?.let {
-      prisonerIndexService.sync(it)
-    }
+    syncWithBookingId(message.bookingId)
   }
 
   fun offenderBookingChange(message: OffenderBookingChangedMessage) {
-    nomisService.getOffender(message.bookingId)?.let {
-      prisonerIndexService.sync(it)
-    }
+    syncWithBookingId(message.bookingId)
   }
 
   fun offenderBookNumberChange(message: OffenderBookingChangedMessage) {
@@ -36,18 +32,26 @@ class PrisonerSyncService(
       prisonerIndexService.delete(it.value)
     }
 
-    nomisService.getOffender(bookingId)?.let {
-      prisonerIndexService.sync(it)
-    }
+    syncWithBookingId(bookingId)
   }
 
   fun offenderChange(message: OffenderChangedMessage) {
     if (message.offenderIdDisplay != null) {
-      nomisService.getOffender(message.offenderIdDisplay)?.let {
-        prisonerIndexService.sync(it)
-      }
+      syncByNomsNumber(message.offenderIdDisplay)
     } else {
       customEventForMissingOffenderIdDisplay(message)
+    }
+  }
+
+  private fun syncWithBookingId(bookingId : Long) {
+    nomisService.getNomsNumberForBooking(bookingId)?.run {
+      syncByNomsNumber(this)
+    }
+  }
+
+  private fun syncByNomsNumber(offenderIdDisplay : String) {
+    nomisService.getOffender(offenderIdDisplay)?.run {
+      prisonerIndexService.sync(this)
     }
   }
 
