@@ -34,7 +34,7 @@ class NomisService(
 
   fun getNomsNumberForBooking(bookingId: Long): String? {
     return prisonWebClient.get()
-      .uri("/api/bookings/v2/bookingId=$bookingId")
+      .uri("/api/bookings/v2?bookingId=$bookingId")
       .retrieve()
       .bodyToMono(BookingInfo::class.java)
       .onErrorResume(NotFound::class.java) { Mono.empty() }
