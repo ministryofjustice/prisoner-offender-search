@@ -1,0 +1,68 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A7089FE"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 4323342,
+      "bookingNo": "V91188",
+      "offenderNo": "A7089FE",
+      "firstName": "ORIGINAL",
+      "lastName": "RECORD-TO-REMOVE",
+      "agencyId": "LEI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "LEI",
+        "description": "H-4-008",
+        "agencyName": "Leeds Prison"
+      },
+      "dateOfBirth": "1931-02-02",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "profileInformation": [
+        {
+          "type": "YOUTH",
+          "question": "Youth Offender?",
+          "resultValue": "No"
+        },
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        }
+      ],
+      "inOutStatus": "IN",
+      "identifiers": [
+        {
+          "type": "CRO",
+          "value": "79906/12Q",
+          "offenderNo": "A7089FE",
+          "bookingId": 4323342,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        },
+        {
+          "type": "PNC",
+          "value": "20/394774J",
+          "offenderNo": "A7089FE",
+          "bookingId": 4323342,
+          "issuedDate": "2013-12-02",
+          "caseloadType": "INST"
+        }
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "REMAND",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24"
+    }
+  }
+}
