@@ -1,10 +1,10 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/api/bookings/v2",
+    "urlPath": "/api/bookings/4323342",
     "queryParameters": {
-      "bookingId": {
-        "equalTo": "4323342"
+      "basicInfo": {
+        "equalTo": "true"
       }
     }
   },
@@ -14,12 +14,19 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "content": [
-        {
-          "bookingId": 4323342,
-          "offenderNo": "A7089FE"
-        }
-      ]
+      "bookingId": 4323342,
+      "bookingNo": "V91188",
+      "offenderNo": "A7089FE",
+      "firstName": "ORIGINAL",
+      "lastName": "RECORD-TO-REMOVE",
+      "agencyId": "LEI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "LEI",
+        "description": "H-4-008",
+        "agencyName": "Leeds Prison"
+      },
+      "dateOfBirth": "1931-02-02"
     }
   }
 }
