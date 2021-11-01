@@ -7,7 +7,7 @@ jobs:
   validate:
     executor:
       name: hmpps/localstack
-      jdk_tag: "16.0"
+      jdk_tag: "17.0"
       localstack_tag: "0.12.10"
       localstack_type: "localstack-full"
       services: "sqs,sns,es"
@@ -35,7 +35,7 @@ jobs:
       - run:
           environment:
             - AWS_PROVIDER: localstack
-          command: ./gradlew -Dorg.gradle.jvmargs="--illegal-access=permit" -Dkotlin.daemon.jvm.options="--illegal-access=permit" check
+          command: ./gradlew check
       - save_cache:
           paths:
             - ~/.gradle
