@@ -51,6 +51,9 @@ data class PrisonerDetailRequest(
   )
   val prisonIds: List<String>? = emptyList(),
 
+  @Schema(description = "Include aliases in search", example = "true", required = false, defaultValue = "true")
+  val includeAliases: Boolean = true,
+
   @Schema(
     description = "Pagination options. Will default to the first page if omitted.",
     required = false,

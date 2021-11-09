@@ -87,25 +87,37 @@ class PrisonerDetailService(
 
     with(detailRequest) {
 
-      // Match by firstName, exact or by wildcard and include aliases - reduce score for alias matches
+      // Match by firstName, exact or by wildcard and include aliases if set - reduce score for alias matches
       firstName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
-          QueryBuilders.boolQuery()
-            .should(QueryBuilders.matchQuery("firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
-            .should(QueryBuilders.matchQuery("aliases.firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(2f))
-            .should(QueryBuilders.wildcardQuery("firstName", it.lowercase()).boost(5f))
-            .should(QueryBuilders.wildcardQuery("aliases.firstName", it.lowercase()).boost(2f))
+          if (detailRequest.includeAliases) {
+            QueryBuilders.boolQuery()
+              .should(QueryBuilders.matchQuery("firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
+              .should(QueryBuilders.matchQuery("aliases.firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(2f))
+              .should(QueryBuilders.wildcardQuery("firstName", it.lowercase()).boost(5f))
+              .should(QueryBuilders.wildcardQuery("aliases.firstName", it.lowercase()).boost(2f))
+          } else {
+            QueryBuilders.boolQuery()
+              .should(QueryBuilders.matchQuery("firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
+              .should(QueryBuilders.wildcardQuery("firstName", it.lowercase()).boost(5f))
+          }
         )
       }
 
       // Match by lastName, exact or by wildcard match and include aliases - reduce score for alias matches
       lastName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
-          QueryBuilders.boolQuery()
-            .should(QueryBuilders.matchQuery("lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
-            .should(QueryBuilders.matchQuery("aliases.lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(2f))
-            .should(QueryBuilders.wildcardQuery("lastName", it.lowercase()).boost(5f))
-            .should(QueryBuilders.wildcardQuery("aliases.lastName", it.lowercase()).boost(2f))
+          if (detailRequest.includeAliases) {
+            QueryBuilders.boolQuery()
+              .should(QueryBuilders.matchQuery("lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
+              .should(QueryBuilders.matchQuery("aliases.lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(2f))
+              .should(QueryBuilders.wildcardQuery("lastName", it.lowercase()).boost(5f))
+              .should(QueryBuilders.wildcardQuery("aliases.lastName", it.lowercase()).boost(2f))
+          } else {
+            QueryBuilders.boolQuery()
+              .should(QueryBuilders.matchQuery("lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
+              .should(QueryBuilders.wildcardQuery("lastName", it.lowercase()).boost(5f))
+          }
         )
       }
 
@@ -199,6 +211,7 @@ class PrisonerDetailService(
       "croNumber" to detailRequest.croNumber,
       "fuzzyMatch" to detailRequest.fuzzyMatch.toString(),
       "prisonIds" to detailRequest.prisonIds.toString(),
+      "includeAliases" to detailRequest.includeAliases.toString()
     )
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
