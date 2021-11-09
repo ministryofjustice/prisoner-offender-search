@@ -252,7 +252,7 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(firstName = "Sam", prisonIds = listOf("LEI", "MDI")),
       expectedCount = 4,
-      expectedPrisoners = listOf("A7090AB","A7090BA", "A7090BB","A7090AF"),
+      expectedPrisoners = listOf("A7090AB", "A7090BA", "A7090BB", "A7090AF"),
     )
   }
 
@@ -261,25 +261,25 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(firstName = "Sam", prisonIds = listOf("LEI", "MDI"), includeAliases = false),
       expectedCount = 3,
-      expectedPrisoners = listOf("A7090AB","A7090BA", "A7090BB"),
+      expectedPrisoners = listOf("A7090AB", "A7090BA", "A7090BB"),
     )
   }
 
   @Test
   fun `find by last name including aliases`() {
     detailSearch(
-      detailRequest = PrisonerDetailRequest(lastName = "Jones", prisonIds = listOf("MDI","LEI")),
+      detailRequest = PrisonerDetailRequest(lastName = "Jones", prisonIds = listOf("MDI", "LEI")),
       expectedCount = 5,
-      expectedPrisoners = listOf("A7090AA","A7090AB","A7090BA","A7090BB","A7090AF"),
+      expectedPrisoners = listOf("A7090AA", "A7090AB", "A7090BA", "A7090BB", "A7090AF"),
     )
   }
 
   @Test
   fun `find by last name excluding aliases`() {
     detailSearch(
-      detailRequest = PrisonerDetailRequest(lastName = "Jones", prisonIds = listOf("MDI","LEI"), includeAliases = false),
+      detailRequest = PrisonerDetailRequest(lastName = "Jones", prisonIds = listOf("MDI", "LEI"), includeAliases = false),
       expectedCount = 4,
-      expectedPrisoners = listOf("A7090AA","A7090AB","A7090BA","A7090BB"),
+      expectedPrisoners = listOf("A7090AA", "A7090AB", "A7090BA", "A7090BB"),
     )
   }
 
