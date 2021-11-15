@@ -1,7 +1,7 @@
 ---
 # Environment specific values, override helm_deploy/prisoner-offender-search/values.yaml
 generic-service:
-  replicaCount: 2
+  replicaCount: 4
   ingress:
     host: "prisoner-offender-search.prison.service.justice.gov.uk"
   env:
