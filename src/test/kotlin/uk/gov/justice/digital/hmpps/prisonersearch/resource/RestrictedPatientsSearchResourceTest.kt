@@ -1,11 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.withinPercentage
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.web.reactive.function.BodyInserters
@@ -336,8 +337,8 @@ class RestrictedPatientsSearchResourceTest : QueueIntegrationTest() {
     verify(telemetryClient).trackEvent(
       eq("POSFindRestrictedPatientsByCriteria"),
       any(),
-      com.nhaarman.mockitokotlin2.check<Map<String, Double>> {
-        Assertions.assertThat(it["numberOfResults"]).isCloseTo(4.0, withinPercentage(1))
+      check<Map<String, Double>> {
+        assertThat(it["numberOfResults"]).isCloseTo(4.0, withinPercentage(1))
       }
     )
   }
