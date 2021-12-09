@@ -284,8 +284,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes: One is marked as in progress or in error")
         }
     }
 
@@ -308,8 +308,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes: One is marked as in progress or in error")
         }
     }
 
@@ -323,8 +323,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes: One is marked as in progress or in error")
         }
     }
 
@@ -338,8 +338,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to switch indexes - one is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to switch indexes: One is marked as in progress or in error")
         }
     }
 
@@ -352,8 +352,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index reason: Index is marked as in progress or in error")
         }
     }
 
@@ -376,8 +376,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index reason: Index is marked as in progress or in error")
         }
     }
 
@@ -391,8 +391,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index reason: Index is marked as in progress or in error")
         }
     }
 
@@ -406,8 +406,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to build index - it is marked as in progress or in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable to build index reason: Index is marked as in progress or in error")
         }
     }
 
@@ -421,8 +421,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to marked index complete as it is in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable mark index as complete: Index is in error")
         }
     }
 
@@ -436,8 +436,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isEqualTo(HttpStatus.CONFLICT)
         .expectBody()
-        .jsonPath("$.message").value<String> { message ->
-          assertThat(message).isEqualTo("Unable to marked index complete as it is in error")
+        .jsonPath("$.developerMessage").value<String> { message ->
+          assertThat(message).isEqualTo("Unable mark index as complete: Index is in error")
         }
     }
 
