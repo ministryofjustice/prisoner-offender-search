@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService.IndexBuildException
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService.MarkIndexCompleteException
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService.SwitchIndexException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.InvalidRequestException
@@ -103,6 +106,32 @@ class ControllerAdvice {
     return ResponseEntity
       .status(HttpStatus.BAD_REQUEST)
       .body(ErrorResponse(status = HttpStatus.BAD_REQUEST.value(), developerMessage = e.developerMessage()))
+  }
+
+  @ExceptionHandler(IndexBuildException::class)
+  fun handleIndexBuildException(e: IndexBuildException): ResponseEntity<ErrorResponse> {
+    log.debug("Index build exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(ErrorResponse(status = HttpStatus.CONFLICT.value(), developerMessage = e.message))
+  }
+
+  @ExceptionHandler(SwitchIndexException::class)
+  fun handleSwitchIndexException(e: SwitchIndexException): ResponseEntity<ErrorResponse> {
+    log.debug("Switch index exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(
+        ErrorResponse(status = HttpStatus.CONFLICT.value(), developerMessage = e.message)
+      )
+  }
+
+  @ExceptionHandler(MarkIndexCompleteException::class)
+  fun handleIndexCompleteException(e: MarkIndexCompleteException): ResponseEntity<ErrorResponse> {
+    log.debug("Index complete exception caught: {}", e.message)
+    return ResponseEntity
+      .status(HttpStatus.CONFLICT)
+      .body(ErrorResponse(status = HttpStatus.CONFLICT.value(), developerMessage = e.message))
   }
 }
 

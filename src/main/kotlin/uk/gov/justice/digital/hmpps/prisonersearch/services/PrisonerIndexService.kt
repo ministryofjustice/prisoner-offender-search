@@ -13,9 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
-import org.springframework.http.HttpStatus.CONFLICT
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
@@ -99,7 +97,7 @@ class PrisonerIndexService(
     return JsonParser.parseString(IOUtils.toString(response.entity.content)).asJsonObject["count"].asInt
   }
 
-  @Throws(ElasticSearchIndexingException::class, ResponseStatusException::class)
+  @Throws(ElasticSearchIndexingException::class, IndexBuildException::class)
   fun buildIndex(): IndexStatus {
     try {
       if (indexStatusService.markRebuildStarting()) {
@@ -118,7 +116,7 @@ class PrisonerIndexService(
         indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.REBUILD))
       } else {
         log.info("Index not restarted as index is marked in progress or in error")
-        throw ResponseStatusException(CONFLICT, "Unable to build index - it is marked as in progress or in error")
+        throw IndexBuildException("Index is marked as in progress or in error")
       }
       return indexStatusService.getCurrentIndex()
     } catch (ese: ElasticsearchException) {
@@ -149,12 +147,12 @@ class PrisonerIndexService(
     return indexStatusService.getCurrentIndex()
   }
 
-  @Throws(ResponseStatusException::class)
+  @Throws(SwitchIndexException::class)
   fun switchIndex(): IndexStatus {
     val switched = indexStatusService.switchIndex()
     if (!switched) {
       log.info("Index not switched as one is marked in progress or in error")
-      throw ResponseStatusException(CONFLICT, "Unable to switch indexes - one is marked as in progress or in error")
+      throw SwitchIndexException("One is marked as in progress or in error")
     }
     val currentIndex = indexStatusService.getCurrentIndex()
     log.info("Index switched, index {} is now current.", currentIndex.currentIndex)
@@ -175,12 +173,12 @@ class PrisonerIndexService(
     log.debug("Requested {} offender index syncs", count)
   }
 
-  @Throws(ResponseStatusException::class)
+  @Throws(MarkIndexCompleteException::class)
   fun indexingComplete(ignoreThreshold: Boolean): IndexStatus {
     val currentIndexStatus = indexStatusService.getCurrentIndex()
     if (currentIndexStatus.inError) {
       log.info("Index not marked as complete as it is in error")
-      throw ResponseStatusException(CONFLICT, "Unable to marked index complete as it is in error")
+      throw MarkIndexCompleteException("Index is in error")
     }
     if (ignoreThreshold.not()) {
       val indexCount = countIndex(currentIndexStatus.currentIndex.otherIndex())
@@ -229,4 +227,13 @@ class PrisonerIndexService(
       )
     )
   }
+
+  open class IndexBuildException(val error: String) :
+    Exception("Unable to build index reason: $error")
+
+  open class SwitchIndexException(val error: String) :
+    Exception("Unable to switch indexes: $error")
+
+  open class MarkIndexCompleteException(val error: String) :
+    Exception("Unable mark index as complete: $error")
 }
