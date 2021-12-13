@@ -11,6 +11,13 @@ dependencyCheck {
   suppressionFiles.add("elasticsearch-suppressions.xml")
 }
 
+// pinned elasticsearch version to 7.12.1 and spring-data-elasticsearch:4.2.7
+// rest-high-level-client:7.15.2 is not compatible with our current version of elasticsearch
+// (AWS currently only support elasticsearch to 7.10)
+// https://github.com/elastic/elasticsearch/issues/76091#issuecomment-892817267
+
+ext["elasticsearch.version"] = "7.12.1"
+
 dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
