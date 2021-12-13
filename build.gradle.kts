@@ -15,7 +15,7 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("org.springframework.data:spring-data-elasticsearch")
+  implementation("org.springframework.data:spring-data-elasticsearch:4.2.7")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
