@@ -7,6 +7,7 @@ generic-service:
   env:
     API_BASE_URL_OAUTH: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
     API_BASE_URL_NOMIS: "https://api-preprod.prison.service.justice.gov.uk"
+    API_BASE_URL_RESTRICTED_PATIENTS: "https://restricted-patients-api-preprod.hmpps.service.justice.gov.uk"
     INDEX_COMPLETE_THRESHOLD: 500000
 
   # Additional allowlist rules
