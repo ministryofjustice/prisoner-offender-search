@@ -60,8 +60,8 @@ class PrisonerSearchService(
     return emptyList()
   }
 
-  fun findByPrison(prisonId: String, pageable: Pageable): Page<Prisoner> {
-    queryBy(prisonId, pageable) { locationMatch(it) } onMatch {
+  fun findByPrison(prisonId: String, pageable: Pageable, includeRestrictedPatients: Boolean = false): Page<Prisoner> {
+    queryBy(prisonId, pageable) { if (includeRestrictedPatients) includeRestricted(it) else locationMatch(it) } onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
     }
