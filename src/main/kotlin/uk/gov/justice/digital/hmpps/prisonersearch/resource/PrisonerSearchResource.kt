@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
@@ -54,9 +55,10 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     prisonerSearchService.findBy(criteria)
 
   @GetMapping("/prison/{prisonId}")
-  @Operation(summary = "Match prisoners by prison", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  @Operation(summary = "Match prisoners by prison, or if a restricted patient supported by a POM", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByPrison(
     @Valid @PathVariable prisonId: String,
+    @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients: Boolean,
     @ParameterObject @PageableDefault pageable: Pageable
-  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable)
+  ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable, includeRestrictedPatients)
 }
