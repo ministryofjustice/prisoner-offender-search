@@ -111,7 +111,7 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can perform a get on prisoner number`() {
-    getPrisoner("A7089EY", "/results/globalSearch/search_results_smith.json")
+    getPrisoner("A7089EY", "/results/globalSearch/get_prisoner_A7089EY.json")
   }
 
   @Test
