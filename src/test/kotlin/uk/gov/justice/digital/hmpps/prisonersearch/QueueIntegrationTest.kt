@@ -168,6 +168,15 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
+  fun getPrisoner(id: String, fileAssert: String) {
+    webTestClient.get().uri("/prisoner/$id")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
   fun keywordSearch(
     keywordRequest: KeywordRequest,
     expectedCount: Int = 0,
