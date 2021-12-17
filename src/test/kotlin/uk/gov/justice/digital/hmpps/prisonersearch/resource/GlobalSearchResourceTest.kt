@@ -110,6 +110,29 @@ class GlobalSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can perform a get on prisoner number`() {
+    getPrisoner("A7089EY", "/results/globalSearch/get_prisoner_A7089EY.json")
+  }
+
+  @Test
+  fun `access forbidden when wrong role`() {
+    webTestClient.get().uri("/prisoner/A7089EY")
+      .headers(setAuthorisation(roles = listOf("ROLE_DUMMY")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `not found when missing prisoner`() {
+    webTestClient.get().uri("/prisoner/DUMMY")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isNotFound
+  }
+
+  @Test
   fun `can perform a match on prisoner number lowercase prisoner number uppercased before search`() {
     globalSearch(
       GlobalSearchCriteria("a7089ey", null, null, null, null, null),

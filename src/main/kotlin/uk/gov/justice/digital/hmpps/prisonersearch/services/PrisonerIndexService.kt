@@ -62,6 +62,15 @@ class PrisonerIndexService(
     prisonerBRepository.deleteById(prisonerNumber)
   }
 
+  fun get(id: String): Prisoner? {
+    val currentIndexStatus = indexStatusService.getCurrentIndex()
+    return if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerARepository.findById(id)
+    } else {
+      prisonerBRepository.findById(id)
+    }.map { it }.orElse(null)
+  }
+
   fun sync(offenderBooking: OffenderBooking): Prisoner {
     val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
 
