@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.0-beta-4"
-  kotlin("plugin.spring") version "1.6.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.2"
+  kotlin("plugin.spring") version "1.6.10"
 }
 
 configurations {
@@ -22,17 +22,17 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("org.springframework.data:spring-data-elasticsearch:4.2.7")
+  implementation("org.springframework.data:spring-data-elasticsearch:4.3.1")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.5.13")
-  implementation("org.springdoc:springdoc-openapi-ui:1.5.13")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.5.13")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.5.13")
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.5")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.5")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.5")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.5")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -40,13 +40,13 @@ dependencies {
   implementation("com.google.code.gson:gson:2.8.9")
   implementation("com.google.guava:guava:31.0.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.3")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.126")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.5")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.148")
   implementation("org.awaitility:awaitility-kotlin:4.1.1")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("org.mockito:mockito-inline:4.1.0")
+  testImplementation("org.mockito:mockito-inline:4.3.1")
 }
 
 java {
