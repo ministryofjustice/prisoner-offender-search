@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.2"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.3-beta"
   kotlin("plugin.spring") version "1.6.10"
 }
 
@@ -41,7 +41,7 @@ dependencies {
   implementation("com.google.guava:guava:31.0.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.5")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.148")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.151")
   implementation("org.awaitility:awaitility-kotlin:4.1.1")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
