@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.3-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.3"
   kotlin("plugin.spring") version "1.6.10"
 }
 
@@ -29,19 +29,19 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.5")
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.5")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.5")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.5")
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.6")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.6")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.6")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.6")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.apache.commons:commons-lang3:3.12.0")
-  implementation("com.google.code.gson:gson:2.8.9")
+  implementation("com.google.code.gson:gson:2.9.0")
   implementation("com.google.guava:guava:31.0.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.5")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.151")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.158")
   implementation("org.awaitility:awaitility-kotlin:4.1.1")
 
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
