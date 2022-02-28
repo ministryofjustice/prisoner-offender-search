@@ -63,7 +63,7 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 
 ### Running
 
-`localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-sns.sh` and `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on two main ports: 4566 for sns and sqs and 4571 for elasticsearch.
+`localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on port 4566.
 
 Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender
 search in a Docker container, or in IntelliJ and in tests. If running search in Docker, `ES_HOSTNAME` needs to be set
@@ -73,7 +73,7 @@ A workaround to this can be to add `localstack` as a host name entry in your OS'
 
 The elasticsearch part of localstack takes a long time to start and will not be up and running fully until you see the following entry in the localstack logs:
 ```
-[INFO] Running on http://0.0.0.0:4571 (CTRL + C to quit)
+Starting mock SQS service on http port 4566 ...
 ```
 
 Starting the services is therefore a two step process:
@@ -174,7 +174,7 @@ curl --location --request POST "http://localhost:8080/prisoner-search/match" --h
 
 #### View ES indexes
 ```bash
-curl --location --request POST "http://localhost:4571/prisoner-search-a/_search" | jq
+curl --location --request POST "http://es1.eu-west-2.es.localhost.localstack.cloud:4566/prisoner-search-a/_search" | jq
 ```
 
 ### Alternative running

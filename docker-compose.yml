@@ -19,8 +19,6 @@ services:
       - API_BASE_URL_OAUTH=http://oauth:8080/auth
       - API_BASE_URL_NOMIS=http://prisonapi:8080
       - SQS_ENDPOINT_URL=http://localstack:4566
-      - ELASTICSEARCH_HOST=localstack
-      - ELASTICSEARCH_PROXY_URL=http://localstack:4571
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
       - OAUTH_CLIENT_SECRET=clientsecret
 
@@ -79,7 +77,6 @@ services:
       - 8999:8080
     environment:
       - SERVICES=sqs,sns,es
-      - ES_PORT_EXTERNAL=4571
       - DEBUG=${DEBUG- }
       - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock

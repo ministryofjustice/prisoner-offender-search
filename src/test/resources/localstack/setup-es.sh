@@ -14,4 +14,4 @@ if [[ -d /tmp/localstack/es_backup ]]; then
 fi
 mkdir -p /tmp/localstack
 chmod -R 777 /tmp/localstack || echo "Failed to chmod /tmp/localstack folder"
-echo "Elasticsearch configured. Please wait until '[INFO] Running on http://0.0.0.0:4571' appears before connecting"
+echo "Elasticsearch configured. Please wait until 'Starting mock SQS service on http port 4566 ...' appears before connecting"
