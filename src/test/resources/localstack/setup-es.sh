@@ -12,5 +12,6 @@ if [[ -d /tmp/localstack/es_backup ]]; then
   mkdir /tmp/localstack/es_backup || echo "Failed to create /tmp/localstack/es_backup folder"
   echo "/tmp/localstack/es_backup successfully recreated."
 fi
+mkdir -p /tmp/localstack
 chmod -R 777 /tmp/localstack || echo "Failed to chmod /tmp/localstack folder"
 echo "Elasticsearch configured. Please wait until '[INFO] Running on http://0.0.0.0:4571' appears before connecting"
