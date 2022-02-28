@@ -12,10 +12,6 @@ generic-service:
     INDEX_COMPLETE_THRESHOLD: 500000
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
 
-# Sets where alerts will be delivered, via Alertmanager receiver
-generic-prometheus-alerts:
-  alertSeverity: digital-prison-service-dev
-
-# CloudPlatform AlertManager receiver to route promethues alerts to slack
+# CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: hmpps_tech_non_prod

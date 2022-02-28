@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.4"
   kotlin("plugin.spring") version "1.6.10"
 }
 
@@ -22,7 +22,7 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("org.springframework.data:spring-data-elasticsearch:4.3.1")
+  implementation("org.springframework.data:spring-data-elasticsearch:4.3.2")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -40,23 +40,24 @@ dependencies {
   implementation("com.google.code.gson:gson:2.9.0")
   implementation("com.google.guava:guava:31.0.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.5")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.158")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.6")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.167")
   implementation("org.awaitility:awaitility-kotlin:4.1.1")
 
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.0.30")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:4.3.1")
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "16"
+      jvmTarget = "17"
     }
   }
 }
