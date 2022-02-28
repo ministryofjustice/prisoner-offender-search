@@ -15,8 +15,6 @@ services:
       - API_BASE_URL_OAUTH=http://oauth-server:8080/auth
       - API_BASE_URL_NOMIS=http://prison-api:8080
       - SQS_ENDPOINT_URL=http://localstack:4566
-      - ELASTICSEARCH_HOST=localstack
-      - ELASTICSEARCH_PROXY_URL=http://localstack:4571
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
       - OAUTH_CLIENT_SECRET=clientsecret
 
@@ -49,7 +47,7 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
 
   localstack:
-    image: localstack/localstack:0.12.10
+    image: localstack/localstack:0.14.0
     networks:
       - hmpps
     container_name: localstack
