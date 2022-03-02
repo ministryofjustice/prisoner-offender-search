@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.0.5-beta"
   kotlin("plugin.spring") version "1.6.10"
 }
 
@@ -38,10 +38,10 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.apache.commons:commons-lang3:3.12.0")
   implementation("com.google.code.gson:gson:2.9.0")
-  implementation("com.google.guava:guava:31.0.1-jre")
+  implementation("com.google.guava:guava:31.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.0.6")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.167")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.168")
   implementation("org.awaitility:awaitility-kotlin:4.1.1")
 
   testImplementation("io.swagger.parser.v3:swagger-parser:2.0.30")
