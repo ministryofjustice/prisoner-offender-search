@@ -40,7 +40,7 @@ data class KeywordRequest(
 
   @Schema(
     description = "List of prison codes to filter results",
-    example = "['LEI', 'MDI']",
+    example = "[\"LEI\", \"MDI\"]",
     required = true,
   )
   val prisonIds: List<String>? = emptyList(),
