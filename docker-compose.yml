@@ -78,6 +78,7 @@ services:
     environment:
       - SERVICES=sqs,sns,es
       - DEBUG=${DEBUG- }
+      - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DEFAULT_REGION=eu-west-2
       - HOSTNAME_EXTERNAL=${ES_HOSTNAME:-localstack}
