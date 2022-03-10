@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 @Service
 class MatchService(
-  private val elasticSearchClient: SearchClient,
+  private val elasticsearchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
   private val mapper: ObjectMapper,
 ) {
@@ -202,7 +202,7 @@ class MatchService(
         query(matchQuery.withDefaults(matchRequest))
       }
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
-      val prisonerMatches = getSearchResult(elasticSearchClient.search(searchRequest))
+      val prisonerMatches = getSearchResult(elasticsearchClient.search(searchRequest))
       return if (prisonerMatches.isEmpty()) PrisonerResult.NoMatch else PrisonerResult.Match(prisonerMatches)
     } ?: PrisonerResult.NoMatch
   }

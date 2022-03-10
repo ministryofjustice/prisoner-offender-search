@@ -16,7 +16,7 @@ class ElasticSearchConfiguration : AbstractElasticsearchConfiguration() {
   @Value("\${elasticsearch.proxy.url}")
   private val url: String? = null
 
-  @Bean("elasticSearchClient")
+  @Bean
   override fun elasticsearchClient(): RestHighLevelClient {
     return RestClients.create(ClientConfiguration.builder().connectedTo("${url?.substringAfter("//")}").build()).rest()
   }

@@ -25,11 +25,11 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @BeforeEach
   fun init() {
-    elasticSearchClient.deleteByQuery(
+    elasticsearchClient.deleteByQuery(
       DeleteByQueryRequest(SyncIndex.INDEX_A.indexName).setQuery(QueryBuilders.matchAllQuery()),
       RequestOptions.DEFAULT
     )
-    elasticSearchClient.deleteByQuery(
+    elasticsearchClient.deleteByQuery(
       DeleteByQueryRequest(SyncIndex.INDEX_B.indexName).setQuery(QueryBuilders.matchAllQuery()),
       RequestOptions.DEFAULT
     )
@@ -444,7 +444,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     private fun updateIndexErrorStatus(inProgress: Boolean, inError: Boolean) {
       val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
       resetIndexStatus.setJsonEntity(gson.toJson(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, inProgress, inError)))
-      elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
+      elasticsearchClient.lowLevelClient.performRequest(resetIndexStatus)
     }
   }
 

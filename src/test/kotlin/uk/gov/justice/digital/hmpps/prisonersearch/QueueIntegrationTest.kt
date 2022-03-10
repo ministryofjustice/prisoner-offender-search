@@ -51,7 +51,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   lateinit var gson: Gson
 
   @Autowired
-  lateinit var elasticSearchClient: RestHighLevelClient
+  lateinit var elasticsearchClient: RestHighLevelClient
 
   @Autowired
   lateinit var elasticsearchOperations: ElasticsearchOperations
@@ -118,7 +118,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   private fun createIndexStatusIndex() {
-    val response = elasticSearchClient.lowLevelClient.performRequest(Request("HEAD", "/offender-index-status"))
+    val response = elasticsearchClient.lowLevelClient.performRequest(Request("HEAD", "/offender-index-status"))
     if (response.statusLine.statusCode == 404) {
       val indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of("offender-index-status"))
       indexOperations.create()
@@ -126,11 +126,11 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     }
     val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
     resetIndexStatus.setJsonEntity(gson.toJson(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false)))
-    elasticSearchClient.lowLevelClient.performRequest(resetIndexStatus)
+    elasticsearchClient.lowLevelClient.performRequest(resetIndexStatus)
   }
 
   private fun createPrisonerIndex(prisonerIndex: SyncIndex) {
-    val response = elasticSearchClient.lowLevelClient.performRequest(Request("HEAD", "/${prisonerIndex.indexName}"))
+    val response = elasticsearchClient.lowLevelClient.performRequest(Request("HEAD", "/${prisonerIndex.indexName}"))
     if (response.statusLine.statusCode == 404) {
       val indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(prisonerIndex.indexName))
       indexOperations.create()
