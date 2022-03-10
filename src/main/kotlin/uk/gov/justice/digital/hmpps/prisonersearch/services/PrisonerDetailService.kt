@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class PrisonerDetailService(
-  private val elasticSearchClient: SearchClient,
+  private val elasticsearchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
@@ -54,7 +54,7 @@ class PrisonerDetailService(
     // log.info("Detail search query JSON: {}", searchSourceBuilder.toString())
 
     return try {
-      val searchResponse = elasticSearchClient.search(searchRequest)
+      val searchResponse = elasticsearchClient.search(searchRequest)
       customEventForFindBySearchCriteria(detailRequest, searchResponse.hits.totalHits?.value ?: 0)
       createDetailResponse(detailRequest.pagination, searchResponse)
     } catch (e: Throwable) {

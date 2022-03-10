@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class KeywordService(
-  private val elasticSearchClient: SearchClient,
+  private val elasticsearchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
@@ -57,7 +57,7 @@ class KeywordService(
     // log.info("Keyword query JSON: {}", searchSourceBuilder.toString())
 
     return try {
-      val searchResponse = elasticSearchClient.search(searchRequest)
+      val searchResponse = elasticsearchClient.search(searchRequest)
       customEventForFindBySearchCriteria(keywordRequest, searchResponse.hits.totalHits?.value ?: 0)
       createKeywordResponse(keywordRequest.pagination, searchResponse)
     } catch (e: Throwable) {
