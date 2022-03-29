@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.1.2-beta-2"
   kotlin("plugin.spring") version "1.6.10"
 }
 
@@ -22,7 +22,7 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   implementation("org.springframework.boot:spring-boot-starter-actuator")
-  implementation("org.springframework.data:spring-data-elasticsearch:4.3.2")
+  implementation("org.springframework.data:spring-data-elasticsearch:4.3.3")
 
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
@@ -40,8 +40,8 @@ dependencies {
   implementation("com.google.code.gson:gson:2.9.0")
   implementation("com.google.guava:guava:31.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.1")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.180")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.2")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.187")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   testImplementation("io.swagger.parser.v3:swagger-parser:2.0.31")
