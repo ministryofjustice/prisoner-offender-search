@@ -79,7 +79,7 @@ open class Prisoner {
   @Schema(description = "Last Movement Reason of prisoner", example = "CA")
   var lastMovementReasonCode: String? = null
 
-  @Schema(description = "In/Out Status", example = "IN", allowableValues = ["IN,OUT"])
+  @Schema(description = "In/Out Status", example = "IN", allowableValues = ["IN", "OUT"])
   var inOutStatus: String? = null
 
   @Field(type = FieldType.Keyword)
