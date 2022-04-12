@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import javax.validation.Valid
 
@@ -53,6 +54,14 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @Operation(summary = "Match prisoners by a list of booking ids", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByIds(@Parameter(required = true) @Valid @RequestBody criteria: BookingIds) =
     prisonerSearchService.findBy(criteria)
+
+  @PostMapping("/release-date-by-prison")
+  @Operation(summary = "Match prisoners who have a release date within a range, and optionally by prison",
+    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  fun findByReleaseDateAndPrison(
+    @Parameter(required = true) @Valid @RequestBody criteria: ReleaseDateSearch,
+    @ParameterObject @PageableDefault pageable: Pageable
+  ) = prisonerSearchService.findByReleaseDate(criteria, pageable)
 
   @GetMapping("/prison/{prisonId}")
   @Operation(summary = "Match prisoners by prison, or if a restricted patient supported by a POM", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")

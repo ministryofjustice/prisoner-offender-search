@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
+import java.time.LocalDate
 
 @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
 @Service
@@ -58,6 +59,15 @@ class PrisonerSearchService(
     }
     customEventForFindBySearchCriteria(searchCriteria, 0)
     return emptyList()
+  }
+
+  fun findByReleaseDate(searchCriteria: ReleaseDateSearch, pageable: Pageable): Page<Prisoner> {
+    searchCriteria.validate()
+    queryBy(searchCriteria, pageable) { releaseDateMatch(it) } onMatch {
+      customEventForFindByReleaseDate(searchCriteria, it.matches.size)
+      return PageImpl(it.matches, pageable, it.totalHits)
+    }
+    return PageImpl(listOf(), pageable, 0L)
   }
 
   fun findByPrison(prisonId: String, pageable: Pageable, includeRestrictedPatients: Boolean = false): Page<Prisoner> {
@@ -108,6 +118,31 @@ class PrisonerSearchService(
   }
 
   private fun queryBy(
+    searchCriteria: ReleaseDateSearch,
+    pageable: Pageable,
+    queryBuilder: (searchCriteria: ReleaseDateSearch) -> BoolQueryBuilder?
+  ): GlobalResult {
+    val query = queryBuilder(searchCriteria)
+    return query?.let {
+      val searchSourceBuilder = SearchSourceBuilder().apply {
+        query(query)
+        size(pageable.pageSize)
+        from(pageable.offset.toInt())
+        sort("_score")
+        sort("prisonerNumber")
+        trackTotalHits(true)
+      }
+      val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
+      val searchResults = searchClient.search(searchRequest)
+      val prisonerMatches = getSearchResult(searchResults)
+      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(
+        prisonerMatches,
+        searchResults.hits.totalHits?.value ?: 0
+      )
+    } ?: GlobalResult.NoMatch
+  }
+
+  private fun queryBy(
     prisonId: String,
     pageable: Pageable,
     queryBuilder: (prisonId: String) -> BoolQueryBuilder?
@@ -152,6 +187,19 @@ class PrisonerSearchService(
           "croNumber",
           "bookNumber"
         )
+    }
+  }
+
+  private fun releaseDateMatch(searchCriteria: ReleaseDateSearch): BoolQueryBuilder {
+    with(searchCriteria) {
+      return QueryBuilders.boolQuery()
+        .matchesDateRange(
+          earliestReleaseDate,
+          latestReleaseDate,
+          "conditionalReleaseDate",
+          "confirmedReleaseDate"
+        )
+        .filterWhenPresent("prisonId", searchCriteria.prisonIds?.toList())
     }
   }
 
@@ -241,6 +289,20 @@ class PrisonerSearchService(
       "numberOfResults" to numberOfResults.toDouble()
     )
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
+  }
+
+  private fun customEventForFindByReleaseDate(searchCriteria: ReleaseDateSearch, numberOfResults: Int) {
+    val propertiesMap = mapOf(
+      "username" to authenticationHolder.currentUsername(),
+      "clientId" to authenticationHolder.currentClientId(),
+      "earliestReleaseDate" to searchCriteria.earliestReleaseDate.toString(),
+      "latestReleaseDateRange" to searchCriteria.latestReleaseDate.toString(),
+      "prisonId" to searchCriteria.prisonIds.toString(),
+    )
+    val metricsMap = mapOf(
+      "numberOfResults" to numberOfResults.toDouble()
+    )
+    telemetryClient.trackEvent("POSFindByReleaseDate", propertiesMap, metricsMap)
   }
 
   private fun customEventForFindBy(type: String, prisonerListNumber: Int, numberOfResults: Int) {
