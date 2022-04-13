@@ -56,8 +56,10 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     prisonerSearchService.findBy(criteria)
 
   @PostMapping("/release-date-by-prison")
-  @Operation(summary = "Match prisoners who have a release date within a range, and optionally by prison",
-    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  @Operation(
+    summary = "Match prisoners who have a release date within a range, and optionally by prison",
+    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role"
+  )
   fun findByReleaseDateAndPrison(
     @Parameter(required = true) @Valid @RequestBody criteria: ReleaseDateSearch,
     @ParameterObject @PageableDefault pageable: Pageable

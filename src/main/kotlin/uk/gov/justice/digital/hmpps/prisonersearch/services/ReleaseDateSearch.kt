@@ -20,7 +20,7 @@ data class ReleaseDateSearch(
 ) {
   @Schema(hidden = true)
   fun validate() = run {
-    if(latestReleaseDate?.isBefore(earliestReleaseDate) == true) {
+    if (latestReleaseDate?.isBefore(earliestReleaseDate) == true) {
       throw BadRequestException("Invalid search - latestReleaseDate must be on or before the earliestReleaseDate")
     }
   }
