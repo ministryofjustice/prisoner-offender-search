@@ -1,0 +1,53 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A1181FF",
+      "bookingId": "-47",
+      "bookNumber": "Z00044",
+      "firstName": "JANIS",
+      "lastName": "DRP",
+      "dateOfBirth": "1980-01-02",
+      "gender": "Male",
+      "ethnicity": "Mixed: White and Black African",
+      "youthOffender": false,
+      "status": "INACTIVE IN",
+      "inOutStatus": "IN",
+      "prisonId": "MDI",
+      "prisonName": "Moorland",
+      "aliases": [],
+      "alerts": [],
+      "recall": false,
+      "indeterminateSentence": false,
+      "releaseDate": "2019-05-01",
+      "confirmedReleaseDate": "2019-05-01",
+      "receptionDate": "2000-08-16",
+      "locationDescription": "Moorland",
+      "restrictedPatient": false
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "offset": 0,
+    "pageNumber": 0,
+    "pageSize": 10,
+    "paged": true,
+    "unpaged": false
+  },
+  "last": true,
+  "totalElements": 1,
+  "totalPages": 1,
+  "first": true,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": false,
+    "unsorted": true
+  },
+  "numberOfElements": 1,
+  "empty": false
+}

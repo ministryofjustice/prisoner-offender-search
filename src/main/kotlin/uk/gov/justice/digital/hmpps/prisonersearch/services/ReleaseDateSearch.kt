@@ -13,7 +13,7 @@ data class ReleaseDateSearch(
   val earliestReleaseDate: LocalDate? = LocalDate.now(),
   @Schema(description = "The upper bound for the release date range of which to search. A required field.", example = "20/05/2022")
   @JsonFormat(pattern = "dd/MM/yyyy")
-  @field:NotNull(message = "latestReleaseDateRange is a required field")
+  @field:NotNull(message = "Invalid search - latestReleaseDateRange is a required field")
   val latestReleaseDate: LocalDate?,
   @Schema(description = "List of Prison Ids (can include OUT and TRN) to restrict the search by. Unrestricted if not supplied or null", example = "[\"MDI\"]")
   val prisonIds: Set<String>? = null,
