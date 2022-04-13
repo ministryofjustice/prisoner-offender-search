@@ -85,8 +85,8 @@ class PrisonerSearchByReleaseDateResourceTest : QueueIntegrationTest() {
   fun `can match on conditionalReleaseDate`() {
     searchByReleaseDate(
       ReleaseDateSearch(
-        earliestReleaseDate = LocalDate.parse("2018-01-31"),
-        latestReleaseDate = LocalDate.parse("2018-01-31")
+        earliestReleaseDate = LocalDate.parse("2023-05-16"),
+        latestReleaseDate = LocalDate.parse("2023-05-16")
       ),
       "/results/releaseDateSearch/search_conditional_release_date.json"
     )
@@ -96,8 +96,8 @@ class PrisonerSearchByReleaseDateResourceTest : QueueIntegrationTest() {
   fun `can match on confirmedReleaseDate`() {
     searchByReleaseDate(
       ReleaseDateSearch(
-        earliestReleaseDate = LocalDate.parse("2022-02-02"),
-        latestReleaseDate = LocalDate.parse("2022-02-02")
+        earliestReleaseDate = LocalDate.parse("2023-04-01"),
+        latestReleaseDate = LocalDate.parse("2023-04-01")
       ),
       "/results/releaseDateSearch/search_confirmed_release_date.json"
     )
@@ -107,8 +107,8 @@ class PrisonerSearchByReleaseDateResourceTest : QueueIntegrationTest() {
   fun `can match on date range with mix of confirmedReleaseDate and conditionalReleaseDate`() {
     searchByReleaseDate(
       ReleaseDateSearch(
-        earliestReleaseDate = LocalDate.parse("2018-01-05"),
-        latestReleaseDate = LocalDate.parse("2018-01-31")
+        earliestReleaseDate = LocalDate.parse("2020-04-28"),
+        latestReleaseDate = LocalDate.parse("2023-04-01")
       ),
       "/results/releaseDateSearch/search_date_range.json"
     )
@@ -120,7 +120,7 @@ class PrisonerSearchByReleaseDateResourceTest : QueueIntegrationTest() {
       ReleaseDateSearch(
         earliestReleaseDate = LocalDate.parse("2011-01-05"),
         latestReleaseDate = LocalDate.parse("2030-01-31"),
-        prisonIds = setOf("MDI")
+        prisonIds = setOf("MDI", "WSI")
       ),
       "/results/releaseDateSearch/search_date_range_filtered_by_prison.json"
     )
@@ -133,7 +133,7 @@ class PrisonerSearchByReleaseDateResourceTest : QueueIntegrationTest() {
         earliestReleaseDate = LocalDate.parse("2011-01-05"),
         latestReleaseDate = LocalDate.parse("2030-01-31")
       ),
-      8, 0, "/results/releaseDateSearch/date_range_pagination_page_1.json"
+      8, 0, "/results/releaseDateSearch/search_date_range_pagination_page_1.json"
     )
   }
 
@@ -144,7 +144,7 @@ class PrisonerSearchByReleaseDateResourceTest : QueueIntegrationTest() {
         earliestReleaseDate = LocalDate.parse("2011-01-05"),
         latestReleaseDate = LocalDate.parse("2030-01-31")
       ),
-      8, 1, "/results/releaseDateSearch/date_range_pagination_page_2.json"
+      8, 1, "/results/releaseDateSearch/search_date_range_pagination_page_2.json"
     )
   }
 }
