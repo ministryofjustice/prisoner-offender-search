@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
+import java.time.LocalDate
 
 fun BoolQueryBuilder.mustWhenPresent(query: String, value: Any?): BoolQueryBuilder {
   value.takeIf {
@@ -122,3 +123,13 @@ fun shouldMatchOneOf(query: String, values: List<*>): BoolQueryBuilder {
 
 fun BoolQueryBuilder.mustWhenPresentGender(query: String, value: Any?) =
   if (value == "ALL") this else mustWhenPresent(query, value)
+
+fun BoolQueryBuilder.matchesDateRange(earliest: LocalDate?, latest: LocalDate?, vararg query: String): BoolQueryBuilder {
+  val nestedClauses = QueryBuilders.boolQuery()
+
+  query.asList().forEach {
+    nestedClauses.should().add(QueryBuilders.rangeQuery(it).from(earliest).to(latest))
+  }
+
+  return this.must(nestedClauses)
+}

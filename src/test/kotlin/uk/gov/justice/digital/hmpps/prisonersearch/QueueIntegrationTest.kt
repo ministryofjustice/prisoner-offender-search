@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
+import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
@@ -248,6 +249,26 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun restrictedPatientSearchPagination(restrictedPatientSearchCriteria: RestrictedPatientSearchCriteria, size: Long, page: Long, fileAssert: String) {
     webTestClient.post().uri("/restricted-patient-search/match-restricted-patients?size=$size&page=$page")
       .body(BodyInserters.fromValue(gson.toJson(restrictedPatientSearchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun searchByReleaseDate(searchCriteria: ReleaseDateSearch, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/release-date-by-prison")
+      .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun searchByReleaseDatePagination(searchCriteria: ReleaseDateSearch, size: Long, page: Long, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/release-date-by-prison?size=$size&page=$page")
+      .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()

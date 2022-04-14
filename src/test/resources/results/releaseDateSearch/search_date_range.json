@@ -1,0 +1,258 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7089EY",
+      "pncNumber": "12/394773H",
+      "pncNumberCanonicalShort": "12/394773H",
+      "pncNumberCanonicalLong": "2012/394773H",
+      "croNumber": "29906/12J",
+      "bookingId": "1900836",
+      "bookNumber": "V61585",
+      "firstName": "JOHN",
+      "middleNames": "LEE",
+      "lastName": "SMITH",
+      "dateOfBirth": "1980-12-31",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": true,
+      "maritalStatus": "Married",
+      "religion": "Christian",
+      "nationality": "British",
+      "status": "ACTIVE IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
+      "inOutStatus": "IN",
+      "prisonId": "MDI",
+      "prisonName": "Moorland Prison",
+      "cellLocation": "A-1-001",
+      "aliases": [],
+      "alerts": [
+        {
+          "alertType": "P",
+          "alertCode": "PL1",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "H",
+          "alertCode": "HC",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "X",
+          "alertCode": "XSA",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "R",
+          "alertCode": "RKS",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "R",
+          "alertCode": "RSS",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "X",
+          "alertCode": "XVL",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "O",
+          "alertCode": "OCYP",
+          "active": true,
+          "expired": false
+        },
+        {
+          "alertType": "V",
+          "alertCode": "VU",
+          "active": true,
+          "expired": false
+        }
+      ],
+      "csra": "High",
+      "category": "C",
+      "legalStatus": "SENTENCED",
+      "imprisonmentStatus": "LASPO_DR",
+      "mostSeriousOffence": "Handle stolen goods",
+      "recall": false,
+      "indeterminateSentence": true,
+      "sentenceStartDate": "2016-09-09",
+      "releaseDate": "2023-04-01",
+      "confirmedReleaseDate": "2023-04-01",
+      "sentenceExpiryDate": "2026-04-05",
+      "licenceExpiryDate": "2026-04-15",
+      "homeDetentionCurfewEligibilityDate": "2020-12-20",
+      "homeDetentionCurfewActualDate": "2019-06-22",
+      "homeDetentionCurfewEndDate": "2019-06-22",
+      "additionalDaysAwarded": 27,
+      "nonDtoReleaseDate": "2023-05-16",
+      "nonDtoReleaseDateType": "CRD",
+      "paroleEligibilityDate": "2020-12-30",
+      "conditionalReleaseDate": "2023-05-16",
+      "restrictedPatient": false
+    },
+    {
+      "prisonerNumber": "A7089EZ",
+      "pncNumber": "08/359381C",
+      "pncNumberCanonicalShort": "08/359381C",
+      "pncNumberCanonicalLong": "2008/359381C",
+      "croNumber": "400862/08W",
+      "bookingId": "1900837",
+      "bookNumber": "38339C",
+      "firstName": "JOHN",
+      "lastName": "SMYTH",
+      "dateOfBirth": "1981-01-01",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "maritalStatus": "Single-not married/in civil partnership",
+      "religion": "Church of England (Anglican)",
+      "nationality": "British",
+      "status": "ACTIVE IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
+      "inOutStatus": "IN",
+      "prisonId": "LEI",
+      "prisonName": "HMP Leeds",
+      "cellLocation": "B-C1-010",
+      "aliases": [
+        {
+          "firstName": "MASTER",
+          "lastName": "CORDIAN",
+          "dateOfBirth": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+        },
+        {
+          "firstName": "MASTER",
+          "middleNames": "J117",
+          "lastName": "CHIEF",
+          "dateOfBirth": "1983-06-17",
+          "gender": "Male"
+        },
+        {
+          "firstName": "MASTER",
+          "middleNames": "J117",
+          "lastName": "CHEIF",
+          "dateOfBirth": "1983-06-17",
+          "gender": "Male"
+        },
+        {
+          "firstName": "TONY",
+          "middleNames": "IRONMAN",
+          "lastName": "STARK",
+          "dateOfBirth": "1970-05-29",
+          "gender": "Male"
+        }
+      ],
+      "alerts": [],
+      "csra": "High",
+      "category": "C",
+      "legalStatus": "SENTENCED",
+      "imprisonmentStatus": "LR_HDC",
+      "mostSeriousOffence": "Burglary dwelling - with intent to steal",
+      "releaseDate": "2020-04-28",
+      "nonDtoReleaseDate": "2020-04-28",
+      "nonDtoReleaseDateType": "CRD",
+      "conditionalReleaseDate": "2020-04-28",
+      "restrictedPatient": false
+    },
+    {
+      "prisonerNumber": "A7090BA",
+      "pncNumber": "08/359381C",
+      "pncNumberCanonicalShort": "08/359381C",
+      "pncNumberCanonicalLong": "2008/359381C",
+      "croNumber": "400862/08W",
+      "bookingId": "1902837",
+      "bookNumber": "38239C",
+      "firstName": "SAM",
+      "lastName": "JONES",
+      "dateOfBirth": "1945-10-10",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "maritalStatus": "Single-not married/in civil partnership",
+      "religion": "Church of England (Anglican)",
+      "nationality": "British",
+      "status": "ACTIVE IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
+      "inOutStatus": "IN",
+      "prisonId": "LEI",
+      "prisonName": "HMP Leeds",
+      "cellLocation": "B-C1-010",
+      "aliases": [
+        {
+          "firstName": "PHIL",
+          "lastName": "BLACK",
+          "dateOfBirth": "1990-08-15",
+          "gender": "Male",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+        },
+        {
+          "firstName": "BOB",
+          "middleNames": "J117",
+          "lastName": "BLACK",
+          "dateOfBirth": "1983-06-17",
+          "gender": "Male"
+        },
+        {
+          "firstName": "PHIL",
+          "middleNames": "J117",
+          "lastName": "WHITE",
+          "dateOfBirth": "1983-06-17",
+          "gender": "Male"
+        },
+        {
+          "firstName": "CEDRIC",
+          "middleNames": "STEELMAN",
+          "lastName": "STRONGMAN",
+          "dateOfBirth": "1970-05-29",
+          "gender": "Male"
+        }
+      ],
+      "alerts": [],
+      "csra": "High",
+      "category": "C",
+      "legalStatus": "SENTENCED",
+      "imprisonmentStatus": "LR_HDC",
+      "releaseDate": "2020-04-28",
+      "nonDtoReleaseDate": "2020-04-28",
+      "nonDtoReleaseDateType": "CRD",
+      "conditionalReleaseDate": "2020-04-28",
+      "restrictedPatient": false
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "offset": 0,
+    "pageNumber": 0,
+    "pageSize": 10,
+    "paged": true,
+    "unpaged": false
+  },
+  "last": true,
+  "totalPages": 1,
+  "totalElements": 3,
+  "first": true,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "empty": true,
+    "sorted": false,
+    "unsorted": true
+  },
+  "numberOfElements": 3,
+  "empty": false
+}
