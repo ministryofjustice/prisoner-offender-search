@@ -12,11 +12,6 @@ spring:
       WRITE_DATES_AS_TIMESTAMPS: false
     default-property-inclusion: non_null
 
-  data:
-    web:
-      pageable:
-        max-page-size: 10000
-
   codec:
     max-in-memory-size: 10MB
 
