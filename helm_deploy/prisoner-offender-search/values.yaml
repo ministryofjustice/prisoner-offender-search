@@ -40,7 +40,7 @@ generic-service:
     JAVA_OPTS: "-Xmx512m"
     SPRING_PROFILES_ACTIVE: "logstash"
     INDEX_COMPLETE_THRESHOLD: 700000
-    APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY)"
+    APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY);IngestionEndpoint=https://northeurope-0.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
