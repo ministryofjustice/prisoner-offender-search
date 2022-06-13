@@ -42,6 +42,7 @@ data class OffenderBooking(
   val imprisonmentStatusDescription: String? = null,
   val personalCareNeeds: List<PersonalCareNeed>? = null,
   val receptionDate: LocalDate? = null,
+  val latestLocationId: String? = null,
   val locationDescription: String? = null,
   val restrictivePatient: RestrictivePatient? = null
 )
