@@ -26,7 +26,7 @@ class PrisonerEventListener(
       log.debug("Received message {} type {}", messageId, eventType)
 
       when (eventType) {
-        "EXTERNAL_MOVEMENT_RECORD-INSERTED" -> prisonerSyncService.externalMovement(fromJson(message))
+        "EXTERNAL_MOVEMENT_RECORD-INSERTED", "EXTERNAL_MOVEMENT_RECORD-UPDATED", "EXTERNAL_MOVEMENT_RECORD-DELETED" -> prisonerSyncService.externalMovement(fromJson(message))
         "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED", "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED", "ASSESSMENT-CHANGED", "OFFENDER_PROFILE_DETAILS-INSERTED", "OFFENDER_PROFILE_DETAILS-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
         "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
         "OFFENDER-INSERTED", "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED", "OFFENDER_ALIAS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
