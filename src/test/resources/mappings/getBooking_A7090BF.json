@@ -124,7 +124,8 @@
         "actualParoleDate": "2020-02-03",
         "tariffDate": "2022-01-04"
       },
-      "locationDescription": "Outside - Psychiatric Hospital Discharge to Hazelwood House"
+      "locationDescription": "Outside - Psychiatric Hospital Discharge to Hazelwood House",
+      "latestLocationId": "MDI"
     }
   }
 }

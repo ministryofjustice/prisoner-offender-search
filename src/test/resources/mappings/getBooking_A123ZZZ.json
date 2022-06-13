@@ -38,7 +38,8 @@
       "status": "INACTIVE OUT",
       "legalStatus": "SENTENCED",
       "lastMovementTypeCode": "REL",
-      "lastMovementReasonCode": "HP"
+      "lastMovementReasonCode": "HP",
+      "latestLocationId": "MDI"
     }
   }
 }
