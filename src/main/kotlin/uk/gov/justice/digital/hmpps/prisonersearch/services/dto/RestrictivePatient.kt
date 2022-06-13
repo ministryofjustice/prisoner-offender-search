@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class RestrictivePatient(
-  var supportingPrison: Agency?,
+  var supportingPrisonId: String?,
   val dischargedHospital: Agency?,
   val dischargeDate: LocalDate,
   val dischargeDetails: String?
@@ -23,7 +23,6 @@ data class RestrictedPatientDto(
   val prisonerNumber: String,
   val fromLocation: Agency,
   val hospitalLocation: Agency,
-  val supportingPrison: Agency,
   val dischargeTime: LocalDateTime,
   val commentText: String? = null,
 )

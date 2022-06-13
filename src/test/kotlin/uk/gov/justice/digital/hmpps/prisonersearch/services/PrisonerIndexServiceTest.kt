@@ -182,7 +182,6 @@ class PrisonerIndexServiceTest {
             id = 1,
             prisonerNumber = "A1234AA",
             fromLocation = prison,
-            supportingPrison = prison,
             hospitalLocation = hospital,
             dischargeTime = now,
             commentText = "test"
@@ -192,8 +191,8 @@ class PrisonerIndexServiceTest {
         val offenderBooking = prisonerIndexService.withRestrictedPatientIfOut(makeOffenderBooking())
 
         assertThat(offenderBooking.restrictivePatient)
-          .extracting("supportingPrison", "dischargedHospital", "dischargeDate", "dischargeDetails")
-          .contains(prison, hospital, now.toLocalDate(), "test")
+          .extracting("supportingPrisonId", "dischargedHospital", "dischargeDate", "dischargeDetails")
+          .contains(prison.agencyId, hospital, now.toLocalDate(), "test")
       }
 
       @Test
@@ -219,7 +218,8 @@ class PrisonerIndexServiceTest {
       "Bloggs",
       LocalDate.of(1976, 5, 15),
       false,
-      assignedLivingUnit = assignedLivingUnit
+      assignedLivingUnit = assignedLivingUnit,
+      latestLocationId = "MDI"
     )
   }
 }

@@ -228,8 +228,9 @@ class PrisonerIndexService(
     val restrictivePatient = restrictedPatientService.getRestrictedPatient(booking.offenderNo) ?: return booking
 
     return booking.copy(
+      locationDescription = booking.locationDescription + " - discharged to " + restrictivePatient.hospitalLocation.description,
       restrictivePatient = RestrictivePatient(
-        supportingPrison = restrictivePatient.supportingPrison,
+        supportingPrisonId = booking.latestLocationId,
         dischargedHospital = restrictivePatient.hospitalLocation,
         dischargeDate = restrictivePatient.dischargeTime.toLocalDate(),
         dischargeDetails = restrictivePatient.commentText
