@@ -29,3 +29,7 @@ build
 out
 dps-gradle-spring-boot-suppressions.xml
 .editorconfig
+
+# Helm
+helm_deploy/prisoner-offender-search/charts/
+Chart.lock
