@@ -1,6 +1,27 @@
 {
   "content": [
     {
+      "prisonerNumber": "A7090AA",
+      "pncNumber": "12/394773I",
+      "pncNumberCanonicalShort": "12/394773I",
+      "pncNumberCanonicalLong": "2012/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1903838",
+      "bookNumber": "V63588",
+      "firstName": "ERIC",
+      "lastName": "JONES",
+      "dateOfBirth": "1980-02-28",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": false,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "prisonId": "MDI",
+      "prisonName": "Moorland Prison",
+      "cellLocation": "H-1-004",
+      "legalStatus": "REMAND"
+    },
+    {
       "prisonerNumber": "A7090AB",
       "pncNumber": "12/394773I",
       "croNumber": "29906/12P",
@@ -18,26 +39,6 @@
       "prisonName": "Moorland Prison",
       "cellLocation": "H-1-004",
       "legalStatus": "REMAND"
-    },
-    {
-      "prisonerNumber": "A7090BB",
-      "pncNumber": "12/394773W",
-      "croNumber": "29906/12L",
-      "bookingId": "1904838",
-      "bookNumber": "V61587",
-      "firstName": "SAM",
-      "lastName": "JONES",
-      "dateOfBirth": "1962-11-01",
-      "gender": "Male",
-      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
-      "youthOffender": false,
-      "religion": "Christian",
-      "nationality": "British",
-      "status": "ACTIVE IN",
-      "prisonId": "MDI",
-      "prisonName": "Moorland Prison",
-      "cellLocation": "A-1-003",
-      "legalStatus": "REMAND"
     }
   ],
   "pageable": {
@@ -52,9 +53,9 @@
     "paged": true,
     "unpaged": false
   },
-  "totalPages": 3,
-  "totalElements": 6,
-  "last": true,
+  "totalPages": 4,
+  "totalElements": 7,
+  "last": false,
   "number": 2,
   "size": 2,
   "numberOfElements": 2,

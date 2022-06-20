@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
-  private val indexCount = 23
+  private val indexCount = 24
 
   @BeforeEach
   fun init() {
