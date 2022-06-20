@@ -160,7 +160,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-status.inProgress").isEqualTo("true")
-      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("24")
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo("25")
 
     search(SearchCriteria("A7089FE", null, null), "/results/search_results_A7089FE.json")
   }
