@@ -57,7 +57,7 @@ data class KeywordRequest(
   )
   val type: SearchType = SearchType.DEFAULT,
 
-  )
+)
 
 enum class SearchType {
   DEFAULT,

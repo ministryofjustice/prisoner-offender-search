@@ -237,7 +237,7 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
         "A7090BB", // JONES, SAM
         "A7090BC", // JONES, SAM
         "A7090AF", // JONES, SAM
-        "A1090AA"  // JONES, ZAC
+        "A1090AA" // JONES, ZAC
       ),
     )
   }
