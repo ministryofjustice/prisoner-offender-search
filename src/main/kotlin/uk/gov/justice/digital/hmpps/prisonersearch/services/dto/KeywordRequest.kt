@@ -52,7 +52,7 @@ data class KeywordRequest(
   val pagination: PaginationRequest = PaginationRequest(0, 10),
 
   @Schema(
-    description = "The type of search. An ESTABLISHMENT type will order results by name and is designed for using this API for a single quick search field for prisoners within a specific prison",
+    description = "The type of search. When set to DEFAULT (which is the default when not provided) search order is by calculated relevance (AKA score). An ESTABLISHMENT type will order results by name and is designed for using this API for a single quick search field for prisoners within a specific prison",
     required = false,
   )
   val type: SearchType = SearchType.DEFAULT,

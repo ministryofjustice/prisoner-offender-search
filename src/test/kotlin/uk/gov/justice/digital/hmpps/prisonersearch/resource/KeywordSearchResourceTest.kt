@@ -197,7 +197,29 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `default order is by score, prison number`() {
+  fun `order is the default which is by score, prison number`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(
+        andWords = "jones",
+        prisonIds = listOf("MDI", "AGI", "LEI"),
+      ),
+      expectedCount = 9,
+      expectedPrisoners = listOf(
+        "A1090AA",
+        "A7090AB",
+        "A7090AC",
+        "A7090AD",
+        "A7090BA",
+        "A7090BB",
+        "A7090BC",
+        "A7090AF",
+        "A7090AA"
+      ),
+    )
+  }
+
+  @Test
+  fun `DEFAULT order is by score, prison number`() {
     keywordSearch(
       keywordRequest = KeywordRequest(
         andWords = "jones",
@@ -220,7 +242,7 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `establishment order is by name`() {
+  fun `ESTABLISHMENT order is by name`() {
     keywordSearch(
       keywordRequest = KeywordRequest(
         andWords = "jones",
