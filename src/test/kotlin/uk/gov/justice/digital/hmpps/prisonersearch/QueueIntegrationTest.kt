@@ -107,6 +107,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RA") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RB") } matches { it == 1 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RC") } matches { it == 1 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A1090AA") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
     Thread.sleep(500)

@@ -50,4 +50,16 @@ data class KeywordRequest(
     required = false,
   )
   val pagination: PaginationRequest = PaginationRequest(0, 10),
-)
+
+  @Schema(
+    description = "The type of search. An ESTABLISHMENT type will order results by name and is designed for using this API for a single quick search field for prisoners within a specific prison",
+    required = false,
+  )
+  val type: SearchType = SearchType.DEFAULT,
+
+  )
+
+enum class SearchType {
+  DEFAULT,
+  ESTABLISHMENT
+}
