@@ -6,6 +6,8 @@ import org.springframework.data.elasticsearch.annotations.DateFormat
 import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
+import org.springframework.data.elasticsearch.annotations.InnerField
+import org.springframework.data.elasticsearch.annotations.MultiField
 import java.time.LocalDate
 
 open class Prisoner {
@@ -38,12 +40,24 @@ open class Prisoner {
   @Schema(description = "Book Number", example = "38412A")
   var bookNumber: String? = null
 
+  @MultiField(
+    mainField = Field(type = FieldType.Text),
+    otherFields = [
+      InnerField(type = FieldType.Keyword, suffix = "keyword")
+    ]
+  )
   @Schema(required = true, description = "First Name", example = "Robert")
   var firstName: String? = null
 
   @Schema(description = "Middle Names", example = "John James")
   var middleNames: String? = null
 
+  @MultiField(
+    mainField = Field(type = FieldType.Text),
+    otherFields = [
+      InnerField(type = FieldType.Keyword, suffix = "keyword")
+    ]
+  )
   @Schema(required = true, description = "Last name", example = "Larsen")
   var lastName: String? = null
 

@@ -1,0 +1,55 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/api/offenders/A1090AA"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "bookingId": 1903838,
+      "bookingNo": "V63588",
+      "offenderNo": "A1090AA",
+      "firstName": "ZACK",
+      "lastName": "JONES",
+      "agencyId": "MDI",
+      "activeFlag": true,
+      "assignedLivingUnit": {
+        "agencyId": "MDI",
+        "description": "H-1-004",
+        "agencyName": "Moorland Prison"
+      },
+      "facialImageId": 1171177,
+      "dateOfBirth": "1980-02-28",
+      "physicalAttributes": {
+        "gender": "Male",
+        "raceCode": "W1",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+        "sexCode": "M"
+      },
+      "physicalCharacteristics": [
+        {
+          "type": "SHOESIZE",
+          "characteristic": "Shoe Size",
+          "detail": "10"
+        }
+      ],
+      "profileInformation": [
+        {
+          "type": "RELF",
+          "question": "Religion",
+          "resultValue": "Christian"
+        }
+      ],
+      "inOutStatus": "IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
+      "identifiers": [
+      ],
+      "status": "ACTIVE IN",
+      "legalStatus": "RECALL"
+    }
+  }
+}

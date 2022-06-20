@@ -269,8 +269,8 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   fun `find by last name including aliases`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(lastName = "Jones", prisonIds = listOf("MDI", "LEI")),
-      expectedCount = 5,
-      expectedPrisoners = listOf("A7090AA", "A7090AB", "A7090BA", "A7090BB", "A7090AF"),
+      expectedCount = 6,
+      expectedPrisoners = listOf("A7090AA", "A7090AB", "A7090BA", "A7090BB", "A7090AF", "A1090AA"),
     )
   }
 
@@ -278,8 +278,8 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   fun `find by last name excluding aliases`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(lastName = "Jones", prisonIds = listOf("MDI", "LEI"), includeAliases = false),
-      expectedCount = 4,
-      expectedPrisoners = listOf("A7090AA", "A7090AB", "A7090BA", "A7090BB"),
+      expectedCount = 5,
+      expectedPrisoners = listOf("A7090AA", "A7090AB", "A7090BA", "A7090BB", "A1090AA"),
     )
   }
 
@@ -359,8 +359,8 @@ class PrisonerDetailResourceTest : QueueIntegrationTest() {
   fun `no-terms query should match all prisoners in the specified location`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(prisonIds = listOf("MDI")),
-      expectedCount = 6,
-      expectedPrisoners = listOf("A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB"),
+      expectedCount = 7,
+      expectedPrisoners = listOf("A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB", "A1090AA"),
     )
   }
 }

@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SearchType
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 import java.util.concurrent.TimeUnit
 
@@ -72,10 +73,19 @@ class KeywordService(
       timeout(TimeValue(searchTimeoutSeconds, TimeUnit.SECONDS))
       size(pageable.pageSize.coerceAtMost(maxSearchResults))
       from(pageable.offset.toInt())
-      sort("_score")
-      sort("prisonerNumber")
       trackTotalHits(true)
       query(buildKeywordQuery(keywordRequest))
+      when (keywordRequest.type) {
+        SearchType.DEFAULT -> {
+          sort("_score")
+          sort("prisonerNumber")
+        }
+        SearchType.ESTABLISHMENT -> {
+          sort("lastName.keyword")
+          sort("firstName.keyword")
+          sort("prisonerNumber")
+        }
+      }
     }
   }
 

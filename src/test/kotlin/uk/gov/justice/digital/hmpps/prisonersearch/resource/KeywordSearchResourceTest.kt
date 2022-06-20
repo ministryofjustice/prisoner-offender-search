@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SearchType
 
 class KeywordSearchResourceTest : QueueIntegrationTest() {
 
@@ -196,6 +197,52 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `default order is by score, prison number`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(
+        andWords = "jones",
+        prisonIds = listOf("MDI", "AGI", "LEI"),
+        type = SearchType.DEFAULT
+      ),
+      expectedCount = 9,
+      expectedPrisoners = listOf(
+        "A1090AA",
+        "A7090AB",
+        "A7090AC",
+        "A7090AD",
+        "A7090BA",
+        "A7090BB",
+        "A7090BC",
+        "A7090AF",
+        "A7090AA"
+      ),
+    )
+  }
+
+  @Test
+  fun `establishment order is by name`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(
+        andWords = "jones",
+        prisonIds = listOf("MDI", "AGI", "LEI"),
+        type = SearchType.ESTABLISHMENT
+      ),
+      expectedCount = 9,
+      expectedPrisoners = listOf(
+        "A7090AA", // JONES, ERIC
+        "A7090AB", // JONES, SAM
+        "A7090AC", // JONES, SAM
+        "A7090AD", // JONES, SAM
+        "A7090BA", // JONES, SAM
+        "A7090BB", // JONES, SAM
+        "A7090BC", // JONES, SAM
+        "A7090AF", // JONES, SAM
+        "A1090AA" // JONES, ZAC
+      ),
+    )
+  }
+
+  @Test
   fun `can perform a keyword AND search on both names in aliases`() {
     keywordSearch(
       keywordRequest = KeywordRequest(andWords = "danny colin", prisonIds = listOf("LEI")),
@@ -217,8 +264,19 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a keyword OR search on multiple words and include an unrelated prisoner number`() {
     keywordSearch(
       keywordRequest = KeywordRequest(orWords = "sam jones A7089EZ", prisonIds = listOf("MDI", "AGI", "LEI")),
-      expectedCount = 9,
-      expectedPrisoners = listOf("A7089EZ", "A7090AB", "A7090AC", "A7090AD", "A7090BA", "A7090BB", "A7090BC", "A7090AA", "A7090AF"),
+      expectedCount = 10,
+      expectedPrisoners = listOf(
+        "A1090AA",
+        "A7089EZ",
+        "A7090AB",
+        "A7090AC",
+        "A7090AD",
+        "A7090BA",
+        "A7090BB",
+        "A7090BC",
+        "A7090AA",
+        "A7090AF"
+      ),
     )
   }
 
@@ -226,8 +284,8 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a keyword OR search for all male gender prisoners in Moorland`() {
     keywordSearch(
       keywordRequest = KeywordRequest(orWords = "male", prisonIds = listOf("MDI")),
-      expectedCount = 6,
-      expectedPrisoners = listOf("A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB"),
+      expectedCount = 7,
+      expectedPrisoners = listOf("A1090AA", "A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB"),
     )
   }
 
@@ -298,8 +356,8 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   fun `can perform a keyword no-terms query to match all prisoners in one location`() {
     keywordSearch(
       keywordRequest = KeywordRequest(prisonIds = listOf("MDI")),
-      expectedCount = 6,
-      expectedPrisoners = listOf("A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB"),
+      expectedCount = 7,
+      expectedPrisoners = listOf("A1090AA", "A7089EY", "A7089FA", "A7089FB", "A7090AA", "A7090AB", "A7090BB"),
     )
   }
 
