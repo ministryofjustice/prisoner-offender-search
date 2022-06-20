@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-restore-script
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+data:
+  entrypoint.sh: |-
+{{ .Files.Get "restore.sh" | indent 4 }}
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "app.fullname" . }}-elasticsearch-restore
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  schedule: "30 3 * * 0"
+  suspend: {{ .Values.cron.suspendRestore }}
+  concurrencyPolicy: "Forbid"
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      # Tidy up all jobs after 4 days
+      ttlSecondsAfterFinished: 345600
+      backoffLimit: 0
+      activeDeadlineSeconds: 2400
+      template:
+        spec:
+          containers:
+          - name: elasticsearch-restore
+            image: "ghcr.io/ministryofjustice/hmpps-devops-tools:latest"
+            command:
+            - /bin/entrypoint.sh
+            volumeMounts:
+            - name: elasticsearch-restore-script 
+              mountPath: /bin/entrypoint.sh
+              readOnly: true
+              subPath: entrypoint.sh
+            env:
+            - name: ELASTICSEARCH_PROXY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: elasticsearch
+                  key: aws_es_proxy_url
+            - name: SNAPSHOT_ROLE_ARN
+              valueFrom:
+                secretKeyRef:
+                  name: es-snapshot-role
+                  key: snapshot_role_arn
+            - name: BUCKET_NAME
+              valueFrom: 
+                secretKeyRef:
+                  name: es-snapshot-bucket
+                  key: bucket_name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NAMESPACE_OVERRIDE
+              value: {{ .Values.cron.snapshotNamespace }}
+          restartPolicy: "Never"
+          volumes:
+          - name: elasticsearch-restore-script
+            configMap:
+              name: elasticsearch-restore-script
+              defaultMode: 0755
