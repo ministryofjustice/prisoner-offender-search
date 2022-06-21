@@ -111,14 +111,14 @@ class KeywordService(
       andWords.takeIf { !it.isNullOrBlank() }?.let {
         // Will include the prisoner document if all of the words specified match in any of the fields
         keywordQuery.must().add(
-          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.CROSS_FIELDS)
+          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.CROSS_FIELDS, keywordRequest.type)
         )
       }
 
       orWords.takeIf { !it.isNullOrBlank() }?.let {
         // Will include the prisoner document if any of the words specified match in any of the fields
         keywordQuery.must().add(
-          generateMatchQuery(it, fuzzyMatch!!, Operator.OR, MultiMatchQueryBuilder.Type.BEST_FIELDS)
+          generateMatchQuery(it, fuzzyMatch!!, Operator.OR, MultiMatchQueryBuilder.Type.BEST_FIELDS, keywordRequest.type)
         )
       }
 
@@ -135,7 +135,7 @@ class KeywordService(
       exactPhrase.takeIf { !it.isNullOrBlank() }?.let {
         // Will include prisoner where this exact phrase appears anywhere in the document
         keywordQuery.must().add(
-          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.PHRASE)
+          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.PHRASE, keywordRequest.type)
         )
       }
 
@@ -153,8 +153,25 @@ class KeywordService(
     fuzzyMatch: Boolean,
     operator: Operator,
     multiMatchType: MultiMatchQueryBuilder.Type,
+    searchType: SearchType
   ): QueryBuilder {
-    return QueryBuilders.multiMatchQuery(term, "*", "aliases.*", "alerts.*")
+    val fields = if (searchType == SearchType.ESTABLISHMENT) {
+      // user research will probably show we really only need names and prisonNumber
+      // for now provide a certain degree of backward compatibility
+      listOf(
+        "prisonerNumber",
+        "pncNumber",
+        "pncNumberCanonicalShort",
+        "pncNumberCanonicalLong",
+        "croNumber",
+        "bookNumber",
+        "firstName",
+        "lastName",
+      )
+    } else {
+      listOf("*", "aliases.*", "alerts.*")
+    }
+    return QueryBuilders.multiMatchQuery(term, *fields.toTypedArray())
       // Boost the scores for specific fields so real names and IDs are ranked higher than alias matches
       .analyzer("whitespace")
       .field("lastName", 10f)

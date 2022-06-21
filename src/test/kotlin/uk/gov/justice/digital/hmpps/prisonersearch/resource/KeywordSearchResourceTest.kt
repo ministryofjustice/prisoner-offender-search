@@ -242,6 +242,36 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `DEFAULT will search alias`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(
+        andWords = "JONES",
+        prisonIds = listOf("LEI"),
+        type = SearchType.DEFAULT
+      ),
+      expectedCount = 2,
+      expectedPrisoners = listOf(
+        "A7090AF", // Alias
+        "A7090BA"
+      ),
+    )
+  }
+  @Test
+  fun `ESTABLISHMENT will not search alias`() {
+    keywordSearch(
+      keywordRequest = KeywordRequest(
+        andWords = "JONES",
+        prisonIds = listOf("LEI"),
+        type = SearchType.ESTABLISHMENT
+      ),
+      expectedCount = 1,
+      expectedPrisoners = listOf(
+        "A7090BA"
+      ),
+    )
+  }
+
+  @Test
   fun `ESTABLISHMENT order is by name`() {
     keywordSearch(
       keywordRequest = KeywordRequest(
@@ -249,7 +279,7 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
         prisonIds = listOf("MDI", "AGI", "LEI"),
         type = SearchType.ESTABLISHMENT
       ),
-      expectedCount = 9,
+      expectedCount = 8,
       expectedPrisoners = listOf(
         "A7090AA", // JONES, ERIC
         "A7090AB", // JONES, SAM
@@ -258,7 +288,6 @@ class KeywordSearchResourceTest : QueueIntegrationTest() {
         "A7090BA", // JONES, SAM
         "A7090BB", // JONES, SAM
         "A7090BC", // JONES, SAM
-        "A7090AF", // JONES, SAM
         "A1090AA" // JONES, ZAC
       ),
     )
