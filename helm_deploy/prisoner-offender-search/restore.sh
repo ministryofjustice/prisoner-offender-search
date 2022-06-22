@@ -3,7 +3,7 @@ set -e
 
 # Snapshot restores only happen every other week, crontab doesn't really support this
 week=$(date +%U)
-if [[ $(("$week" % 2)) == 0 ]]; then
+if [[ $(("$week" % 2)) == 0 && -z "$FORCE_RUN" ]]; then
   echo "Not running restore this week, restores only happens on odd week numbers, check back next week."
   exit 0
 fi
@@ -25,7 +25,7 @@ INDICES="prisoner-search-a,prisoner-search-b,offender-index-status"
 
 # Register restore snapshot repo if not already
 if ! http_es GET "$ENDPOINT_SNAPSHOT_NAMESPACE" &>/dev/null; then
-  echo -e "\Creating restore snapshot repository"
+  echo -e "\nCreating restore snapshot repository"
   # If the snapshot repo with same name as namespace does not exist, create it.
   # Note that we set to readonly so that we can't accidentally override the snapshot during restore.
   settings="{
@@ -36,6 +36,12 @@ if ! http_es GET "$ENDPOINT_SNAPSHOT_NAMESPACE" &>/dev/null; then
     \"readonly\": \"true\"
   }"
   http_es --print=Hbh POST "$ENDPOINT_SNAPSHOT_NAMESPACE" type="s3" settings:="${settings}"
+fi
+
+# Check that we have a snapshot to restore
+if ! http_es "$ENDPOINT_LATEST"; then
+  echo -e "\nUnable to find a snapshot at $ENDPOINT_LATEST"
+  exit 1
 fi
 
 # Get the original count of indices
