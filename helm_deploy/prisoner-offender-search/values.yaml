@@ -2,6 +2,8 @@
 # Values here are the same across all environments
 cron:
   SYNTHETIC_MONITOR_CRON_EXPRESSION: "*/10 * * * *"
+  # default is to suspend the restore - only want it happening on preprod
+  suspendRestore: true
 
 alertManagerReceiver: digital-prison-service-dev
 

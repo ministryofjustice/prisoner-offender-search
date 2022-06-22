@@ -22,9 +22,7 @@ if ! http_es GET "$ENDPOINT_SNAPSHOT_NAMESPACE" &>/dev/null; then
     \"role_arn\": \"${SNAPSHOT_ROLE_ARN}\",
     \"base_path\": \"${NAMESPACE}\"
   }"
-  http_es --print=Hbh POST "$ENDPOINT_SNAPSHOT_NAMESPACE" \
-    type="s3" \
-    settings:="${settings}"
+  http_es --print=Hbh POST "$ENDPOINT_SNAPSHOT_NAMESPACE" type="s3" settings:="${settings}"
 fi
 
 # Delete latest snapshot if exists
