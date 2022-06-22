@@ -25,8 +25,8 @@ In normal running one of these indexes will be "active" while the other is dorma
 
 When we are ready to rebuild the index the "other" non-active index is transitioned into an `in-progress` state of `true`.
 
-```
-    PUT /prisoner-index/build-index
+```shell
+    http PUT /prisoner-index/build-index
 ```
 
 The entire NOMIS offender base is retrieved and over several hours the other index is fully populated.
@@ -39,8 +39,8 @@ If the index build fails - there are messages left on the index dead letter queu
 Two ES runtime exceptions, ElasticsearchException and ElasticSearchIndexingException, are caught during the re-indexing process to safeguard the integrity of the index status. Once caught,
 the inError status flag is set on the IndexStatus.  The flag ensures that manipulation of the index is forbidden when in this state.
 Only cancelling the index process will reset the flag and subsequently allow a rebuild of the index to be invoked.
-```
-    PUT /prisoner/index/cancel-index
+```shell
+    http PUT /prisoner/index/cancel-index
 ```
 
 #### Index switch
@@ -50,8 +50,8 @@ Given the state of the each index is itself held in ES under the `in-progress` i
 * The ES `current-index` is switched to point at the active index. This means external clients can safely use the `offender` index without any knowledge of the INDEX_A/INDEX_B indexes.
 
 Indexes can be switched without rebuilding, if they are both marked as "inProgress": false and "inError":false
-```
-    PUT /prisoner/index/switch-index
+```shell
+    http PUT /prisoner/index/switch-index
 ```
 
 ### Housekeeping Cronjob
@@ -63,43 +63,23 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 
 ### Running
 
-`localstack` is used to emulate the AWS SQS and Elastic Search service. Any commands in `localstack/setup-es.sh` will be run when `localstack` starts, so this contains commands to create the appropriate queues. Localstack listens on port 4566.
-
-Unfortunately localstack needs to be started differently depending on whether you are going to run prisoner offender
-search in a Docker container, or in IntelliJ and in tests. If running search in Docker, `ES_HOSTNAME` needs to be set
-to `localstack`. Otherwise it should be set to `localhost`. This is because when clients connect it returns a url for
-subsequent calls and the hostname is then different when in Docker versus connecting from a laptop.
-A workaround to this can be to add `localstack` as a host name entry in your OS' `/etc/hosts` file.
-
-The elasticsearch part of localstack takes a long time to start and will not be up and running fully until you see the following entry in the localstack logs:
-```
-Starting mock SQS service on http port 4566 ...
-```
-
-Starting the services is therefore a two step process:
-1. Start everything apart from prisoner offender search and wait for localstack to start fully
-2. Start prisoner offender search
+`localstack` is used to emulate the AWS SQS and Elastic Search service.
 
 #### Running prisoner offender search in Docker
 To start up localstack and other dependencies with prisoner offender search running in Docker too:
-```bash
-docker-compose up localstack oauth prisonapi restricted-patients
-```
-If running on Docker Desktop for Windows there is a separate docker compose script instead, so do:
-```bash
-docker compose -f docker-compose-windows.yml up localstack oauth prisonapi restricted-patients
-```
+```shell
+docker compose up localstack oauth prisonapi restricted-patients
 
 Once localstack has started then, in another terminal, run the following command to start prisoner offender search too:
-```bash
+```shell
 docker-compose up prisoner-offender-search --detach
 ```
-  To check that it has all started correctly then go to http://localhost:8080/health and check that the `status` is `UP`. The `docker ps` Docker command is another way to see what state the services are in.
+  To check that it has all started correctly use `docker ps`.
 
 #### Running prisoner offender search in IntelliJ or on the command line
 To start up localstack and other dependencies with prisoner offender search running in IntelliJ:
-```bash
-ES_HOSTNAME=localhost docker-compose up --scale prisoner-offender-search=0
+```shell
+docker compose up --scale prisoner-offender-search=0
 ```
 To then run prisoner offender search from the command line:
 ```
@@ -110,11 +90,11 @@ Alternatively create a Spring Boot run configuration with active profile of `dev
 #### Running the tests
 If just running the tests then the following will just start localstack as the other dependencies are mocked out:
 
-```bash
-docker-compose -f docker-compose-localstack-tests.yml up
+```shell
+docker compose -f docker-compose-localstack-tests.yml up
 ```
 Then the following command will run all the tests:
-```bash
+```shell
 ./gradlew test
 ```
 
@@ -122,15 +102,15 @@ Then the following command will run all the tests:
 Since localstack persists data between runs it may be necessary to delete the localstack temporary data:
 
 Mac
-```bash
+```shell
 rm -rf $TMPDIR/data
 ```
 Linux
-```bash
+```shell
 sudo rm -rf /tmp/localstack
 ```
 Docker Desktop for Windows (started using `docker-compose-windows.yml`)
-```bash
+```shell
 docker volume rm -f prisoner-offender-search_localstack-vol
 ```
 
@@ -138,34 +118,34 @@ docker volume rm -f prisoner-offender-search_localstack-vol
 
 On Mac it is recommended to run all components *except* prisoner-offender-search (see below). Then run prisoner-offender-search outside of docker using gradle:
 
-```bash
+```shell
 SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
 ```
 
 ### When running locally you can add some prisoners into Elastic with the following:-
 
 #### Get a token
-```bash
+```shell
 TOKEN=$(curl --location --request POST "http://localhost:8090/auth/oauth/token?grant_type=client_credentials" --header "Authorization: Basic $(echo -n prisoner-offender-search-client:clientsecret | base64)" |  jq -r .access_token)
 ```
 
 #### Start indexing
-```bash
+```shell
 curl --location --request PUT "http://localhost:8080/prisoner-index/build-index" --header "Authorization: Bearer $TOKEN" | jq -r
 ```
 
 #### Check all indexed with
-```bash
+```shell
 curl --location --request GET "http://localhost:8080/info" | jq -r
 ```
 
 #### If 53 records then mark complete
-```bash
+```shell
 curl --location --request PUT "http://localhost:8080/prisoner-index/mark-complete" --header "Authorization: Bearer $TOKEN" | jq -r
 ```
 
 #### Now test a search
-```bash
+```shell
 curl --location --request POST "http://localhost:8080/prisoner-search/match" --header "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' \
  --data-raw '{
     "lastName": "Smith"
@@ -173,14 +153,14 @@ curl --location --request POST "http://localhost:8080/prisoner-search/match" --h
 ```
 
 #### View ES indexes
-```bash
+```shell
 curl --location --request POST "http://es1.eu-west-2.es.localhost.localstack.cloud:4566/prisoner-search-a/_search" | jq
 ```
 
 ### Alternative running
 Or to just run `localstack` which is useful when running against an a non-local test system, you will  need the `spring.profiles.active=localstack` and `sqs.provider=full-localstack` environment variables:
 
-```bash
+```shell
 TMPDIR=/private$TMPDIR docker-compose up localstack
 ```
 
@@ -191,7 +171,7 @@ In all of the above the application should use the host network to communicate w
 There are two handy scripts to add messages to the queue with data that matches either the dev environment or data in the test Docker version of the apps.
 
 Purging a local queue:
-```bash
+```shell
 aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/queue/prisoner_offender_index_queue
 ```
 
@@ -276,7 +256,7 @@ Access to the raw Elastic Search indexes is only possible from the Cloud Platfor
 For instance, the following curl command in any environment would return a list all indexes e.g.:
 
 ```
-curl http://aws-es-proxy-service:9200/_cat/indices
+http http://aws-es-proxy-service:9200/_cat/indices
 
 green open prisoner-search-a     tlGst8dmS2aE8knxfxJsfQ 5 1 2545309 1144511   1.1gb 578.6mb
 green open offender-index-status v9traPPRS9uo7Ui0J6ixOQ 1 1       1       0  10.7kb   5.3kb
@@ -361,42 +341,84 @@ One last check of the info endpoint should confirm the new state, e.g.:
 
 Pay careful attention to `"currentIndex": "INDEX_A"` - this shows the actual index being used by clients.
 
+### Snapshot cronjobs
+There are two kubernetes cronjobs
+1. A scheduled job runs at 2.30am each day to take a snapshot of the whole cluster.
+2. A fortnightly job runs at 3.30am in pre-production only.  This is timed to coincide with the NOMIS database copy of production to 
+pre-production so that the database and elastic search remain in sync.  Pre-production has access to the production 
+snapshot s3 bucket and uses that to restore the latest production snapshot created by step 1.
+
+#### Manually running the create snapshot cronjob
+```shell
+kubectl create job --from=cronjob/prisoner-offender-search-elasticsearch-snapshot prisoner-offender-search-elasticsearch-snapshot-<user>
+```
+will trigger the job to create a snapshot called latest.
+Job progress can then be seen by running `kubectl logs -f` on the newly created pod.
+
+#### Manually running the restore snapshot cronjob
+The restore cronjob script only runs alternative weeks so we need to override the configuration to ensure to force the run.
+We do that by using `jq` to amend the json and adding in the `FORCE_RUN=true` parameter.
+
+In dev and production there is only one snapshot repository so 
+```shell
+kubectl create job --dry-run=client --from=cronjob/prisoner-offender-search-elasticsearch-restore prisoner-offender-search-elasticsearch-restore-<user> -o "json" | jq ".spec.template.spec.containers[0].env += [{ \"name\": \"FORCE_RUN\", \"value\": \"true\"}]" | kubectl apply -f -
+```
+will trigger the job to restore the snapshot called latest.
+Job progress can then be seen by running `kubectl logs -f` on the newly created pod.
+
+The default for the cronjob in pre-production is to restore from production.  If that is required then the command above
+will suffice.  However, if it required to restore from the previous pre-production snapshot then we need to clear the 
+`NAMESPACE_OVERRIDE` environment variable so that it doesn't try to restore from production instead.
+```shell
+kubectl create job --dry-run=client --from=cronjob/prisoner-offender-search-elasticsearch-restore prisoner-offender-search-elasticsearch-restore-pgp -o "json" | jq "(.spec.template.spec.containers[0].env += [{ \"name\": \"FORCE_RUN\", \"value\": \"true\"}]) | (.spec.template.spec.containers[0].env[] | select(.name==\"NAMESPACE_OVERRIDE\").value) |= \"\"" | kubectl apply -f -
+```
+
 ### Restore from a snapshot (if both indexes have become corrupt/empty)
 
 If we are restoring from the snapshot it means that the current index and other index are broken, we need to delete them to be able to restore from the snapshot.
-Every night we have a scheduled job that takes the snapshot of the whole cluster which is called `latest` and this should be restored
+At 2.30am we have a scheduled job that takes the snapshot of the whole cluster which is called `latest` and this should be restored.
 
 1. To restore we need to port-forward to the es instance (replace NAMESPACE with the affected namespace)
-
-   `kubectl -n <NAMESPACE> port-forward svc/es-proxy 9200:9200`
-
+   ```shell
+   kubectl -n <NAMESPACE> port-forward $(kubectl -n <NAMESPACE> get pods | grep aws-es-proxy-cloud-platform | grep Running | head -1 | awk '{print $1}') 9200:9200
+   ```
 2. Delete the current indexes
+   ```shell
+   http DELETE http://localhost:9200/_all
+   ```
+3. Check that the indices have all been removed
+   ```shell
+   http http://localhost:9200/_cat/indices
+   ```
+   If you wait to long between the delete and restore then the `.kibana` ones might get recreated, you'll need to delete them again otherwise the restore will fail.
+4. Then we can start the restore (SNAPSHOT_NAME for the overnight snapshot is `latest`)
+   ```shell
+   http POST 'http://localhost:9200/_snapshot/<NAMESPACE>/<SNAPSHOT_NAME>/_restore' include_global_state=true
+   ```
 
-   `curl -XDELETE 'http://localhost:9200/_all'`
+   The `include_global_state: true` is set true so that we copy the global state of the cluster snapshot over. The default for restoring,
+   however, is `include_global_state: false`. If only restoring a single index, it could be bad to overwrite the global state but as we are
+   restoring the full cluster we set it to true.
 
-3. Then we can start the restore (SNAPSHOT_NAME for the overnight snapshot is `latest`)
-
-   `curl -XPOST 'http://localhost:9200/_snapshot/<NAMESPACE>/<SNAPSHOT_NAME>/_restore' --data '{"include_global_state": true}'`
-
-The `include_global_state: true` is set true so that we copy the global state of the cluster snapshot over. The default for restoring,
-however, is `include_global_state: False`. If only restoring a single index, it could be bad to overwrite the global state but as we are
-restoring the full cluster we set it to true
-
+5. The indices will be yellow until they are all restored - again check they are completed with
+   ```shell
+   http http://localhost:9200/_cat/indices
+   ```
 #### To view the state of the indexes while restoring from a snapshot
 
 ##### Cluster health
 
-`curl -XGET 'http://localhost:9200/_cluster/health'`
+`http 'http://localhost:9200/_cluster/health'`
 
 The cluster health status is: green, yellow or red. On the shard level, a red status indicates that the specific shard is not allocated in the cluster, yellow means that the primary shard is allocated but replicas are not, and green means that all shards are allocated. The index level status is controlled by the worst shard status. The cluster status is controlled by the worst index status.
 
 ##### Shards
-`curl -XGET 'http://localhost:9200/_cat/shards'`
+`http 'http://localhost:9200/_cat/shards'`
 
 The shards command is the detailed view of what nodes contain which shards. It will tell you if it’s a primary or replica, the number of docs, the bytes it takes on disk, and the node where it’s located.
 
 ##### Recovery
-`curl -XGET 'http://localhost:9200/_cat/recovery'`
+`http 'http://localhost:9200/_cat/recovery'`
 
 Returns information about ongoing and completed shard recoveries
 
@@ -404,25 +426,29 @@ Returns information about ongoing and completed shard recoveries
 
 1. You can't take a snapshot if one is currently in progress. To check, run the following command:
 
-   `curl -XGET 'http://localhost:9200/_snapshot/_status'`
+   `http 'http://localhost:9200/_snapshot/_status'`
 2. Run the following command to take a manual snapshot:
 
-   `curl -XPUT 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
+   `http PUT 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
 
 you can now use the restore commands above to restore the snapshot if needed
 
 ##### To remove a snapshot
-`curl -XDELETE 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
+`http DELETE 'http://localhost:9200/_snapshot/<NAMESPACE>/snapshot-name'`
 
 #### Other command which will help when looking at restoring a snapshot
 
 To see all snapshot repositories, run the following command (normally there will only be one, as we have one per namespace):
 
-`curl -XGET 'http://localhost:9200/_snapshot?pretty'`
+`http 'http://localhost:9200/_snapshot?pretty'`
+
+In the pre-production namespace there will be a pre-production snapshot repository and also the production repository.
+The latter is used for the fortnightly restore and should be set to `readonly` so that it can't be overwritten with 
+pre-production data.
 
 To see all snapshots for the namespace run the following command:
 
-`curl -XGET 'http://localhost:9200/_snapshot/<NAMESPACE>/_all?pretty'`
+`http 'http://localhost:9200/_snapshot/<NAMESPACE>/_all?pretty'`
 
 ### Useful App Insights Queries
 
