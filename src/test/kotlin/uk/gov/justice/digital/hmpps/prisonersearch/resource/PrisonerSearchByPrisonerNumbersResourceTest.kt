@@ -1,17 +1,11 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import org.awaitility.kotlin.await
-import org.awaitility.kotlin.matches
-import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
+import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
 class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
 
@@ -23,51 +17,10 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
 
   @BeforeEach
   fun setup() {
-
     if (initialiseSearchData) {
-      val prisonerNumbers = getTestPrisonerNumbers(12)
-      prisonMockServer.stubFor(
-        get(urlEqualTo("/api/offenders/ids"))
-          .willReturn(
-            aResponse()
-              .withHeader("Content-Type", "application/json")
-              .withHeader("Total-Records", prisonerNumbers.size.toString())
-              .withBody(gson.toJson(prisonerNumbers.map { IDs(it) }))
-          )
-      )
-      prisonerNumbers.forEach {
-        prisonMockServer.stubFor(
-          get(urlEqualTo("/api/offenders/$it"))
-            .willReturn(
-              aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody(getOffenderBookingJson(it))
-            )
-        )
-      }
-
-      setupIndexes()
-      indexPrisoners(prisonerNumbers)
-
-      webTestClient.put().uri("/prisoner-index/mark-complete")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .exchange()
-        .expectStatus().isOk
-
+      loadPrisoners(*getTestPrisonerNumbers(12).map { PrisonerBuilder(prisonerNumber = it) }.toTypedArray())
       initialiseSearchData = false
     }
-  }
-
-  fun indexPrisoners(prisonerNumbers: List<String>) {
-    webTestClient.put().uri("/prisoner-index/build-index")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-      .exchange()
-      .expectStatus().isOk
-
-    // wait for last offender to be available
-    await untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
-
-    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
   private fun getTestPrisonerNumbers(count: Int): List<String> {
@@ -148,12 +101,4 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
       .exchange()
       .expectStatus().isForbidden
   }
-
-  private fun getOffenderBookingJson(offenderNo: String): String? {
-    val templateOffender = gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
-    return gson.toJson(templateOffender.copy(offenderNo = offenderNo))
-  }
 }
-
-private fun String.readResourceAsText() =
-  PrisonerSearchByPrisonerNumbersResourceTest::class.java.getResource(this).readText()
