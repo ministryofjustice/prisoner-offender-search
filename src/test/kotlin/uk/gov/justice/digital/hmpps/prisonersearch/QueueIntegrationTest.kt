@@ -1,10 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonersearch
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
+import org.apache.commons.lang3.RandomStringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -25,6 +27,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.resource.PrisonerSearchByPrisonerNumbersResourceTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
@@ -33,6 +36,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSea
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
@@ -117,6 +121,44 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     createIndexStatusIndex()
     createPrisonerIndex(SyncIndex.INDEX_A)
     createPrisonerIndex(SyncIndex.INDEX_B)
+  }
+
+  fun loadPrisoners(vararg prisoner: PrisonerBuilder) {
+    setupIndexes()
+    val prisonerNumbers = prisoner.map { it.prisonerNumber }.toList()
+    prisonMockServer.stubFor(
+      WireMock.get(urlEqualTo("/api/offenders/ids"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withHeader("Total-Records", prisonerNumbers.size.toString())
+            .withBody(gson.toJson(prisonerNumbers.map { PrisonerSearchByPrisonerNumbersResourceTest.IDs(it) }))
+        )
+    )
+    prisoner.forEach {
+      prisonMockServer.stubFor(
+        WireMock.get(urlEqualTo("/api/offenders/${it.prisonerNumber}"))
+          .willReturn(
+            WireMock.aResponse()
+              .withHeader("Content-Type", "application/json")
+              .withBody(it.toOffenderBooking())
+          )
+      )
+    }
+
+    webTestClient.put().uri("/prisoner-index/build-index")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+
+    await untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+
+    webTestClient.put().uri("/prisoner-index/mark-complete")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
   }
 
   private fun createIndexStatusIndex() {
@@ -247,7 +289,12 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
-  fun restrictedPatientSearchPagination(restrictedPatientSearchCriteria: RestrictedPatientSearchCriteria, size: Long, page: Long, fileAssert: String) {
+  fun restrictedPatientSearchPagination(
+    restrictedPatientSearchCriteria: RestrictedPatientSearchCriteria,
+    size: Long,
+    page: Long,
+    fileAssert: String
+  ) {
     webTestClient.post().uri("/restricted-patient-search/match-restricted-patients?size=$size&page=$page")
       .body(BodyInserters.fromValue(gson.toJson(restrictedPatientSearchCriteria)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -294,6 +341,41 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectStatus().isOk
       .expectBody().json(fileAssert.readResourceAsText())
   }
+
+  protected fun getOffenderBookingTemplate(): OffenderBooking {
+    return gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
+  }
+
+  fun PrisonerBuilder.toOffenderBooking(): String {
+    return gson.toJson(
+      getOffenderBookingTemplate().copy(
+        offenderNo = this.prisonerNumber,
+        firstName = this.firstName,
+        lastName = this.lastName,
+        agencyId = this.agencyId
+      )
+    )
+  }
 }
 
+data class PrisonerBuilder(
+  val prisonerNumber: String = generatePrisonerNumber(),
+  val firstName: String = "LUCAS",
+  val lastName: String = "MORALES",
+  val agencyId: String = "MDI"
+)
+
 private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
+
+fun generatePrisonerNumber(): String {
+  // generate random string starting with a letter, followed by 4 numbers and 2 letters
+  return "${letters(1)}${numbers(4)}${letters(2)}"
+}
+
+fun letters(length: Int): String {
+  return RandomStringUtils.random(length, true, true)
+}
+
+fun numbers(length: Int): String {
+  return RandomStringUtils.random(length, false, true)
+}
