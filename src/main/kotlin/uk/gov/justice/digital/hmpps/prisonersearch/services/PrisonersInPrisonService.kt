@@ -21,11 +21,11 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerInEstablishmentRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 import java.util.concurrent.TimeUnit
 
 @Service
-class PrisonerInEstablishmentService(
+class PrisonersInPrisonService(
   private val elasticsearchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
@@ -38,7 +38,7 @@ class PrisonerInEstablishmentService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun search(prisonId: String, prisonerSearchRequest: PrisonerInEstablishmentRequest): Page<Prisoner> {
+  fun search(prisonId: String, prisonerSearchRequest: PrisonersInPrisonRequest): Page<Prisoner> {
     log.info("Received keyword request ${gson.toJson(prisonerSearchRequest)}")
 
     val searchSourceBuilder = createSourceBuilder(prisonId, prisonerSearchRequest)
@@ -55,7 +55,7 @@ class PrisonerInEstablishmentService(
 
   private fun createSourceBuilder(
     prisonId: String,
-    searchRequest: PrisonerInEstablishmentRequest
+    searchRequest: PrisonersInPrisonRequest
   ): SearchSourceBuilder {
     val pageable = PageRequest.of(searchRequest.pagination.page, searchRequest.pagination.size)
     return SearchSourceBuilder().apply {
@@ -70,11 +70,11 @@ class PrisonerInEstablishmentService(
     }
   }
 
-  private fun buildKeywordQuery(prisonId: String, searchRequest: PrisonerInEstablishmentRequest): BoolQueryBuilder {
+  private fun buildKeywordQuery(prisonId: String, searchRequest: PrisonersInPrisonRequest): BoolQueryBuilder {
     val keywordQuery = QueryBuilders.boolQuery()
 
     // Pattern match terms which might be NomsId, PNC or CRO & uppercase them
-    val sanitisedKeywordRequest = PrisonerInEstablishmentRequest(
+    val sanitisedKeywordRequest = PrisonersInPrisonRequest(
       term = addUppercaseKeywordTokens(searchRequest.term),
       pagination = searchRequest.pagination,
     )
@@ -154,7 +154,7 @@ class PrisonerInEstablishmentService(
   private fun getIndex() = indexStatusService.getCurrentIndex().currentIndex.indexName
 
   private fun auditSearch(
-    searchRequest: PrisonerInEstablishmentRequest,
+    searchRequest: PrisonersInPrisonRequest,
     numberOfResults: Long,
   ) {
     val propertiesMap = mapOf(

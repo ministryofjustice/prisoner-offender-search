@@ -18,23 +18,20 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerInEstablishmentService
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerInEstablishmentRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonersInPrisonService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 import javax.validation.Valid
 
 @RestController
 @Validated
 @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
-class PrisonerInEstablishmentResource(private val searchService: PrisonerInEstablishmentService) {
+class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  // A hack to allow swagger to determine the response schema which includes generic content
-  abstract class Response : Page<Prisoner>
-
   @Operation(
-    summary = "Search for a prisoner within a particular establishment",
+    summary = "Search for prisoners within a particular prison establishment",
     description = """ 
       This search is optimised for clients that have a simple search term typically containing the prisonser's name
       or prisoner number. The user typically is certain the prisoner is within the establishment and knows key information 
@@ -46,7 +43,7 @@ class PrisonerInEstablishmentResource(private val searchService: PrisonerInEstab
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = PrisonerInEstablishmentRequest::class)
+          schema = Schema(implementation = PrisonersInPrisonRequest::class)
         )
       ]
     ),
@@ -55,7 +52,6 @@ class PrisonerInEstablishmentResource(private val searchService: PrisonerInEstab
       ApiResponse(
         responseCode = "200",
         description = "Search successfully performed",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = Response::class))]
       ),
       ApiResponse(
         responseCode = "400",
@@ -74,9 +70,9 @@ class PrisonerInEstablishmentResource(private val searchService: PrisonerInEstab
       ),
     ]
   )
-  @PostMapping("/establishment/{prisonId}/prisoner", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @PostMapping("/prison/{prisonId}/prisoners", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun search(
     @PathVariable("prisonId") @Parameter(required = true) prisonId: String,
-    @Valid @RequestBody searchRequest: PrisonerInEstablishmentRequest
+    @Valid @RequestBody searchRequest: PrisonersInPrisonRequest
   ): Page<Prisoner> = searchService.search(prisonId, searchRequest)
 }

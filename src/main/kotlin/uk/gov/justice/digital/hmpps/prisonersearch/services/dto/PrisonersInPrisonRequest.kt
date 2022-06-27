@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 
-data class PrisonerInEstablishmentRequest(
+data class PrisonersInPrisonRequest(
   @Schema(
     description = "Match where any of the keywords are present in key fields",
     example = "smith",
