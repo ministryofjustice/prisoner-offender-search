@@ -47,17 +47,16 @@ class PrisonerInEstablishmentService(
     // Useful for logging the JSON elastic search query that is executed
     log.info("search query JSON: {}", searchSourceBuilder.toString())
 
-    return try {
-      val searchResponse = elasticsearchClient.search(searchRequest)
-      customEventForFindBySearchCriteria(prisonerSearchRequest, searchResponse.hits.totalHits?.value ?: 0)
-      createSearchResponse(prisonerSearchRequest.pagination, searchResponse)
-    } catch (e: Throwable) {
-      log.error("Elastic search exception: $e")
-      createEmptyResponse(prisonerSearchRequest.pagination)
+    val searchResponse = elasticsearchClient.search(searchRequest)
+    return createSearchResponse(prisonerSearchRequest.pagination, searchResponse).also {
+      auditSearch(prisonerSearchRequest, searchResponse.hits.totalHits?.value ?: 0)
     }
   }
 
-  private fun createSourceBuilder(prisonId: String, searchRequest: PrisonerInEstablishmentRequest): SearchSourceBuilder {
+  private fun createSourceBuilder(
+    prisonId: String,
+    searchRequest: PrisonerInEstablishmentRequest
+  ): SearchSourceBuilder {
     val pageable = PageRequest.of(searchRequest.pagination.page, searchRequest.pagination.size)
     return SearchSourceBuilder().apply {
       timeout(TimeValue(searchTimeoutSeconds, TimeUnit.SECONDS))
@@ -123,7 +122,10 @@ class PrisonerInEstablishmentService(
       .operator(Operator.OR)
   }
 
-  private fun createSearchResponse(paginationRequest: PaginationRequest, searchResponse: SearchResponse): Page<Prisoner> {
+  private fun createSearchResponse(
+    paginationRequest: PaginationRequest,
+    searchResponse: SearchResponse
+  ): Page<Prisoner> {
     val pageable = PageRequest.of(paginationRequest.page, paginationRequest.size)
     val prisoners = getSearchResult(searchResponse)
     return if (prisoners.isEmpty()) {
@@ -151,7 +153,7 @@ class PrisonerInEstablishmentService(
 
   private fun getIndex() = indexStatusService.getCurrentIndex().currentIndex.indexName
 
-  private fun customEventForFindBySearchCriteria(
+  private fun auditSearch(
     searchRequest: PrisonerInEstablishmentRequest,
     numberOfResults: Long,
   ) {
