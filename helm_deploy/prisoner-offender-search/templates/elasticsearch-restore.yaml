@@ -17,7 +17,7 @@ metadata:
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
-  schedule: "30 3 * * 0"
+  schedule: "30 */4 * * *"
   suspend: {{ .Values.cron.suspendRestore }}
   concurrencyPolicy: "Forbid"
   successfulJobsHistoryLimit: 5
@@ -62,6 +62,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: NAMESPACE_OVERRIDE
               value: {{ .Values.cron.snapshotNamespace }}
+            - name: PRISON_API_BASE_URL
+              value: {{ index .Values "generic-service" "env" "API_BASE_URL_NOMIS" }}
           restartPolicy: "Never"
           volumes:
           - name: elasticsearch-restore-script

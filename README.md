@@ -344,9 +344,9 @@ Pay careful attention to `"currentIndex": "INDEX_A"` - this shows the actual ind
 ### Snapshot cronjobs
 There are two kubernetes cronjobs
 1. A scheduled job runs at 2.30am each day to take a snapshot of the whole cluster.
-2. A fortnightly job runs at 3.30am in pre-production only.  This is timed to coincide with the NOMIS database copy of production to 
-pre-production so that the database and elastic search remain in sync.  Pre-production has access to the production 
-snapshot s3 bucket and uses that to restore the latest production snapshot created by step 1.
+2. A scheduled job runs every four hours in pre-production only.  This checks to see if there is a newer version of
+the NOMIS database since the last restore and if so then does another restore.  Pre-production has access to the
+production snapshot s3 bucket and uses that to restore the latest production snapshot created by step 1.
 
 #### Manually running the create snapshot cronjob
 ```shell
@@ -356,7 +356,7 @@ will trigger the job to create a snapshot called latest.
 Job progress can then be seen by running `kubectl logs -f` on the newly created pod.
 
 #### Manually running the restore snapshot cronjob
-The restore cronjob script only runs alternative weeks so we need to override the configuration to ensure to force the run.
+The restore cronjob script only runs if there is a newer NOMIS database so we need to override the configuration to ensure to force the run.
 We do that by using `jq` to amend the json and adding in the `FORCE_RUN=true` parameter.
 
 In dev and production there is only one snapshot repository so 
@@ -371,6 +371,11 @@ will suffice.  However, if it required to restore from the previous pre-producti
 `NAMESPACE_OVERRIDE` environment variable so that it doesn't try to restore from production instead.
 ```shell
 kubectl create job --dry-run=client --from=cronjob/prisoner-offender-search-elasticsearch-restore prisoner-offender-search-elasticsearch-restore-pgp -o "json" | jq "(.spec.template.spec.containers[0].env += [{ \"name\": \"FORCE_RUN\", \"value\": \"true\"}]) | (.spec.template.spec.containers[0].env[] | select(.name==\"NAMESPACE_OVERRIDE\").value) |= \"\"" | kubectl apply -f -
+```
+
+The last successful restore information is stored in a `restore-status` index.  To find out when the last restore ran:
+```
+http GET http://localhost:9200/restore-status/_doc/1
 ```
 
 ### Restore from a snapshot (if both indexes have become corrupt/empty)
@@ -443,7 +448,7 @@ To see all snapshot repositories, run the following command (normally there will
 `http 'http://localhost:9200/_snapshot?pretty'`
 
 In the pre-production namespace there will be a pre-production snapshot repository and also the production repository.
-The latter is used for the fortnightly restore and should be set to `readonly` so that it can't be overwritten with 
+The latter is used for the restore and should be set to `readonly` so that it can't be overwritten with 
 pre-production data.
 
 To see all snapshots for the namespace run the following command:
