@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 
 @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
@@ -58,6 +59,24 @@ class PrisonerSearchService(
     }
     customEventForFindBySearchCriteria(searchCriteria, 0)
     return emptyList()
+  }
+
+  fun findPossibleMatchesBySearchCriteria(searchCriteria: PossibleMatchCriteria): List<Prisoner> {
+    if (!searchCriteria.isValid()) {
+      log.warn("Invalid search  - no criteria provided")
+      throw BadRequestException("Invalid search  - please provide at least 1 search parameter")
+    }
+    var result = mutableListOf<Prisoner>()
+    if (searchCriteria.nomsNumber != null) {
+      result.addAll(queryBy(searchCriteria.nomsNumber) { fieldMatch("prisonerNumber", it) }.collect())
+    }
+    if (searchCriteria.pncNumber != null) {
+      result.addAll(queryBy(searchCriteria.pncNumber) { fieldMatch("pncNumber", it) }.collect())
+    }
+    if (searchCriteria.lastName != null && searchCriteria.dateOfBirth != null) {
+      result.addAll(queryBy(searchCriteria) { nameMatchWithAliasesAndDob(it) }.collect())
+    }
+    return result.distinctBy { it.prisonerNumber }
   }
 
   fun findByReleaseDate(searchCriteria: ReleaseDateSearch, pageable: Pageable): Page<Prisoner> {
@@ -189,6 +208,13 @@ class PrisonerSearchService(
     }
   }
 
+  private fun fieldMatch(field: String, value: String): BoolQueryBuilder {
+    return QueryBuilders.boolQuery()
+      .must(
+        "$field", value
+      )
+  }
+
   private fun releaseDateMatch(searchCriteria: ReleaseDateSearch): BoolQueryBuilder {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
@@ -241,6 +267,34 @@ class PrisonerSearchService(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
                       .mustWhenPresent("aliases.firstName", firstName)
+                  ),
+                ScoreMode.Max
+              )
+            )
+        )
+    }
+  }
+
+  private fun nameMatchWithAliasesAndDob(searchCriteria: PossibleMatchCriteria): BoolQueryBuilder? {
+    with(searchCriteria) {
+      return QueryBuilders.boolQuery()
+        .must(
+          QueryBuilders.boolQuery()
+            .should(
+              QueryBuilders.boolQuery()
+                .mustWhenPresent("lastName", lastName)
+                .mustWhenPresent("firstName", firstName)
+                .mustWhenPresent("dateOfBirth", dateOfBirth)
+            )
+            .should(
+              QueryBuilders.nestedQuery(
+                "aliases",
+                QueryBuilders.boolQuery()
+                  .should(
+                    QueryBuilders.boolQuery()
+                      .mustWhenPresent("aliases.lastName", lastName)
+                      .mustWhenPresent("aliases.firstName", firstName)
+                      .mustWhenPresent("dateOfBirth", dateOfBirth)
                   ),
                 ScoreMode.Max
               )
@@ -335,6 +389,12 @@ sealed class Result {
   object NoMatch : Result()
   data class Match(val matches: List<Prisoner>) : Result()
 }
+
+inline fun Result.collect() =
+  when (this) {
+    is Result.NoMatch -> emptyList<Prisoner>()
+    is Result.Match -> matches
+  }
 
 inline infix fun Result.onMatch(block: (Result.Match) -> Nothing) =
   when (this) {

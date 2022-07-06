@@ -37,6 +37,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
@@ -267,6 +268,16 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
       .expectBody().json(fileAssert.readResourceAsText())
+  }
+
+  fun possibleMatch(matchRequest: PossibleMatchCriteria, fileAssert: String) {
+    webTestClient.post().uri("/prisoner-search/possible-matches")
+      .body(BodyInserters.fromValue(gson.toJson(matchRequest)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody().json(fileAssert.readResourceAsText(), true)
   }
 
   fun globalSearchPagination(globalSearchCriteria: GlobalSearchCriteria, size: Long, page: Long, fileAssert: String) {
