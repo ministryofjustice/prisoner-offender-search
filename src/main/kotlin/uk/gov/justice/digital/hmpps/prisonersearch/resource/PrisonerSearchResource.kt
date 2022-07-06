@@ -47,7 +47,7 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     prisonerSearchService.findBySearchCriteria(searchCriteria)
 
   @PostMapping("/possible-matches")
-  @Operation(summary = "Search for possible matches by criteria, searching by prison number, pnc number, and/or name and date of birth, returning collated results by order of search. Use when there is manual input, eg a user has opportunity to select correct match from search results.", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  @Operation(summary = "Search for possible matches by criteria, searching by prison number, pnc number, and/or name and date of birth, returning collated results by order of search. This will also search aliases for possible matches. Use when there is manual input, eg a user has opportunity to select correct match from search results.", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findPossibleMatchesBySearchCriteria(@Parameter(required = true) @RequestBody searchCriteria: PossibleMatchCriteria) =
     prisonerSearchService.findPossibleMatchesBySearchCriteria(searchCriteria)
 
