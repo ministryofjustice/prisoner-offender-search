@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import javax.validation.Valid
 
 @RestController
@@ -41,9 +42,14 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     prisonerSearchService.findBySearchCriteria(prisonSearch.toSearchCriteria())
 
   @PostMapping("/match-prisoners")
-  @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  @Operation(summary = "Match prisoners by criteria, searching by prisoner identifier or name and returning result for criteria matched first", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
   fun findByCriteria(@Parameter(required = true) @RequestBody searchCriteria: SearchCriteria) =
     prisonerSearchService.findBySearchCriteria(searchCriteria)
+
+  @PostMapping("/possible-matches")
+  @Operation(summary = "Search for possible matches by criteria, searching by prison number, pnc number, and/or name and date of birth, returning collated results by order of search. This will also search aliases for possible matches. Use when there is manual input, eg a user has opportunity to select correct match from search results.", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  fun findPossibleMatchesBySearchCriteria(@Parameter(required = true) @RequestBody searchCriteria: PossibleMatchCriteria) =
+    prisonerSearchService.findPossibleMatchesBySearchCriteria(searchCriteria)
 
   @PostMapping("/prisoner-numbers")
   @Operation(summary = "Match prisoners by a list of prisoner numbers", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
