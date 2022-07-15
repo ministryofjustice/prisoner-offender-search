@@ -364,7 +364,19 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         firstName = this.firstName,
         lastName = this.lastName,
         agencyId = this.agencyId
-      )
+      ).let {
+        if (released) {
+          it.copy(
+            status = "INACTIVE OUT",
+            lastMovementTypeCode = "REL",
+            lastMovementReasonCode = "HP",
+            inOutStatus = "OUT",
+            agencyId = "OUT",
+          )
+        } else {
+          it
+        }
+      }
     )
   }
 }
@@ -373,7 +385,8 @@ data class PrisonerBuilder(
   val prisonerNumber: String = generatePrisonerNumber(),
   val firstName: String = "LUCAS",
   val lastName: String = "MORALES",
-  val agencyId: String = "MDI"
+  val agencyId: String = "MDI",
+  val released: Boolean = false,
 )
 
 private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
