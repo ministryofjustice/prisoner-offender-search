@@ -117,6 +117,30 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1819AA", "A1809AB", "A1809AC"),
       )
     }
+    @Test
+    internal fun `can search by just first name`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "CAMILA"),
+        prisonId = "PEI",
+        expectedPrisoners = listOf("A1809AC", "A1809AD"),
+      )
+    }
+    @Test
+    internal fun `can search by first and last name`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "MARIANA RODRÍGUEZ"),
+        prisonId = "PEI",
+        expectedPrisoners = listOf("A1809AB", "A1819AA"),
+      )
+    }
+    @Test
+    internal fun `can search by first and last name in any order`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "RODRÍGUEZ MARIANA"),
+        prisonId = "PEI",
+        expectedPrisoners = listOf("A1809AB", "A1819AA"),
+      )
+    }
   }
   @Nested
   @DisplayName("When term includes a prisoner number")
