@@ -75,7 +75,7 @@ class PrisonersInPrisonService(
 
     // Pattern match terms which might be NomsId, PNC or CRO & uppercase them
     val sanitisedKeywordRequest = PrisonersInPrisonRequest(
-      term = addUppercaseKeywordTokens(searchRequest.term),
+      term = convertTokensToSearchTerms(searchRequest.term),
       pagination = searchRequest.pagination,
     )
 
@@ -168,19 +168,19 @@ class PrisonersInPrisonService(
     telemetryClient.trackEvent("POSFindInEstablisment", propertiesMap, metricsMap)
   }
 
-  /*
-  ** Some fields are defined as @Keyword in the ES mapping annotations so will not match when the query
-  ** tokens are provided in lower or mixed case. Detect these and replace with an uppercase variant.
-  */
-
-  private fun addUppercaseKeywordTokens(tokens: String?): String? {
+  private fun convertTokensToSearchTerms(tokens: String?): String? {
     if (tokens.isNullOrEmpty()) {
       return tokens
     }
     var newTokens = ""
     val arrayOfTokens = tokens.split("\\s+".toRegex())
     arrayOfTokens.forEach {
-      newTokens += if (it.isPrisonerNumber() || it.isCroNumber() || it.isPncNumber()) {
+      // sort circuit - ignore everything in this special case
+      if (it.isPrisonerNumber()) {
+        return it.uppercase()
+      }
+      // TODO not sure we need this below, why they ever search by CRO/PNC within an establishment??
+      newTokens += if (it.isCroNumber() || it.isPncNumber()) {
         "${it.uppercase()} "
       } else {
         "${it.lowercase()} "

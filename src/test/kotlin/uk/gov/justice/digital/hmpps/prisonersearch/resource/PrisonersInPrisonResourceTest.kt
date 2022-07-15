@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
@@ -22,7 +23,28 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
       loadPrisoners(
         PrisonerBuilder(
           prisonerNumber = "A7089EY", firstName = "SMITH", lastName = "JONES", agencyId = "MDI"
-        )
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1809JK", firstName = "SMITH", lastName = "JONES", agencyId = "HEI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A9809BB", firstName = "AKAN", lastName = "OBENG", agencyId = "HEI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1921BH", firstName = "SMITH", lastName = "JONES", released = true
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1819AA", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "PEI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1809AB", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "PEI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1809AC", firstName = "CAMILA", lastName = "RODRÍGUEZ", agencyId = "PEI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1809AD", firstName = "CAMILA", lastName = "MORALES", agencyId = "PEI"
+        ),
       )
       initialiseSearchData = false
     }
@@ -84,10 +106,81 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     }
   }
 
+  @Nested
+  @DisplayName("When term includes a name")
+  inner class TermIncludesNames {
+    @Test
+    internal fun `can search by just last name`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "RODRÍGUEZ"),
+        prisonId = "PEI",
+        expectedPrisoners = listOf("A1819AA", "A1809AB", "A1809AC"),
+      )
+    }
+  }
+  @Nested
+  @DisplayName("When term includes a prisoner number")
+  inner class TermIncludesPrisonerNumber {
+    @Test
+    internal fun `will only find in the prison they are active in`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "A7089EY"),
+        prisonId = "MDI",
+        expectedPrisoners = listOf("A7089EY"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "A1809JK"),
+        prisonId = "HEI",
+        expectedPrisoners = listOf("A1809JK"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "A7089EY"),
+        prisonId = "HEI",
+        expectedPrisoners = listOf(),
+      )
+    }
+
+    @Test
+    internal fun `could find a prisoner that is OUT even though it is not officially supported`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "A1921BH"),
+        prisonId = "OUT",
+        expectedPrisoners = listOf("A1921BH"),
+      )
+    }
+
+    @Test
+    internal fun `can search with any case`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "A1809JK"),
+        prisonId = "HEI",
+        expectedPrisoners = listOf("A1809JK"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "a1809jk"),
+        prisonId = "HEI",
+        expectedPrisoners = listOf("A1809JK"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "a1809JK"),
+        prisonId = "HEI",
+        expectedPrisoners = listOf("A1809JK"),
+      )
+    }
+    @Test
+    internal fun `when prisoner number present will ignore any other term`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "OBENG A1809JK"),
+        prisonId = "HEI",
+        expectedPrisoners = listOf("A1809JK"),
+      )
+    }
+  }
+
   fun search(
     request: PrisonersInPrisonRequest,
     prisonId: String = "MDI",
-    expectedCount: Int = 0,
+    expectedCount: Int? = null,
     expectedPrisoners: List<String> = emptyList(),
   ) {
     val response =
@@ -95,7 +188,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk.expectBody(RestResponsePage::class.java).returnResult().responseBody
 
-    Assertions.assertThat(response.numberOfElements).isEqualTo(expectedCount)
+    Assertions.assertThat(response.numberOfElements).isEqualTo(expectedCount ?: expectedPrisoners.size)
     Assertions.assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
     Assertions.assertThat(response.content).extracting("prisonerNumber").containsAll(expectedPrisoners)
   }
