@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import java.time.LocalDate
 
@@ -132,4 +133,20 @@ fun BoolQueryBuilder.matchesDateRange(earliest: LocalDate?, latest: LocalDate?, 
   }
 
   return this.must(nestedClauses)
+}
+
+fun BoolQueryBuilder.shouldAll(vararg queries: QueryBuilder): BoolQueryBuilder = shouldAll(queries.asList())
+
+fun BoolQueryBuilder.shouldAll(queries: List<QueryBuilder>): BoolQueryBuilder {
+  queries.forEach {
+    this.should().add(it)
+  }
+  return this
+}
+
+fun BoolQueryBuilder.mustAll(queries: List<QueryBuilder>): BoolQueryBuilder {
+  queries.forEach {
+    this.must().add(it)
+  }
+  return this
 }

@@ -104,14 +104,29 @@ class PrisonersInPrisonService(
       "pncNumberCanonicalLong",
       "croNumber",
       "bookNumber",
+    )
+
+    val nameFields = listOf(
       "firstName",
       "lastName",
     )
-    return QueryBuilders.multiMatchQuery(term, *fields.toTypedArray())
+
+    val keywordQuery = QueryBuilders.multiMatchQuery(term, *fields.toTypedArray())
       .analyzer("whitespace")
       .lenient(true)
       .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
       .operator(Operator.AND)
+
+    val prefixNameQuery = QueryBuilders.boolQuery().mustAll(
+      term.split("\\s".toRegex()).map {
+        QueryBuilders.boolQuery().shouldAll(nameFields.map { name -> QueryBuilders.prefixQuery(name, it) })
+      }
+    )
+
+    return QueryBuilders.boolQuery().shouldAll(
+      keywordQuery,
+      prefixNameQuery,
+    )
   }
 
   private fun createSearchResponse(
