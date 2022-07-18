@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -44,6 +44,24 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         ),
         PrisonerBuilder(
           prisonerNumber = "A1809AD", firstName = "CAMILA", lastName = "MORALES", agencyId = "PEI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1810AA", firstName = "YAW", lastName = "BOATENG", agencyId = "WWI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1810AC", firstName = "EKOW", lastName = "BOATENG", agencyId = "WWI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1810AB", firstName = "EKOW", lastName = "BOATENG", agencyId = "WWI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1810AD", firstName = "EKOW", lastName = "MENSAH", agencyId = "WWI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1810AE", firstName = "EKOW", lastName = "ADJEI", agencyId = "WWI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1810AF", firstName = "ADJEI", lastName = "BOATENG", agencyId = "WWI"
         ),
       )
       initialiseSearchData = false
@@ -141,6 +159,22 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1809AB", "A1819AA"),
       )
     }
+
+    @Test
+    internal fun `will order by last name, first name then prisoner number`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "BOATENG"),
+        prisonId = "WWI",
+        expectedPrisoners = listOf("A1810AF", "A1810AB", "A1810AC", "A1810AA"),
+        checkOrder = true,
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "EKOW"),
+        prisonId = "WWI",
+        expectedPrisoners = listOf("A1810AE", "A1810AB", "A1810AC", "A1810AD"),
+        checkOrder = true,
+      )
+    }
   }
   @Nested
   @DisplayName("When term includes a prisoner number")
@@ -206,14 +240,20 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     prisonId: String = "MDI",
     expectedCount: Int? = null,
     expectedPrisoners: List<String> = emptyList(),
+    checkOrder: Boolean = false,
   ) {
     val response =
       webTestClient.post().uri("/prison/$prisonId/prisoners").body(BodyInserters.fromValue(gson.toJson(request)))
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk.expectBody(RestResponsePage::class.java).returnResult().responseBody
 
-    Assertions.assertThat(response.numberOfElements).isEqualTo(expectedCount ?: expectedPrisoners.size)
-    Assertions.assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
-    Assertions.assertThat(response.content).extracting("prisonerNumber").containsAll(expectedPrisoners)
+    assertThat(response.numberOfElements).isEqualTo(expectedCount ?: expectedPrisoners.size)
+    assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
+    val numbers = assertThat(response.content).extracting("prisonerNumber")
+    if (checkOrder) {
+      numbers.isEqualTo(expectedPrisoners)
+    } else {
+      numbers.containsAll(expectedPrisoners)
+    }
   }
 }
