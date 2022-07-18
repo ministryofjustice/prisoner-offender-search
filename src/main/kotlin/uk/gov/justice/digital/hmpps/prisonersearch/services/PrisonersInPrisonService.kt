@@ -108,18 +108,10 @@ class PrisonersInPrisonService(
       "lastName",
     )
     return QueryBuilders.multiMatchQuery(term, *fields.toTypedArray())
-      // Boost the scores for specific fields so real names and IDs are ranked higher than alias matches
       .analyzer("whitespace")
-      .field("lastName", 10f)
-      .field("firstName", 10f)
-      .field("prisonerNumber", 10f)
-      .field("pncNumber", 10f)
-      .field("pncNumberCanonicalShort", 10f)
-      .field("pncNumberCanonicalLong", 10f)
-      .field("croNumber", 10f)
       .lenient(true)
-      .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
-      .operator(Operator.OR)
+      .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
+      .operator(Operator.AND)
   }
 
   private fun createSearchResponse(
