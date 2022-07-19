@@ -77,6 +77,9 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         PrisonerBuilder(
           prisonerNumber = "A1820AD", firstName = "JOHN", lastName = "HUSAIN", agencyId = "BXI"
         ),
+        PrisonerBuilder(
+          prisonerNumber = "A1820AE", firstName = "JOHN", lastName = "BLATHERINGTON-SMYTHE", agencyId = "BXI"
+        ),
       )
       initialiseSearchData = false
     }
@@ -238,6 +241,58 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(term = "MOHAMM HUS"),
         prisonId = "BXI",
         expectedPrisoners = listOf("A1820AA", "A1820AB"),
+      )
+    }
+    @Test
+    internal fun `can partially match with either first or last name`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "MOH MAD"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AB", "A1820AC"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "HUS AIN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB", "A1820AC", "A1820AD"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "HUS AI"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB", "A1820AC", "A1820AD"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "HUSS IN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB"),
+      )
+    }
+
+    @Test
+    internal fun `can partially match double barrelled names`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "BLATHERINGTON-SMYTHE"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AE"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "JOHN BLATHERINGTON-SMYTHE"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AE"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "BLATHERINGTON-SMYTHE"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AE"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "BLATHERINGTON SMYTHE"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AE"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "BLATHERING SMYTH"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AE"),
       )
     }
   }

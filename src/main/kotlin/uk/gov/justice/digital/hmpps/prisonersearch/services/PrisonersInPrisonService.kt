@@ -109,6 +109,8 @@ class PrisonersInPrisonService(
     val nameFields = listOf(
       "firstName",
       "lastName",
+      "firstName.keyword",
+      "lastName.keyword",
     )
 
     val keywordQuery = QueryBuilders.multiMatchQuery(term, *fields.toTypedArray())
@@ -117,15 +119,22 @@ class PrisonersInPrisonService(
       .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
       .operator(Operator.AND)
 
+    val termsList = term.split("\\s".toRegex()).map { it.uppercase() }
     val prefixNameQuery = QueryBuilders.boolQuery().mustAll(
-      term.split("\\s".toRegex()).map {
+      termsList.map {
         QueryBuilders.boolQuery().shouldAll(nameFields.map { name -> QueryBuilders.prefixQuery(name, it) })
       }
     )
 
+    val maybeWildcardNameQuery = termsList.takeIf { it.size > 1 }?.let {
+      val wildCardNameTerm = termsList.joinToString("*") + "*"
+      QueryBuilders.boolQuery().shouldAll(nameFields.map { QueryBuilders.wildcardQuery(it, wildCardNameTerm) })
+    }
+
     return QueryBuilders.boolQuery().shouldAll(
       keywordQuery,
       prefixNameQuery,
+      maybeWildcardNameQuery
     )
   }
 
