@@ -2,11 +2,13 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.PrisonerNumbers
 
+@TestPropertySource(properties = [ "index.page-size=1000" ])
 class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
 
   companion object {

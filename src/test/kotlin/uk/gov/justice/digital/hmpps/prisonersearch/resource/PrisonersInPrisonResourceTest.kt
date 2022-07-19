@@ -5,12 +5,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 
+@TestPropertySource(properties = [ "index.page-size=1000" ])
 class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
 
   companion object {
@@ -62,6 +64,18 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         ),
         PrisonerBuilder(
           prisonerNumber = "A1810AF", firstName = "ADJEI", lastName = "BOATENG", agencyId = "WWI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1820AA", firstName = "MOHAMMED", lastName = "HUSSAIN", agencyId = "BXI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1820AB", firstName = "MOHAMMAD", lastName = "HUSSAIN", agencyId = "BXI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1820AC", firstName = "MOHAMAD", lastName = "HUSAIN", agencyId = "BXI"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1820AD", firstName = "JOHN", lastName = "HUSAIN", agencyId = "BXI"
         ),
       )
       initialiseSearchData = false
@@ -173,6 +187,57 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         prisonId = "WWI",
         expectedPrisoners = listOf("A1810AE", "A1810AB", "A1810AC", "A1810AD"),
         checkOrder = true,
+      )
+    }
+
+    @Test
+    internal fun `can partially match for first name`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAM"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB", "A1820AC"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMM"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMME"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA"),
+      )
+    }
+
+    @Test
+    internal fun `can partially match for last name`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "HUS"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB", "A1820AC", "A1820AD"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "HUSS"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB"),
+      )
+    }
+    @Test
+    internal fun `can partially match for last and last name at same time`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMMED HUSSAIN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAM HUS"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB", "A1820AC"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMM HUS"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA", "A1820AB"),
       )
     }
   }
