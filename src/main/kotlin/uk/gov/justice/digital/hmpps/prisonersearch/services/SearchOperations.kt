@@ -135,7 +135,8 @@ fun BoolQueryBuilder.matchesDateRange(earliest: LocalDate?, latest: LocalDate?, 
   return this.must(nestedClauses)
 }
 
-fun BoolQueryBuilder.shouldAll(vararg queries: QueryBuilder): BoolQueryBuilder = shouldAll(queries.asList())
+fun BoolQueryBuilder.shouldAll(vararg queries: QueryBuilder?): BoolQueryBuilder =
+  shouldAll(queries.asList().filterNotNull())
 
 fun BoolQueryBuilder.shouldAll(queries: List<QueryBuilder>): BoolQueryBuilder {
   queries.forEach {
