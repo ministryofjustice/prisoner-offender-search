@@ -71,27 +71,25 @@ class PrisonersInPrisonService(
   }
 
   private fun buildKeywordQuery(prisonId: String, searchRequest: PrisonersInPrisonRequest): BoolQueryBuilder {
-    val keywordQuery = QueryBuilders.boolQuery()
+    val query = QueryBuilders.boolQuery()
 
     // Pattern match terms which might be NomsId, PNC or CRO & uppercase them
-    val sanitisedKeywordRequest = PrisonersInPrisonRequest(
-      term = convertTokensToSearchTerms(searchRequest.term),
-      pagination = searchRequest.pagination,
-    )
+    val sanitisedSearchRequest = searchRequest.copy(term = convertTokensToSearchTerms(searchRequest.term))
 
-    with(sanitisedKeywordRequest) {
+    with(sanitisedSearchRequest) {
 
       term.takeIf { !it.isNullOrBlank() }?.let {
         // Will include the prisoner document if any of the words specified match in any of the fields
-        keywordQuery.must().add(
+        query.must().add(
           generateMatchQuery(it)
         )
       }
 
-      keywordQuery.filterWhenPresent("prisonId", prisonId)
+      query.filterWhenPresent("prisonId", prisonId)
+      query.filterWhenPresent("alerts.alertCode", alertCodes)
     }
 
-    return keywordQuery
+    return query
   }
 
   private fun generateMatchQuery(

@@ -79,6 +79,21 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         PrisonerBuilder(
           prisonerNumber = "A1820AE", firstName = "JOHN", lastName = "BLATHERINGTON-SMYTHE", agencyId = "BXI"
         ),
+        PrisonerBuilder(
+          prisonerNumber = "A1830AA", firstName = "SMITH", lastName = "JONES", agencyId = "ACI", alertCodes = listOf("X" to "XTACT")
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1830AB", firstName = "SMITH", lastName = "JACK", agencyId = "ACI", alertCodes = listOf("X" to "XTACT", "W" to "WO")
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1830AC", firstName = "MOHAMAD", lastName = "HUSAIN", agencyId = "ACI", alertCodes = listOf("W" to "WO")
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1830AD", firstName = "ADJEI", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf()
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1830AE", firstName = "KWEKU", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf("V" to "VIP")
+        ),
       )
       initialiseSearchData = false
     }
@@ -147,6 +162,19 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(term = "A7089EY"),
         expectedCount = 1,
         expectedPrisoners = listOf("A7089EY"),
+      )
+    }
+  }
+
+  @DisplayName("With no search term")
+  @Nested
+  inner class NoSearchTerm {
+    @Test
+    internal fun `will find all prisoners in the specified prison`() {
+      search(
+        request = PrisonersInPrisonRequest(term = ""),
+        prisonId = "PEI",
+        expectedPrisoners = listOf("A1819AA", "A1809AB", "A1809AC", "A1809AD"),
       )
     }
   }
@@ -372,6 +400,69 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     }
   }
 
+  @DisplayName("When filtering by alert")
+  @Nested
+  inner class AlertFilter {
+
+    @Nested
+    @DisplayName("with no search term")
+    inner class WithNoSearchTerm {
+      @Test
+      internal fun `will find all prisoners that have that alert`() {
+        search(
+          request = PrisonersInPrisonRequest(alertCodes = listOf("XTACT")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AA", "A1830AB"),
+        )
+        search(
+          request = PrisonersInPrisonRequest(alertCodes = listOf("WO")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AB", "A1830AC"),
+        )
+      }
+
+      @Test
+      internal fun `will find all prisoners that have at least one of the specified alerts`() {
+        search(
+          request = PrisonersInPrisonRequest(alertCodes = listOf("XTACT", "WO")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AA", "A1830AB", "A1830AC"),
+        )
+      }
+    }
+    @Nested
+    @DisplayName("with a search term")
+    inner class WithSearchTerm {
+      @Test
+      internal fun `will find all prisoners that have the alert and match the term `() {
+        search(
+          request = PrisonersInPrisonRequest(term = "J SMITH", alertCodes = listOf("XTACT")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AA", "A1830AB"),
+        )
+        search(
+          request = PrisonersInPrisonRequest(term = "JO SMITH", alertCodes = listOf("XTACT")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AA"),
+        )
+      }
+
+      @Test
+      internal fun `will find all prisoners that have at least one of the specified alerts and match the term`() {
+        search(
+          request = PrisonersInPrisonRequest(term = "J SMITH", alertCodes = listOf("XTACT", "WO")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AA", "A1830AB"),
+        )
+        search(
+          request = PrisonersInPrisonRequest(term = "BOATENG", alertCodes = listOf("VIP")),
+          prisonId = "ACI",
+          expectedPrisoners = listOf("A1830AE"),
+        )
+      }
+    }
+  }
+
   fun search(
     request: PrisonersInPrisonRequest,
     prisonId: String = "MDI",
@@ -385,6 +476,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("term", request.term)
           .queryParam("page", request.pagination.page)
           .queryParam("size", request.pagination.size)
+          .queryParam("alerts", request.alertCodes)
           .build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")

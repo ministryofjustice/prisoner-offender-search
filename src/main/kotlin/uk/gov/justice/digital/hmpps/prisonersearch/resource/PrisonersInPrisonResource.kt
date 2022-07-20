@@ -76,5 +76,13 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     @RequestParam(value = "term", required = false, defaultValue = "") @Parameter term: String,
     @RequestParam(value = "page", required = false, defaultValue = "0") @Parameter page: Int,
     @RequestParam(value = "size", required = false, defaultValue = "10") @Parameter size: Int,
-  ): Page<Prisoner> = searchService.search(prisonId, PrisonersInPrisonRequest(term, PaginationRequest(page, size)))
+    @RequestParam(value = "alerts", required = false, defaultValue = "") @Parameter alerts: List<String>,
+  ): Page<Prisoner> = searchService.search(
+    prisonId,
+    PrisonersInPrisonRequest(
+      term = term,
+      pagination = PaginationRequest(page, size),
+      alertCodes = alerts
+    )
+  )
 }
