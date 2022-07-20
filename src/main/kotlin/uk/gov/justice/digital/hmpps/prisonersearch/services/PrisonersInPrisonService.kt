@@ -87,6 +87,8 @@ class PrisonersInPrisonService(
 
       query.filterWhenPresent("prisonId", prisonId)
       query.filterWhenPresent("alerts.alertCode", alertCodes)
+      // when they are null ES will just ignore the range
+      query.filter(QueryBuilders.rangeQuery("dateOfBirth").from(fromDob).to(toDob))
     }
 
     return query

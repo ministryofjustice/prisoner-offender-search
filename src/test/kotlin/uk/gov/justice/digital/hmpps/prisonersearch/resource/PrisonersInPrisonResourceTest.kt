@@ -10,6 +10,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @TestPropertySource(properties = ["index.page-size=1000"])
 class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
@@ -93,6 +95,18 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AE", firstName = "KWEKU", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf("V" to "VIP")
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1840AA", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "LEI", dateOfBirth = "1965-07-19"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1840AB", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "LEI", dateOfBirth = "1965-07-20"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1840AC", firstName = "CAMILA", lastName = "MORALES", agencyId = "LEI", dateOfBirth = "1975-07-19"
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "A1840AD", firstName = "CAMILA", lastName = "RODRÍGUEZ", agencyId = "LEI", dateOfBirth = "1975-07-20"
         ),
       )
       initialiseSearchData = false
@@ -463,6 +477,68 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     }
   }
 
+  @DisplayName("When filtering by date of birth")
+  @Nested
+  inner class DateOfBirthFilter {
+    @Test
+    internal fun `when from dob supplied only prisoners born on or after that date are returned`() {
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-20")),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AB", "A1840AC", "A1840AD"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1975-07-20")),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AD"),
+      )
+    }
+    @Test
+    internal fun `when to dob supplied only prisoners born on or before that date are returned`() {
+      search(
+        request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1965-07-19")),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1975-07-19")),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC"),
+      )
+    }
+    @Test
+    internal fun `when from and to dob supplied only prisoners born on or between those dates are returned`() {
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-20"), toDob = LocalDate.parse("1975-07-19")),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AB", "A1840AC"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1900-01-01"), toDob = LocalDate.parse("2020-07-19")),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AD"),
+      )
+    }
+    @Test
+    internal fun `term can be combined with from and to dob filter`() {
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-20"), toDob = LocalDate.parse("1975-07-20"), term = "RODRÍGUEZ"),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AB", "A1840AD"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-19"), toDob = LocalDate.parse("1975-07-20"), term = "CAMILA"),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AC", "A1840AD"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1975-07-20"), toDob = LocalDate.parse("1975-07-20"), term = "CAMILA"),
+        prisonId = "LEI",
+        expectedPrisoners = listOf("A1840AD"),
+      )
+    }
+  }
+
   fun search(
     request: PrisonersInPrisonRequest,
     prisonId: String = "MDI",
@@ -477,6 +553,8 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("page", request.pagination.page)
           .queryParam("size", request.pagination.size)
           .queryParam("alerts", request.alertCodes)
+          .queryParam("fromDob", request.fromDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
+          .queryParam("toDob", request.toDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
           .build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
