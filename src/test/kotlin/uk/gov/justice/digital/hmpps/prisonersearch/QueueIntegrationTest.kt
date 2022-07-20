@@ -34,11 +34,14 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
+import java.time.LocalDate
+import kotlin.random.Random
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
 abstract class QueueIntegrationTest : IntegrationTest() {
@@ -363,7 +366,20 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         offenderNo = this.prisonerNumber,
         firstName = this.firstName,
         lastName = this.lastName,
-        agencyId = this.agencyId
+        agencyId = this.agencyId,
+        alerts = this.alertCodes.map { (type, code) ->
+          Alert(
+            alertId = Random.nextLong(),
+            offenderNo = this.prisonerNumber,
+            alertCode = code,
+            alertCodeDescription = "Code description for $code",
+            alertType = type,
+            alertTypeDescription = "Type Description for $type",
+            expired = false, // In search all alerts are not expired and active
+            active = true,
+            dateCreated = LocalDate.now(),
+          )
+        },
       ).let {
         if (released) {
           it.copy(
@@ -387,6 +403,7 @@ data class PrisonerBuilder(
   val lastName: String = "MORALES",
   val agencyId: String = "MDI",
   val released: Boolean = false,
+  val alertCodes: List<Pair<String, String>> = listOf(),
 )
 
 private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
