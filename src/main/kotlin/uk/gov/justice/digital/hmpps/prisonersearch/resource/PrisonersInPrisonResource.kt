@@ -12,15 +12,15 @@ import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonersInPrisonService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
-import javax.validation.Valid
 
 @RestController
 @Validated
@@ -70,9 +70,11 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       ),
     ]
   )
-  @PostMapping("/prison/{prisonId}/prisoners", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @GetMapping("/prison/{prisonId}/prisoners", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun search(
     @PathVariable("prisonId") @Parameter(required = true) prisonId: String,
-    @Valid @RequestBody searchRequest: PrisonersInPrisonRequest
-  ): Page<Prisoner> = searchService.search(prisonId, searchRequest)
+    @RequestParam(value = "term", required = false, defaultValue = "") @Parameter term: String,
+    @RequestParam(value = "page", required = false, defaultValue = "0") @Parameter page: Int,
+    @RequestParam(value = "size", required = false, defaultValue = "10") @Parameter size: Int,
+  ): Page<Prisoner> = searchService.search(prisonId, PrisonersInPrisonRequest(term, PaginationRequest(page, size)))
 }

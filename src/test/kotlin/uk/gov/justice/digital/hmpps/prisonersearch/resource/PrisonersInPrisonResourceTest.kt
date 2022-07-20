@@ -6,13 +6,12 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.TestPropertySource
-import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 
-@TestPropertySource(properties = [ "index.page-size=1000" ])
+@TestPropertySource(properties = ["index.page-size=1000"])
 class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
 
   companion object {
@@ -90,43 +89,54 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
 
     @Test
     fun `access forbidden when no authority`() {
-      webTestClient.post().uri("/prison/MDI/prisoners").header("Content-Type", "application/json").exchange()
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .queryParam("term", "smith jones")
+          .build()
+      }
+        .header("Content-Type", "application/json").exchange()
         .expectStatus().isUnauthorized
     }
 
     @Test
     fun `access forbidden when no role`() {
-      webTestClient.post().uri("/prison/MDI/prisoners").body(
-        BodyInserters.fromValue(
-          gson.toJson(
-            PrisonersInPrisonRequest(
-              term = "smith jones",
-            )
-          )
-        )
-      ).headers(setAuthorisation()).header("Content-Type", "application/json").exchange().expectStatus().isForbidden
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .queryParam("term", "smith jones")
+          .build()
+      }
+        .headers(setAuthorisation()).header("Content-Type", "application/json").exchange().expectStatus().isForbidden
     }
 
     @Test
     fun `can perform a search with ROLE_GLOBAL_SEARCH role`() {
-      webTestClient.post().uri("/prison/MDI/prisoners")
-        .body(BodyInserters.fromValue(gson.toJson(PrisonersInPrisonRequest(term = "smith jones"))))
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .queryParam("term", "smith jones")
+          .build()
+      }
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk
     }
 
     @Test
     fun `can perform a search with ROLE_PRISONER_SEARCH role`() {
-      webTestClient.post().uri("/prison/MDI/prisoners")
-        .body(BodyInserters.fromValue(gson.toJson(PrisonersInPrisonRequest(term = "smith jones"))))
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .queryParam("term", "smith jones")
+          .build()
+      }
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk
     }
 
     @Test
     fun `can perform a search with both ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH roles`() {
-      webTestClient.post().uri("/prison/MDI/prisoners")
-        .body(BodyInserters.fromValue(gson.toJson(PrisonersInPrisonRequest(term = "smith jones"))))
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .queryParam("term", "smith jones")
+          .build()
+      }
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
         .header("Content-Type", "application/json").exchange().expectStatus().isOk
     }
@@ -152,6 +162,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1819AA", "A1809AB", "A1809AC"),
       )
     }
+
     @Test
     internal fun `can search by just first name`() {
       search(
@@ -160,6 +171,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1809AC", "A1809AD"),
       )
     }
+
     @Test
     internal fun `can search by first and last name`() {
       search(
@@ -168,6 +180,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1809AB", "A1819AA"),
       )
     }
+
     @Test
     internal fun `can search by first and last name in any order`() {
       search(
@@ -225,6 +238,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1820AA", "A1820AB"),
       )
     }
+
     @Test
     internal fun `can partially match for last and last name at same time`() {
       search(
@@ -243,6 +257,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1820AA", "A1820AB"),
       )
     }
+
     @Test
     internal fun `can partially match with either first or last name`() {
       search(
@@ -296,6 +311,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
       )
     }
   }
+
   @Nested
   @DisplayName("When term includes a prisoner number")
   inner class TermIncludesPrisonerNumber {
@@ -345,6 +361,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1809JK"),
       )
     }
+
     @Test
     internal fun `when prisoner number present will ignore any other term`() {
       search(
@@ -363,7 +380,13 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     checkOrder: Boolean = false,
   ) {
     val response =
-      webTestClient.post().uri("/prison/$prisonId/prisoners").body(BodyInserters.fromValue(gson.toJson(request)))
+      webTestClient.get().uri {
+        it.path("/prison/$prisonId/prisoners")
+          .queryParam("term", request.term)
+          .queryParam("page", request.pagination.page)
+          .queryParam("size", request.pagination.size)
+          .build()
+      }
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk.expectBody(RestResponsePage::class.java).returnResult().responseBody
 
