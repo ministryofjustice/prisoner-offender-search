@@ -118,29 +118,33 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           prisonerNumber = "A1840AA",
           firstName = "MARIANA",
           lastName = "RODRÍGUEZ",
-          agencyId = "LEI",
-          dateOfBirth = "1965-07-19"
+          agencyId = "TEI",
+          dateOfBirth = "1965-07-19",
+          cellLocation = "3-1-C-016",
         ),
         PrisonerBuilder(
           prisonerNumber = "A1840AB",
           firstName = "MARIANA",
           lastName = "RODRÍGUEZ",
-          agencyId = "LEI",
-          dateOfBirth = "1965-07-20"
+          agencyId = "TEI",
+          dateOfBirth = "1965-07-20",
+          cellLocation = "3-1-D-017",
         ),
         PrisonerBuilder(
           prisonerNumber = "A1840AC",
           firstName = "CAMILA",
           lastName = "MORALES",
-          agencyId = "LEI",
-          dateOfBirth = "1975-07-19"
+          agencyId = "TEI",
+          dateOfBirth = "1975-07-19",
+          cellLocation = "3-2-D-001",
         ),
         PrisonerBuilder(
           prisonerNumber = "A1840AD",
           firstName = "CAMILA",
           lastName = "RODRÍGUEZ",
-          agencyId = "LEI",
-          dateOfBirth = "1975-07-20"
+          agencyId = "TEI",
+          dateOfBirth = "1975-07-20",
+          cellLocation = "4-1-D-001",
         ),
       )
       initialiseSearchData = false
@@ -519,12 +523,12 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     internal fun `when from dob supplied only prisoners born on or after that date are returned`() {
       search(
         request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-20")),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AB", "A1840AC", "A1840AD"),
       )
       search(
         request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1975-07-20")),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AD"),
       )
     }
@@ -533,12 +537,12 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     internal fun `when to dob supplied only prisoners born on or before that date are returned`() {
       search(
         request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1965-07-19")),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AA"),
       )
       search(
         request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1975-07-19")),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC"),
       )
     }
@@ -550,7 +554,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           fromDob = LocalDate.parse("1965-07-20"),
           toDob = LocalDate.parse("1975-07-19")
         ),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AB", "A1840AC"),
       )
       search(
@@ -558,7 +562,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           fromDob = LocalDate.parse("1900-01-01"),
           toDob = LocalDate.parse("2020-07-19")
         ),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AD"),
       )
     }
@@ -571,7 +575,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           toDob = LocalDate.parse("1975-07-20"),
           term = "RODRÍGUEZ"
         ),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AB", "A1840AD"),
       )
       search(
@@ -580,7 +584,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           toDob = LocalDate.parse("1975-07-20"),
           term = "CAMILA"
         ),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AC", "A1840AD"),
       )
       search(
@@ -589,8 +593,73 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           toDob = LocalDate.parse("1975-07-20"),
           term = "CAMILA"
         ),
-        prisonId = "LEI",
+        prisonId = "TEI",
         expectedPrisoners = listOf("A1840AD"),
+      )
+    }
+  }
+
+  @DisplayName("When filtering by cell location")
+  @Nested
+  inner class CellLocationFilter {
+    @Test
+    internal fun `can filter by block`() {
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "3"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AB"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "TEI-3"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AB"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "4"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AD"),
+      )
+    }
+
+    @Test
+    internal fun `can filter by block and wing`() {
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "3-1"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "TEI-3-1"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "4-1"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AD"),
+      )
+    }
+
+    @Test
+    internal fun `can filter cell location all the way down to specific cell`() {
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "3-1-C-016"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA"),
+      )
+    }
+
+    @Test
+    internal fun `location filter can be combined with other filters`() {
+      search(
+        request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1975-07-20"), cellLocationPrefix = "TEI-3-1"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA", "A1840AB"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1965-07-19"), cellLocationPrefix = "TEI-3-1", term = "RODRÍGUEZ"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA"),
       )
     }
   }
@@ -620,9 +689,12 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk.expectBody(responseType).returnResult().responseBody
 
-    assertThat(response.numberOfElements).isEqualTo(expectedCount ?: expectedPrisoners.size)
+    assertThat(response.numberOfElements)
       .withFailMessage { "Expected ${expectedCount ?: expectedPrisoners.size} prisoners but got ${response.numberOfElements} [${response.content.map { it.prisonerNumber }}]" }
-    assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
+      .isEqualTo(expectedCount ?: expectedPrisoners.size)
+    assertThat(response.content).size()
+      .withFailMessage { "Expected ${expectedCount ?: expectedPrisoners.size} prisoners but got ${response.content.size} [${response.content.map { it.prisonerNumber }}]" }
+      .isEqualTo(expectedPrisoners.size)
     val numbers = assertThat(response.content).extracting("prisonerNumber")
     if (checkOrder) {
       numbers.isEqualTo(expectedPrisoners)
