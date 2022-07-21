@@ -176,13 +176,13 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     }
 
     @Test
-    fun `can perform a search with ROLE_GLOBAL_SEARCH role`() {
+    fun `can perform a search with ROLE_PRISONER_IN_PRISON_SEARCH role`() {
       webTestClient.get().uri {
         it.path("/prison/MDI/prisoners")
           .queryParam("term", "smith jones")
           .build()
       }
-        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_IN_PRISON_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk
     }
 
@@ -198,13 +198,13 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     }
 
     @Test
-    fun `can perform a search with both ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH roles`() {
+    fun `can perform a search with both ROLE_PRISONER_IN_PRISON_SEARCH and ROLE_PRISONER_SEARCH roles`() {
       webTestClient.get().uri {
         it.path("/prison/MDI/prisoners")
           .queryParam("term", "smith jones")
           .build()
       }
-        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_IN_PRISON_SEARCH", "ROLE_PRISONER_SEARCH")))
         .header("Content-Type", "application/json").exchange().expectStatus().isOk
     }
 
@@ -686,7 +686,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("cellLocationPrefix", request.cellLocationPrefix)
           .build()
       }
-        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_IN_PRISON_SEARCH"))).header("Content-Type", "application/json")
         .exchange().expectStatus().isOk.expectBody(responseType).returnResult().responseBody
 
     assertThat(response.numberOfElements)
