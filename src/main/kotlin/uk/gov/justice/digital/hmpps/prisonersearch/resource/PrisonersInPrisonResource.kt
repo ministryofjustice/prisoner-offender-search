@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -21,6 +22,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonersInPrisonService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
+import java.time.LocalDate
 
 @RestController
 @Validated
@@ -72,17 +74,35 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
   )
   @GetMapping("/prison/{prisonId}/prisoners", produces = [MediaType.APPLICATION_JSON_VALUE])
   fun search(
-    @PathVariable("prisonId") @Parameter(required = true) prisonId: String,
-    @RequestParam(value = "term", required = false, defaultValue = "") @Parameter term: String,
-    @RequestParam(value = "page", required = false, defaultValue = "0") @Parameter page: Int,
-    @RequestParam(value = "size", required = false, defaultValue = "10") @Parameter size: Int,
-    @RequestParam(value = "alerts", required = false, defaultValue = "") @Parameter alerts: List<String>,
+    @PathVariable("prisonId") @Parameter(required = true)
+    prisonId: String,
+    @RequestParam(value = "term", required = false, defaultValue = "")
+    @Parameter(description = "The primary search term. Whe absent all prisoners will be returned at the prison", example = "john smith")
+    term: String,
+    @RequestParam(value = "page", required = false, defaultValue = "0")
+    @Parameter(description = "zero based page number to return")
+    page: Int,
+    @RequestParam(value = "size", required = false, defaultValue = "10")
+    @Parameter(description = "number of items in each page of results")
+    size: Int,
+    @RequestParam(value = "alerts", required = false, defaultValue = "")
+    @Parameter(description = "alert codes to filter by. Zero or more can be supplied. When multiple supplied the filter is effectively and OR", example = "XTACT")
+    alerts: List<String>,
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Parameter(description = "Offenders with a DOB >= this date", example = "1970-01-02")
+    fromDob: LocalDate?,
+    @RequestParam(value = "toDob", required = false)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @Parameter(description = "Offenders with a DOB <= this date", example = "1975-01-02")
+    toDob: LocalDate?,
   ): Page<Prisoner> = searchService.search(
     prisonId,
     PrisonersInPrisonRequest(
       term = term,
       pagination = PaginationRequest(page, size),
-      alertCodes = alerts
+      alertCodes = alerts,
+      fromDob = fromDob,
+      toDob = toDob
     )
   )
 }

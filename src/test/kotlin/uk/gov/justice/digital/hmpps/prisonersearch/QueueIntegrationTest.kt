@@ -367,6 +367,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         firstName = this.firstName,
         lastName = this.lastName,
         agencyId = this.agencyId,
+        dateOfBirth = LocalDate.parse(this.dateOfBirth),
         alerts = this.alertCodes.map { (type, code) ->
           Alert(
             alertId = Random.nextLong(),
@@ -404,6 +405,7 @@ data class PrisonerBuilder(
   val agencyId: String = "MDI",
   val released: Boolean = false,
   val alertCodes: List<Pair<String, String>> = listOf(),
+  val dateOfBirth: String = "1965-07-19",
 )
 
 private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
