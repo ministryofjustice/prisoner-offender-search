@@ -89,6 +89,9 @@ class PrisonersInPrisonService(
       query.filterWhenPresent("alerts.alertCode", alertCodes)
       // when they are null ES will just ignore the range
       query.filter(QueryBuilders.rangeQuery("dateOfBirth").from(fromDob).to(toDob))
+      cellLocationPrefix
+        ?.let { it.removePrefix("$prisonId-") }
+        ?.let { query.filter(QueryBuilders.prefixQuery("cellLocation.keyword", it)) }
     }
 
     return query
