@@ -26,7 +26,7 @@ import java.time.LocalDate
 
 @RestController
 @Validated
-@PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
+@PreAuthorize("hasAnyRole('ROLE_PRISONER_IN_PRISON_SEARCH', 'ROLE_PRISONER_SEARCH')")
 class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonService) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -38,9 +38,9 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       This search is optimised for clients that have a simple search term typically containing the prisonser's name
       or prisoner number. The user typically is certain the prisoner is within the establishment and knows key information 
       about the prisoner.
-      Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
+      Requires ROLE_PRISONER_IN_PRISON_SEARCH or ROLE_PRISONER_SEARCH role.
       """,
-    security = [SecurityRequirement(name = "ROLE_GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
+    security = [SecurityRequirement(name = "ROLE_PRISONER_IN_PRISON_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(
