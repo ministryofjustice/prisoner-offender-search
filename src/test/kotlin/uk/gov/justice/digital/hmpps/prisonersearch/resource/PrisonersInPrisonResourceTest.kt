@@ -5,9 +5,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.TestPropertySource
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 import java.time.LocalDate
@@ -82,31 +84,63 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           prisonerNumber = "A1820AE", firstName = "JOHN", lastName = "BLATHERINGTON-SMYTHE", agencyId = "BXI"
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AA", firstName = "SMITH", lastName = "JONES", agencyId = "ACI", alertCodes = listOf("X" to "XTACT")
+          prisonerNumber = "A1830AA",
+          firstName = "SMITH",
+          lastName = "JONES",
+          agencyId = "ACI",
+          alertCodes = listOf("X" to "XTACT")
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AB", firstName = "SMITH", lastName = "JACK", agencyId = "ACI", alertCodes = listOf("X" to "XTACT", "W" to "WO")
+          prisonerNumber = "A1830AB",
+          firstName = "SMITH",
+          lastName = "JACK",
+          agencyId = "ACI",
+          alertCodes = listOf("X" to "XTACT", "W" to "WO")
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AC", firstName = "MOHAMAD", lastName = "HUSAIN", agencyId = "ACI", alertCodes = listOf("W" to "WO")
+          prisonerNumber = "A1830AC",
+          firstName = "MOHAMAD",
+          lastName = "HUSAIN",
+          agencyId = "ACI",
+          alertCodes = listOf("W" to "WO")
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AD", firstName = "ADJEI", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf()
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AE", firstName = "KWEKU", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf("V" to "VIP")
+          prisonerNumber = "A1830AE",
+          firstName = "KWEKU",
+          lastName = "BOATENG",
+          agencyId = "ACI",
+          alertCodes = listOf("V" to "VIP")
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1840AA", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "LEI", dateOfBirth = "1965-07-19"
+          prisonerNumber = "A1840AA",
+          firstName = "MARIANA",
+          lastName = "RODRÍGUEZ",
+          agencyId = "LEI",
+          dateOfBirth = "1965-07-19"
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1840AB", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "LEI", dateOfBirth = "1965-07-20"
+          prisonerNumber = "A1840AB",
+          firstName = "MARIANA",
+          lastName = "RODRÍGUEZ",
+          agencyId = "LEI",
+          dateOfBirth = "1965-07-20"
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1840AC", firstName = "CAMILA", lastName = "MORALES", agencyId = "LEI", dateOfBirth = "1975-07-19"
+          prisonerNumber = "A1840AC",
+          firstName = "CAMILA",
+          lastName = "MORALES",
+          agencyId = "LEI",
+          dateOfBirth = "1975-07-19"
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1840AD", firstName = "CAMILA", lastName = "RODRÍGUEZ", agencyId = "LEI", dateOfBirth = "1975-07-20"
+          prisonerNumber = "A1840AD",
+          firstName = "CAMILA",
+          lastName = "RODRÍGUEZ",
+          agencyId = "LEI",
+          dateOfBirth = "1975-07-20"
         ),
       )
       initialiseSearchData = false
@@ -444,6 +478,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         )
       }
     }
+
     @Nested
     @DisplayName("with a search term")
     inner class WithSearchTerm {
@@ -493,6 +528,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1840AD"),
       )
     }
+
     @Test
     internal fun `when to dob supplied only prisoners born on or before that date are returned`() {
       search(
@@ -506,33 +542,53 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC"),
       )
     }
+
     @Test
     internal fun `when from and to dob supplied only prisoners born on or between those dates are returned`() {
       search(
-        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-20"), toDob = LocalDate.parse("1975-07-19")),
+        request = PrisonersInPrisonRequest(
+          fromDob = LocalDate.parse("1965-07-20"),
+          toDob = LocalDate.parse("1975-07-19")
+        ),
         prisonId = "LEI",
         expectedPrisoners = listOf("A1840AB", "A1840AC"),
       )
       search(
-        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1900-01-01"), toDob = LocalDate.parse("2020-07-19")),
+        request = PrisonersInPrisonRequest(
+          fromDob = LocalDate.parse("1900-01-01"),
+          toDob = LocalDate.parse("2020-07-19")
+        ),
         prisonId = "LEI",
         expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AD"),
       )
     }
+
     @Test
     internal fun `term can be combined with from and to dob filter`() {
       search(
-        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-20"), toDob = LocalDate.parse("1975-07-20"), term = "RODRÍGUEZ"),
+        request = PrisonersInPrisonRequest(
+          fromDob = LocalDate.parse("1965-07-20"),
+          toDob = LocalDate.parse("1975-07-20"),
+          term = "RODRÍGUEZ"
+        ),
         prisonId = "LEI",
         expectedPrisoners = listOf("A1840AB", "A1840AD"),
       )
       search(
-        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1965-07-19"), toDob = LocalDate.parse("1975-07-20"), term = "CAMILA"),
+        request = PrisonersInPrisonRequest(
+          fromDob = LocalDate.parse("1965-07-19"),
+          toDob = LocalDate.parse("1975-07-20"),
+          term = "CAMILA"
+        ),
         prisonId = "LEI",
         expectedPrisoners = listOf("A1840AC", "A1840AD"),
       )
       search(
-        request = PrisonersInPrisonRequest(fromDob = LocalDate.parse("1975-07-20"), toDob = LocalDate.parse("1975-07-20"), term = "CAMILA"),
+        request = PrisonersInPrisonRequest(
+          fromDob = LocalDate.parse("1975-07-20"),
+          toDob = LocalDate.parse("1975-07-20"),
+          term = "CAMILA"
+        ),
         prisonId = "LEI",
         expectedPrisoners = listOf("A1840AD"),
       )
@@ -546,6 +602,9 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     expectedPrisoners: List<String> = emptyList(),
     checkOrder: Boolean = false,
   ) {
+
+    val responseType = object : ParameterizedTypeReference<RestResponsePage<Prisoner>>() {}
+
     val response =
       webTestClient.get().uri {
         it.path("/prison/$prisonId/prisoners")
@@ -555,12 +614,14 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("alerts", request.alertCodes)
           .queryParam("fromDob", request.fromDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
           .queryParam("toDob", request.toDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
+          .queryParam("cellLocationPrefix", request.cellLocationPrefix)
           .build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH"))).header("Content-Type", "application/json")
-        .exchange().expectStatus().isOk.expectBody(RestResponsePage::class.java).returnResult().responseBody
+        .exchange().expectStatus().isOk.expectBody(responseType).returnResult().responseBody
 
     assertThat(response.numberOfElements).isEqualTo(expectedCount ?: expectedPrisoners.size)
+      .withFailMessage { "Expected ${expectedCount ?: expectedPrisoners.size} prisoners but got ${response.numberOfElements} [${response.content.map { it.prisonerNumber }}]" }
     assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
     val numbers = assertThat(response.content).extracting("prisonerNumber")
     if (checkOrder) {

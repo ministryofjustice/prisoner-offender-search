@@ -95,6 +95,9 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Parameter(description = "Offenders with a DOB <= this date", example = "1975-01-02")
     toDob: LocalDate?,
+    @RequestParam(value = "cellLocationPrefix", required = false)
+    @Parameter(description = "Filter for the prisoners cell location. A block wing or cell can be specified. With prison id can be included or absent so HEI-3-1 and 3-1 are equivalent when the prison id is HEI", example = "3-1")
+    cellLocationPrefix: String?,
   ): Page<Prisoner> = searchService.search(
     prisonId,
     PrisonersInPrisonRequest(
@@ -102,7 +105,8 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       pagination = PaginationRequest(page, size),
       alertCodes = alerts,
       fromDob = fromDob,
-      toDob = toDob
+      toDob = toDob,
+      cellLocationPrefix = cellLocationPrefix,
     )
   )
 }

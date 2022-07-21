@@ -8,4 +8,5 @@ data class PrisonersInPrisonRequest(
   val pagination: PaginationRequest = PaginationRequest(0, 10),
   val fromDob: LocalDate? = null,
   val toDob: LocalDate? = null,
+  val cellLocationPrefix: String? = null,
 )

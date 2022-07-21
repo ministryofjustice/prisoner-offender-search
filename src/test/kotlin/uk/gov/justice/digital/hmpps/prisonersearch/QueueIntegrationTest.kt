@@ -35,6 +35,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.AssignedLivingUnit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
@@ -368,6 +369,12 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         lastName = this.lastName,
         agencyId = this.agencyId,
         dateOfBirth = LocalDate.parse(this.dateOfBirth),
+        assignedLivingUnit = AssignedLivingUnit(
+          agencyId = this.agencyId,
+          locationId = Random.nextLong(),
+          description = this.cellLocation,
+          agencyName = "$agencyId (HMP)"
+        ),
         alerts = this.alertCodes.map { (type, code) ->
           Alert(
             alertId = Random.nextLong(),
@@ -406,6 +413,7 @@ data class PrisonerBuilder(
   val released: Boolean = false,
   val alertCodes: List<Pair<String, String>> = listOf(),
   val dateOfBirth: String = "1965-07-19",
+  val cellLocation: String = "A-1-1",
 )
 
 private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
