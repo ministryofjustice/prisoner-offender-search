@@ -11,12 +11,15 @@ import org.elasticsearch.index.query.Operator
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.sort.SortBuilders
+import org.elasticsearch.search.sort.SortOrder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
@@ -36,6 +39,12 @@ class PrisonersInPrisonService(
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+    fun mapSortField(sortField: String) = when (sortField) {
+      "cellLocation" -> "cellLocation.keyword"
+      "firstName" -> "firstName.keyword"
+      "lastName" -> "lastName.keyword"
+      else -> sortField
+    }
   }
 
   fun search(prisonId: String, prisonerSearchRequest: PrisonersInPrisonRequest): Page<Prisoner> {
@@ -58,15 +67,23 @@ class PrisonersInPrisonService(
     searchRequest: PrisonersInPrisonRequest
   ): SearchSourceBuilder {
     val pageable = PageRequest.of(searchRequest.pagination.page, searchRequest.pagination.size)
+    val sorting = searchRequest.sort.toList()
+      .map { sort ->
+        SortBuilders.fieldSort(Companion.mapSortField(sort.property)).order(
+          when (sort.direction) {
+            Sort.Direction.DESC -> SortOrder.DESC
+            Sort.Direction.ASC -> SortOrder.ASC
+            else -> throw IllegalArgumentException("Invalid sort direction: ${sort.direction}")
+          }
+        )
+      }
     return SearchSourceBuilder().apply {
       timeout(TimeValue(searchTimeoutSeconds, TimeUnit.SECONDS))
       size(pageable.pageSize.coerceAtMost(maxSearchResults))
       from(pageable.offset.toInt())
       trackTotalHits(true)
       query(buildKeywordQuery(prisonId, searchRequest))
-      sort("lastName.keyword")
-      sort("firstName.keyword")
-      sort("prisonerNumber")
+      sort(sorting)
     }
   }
 
@@ -194,7 +211,7 @@ class PrisonersInPrisonService(
     var newTokens = ""
     val arrayOfTokens = tokens.split("\\s+".toRegex())
     arrayOfTokens.forEach {
-      // sort circuit - ignore everything in this special case
+      // short circuit - ignore everything in this special case
       if (it.isPrisonerNumber()) {
         return it.uppercase()
       }
