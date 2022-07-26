@@ -41,14 +41,6 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       Requires ROLE_PRISONER_IN_PRISON_SEARCH or ROLE_PRISONER_SEARCH role.
       """,
     security = [SecurityRequirement(name = "ROLE_PRISONER_IN_PRISON_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
-    requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
-      content = [
-        Content(
-          mediaType = "application/json",
-          schema = Schema(implementation = PrisonersInPrisonRequest::class)
-        )
-      ]
-    ),
 
     responses = [
       ApiResponse(
