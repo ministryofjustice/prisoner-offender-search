@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -30,7 +31,7 @@ class PrisonerMatchResource(private val matchService: MatchService) {
   }
 
   @Operation(
-    summary = "Match for an prisoner in Prisoner ElasticSearch. It will return the best group of matching prisoners based on the request",
+    summary = "Match for an prisoner by criteria. This is a more lenient version to other match endpoints that includes alias and fuzzy date of birth matching. It will return the best group of matching prisoners based on the request",
     description = "Specify the request criteria to match against, role required is ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH",
     security = [SecurityRequirement(name = "ROLE_GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -65,6 +66,7 @@ class PrisonerMatchResource(private val matchService: MatchService) {
       ),
     ]
   )
+  @Tag(name = "Deprecated")
   @PostMapping
   fun matchPrisoners(@Valid @RequestBody matchRequest: MatchRequest): PrisonerMatches {
     log.info("Match called with {}", matchRequest)
