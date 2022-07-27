@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
+import org.springframework.data.domain.Sort
 import java.time.LocalDate
 
 data class PrisonersInPrisonRequest(
@@ -9,4 +10,5 @@ data class PrisonersInPrisonRequest(
   val fromDob: LocalDate? = null,
   val toDob: LocalDate? = null,
   val cellLocationPrefix: String? = null,
+  val sort: Sort = Sort.by(Sort.Direction.ASC, "lastName", "firstName", "prisonNumber"),
 )

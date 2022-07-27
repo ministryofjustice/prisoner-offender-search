@@ -146,6 +146,14 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           dateOfBirth = "1975-07-20",
           cellLocation = "4-1-D-001",
         ),
+        PrisonerBuilder(
+          prisonerNumber = "A1840AE",
+          firstName = "ANGELA",
+          lastName = "ZOCO",
+          agencyId = "TEI",
+          dateOfBirth = "1955-07-20",
+          cellLocation = "1-1-D-001",
+        ),
       )
       initialiseSearchData = false
     }
@@ -538,12 +546,12 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
       search(
         request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1965-07-19")),
         prisonId = "TEI",
-        expectedPrisoners = listOf("A1840AA"),
+        expectedPrisoners = listOf("A1840AA", "A1840AE"),
       )
       search(
         request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1975-07-19")),
         prisonId = "TEI",
-        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC"),
+        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AE"),
       )
     }
 
@@ -563,7 +571,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           toDob = LocalDate.parse("2020-07-19")
         ),
         prisonId = "TEI",
-        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AD"),
+        expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AD", "A1840AE"),
       )
     }
 
@@ -595,6 +603,77 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         ),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AD"),
+      )
+    }
+  }
+
+  @Nested
+  inner class Sorting {
+
+    @Test
+    internal fun `default order is lastName, firstName and prisonerNumber`() {
+      search(
+        request = PrisonersInPrisonRequest(),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AC", "A1840AD", "A1840AA", "A1840AB", "A1840AE"),
+        checkOrder = true,
+      )
+    }
+
+    @Test
+    internal fun `can order by firstName, prisonerNumber ascending`() {
+      search(
+        sort = "firstName,prisonerNumber,asc",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AE", "A1840AC", "A1840AD", "A1840AA", "A1840AB"),
+        checkOrder = true,
+      )
+      search(
+        sort = "firstName,prisonerNumber",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AE", "A1840AC", "A1840AD", "A1840AA", "A1840AB"),
+        checkOrder = true,
+      )
+    }
+    @Test
+    internal fun `can order by firstName, prisonerNumber descending`() {
+      search(
+        sort = "firstName,prisonerNumber,desc",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AB", "A1840AA", "A1840AD", "A1840AC", "A1840AE"),
+        checkOrder = true,
+      )
+    }
+
+    @Test
+    internal fun `can order by cell location`() {
+      search(
+        sort = "cellLocation,asc",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AE", "A1840AA", "A1840AB", "A1840AC", "A1840AD"),
+        checkOrder = true,
+      )
+      search(
+        sort = "cellLocation,desc",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AD", "A1840AC", "A1840AB", "A1840AA", "A1840AE"),
+        checkOrder = true,
+      )
+    }
+
+    @Test
+    internal fun `can order by date of birth`() {
+      search(
+        sort = "dateOfBirth,asc",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AE", "A1840AA", "A1840AB", "A1840AC", "A1840AD"),
+        checkOrder = true,
+      )
+      search(
+        sort = "dateOfBirth,desc",
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AD", "A1840AC", "A1840AB", "A1840AA", "A1840AE"),
+        checkOrder = true,
       )
     }
   }
@@ -665,7 +744,8 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
   }
 
   fun search(
-    request: PrisonersInPrisonRequest,
+    request: PrisonersInPrisonRequest = PrisonersInPrisonRequest(),
+    sort: String? = null,
     prisonId: String = "MDI",
     expectedCount: Int? = null,
     expectedPrisoners: List<String> = emptyList(),
@@ -680,6 +760,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("term", request.term)
           .queryParam("page", request.pagination.page)
           .queryParam("size", request.pagination.size)
+          .queryParam("sort", sort)
           .queryParam("alerts", request.alertCodes)
           .queryParam("fromDob", request.fromDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
           .queryParam("toDob", request.toDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
@@ -687,7 +768,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_IN_PRISON_SEARCH"))).header("Content-Type", "application/json")
-        .exchange().expectStatus().isOk.expectBody(responseType).returnResult().responseBody
+        .exchange().expectStatus().isOk.expectBody(responseType).returnResult().responseBody!!
 
     assertThat(response.numberOfElements)
       .withFailMessage { "Expected ${expectedCount ?: expectedPrisoners.size} prisoners but got ${response.numberOfElements} [${response.content.map { it.prisonerNumber }}]" }

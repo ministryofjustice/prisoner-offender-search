@@ -8,7 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
+import org.springdoc.api.annotations.ParameterObject
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonersInPrisonService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
@@ -39,6 +41,8 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       or prisoner number. The user typically is certain the prisoner is within the establishment and knows key information 
       about the prisoner.
       Requires ROLE_PRISONER_IN_PRISON_SEARCH or ROLE_PRISONER_SEARCH role.
+      
+      Sort fields supported are: firstName, lastName, prisonerNumber, dateOfBirth, cellLocation e.g "sort=firstName,lastName,desc"
       """,
     security = [SecurityRequirement(name = "ROLE_PRISONER_IN_PRISON_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
 
@@ -71,12 +75,6 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     @RequestParam(value = "term", required = false, defaultValue = "")
     @Parameter(description = "The primary search term. Whe absent all prisoners will be returned at the prison", example = "john smith")
     term: String,
-    @RequestParam(value = "page", required = false, defaultValue = "0")
-    @Parameter(description = "zero based page number to return")
-    page: Int,
-    @RequestParam(value = "size", required = false, defaultValue = "10")
-    @Parameter(description = "number of items in each page of results")
-    size: Int,
     @RequestParam(value = "alerts", required = false, defaultValue = "")
     @Parameter(description = "alert codes to filter by. Zero or more can be supplied. When multiple supplied the filter is effectively and OR", example = "XTACT")
     alerts: List<String>,
@@ -90,15 +88,17 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     @RequestParam(value = "cellLocationPrefix", required = false)
     @Parameter(description = "Filter for the prisoners cell location. A block wing or cell can be specified. With prison id can be included or absent so HEI-3-1 and 3-1 are equivalent when the prison id is HEI", example = "3-1")
     cellLocationPrefix: String?,
-  ): Page<Prisoner> = searchService.search(
+    @ParameterObject @PageableDefault(sort = ["lastName", "firstName", "prisonerNumber"], direction = Sort.Direction.ASC) pageable: Pageable
+  ) = searchService.search(
     prisonId,
     PrisonersInPrisonRequest(
       term = term,
-      pagination = PaginationRequest(page, size),
+      pagination = PaginationRequest(pageable.pageNumber, pageable.pageSize),
       alertCodes = alerts,
       fromDob = fromDob,
       toDob = toDob,
       cellLocationPrefix = cellLocationPrefix,
+      sort = pageable.sort
     )
   )
 }
