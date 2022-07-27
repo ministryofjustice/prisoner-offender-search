@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -21,6 +22,7 @@ import javax.validation.constraints.Pattern
 @RestController
 @Validated
 @RequestMapping("/prisoner-index", produces = [MediaType.APPLICATION_JSON_VALUE])
+@Tag(name = "Elastic Search index maintenance")
 class PrisonerIndexResource(
   private val prisonerIndexService: PrisonerIndexService,
 ) {

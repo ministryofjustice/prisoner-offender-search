@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springdoc.api.annotations.ParameterObject
@@ -40,9 +41,42 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       This search is optimised for clients that have a simple search term typically containing the prisonser's name
       or prisoner number. The user typically is certain the prisoner is within the establishment and knows key information 
       about the prisoner.
+      
       Requires ROLE_PRISONER_IN_PRISON_SEARCH or ROLE_PRISONER_SEARCH role.
       
       Sort fields supported are: firstName, lastName, prisonerNumber, dateOfBirth, cellLocation e.g "sort=firstName,lastName,desc"
+      
+      Examples:
+      
+      "/prisoners-in-prison/BXI?term=John&sort=firstName,lastName,desc&page=2&size=20"
+      This will return all people in HMP Brixton whose first or last names begins with JOHN. 
+      Results will be ordered by firstName, lastName descending. 
+      Page 3 will be returned with a maximum of 20 results per page.
+      
+      "/prisoners-in-prison/WWI?sort=cellLocation"
+      This will return all people in HMP Wandsworth. 
+      Results will be ordered by cell location ascending. 
+      Page 1 will be returned with a maximum of 10 results per page.
+      
+      "/prisoners-in-prison/WWI?cellLocationPrefix=WWI-2&term=smith"
+      "/prisoners-in-prison/WWI?cellLocationPrefix=2&term=smith"
+      This will return all people in HMP Wandsworth block 2 whose name starts with SMITH. 
+
+      "/prisoners-in-prison/WWI?cellLocationPrefix=2-A-3-001"
+      This will return all people in HMP Wandsworth cell WWI-2-A-3-001 
+
+      "/prisoners-in-prison/WWI?term=A1234KJ"
+      "/prisoners-in-prison/WWI?term=A1234KJ bananas"
+      This will return the single prisoner with prisoner number A1234KJ in HMP Wandsworth. 
+      An empty page will be returned if not found
+
+      "/prisoners-in-prison/WWI?term=A J&fromDob=1956-01-01&toDob=2000-01-02"
+      This will return all people in HMP Wandsworth. Born on or after 1956-01-01 and on or before 2000-01-02, 
+      whose name begins with A J, e.g Alan Jones born on 1956-01-01. 
+
+      "/prisoners-in-prison/WWI?alerts=TACT&alerts=PEEP"
+      This will return all people in HMP Wandsworth. With the alerts TACT or PEEP.
+
       """,
     security = [SecurityRequirement(name = "ROLE_PRISONER_IN_PRISON_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
 
@@ -69,6 +103,8 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     ]
   )
   @GetMapping("/prison/{prisonId}/prisoners", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @Tag(name = "Establishment search")
+  @Tag(name = "Popular")
   fun search(
     @PathVariable("prisonId") @Parameter(required = true)
     prisonId: String,

@@ -1,0 +1,51 @@
+<div>
+  <h2>Overview</h2>
+  <p>This service provides a number of endpoints for searching and reading prisoners that have been registered with the
+    HMPPS prison service. This maybe current or previous prisoners or other people that might be secure hospitals.</p>
+  <h2>Data provided</h2>
+  <p>The vast majority of the data is sourced from the NOMIS system though in the future this is likely to change as
+    more HMPPS prison data is held outside NOMIS.</p>
+  <p>The data for a person is stored in Elastic Search and is updated after a record in NOMIS is changed. This is
+    typically about a minute after the data is changed in NOMIS. In the unlikely circumstance that your service needs
+    data that 100% up to date with NOMIS then the <b>prison-api</b> might be a better service to use.
+    One use case that this might be appropriate is if you need update to date data at the point a NOMIS prisoner event
+    is received; this service updates its record also as result of NOMIS prisoner events, so you might encounter a race
+    condition if your read is triggered from the same event.
+  </p>
+  <p>The data returned for each prisoner record is essentially a snapshot of key prisoner data. This includes the
+    following:
+  <ul>
+    <li>Identifiers from both NOMIS and those held in other systems</li>
+    <li>Personal details such as name and date of births (including aliases)</li>
+    <li>Current prison status including the current location (including cell)</li>
+    <li>Latest sentence details</li>
+    <li>Alerts</li>
+  </ul>
+  See the schema definition for the API for full details.
+  </p>
+  <h2>Types of endpoints</h2>
+  <h3>Searching for a specific prisoner based on criteria</h3>
+  <p>
+    These are endpoints that use the core Elastic Search features to locate a prisoner record based on a set criteria;
+    for instance name, date of birth or unique identifier for instance the Police National Computer PNC number.
+    Typically, they return many results and a summary of results would be presented to an end user.
+  </p>
+  <h3>Matching records</h3>
+  <p>
+    Similar to above but typically using a criteria from a different system. For instance key data from a probation
+    record or court record.
+    These will use an algorithm that matches based on data that is likely to be most reliable for matching; for instance
+    PNC number or name with date of birth.
+  </p>
+  <h3>Retrieving a specific record</h3>
+  <p>
+    Retrieving a specific record typically by a unique identifier for instance prisoner number (aka NOMS number). This
+    is a convenient way of viewing a summary of a prisoner record and is typically quicker than using the equivalent API
+    in <b>prison-api</b>.
+  </p>
+  <h3>Retrieving batches of records</h3>
+  <p>
+    Retrieving a batch of records either by supplying a list of identifiers or a criteria that will a match many records;
+    for instance all people in a prison wing or people to be released on a specific date.
+  </p>
+</div>
