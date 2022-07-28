@@ -29,7 +29,7 @@ class PrisonerIndexResource(
 
   @PutMapping("/build-index")
   @Operation(
-    summary = "Start building a new index.",
+    summary = "Start building a new index",
     description = "Old index is left untouched and will be maintained whilst new index is built, requires PRISONER_INDEX role"
   )
   @ApiResponses(
@@ -42,7 +42,7 @@ class PrisonerIndexResource(
 
   @PutMapping("/cancel-index")
   @Operation(
-    summary = "Cancels a building index.",
+    summary = "Cancels a building index",
     description = "Only cancels if indexing is in progress, requires PRISONER_INDEX role"
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")

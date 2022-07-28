@@ -33,21 +33,21 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     .tags(
       listOf(
         Tag().name("Popular")
-          .description("The most popular endpoints. Look here first when deciding what endpoint to use"),
+          .description("The most popular endpoints. Look here first when deciding which endpoint to use."),
         Tag().name("Establishment search").description("Endpoints for searching for a prisoner within a prison"),
         Tag().name("Global search")
           .description("Endpoints for searching for a prisoner across the entire prison estate, including people that have previously been released"),
-        Tag().name("Batch").description("Endpoints designed for find a large number of prisoners with a single call"),
+        Tag().name("Batch").description("Endpoints designed to find a large number of prisoners with a single call"),
         Tag().name("Matching").description("Endpoints designed for matching a prisoner with data from other sources"),
         Tag().name("Deprecated")
           .description("Endpoints that should no longer be used and will be removed in a future release"),
         Tag().name("Specific use case")
-          .description("Endpoints that were designed for a specific use case that are unlikely to fit for general use"),
+          .description("Endpoints that were designed for a specific use case and are unlikely to fit for general use"),
         Tag().name("Experimental")
-          .description("Endpoints that have not been tried an tested in a production environment"),
-        Tag().name("Elastic Search index maintenance").description("Endpoints, that are to be used by administrators only, for maintaining Elasticsearch indices"),
-        Tag().name("hmpps-queue-resource").description("""Endpoints, that are to be used by administrators only, that are used to manage SQS queues. All endpoints require the <b>QUEUE_ADMIN</b> role further information can be found in the <a href="https://github.com/ministryofjustice/hmpps-spring-boot-sqs">hmpps-spring-boot-sqs</a> project"""),
-        Tag().name("hmpps-queue-resource-async").description("""Endpoints, that are to be used by administrators only, that are used to manage SQS queues. All endpoints require the <b>QUEUE_ADMIN</b> role further information can be found in the <a href="https://github.com/ministryofjustice/hmpps-spring-boot-sqs">hmpps-spring-boot-sqs</a> project"""),
+          .description("Endpoints that have not been tried and tested in a production environment"),
+        Tag().name("Elastic Search index maintenance").description("Endpoints that are to be used by administrators only for maintaining Elasticsearch indices"),
+        Tag().name("hmpps-queue-resource").description("""Endpoints that are to be used by administrators only for managing SQS queues. All endpoints require the <b>QUEUE_ADMIN</b> role further information can be found in the <a href="https://github.com/ministryofjustice/hmpps-spring-boot-sqs">hmpps-spring-boot-sqs</a> project"""),
+        Tag().name("hmpps-queue-resource-async").description("""Endpoints that are to be used by administrators only for managing SQS queues. All endpoints require the <b>QUEUE_ADMIN</b> role further information can be found in the <a href="https://github.com/ministryofjustice/hmpps-spring-boot-sqs">hmpps-spring-boot-sqs</a> project"""),
       )
     )
     .info(
