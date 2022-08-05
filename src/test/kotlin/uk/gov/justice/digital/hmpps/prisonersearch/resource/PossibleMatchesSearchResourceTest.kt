@@ -72,8 +72,18 @@ class PossibleMatchesSearchResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `can search for possible matches by noms number - when case insensitive`() {
+    possibleMatch((PossibleMatchCriteria(null, null, null, null, "a7089fa")), "/results/possibleMatches/search_results_A7089FA.json")
+  }
+
+  @Test
   fun `can search for possible matches by pnc number`() {
     possibleMatch((PossibleMatchCriteria(null, null, null, "2015/001234S", null)), "/results/possibleMatches/search_results_pnc.json")
+  }
+
+  @Test
+  fun `can search for possible matches by pnc number - when case insensitive`() {
+    possibleMatch((PossibleMatchCriteria(null, null, null, "2015/001234s", null)), "/results/possibleMatches/search_results_pnc.json")
   }
 
   @Test
