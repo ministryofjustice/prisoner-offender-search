@@ -10,7 +10,7 @@ data class PossibleMatchCriteria(
   @Schema(description = "Prisoner last Name", example = "smith") val lastName: String? = null,
   @field:Past(message = "Date of birth must be in the past")
   @Schema(description = "Prisoner date of birth", example = "1996-02-10") val dateOfBirth: LocalDate? = null,
-  @Schema(description = "Police National Computer (PNC) number", example = "2018/0123456X") val pncNumber: String? = null,
+  @Schema(description = "Police National Computer (PNC) number (This will match both long and short PNC formats)", example = "2018/0123456X") val pncNumber: String? = null,
   @Schema(description = "The Prisoner NOMIS Id (aka prison number/offender no in DPS)", example = "A1234AB") val nomsNumber: String? = null
 ) {
   @Schema(hidden = true)
