@@ -68,10 +68,10 @@ class PrisonerSearchService(
     }
     var result = mutableListOf<Prisoner>()
     if (searchCriteria.nomsNumber != null) {
-      result += queryBy(searchCriteria.nomsNumber) { fieldMatch("prisonerNumber", it) }.collect()
+      result += queryBy(searchCriteria.nomsNumber.uppercase()) { fieldMatch("prisonerNumber", it) }.collect()
     }
     if (searchCriteria.pncNumber != null) {
-      result += queryBy(searchCriteria.pncNumber) { fieldMatch("pncNumber", it) }.collect()
+      result += queryBy(searchCriteria.pncNumber.uppercase()) { fieldMatch("pncNumber", it) }.collect()
     }
     if (searchCriteria.lastName != null && searchCriteria.dateOfBirth != null) {
       result += queryBy(searchCriteria) { nameMatchWithAliasesAndDob(it) }.collect()
