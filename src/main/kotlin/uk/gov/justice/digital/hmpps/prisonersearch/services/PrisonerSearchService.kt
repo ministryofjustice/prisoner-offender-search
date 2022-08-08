@@ -66,12 +66,12 @@ class PrisonerSearchService(
       log.warn("Invalid search  - no criteria provided")
       throw BadRequestException("Invalid search  - please provide at least 1 search parameter")
     }
-    var result = mutableListOf<Prisoner>()
+    val result = mutableListOf<Prisoner>()
     if (searchCriteria.nomsNumber != null) {
       result += queryBy(searchCriteria.nomsNumber.uppercase()) { fieldMatch("prisonerNumber", it) }.collect()
     }
     if (searchCriteria.pncNumber != null) {
-      result += queryBy(searchCriteria.pncNumber.uppercase()) { fieldMatch("pncNumber", it) }.collect()
+      result += queryBy(searchCriteria.pncNumber) { pncMatch(it) }.collect()
     }
     if (searchCriteria.lastName != null && searchCriteria.dateOfBirth != null) {
       result += queryBy(searchCriteria) { nameMatchWithAliasesAndDob(it) }.collect()
@@ -89,7 +89,10 @@ class PrisonerSearchService(
   }
 
   fun findByPrison(prisonId: String, pageable: Pageable, includeRestrictedPatients: Boolean = false): Page<Prisoner> {
-    queryBy(prisonId, pageable) { if (includeRestrictedPatients) includeRestricted(it) else locationMatch(it) } onMatch {
+    queryBy(
+      prisonId,
+      pageable
+    ) { if (includeRestrictedPatients) includeRestricted(it) else locationMatch(it) } onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
     }
@@ -214,6 +217,14 @@ class PrisonerSearchService(
         "$field", value
       )
   }
+
+  private fun pncMatch(pncNumber: String) = QueryBuilders.boolQuery()
+    .mustMultiMatchKeyword(
+      pncNumber.canonicalPNCNumber(),
+      "pncNumber",
+      "pncNumberCanonicalShort",
+      "pncNumberCanonicalLong",
+    )
 
   private fun releaseDateMatch(searchCriteria: ReleaseDateSearch): BoolQueryBuilder {
     with(searchCriteria) {
