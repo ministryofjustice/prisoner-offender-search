@@ -58,7 +58,7 @@ class PrisonersInPrisonService(
 
     val searchResponse = elasticsearchClient.search(searchRequest)
     return createSearchResponse(prisonerSearchRequest.pagination, searchResponse).also {
-      auditSearch(prisonerSearchRequest, searchResponse.hits.totalHits?.value ?: 0)
+      auditSearch(prisonId, prisonerSearchRequest, searchResponse.hits.totalHits?.value ?: 0)
     }
   }
 
@@ -69,7 +69,7 @@ class PrisonersInPrisonService(
     val pageable = PageRequest.of(searchRequest.pagination.page, searchRequest.pagination.size)
     val sorting = searchRequest.sort.toList()
       .map { sort ->
-        SortBuilders.fieldSort(Companion.mapSortField(sort.property)).order(
+        SortBuilders.fieldSort(mapSortField(sort.property)).order(
           when (sort.direction) {
             Sort.Direction.DESC -> SortOrder.DESC
             Sort.Direction.ASC -> SortOrder.ASC
@@ -106,8 +106,7 @@ class PrisonersInPrisonService(
       query.filterWhenPresent("alerts.alertCode", alertCodes)
       // when they are null ES will just ignore the range
       query.filter(QueryBuilders.rangeQuery("dateOfBirth").from(fromDob).to(toDob))
-      cellLocationPrefix
-        ?.let { it.removePrefix("$prisonId-") }
+      cellLocationPrefix?.removePrefix("$prisonId-")
         ?.let { query.filter(QueryBuilders.prefixQuery("cellLocation.keyword", it)) }
     }
 
@@ -139,7 +138,7 @@ class PrisonersInPrisonService(
       .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
       .operator(Operator.AND)
 
-    val termsList = term.split("\\s".toRegex()).map { it.uppercase() }
+    val termsList = term.split("[\\s,;:+]".toRegex()).map { it.uppercase() }
     val prefixNameQuery = QueryBuilders.boolQuery().mustAll(
       termsList.map {
         QueryBuilders.boolQuery().shouldAll(nameFields.map { name -> QueryBuilders.prefixQuery(name, it) })
@@ -190,18 +189,27 @@ class PrisonersInPrisonService(
   private fun getIndex() = indexStatusService.getCurrentIndex().currentIndex.indexName
 
   private fun auditSearch(
+    prisonId: String,
     searchRequest: PrisonersInPrisonRequest,
     numberOfResults: Long,
   ) {
     val propertiesMap = mapOf(
-      "username" to authenticationHolder.currentUsername(),
-      "clientId" to authenticationHolder.currentClientId(),
-      "term" to searchRequest.term,
+      "username" to (authenticationHolder.currentUsername() ?: "anonymous"),
+      "clientId" to (authenticationHolder.currentClientId() ?: "anonymous"),
+      "term" to (searchRequest.term ?: ""),
+      "cellLocationPrefix" to (searchRequest.cellLocationPrefix ?: ""),
+      "prisonId" to prisonId,
+      "alertCodes" to searchRequest.alertCodes.joinToString(","),
+      "fromDob" to (searchRequest.fromDob?.toString() ?: ""),
+      "toDob" to (searchRequest.toDob?.toString() ?: ""),
+      "sort" to searchRequest.sort.toString(),
+      "page" to searchRequest.pagination.page.toString(),
+      "size" to searchRequest.pagination.size.toString(),
     )
     val metricsMap = mapOf(
       "numberOfResults" to numberOfResults.toDouble()
     )
-    telemetryClient.trackEvent("POSFindInEstablisment", propertiesMap, metricsMap)
+    telemetryClient.trackEvent("POSPrisonersInPrison", propertiesMap, metricsMap)
   }
 
   private fun convertTokensToSearchTerms(tokens: String?): String? {

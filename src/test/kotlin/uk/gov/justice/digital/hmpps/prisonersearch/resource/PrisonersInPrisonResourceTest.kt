@@ -5,6 +5,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.check
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.TestPropertySource
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
@@ -367,6 +371,30 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(term = "HUSS IN"),
         prisonId = "BXI",
         expectedPrisoners = listOf("A1820AA", "A1820AB"),
+      )
+    }
+
+    @Test
+    internal fun `can match when names separated by comma`() {
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMMED HUSSAIN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMMED,HUSSAIN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMMED, HUSSAIN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(term = "MOHAMMED;HUSSAIN"),
+        prisonId = "BXI",
+        expectedPrisoners = listOf("A1820AA"),
       )
     }
 
@@ -739,6 +767,71 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1965-07-19"), cellLocationPrefix = "TEI-3-1", term = "RODRÍGUEZ"),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AA"),
+      )
+    }
+  }
+
+  @Nested
+  inner class Auditing {
+    @Test
+    internal fun `will audit full request supplied`() {
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .queryParam("term", "smith jones")
+          .queryParam("page", "10")
+          .queryParam("size", "100")
+          .queryParam("sort", "firstName,lastName,ASC")
+          .queryParam("alerts", "PEEP")
+          .queryParam("alerts", "XACT")
+          .queryParam("fromDob", "1975-07-20")
+          .queryParam("toDob", "1975-07-21")
+          .queryParam("cellLocationPrefix", "MDI-1-A")
+          .build()
+      }
+        .headers(setAuthorisation(user = "JILL.BEANS", roles = listOf("ROLE_PRISONER_SEARCH"))).header("Content-Type", "application/json")
+        .exchange().expectStatus().isOk
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonersInPrison"),
+        check<Map<String, String>> {
+          assertThat(it["username"]).isEqualTo("JILL.BEANS")
+          assertThat(it["clientId"]).isEqualTo("prisoner-offender-search-client")
+          assertThat(it["prisonId"]).isEqualTo("MDI")
+          assertThat(it["term"]).isEqualTo("smith jones")
+          assertThat(it["alertCodes"]).isEqualTo("PEEP,XACT")
+          assertThat(it["fromDob"]).isEqualTo("1975-07-20")
+          assertThat(it["toDob"]).isEqualTo("1975-07-21")
+          assertThat(it["cellLocationPrefix"]).isEqualTo("MDI-1-A")
+          assertThat(it["sort"]).isEqualTo("firstName: ASC,lastName: ASC")
+          assertThat(it["page"]).isEqualTo("10")
+          assertThat(it["size"]).isEqualTo("100")
+        },
+        any(),
+      )
+    }
+    @Test
+    internal fun `will audit minimal request supplied`() {
+      webTestClient.get().uri {
+        it.path("/prison/MDI/prisoners")
+          .build()
+      }
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH"))).header("Content-Type", "application/json")
+        .exchange().expectStatus().isOk
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonersInPrison"),
+        check<Map<String, String>> {
+          assertThat(it["prisonId"]).isEqualTo("MDI")
+          assertThat(it["term"]).isEqualTo("")
+          assertThat(it["alertCodes"]).isEqualTo("")
+          assertThat(it["fromDob"]).isEqualTo("")
+          assertThat(it["toDob"]).isEqualTo("")
+          assertThat(it["cellLocationPrefix"]).isEqualTo("")
+          assertThat(it["sort"]).isEqualTo("lastName: ASC,firstName: ASC,prisonerNumber: ASC")
+          assertThat(it["page"]).isEqualTo("0")
+          assertThat(it["size"]).isEqualTo("10")
+        },
+        any(),
       )
     }
   }
