@@ -62,7 +62,7 @@ class PrisonerDiffServiceTest {
       assertThat(propertiesByDiffType[DiffType.IDENTIFIERS]).contains("pncNumber", "croNumber")
       assertThat(propertiesByDiffType[DiffType.PERSONAL_DETAILS]).contains("firstName")
     }
-        @Test
+    @Test
     fun `calculates diff types by property name`() {
       assertThat(diffTypesByProperty["pncNumber"]).isEqualTo(DiffType.IDENTIFIERS)
       assertThat(diffTypesByProperty["croNumber"]).isEqualTo(DiffType.IDENTIFIERS)
