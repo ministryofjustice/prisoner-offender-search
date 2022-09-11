@@ -89,9 +89,9 @@ class PrisonerDiffServiceTest {
       assertThat(diffsByType.keys).containsExactly(DiffType.IDENTIFIERS)
       val identifierDiffs = diffsByType[DiffType.IDENTIFIERS]
       assertThat(identifierDiffs)
-        .extracting("property", "oldValue", "newValue")
+        .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("pncNumber", "somePnc1", "somePnc2"),
+          Tuple("pncNumber", DiffType.IDENTIFIERS, "somePnc1", "somePnc2"),
         )
     }
 
@@ -105,10 +105,10 @@ class PrisonerDiffServiceTest {
       assertThat(diffsByType.keys).containsExactly(DiffType.IDENTIFIERS)
       val identifierDiffs = diffsByType[DiffType.IDENTIFIERS]
       assertThat(identifierDiffs)
-        .extracting("property", "oldValue", "newValue")
+        .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("pncNumber", "somePnc1", "somePnc2"),
-          Tuple("croNumber", "someCro1", "someCro2"),
+          Tuple("pncNumber", DiffType.IDENTIFIERS, "somePnc1", "somePnc2"),
+          Tuple("croNumber", DiffType.IDENTIFIERS, "someCro1", "someCro2"),
         )
     }
 
@@ -119,19 +119,20 @@ class PrisonerDiffServiceTest {
 
       val diffsByType = getDifferencesByType(prisoner1, prisoner2)
 
+      assertThat(diffsByType.keys).containsExactlyInAnyOrder(DiffType.IDENTIFIERS, DiffType.PERSONAL_DETAILS)
       val identifierDiffs = diffsByType[DiffType.IDENTIFIERS]
       val personalDetailDiffs = diffsByType[DiffType.PERSONAL_DETAILS]
 
       assertThat(identifierDiffs)
-        .extracting("property", "oldValue", "newValue")
+        .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("pncNumber", "somePnc1", "somePnc2"),
-          Tuple("croNumber", "someCro1", "someCro2")
+          Tuple("pncNumber", DiffType.IDENTIFIERS, "somePnc1", "somePnc2"),
+          Tuple("croNumber", DiffType.IDENTIFIERS, "someCro1", "someCro2")
         )
       assertThat(personalDetailDiffs)
-        .extracting("property", "oldValue", "newValue")
+        .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("firstName", "someName1", "someName2"),
+          Tuple("firstName", DiffType.PERSONAL_DETAILS, "someName1", "someName2"),
         )
     }
   }
