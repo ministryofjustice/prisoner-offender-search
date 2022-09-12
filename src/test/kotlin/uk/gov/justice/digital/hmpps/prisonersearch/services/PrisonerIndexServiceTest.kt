@@ -9,8 +9,11 @@ import org.elasticsearch.client.RestClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyMap
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -22,6 +25,7 @@ import org.springframework.data.elasticsearch.core.IndexOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
@@ -31,6 +35,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatientDto
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Optional
 
 class PrisonerIndexServiceTest {
 
@@ -176,7 +181,7 @@ class PrisonerIndexServiceTest {
         val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true)
         val now = LocalDateTime.now()
 
-        whenever(restrictedPatientService.getRestrictedPatient(ArgumentMatchers.anyString())).thenReturn(
+        whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(
           RestrictedPatientDto(
             id = 1,
             prisonerNumber = "A1234AA",
@@ -195,7 +200,7 @@ class PrisonerIndexServiceTest {
 
       @Test
       fun `handle no restricted patient`() {
-        whenever(restrictedPatientService.getRestrictedPatient(ArgumentMatchers.anyString())).thenReturn(null)
+        whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(null)
 
         val offenderBooking = prisonerIndexService.withRestrictedPatientIfOut(makeOffenderBooking())
 
@@ -219,5 +224,34 @@ class PrisonerIndexServiceTest {
       assignedLivingUnit = assignedLivingUnit,
       latestLocationId = "MDI"
     )
+  }
+
+  @Nested
+  inner class SyncPrisonerDifferences {
+    @BeforeEach
+    fun setUp() {
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(
+        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
+      )
+      whenever(prisonerARepository.save(any())).thenReturn(PrisonerA().apply { pncNumber = "somePncNumber2" })
+    }
+
+    @Test
+    fun `should raise telemetry if prisoner updated`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
+
+      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+
+      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
+    }
+
+    @Test
+    fun `should not raise telemetry if prisoner is new`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+
+      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+
+      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
+    }
   }
 }
