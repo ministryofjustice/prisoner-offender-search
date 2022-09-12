@@ -98,10 +98,12 @@ class PrisonerIndexService(
     }
 
     existingPrisoner?.also {
-      getDifferencesByPropertyType(it, storedPrisoner)
-        .also { differences ->
-          raiseDifferencesTelemetry(offenderBooking.offenderNo, offenderBooking.bookingNo, differences, telemetryClient)
-        }
+      raiseDifferencesTelemetry(
+        offenderBooking.offenderNo,
+        offenderBooking.bookingNo,
+        getDifferencesByPropertyType(it, storedPrisoner),
+        telemetryClient
+      )
     }
 
     return storedPrisoner
