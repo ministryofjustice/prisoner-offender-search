@@ -159,6 +159,23 @@ class PrisonerDiffServiceTest {
     }
 
     @Test
+    fun `should allow null differences`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null; firstName = "someName" }
+      val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro"; firstName = "someName" }
+
+      val diffsByType = getDifferencesByPropertyType(prisoner1, prisoner2)
+
+      assertThat(diffsByType.keys).containsExactly(PropertyType.IDENTIFIERS)
+      val identifierDiffs = diffsByType[PropertyType.IDENTIFIERS]
+      assertThat(identifierDiffs)
+        .extracting("property", "propertyType", "oldValue", "newValue")
+        .containsExactlyInAnyOrder(
+          Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc", null),
+          Tuple("croNumber", PropertyType.IDENTIFIERS, null, "someCro"),
+        )
+    }
+
+    @Test
     fun `should report multiple differences`() {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someName" }
@@ -266,6 +283,29 @@ class PrisonerDiffServiceTest {
           assertThat(it["propertyTypes"]).isEqualTo(PropertyType.IDENTIFIERS.name)
           assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
           assertThat(it["croNumber"]).isEqualTo("someCro1 -> someCro2")
+        },
+        isNull()
+      )
+    }
+
+    @Test
+    fun `should report null differences`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null }
+      val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro" }
+
+      raiseDifferencesTelemetry(
+        "someOffenderNo",
+        "someBookingNo",
+        getDifferencesByPropertyType(prisoner1, prisoner2),
+        telemetryClient
+      )
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerUpdated"),
+        check<Map<String, String>> {
+          assertThat(it["propertyTypes"]).isEqualTo(PropertyType.IDENTIFIERS.name)
+          assertThat(it["pncNumber"]).isEqualTo("somePnc -> null")
+          assertThat(it["croNumber"]).isEqualTo("null -> someCro")
         },
         isNull()
       )
