@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.commons.lang3.builder.Diff
 import org.apache.commons.lang3.builder.DiffBuilder
 import org.apache.commons.lang3.builder.DiffResult
@@ -43,3 +44,24 @@ val propertyTypesByProperty: Map<String, PropertyType> =
   Prisoner::class.members
     .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
     .associate { property -> property.name to property.findAnnotations<DiffableProperty>().first().type }
+
+fun raiseDifferencesTelemetry(
+  offenderNo: String,
+  bookingNo: String?,
+  differences: Map<PropertyType, List<Difference>>,
+  telemetryClient: TelemetryClient
+) {
+  differences.forEach { propertyTypeMap ->
+    telemetryClient.trackEvent(
+      "POSPrisonerUpdated",
+      mapOf(
+        "offenderNumber" to offenderNo,
+        "bookingNumber" to bookingNo,
+        "propertyTypes" to propertyTypeMap.key.name,
+      ) + propertyTypeMap.value.associate { difference ->
+        difference.property to """${difference.oldValue} -> ${difference.newValue}"""
+      },
+      null
+    )
+  }
+}

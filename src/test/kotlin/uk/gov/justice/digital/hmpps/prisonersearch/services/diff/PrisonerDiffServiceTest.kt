@@ -1,9 +1,15 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.check
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlias
 import java.time.LocalDate
@@ -115,6 +121,7 @@ class PrisonerDiffServiceTest {
       assertThat(propertiesByPropertyType[PropertyType.IDENTIFIERS]).contains("pncNumber", "croNumber")
       assertThat(propertiesByPropertyType[PropertyType.PERSONAL_DETAILS]).contains("firstName")
     }
+
     @Test
     fun `maps property types by property`() {
       assertThat(propertyTypesByProperty["pncNumber"]).isEqualTo(PropertyType.IDENTIFIERS)
@@ -189,6 +196,112 @@ class PrisonerDiffServiceTest {
         .extracting("property", "propertyType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
           Tuple("firstName", PropertyType.PERSONAL_DETAILS, "someName1", "someName2"),
+        )
+    }
+  }
+
+  @Nested
+  inner class RaiseDifferencesTelemetry {
+    private val telemetryClient = mock<TelemetryClient>()
+
+    @Test
+    fun `should report identifiers`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      raiseDifferencesTelemetry(
+        "someOffenderNo",
+        "someBookingNo",
+        getDifferencesByPropertyType(prisoner1, prisoner2),
+        telemetryClient
+      )
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerUpdated"),
+        check<Map<String, String>> {
+          assertThat(it["offenderNumber"]).isEqualTo("someOffenderNo")
+          assertThat(it["bookingNumber"]).isEqualTo("someBookingNo")
+        },
+        isNull()
+      )
+    }
+
+    @Test
+    fun `should report a single difference`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      raiseDifferencesTelemetry(
+        "someOffenderNo",
+        "someBookingNo",
+        getDifferencesByPropertyType(prisoner1, prisoner2),
+        telemetryClient
+      )
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerUpdated"),
+        check<Map<String, String>> {
+          assertThat(it["propertyTypes"]).isEqualTo(PropertyType.IDENTIFIERS.name)
+          assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
+        },
+        isNull()
+      )
+    }
+
+    @Test
+    fun `should report multiple differences`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2" }
+
+      raiseDifferencesTelemetry(
+        "someOffenderNo",
+        "someBookingNo",
+        getDifferencesByPropertyType(prisoner1, prisoner2),
+        telemetryClient
+      )
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerUpdated"),
+        check<Map<String, String>> {
+          assertThat(it["propertyTypes"]).isEqualTo(PropertyType.IDENTIFIERS.name)
+          assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
+          assertThat(it["croNumber"]).isEqualTo("someCro1 -> someCro2")
+        },
+        isNull()
+      )
+    }
+
+    @Test
+    fun `should report multiple differences of multiple types`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someFirstName1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someFirstName2" }
+
+      raiseDifferencesTelemetry(
+        "someOffenderNo",
+        "someBookingNo",
+        getDifferencesByPropertyType(prisoner1, prisoner2),
+        telemetryClient
+      )
+
+      verify(telemetryClient)
+        .trackEvent(
+          eq("POSPrisonerUpdated"),
+          check<Map<String, String>> {
+            assertThat(it["propertyTypes"]).isEqualTo(PropertyType.IDENTIFIERS.name)
+            assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
+            assertThat(it["croNumber"]).isEqualTo("someCro1 -> someCro2")
+          },
+          isNull()
+        )
+
+      verify(telemetryClient)
+        .trackEvent(
+          eq("POSPrisonerUpdated"),
+          check<Map<String, String>> {
+            assertThat(it["propertyTypes"]).isEqualTo(PropertyType.PERSONAL_DETAILS.name)
+            assertThat(it["firstName"]).isEqualTo("someFirstName1 -> someFirstName2")
+          },
+          isNull()
         )
     }
   }
