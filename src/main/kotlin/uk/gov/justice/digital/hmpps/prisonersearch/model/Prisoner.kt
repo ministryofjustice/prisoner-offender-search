@@ -108,11 +108,11 @@ open class Prisoner : Diffable<Prisoner> {
   var status: String? = null
 
   @Schema(description = "Last Movement Type Code of prisoner", example = "CRT")
-  @DiffableProperty(PropertyType.STATUS)
+  @DiffableProperty(PropertyType.LOCATION)
   var lastMovementTypeCode: String? = null
 
   @Schema(description = "Last Movement Reason of prisoner", example = "CA")
-  @DiffableProperty(PropertyType.STATUS)
+  @DiffableProperty(PropertyType.LOCATION)
   var lastMovementReasonCode: String? = null
 
   @Schema(description = "In/Out Status", example = "IN", allowableValues = ["IN", "OUT"])
