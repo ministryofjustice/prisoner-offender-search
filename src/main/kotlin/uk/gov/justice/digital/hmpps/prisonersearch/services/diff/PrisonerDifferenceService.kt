@@ -24,24 +24,22 @@ fun getDifferencesByPropertyType(prisoner: Prisoner, other: Prisoner): Map<Prope
       diffs.filter { diff -> properties.value.contains(diff.fieldName) }
         .map { diff -> Difference(diff.fieldName, properties.key, diff.left, diff.right) }
     }
-  }.filter { it.value.isNotEmpty() }
+  }.filter { differencesByPropertyType -> differencesByPropertyType.value.isNotEmpty() }
 
 internal fun getDiffResult(prisoner: Prisoner, other: Prisoner): DiffResult<Prisoner> =
   DiffBuilder(prisoner, other, ToStringStyle.JSON_STYLE).apply {
     Prisoner::class.members
-      .filter { it.findAnnotations<DiffableProperty>().isNotEmpty() }
-      .forEach {
-        append(it.name, it.call(prisoner), it.call(other))
-      }
+      .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
+      .forEach { property -> append(property.name, property.call(prisoner), property.call(other)) }
   }.build()
 
 val propertiesByPropertyType: Map<PropertyType, List<String>> =
   Prisoner::class.members
-    .filter { it.findAnnotations<DiffableProperty>().isNotEmpty() }
-    .groupBy { it.findAnnotations<DiffableProperty>().first().type }
-    .mapValues { it.value.map { property -> property.name } }
+    .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
+    .groupBy { property -> property.findAnnotations<DiffableProperty>().first().type }
+    .mapValues { propertiesByPropertyType -> propertiesByPropertyType.value.map { property -> property.name } }
 
 val propertyTypesByProperty: Map<String, PropertyType> =
   Prisoner::class.members
-    .filter { it.findAnnotations<DiffableProperty>().isNotEmpty() }
-    .associate { it.name to it.findAnnotations<DiffableProperty>().first().type }
+    .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
+    .associate { property -> property.name to property.findAnnotations<DiffableProperty>().first().type }
