@@ -134,7 +134,7 @@ open class Prisoner : Diffable<Prisoner> {
 
   @Field(type = FieldType.Nested, includeInParent = true)
   @Schema(description = "Aliases Names and Details")
-  @DiffableType(DiffType.LOCATION)
+  @DiffableType(DiffType.PERSONAL_DETAILS)
   var aliases: List<PrisonerAlias>? = null
 
   @Field(type = FieldType.Nested, includeInParent = true)
