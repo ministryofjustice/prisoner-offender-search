@@ -9,39 +9,39 @@ import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class DiffableType(val type: DiffType)
+annotation class DiffableProperty(val type: PropertyType)
 
-enum class DiffType {
+enum class PropertyType {
   IDENTIFIERS, PERSONAL_DETAILS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT
 }
 
-data class Difference(val property: String, val diffType: DiffType, val oldValue: Any, val newValue: Any)
+data class Difference(val property: String, val propertyType: PropertyType, val oldValue: Any, val newValue: Any)
 
-fun getDifferencesByType(prisoner: Prisoner, other: Prisoner): Map<DiffType, List<Difference>> =
-  getDiff(prisoner, other).let { diffResult ->
-    propertiesByDiffType.mapValues { properties ->
+fun getDifferencesByPropertyType(prisoner: Prisoner, other: Prisoner): Map<PropertyType, List<Difference>> =
+  getDiffResult(prisoner, other).let { diffResult ->
+    propertiesByPropertyType.mapValues { properties ->
       val diffs = diffResult.diffs as List<Diff<Prisoner>>
       diffs.filter { diff -> properties.value.contains(diff.fieldName) }
         .map { diff -> Difference(diff.fieldName, properties.key, diff.left, diff.right) }
     }
   }.filter { it.value.isNotEmpty() }
 
-internal fun getDiff(prisoner: Prisoner, other: Prisoner): DiffResult<Prisoner> =
+internal fun getDiffResult(prisoner: Prisoner, other: Prisoner): DiffResult<Prisoner> =
   DiffBuilder(prisoner, other, ToStringStyle.JSON_STYLE).apply {
     Prisoner::class.members
-      .filter { it.findAnnotations<DiffableType>().isNotEmpty() }
+      .filter { it.findAnnotations<DiffableProperty>().isNotEmpty() }
       .forEach {
         append(it.name, it.call(prisoner), it.call(other))
       }
   }.build()
 
-val propertiesByDiffType: Map<DiffType, List<String>> =
+val propertiesByPropertyType: Map<PropertyType, List<String>> =
   Prisoner::class.members
-    .filter { it.findAnnotations<DiffableType>().isNotEmpty() }
-    .groupBy { it.findAnnotations<DiffableType>().first().type }
+    .filter { it.findAnnotations<DiffableProperty>().isNotEmpty() }
+    .groupBy { it.findAnnotations<DiffableProperty>().first().type }
     .mapValues { it.value.map { property -> property.name } }
 
-val diffTypesByProperty: Map<String, DiffType> =
+val propertyTypesByProperty: Map<String, PropertyType> =
   Prisoner::class.members
-    .filter { it.findAnnotations<DiffableType>().isNotEmpty() }
-    .associate { it.name to it.findAnnotations<DiffableType>().first().type }
+    .filter { it.findAnnotations<DiffableProperty>().isNotEmpty() }
+    .associate { it.name to it.findAnnotations<DiffableProperty>().first().type }

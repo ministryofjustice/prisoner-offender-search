@@ -17,7 +17,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "any" }
       val prisoner2 = Prisoner().apply { pncNumber = "any" }
 
-      assertThat(getDiff(prisoner1, prisoner2)).isEmpty()
+      assertThat(getDiffResult(prisoner1, prisoner2)).isEmpty()
     }
 
     @Test
@@ -25,7 +25,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactly(Tuple("pncNumber", "somePnc1", "somePnc2"))
     }
@@ -35,7 +35,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2" }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", "somePnc1", "somePnc2"),
@@ -44,11 +44,11 @@ class PrisonerDiffServiceTest {
     }
 
     @Test
-    fun `should report differences of different types`() {
+    fun `should report differences of different property types`() {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; firstName = "firstName1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; firstName = "firstName2" }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", "somePnc1", "somePnc2"),
@@ -61,7 +61,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { youthOffender = true }
       val prisoner2 = Prisoner().apply { youthOffender = false }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactly(Tuple("youthOffender", true, false))
     }
@@ -71,7 +71,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = null }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc" }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactly(Tuple("pncNumber", null, "somePnc"))
     }
@@ -81,7 +81,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = null }
       val prisoner2 = Prisoner().apply { pncNumber = null }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs).isEmpty()
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs).isEmpty()
     }
 
     @Test
@@ -89,7 +89,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { aliases = listOf() }
       val prisoner2 = Prisoner().apply { aliases = listOf(alias(firstName = "aliasFirstName", lastName = "aliasLastName", dateOfBirth = LocalDate.now())) }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactly(Tuple("aliases", listOf<PrisonerAlias>(), listOf(alias(firstName = "aliasFirstName", lastName = "aliasLastName", dateOfBirth = LocalDate.now()))))
     }
@@ -102,7 +102,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { sentenceStartDate = LocalDate.of(2022, 9, 12) }
       val prisoner2 = Prisoner().apply { sentenceStartDate = LocalDate.of(2021, 8, 11) }
 
-      assertThat(getDiff(prisoner1, prisoner2).diffs)
+      assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
         .containsExactly(Tuple("sentenceStartDate", LocalDate.of(2022, 9, 12), LocalDate.of(2021, 8, 11)))
     }
@@ -111,26 +111,26 @@ class PrisonerDiffServiceTest {
   @Nested
   inner class Groupings {
     @Test
-    fun `groups prisoner class members by DiffType`() {
-      assertThat(propertiesByDiffType[DiffType.IDENTIFIERS]).contains("pncNumber", "croNumber")
-      assertThat(propertiesByDiffType[DiffType.PERSONAL_DETAILS]).contains("firstName")
+    fun `groups properties by property type`() {
+      assertThat(propertiesByPropertyType[PropertyType.IDENTIFIERS]).contains("pncNumber", "croNumber")
+      assertThat(propertiesByPropertyType[PropertyType.PERSONAL_DETAILS]).contains("firstName")
     }
     @Test
-    fun `calculates diff types by property name`() {
-      assertThat(diffTypesByProperty["pncNumber"]).isEqualTo(DiffType.IDENTIFIERS)
-      assertThat(diffTypesByProperty["croNumber"]).isEqualTo(DiffType.IDENTIFIERS)
-      assertThat(diffTypesByProperty["firstName"]).isEqualTo(DiffType.PERSONAL_DETAILS)
+    fun `maps property types by property`() {
+      assertThat(propertyTypesByProperty["pncNumber"]).isEqualTo(PropertyType.IDENTIFIERS)
+      assertThat(propertyTypesByProperty["croNumber"]).isEqualTo(PropertyType.IDENTIFIERS)
+      assertThat(propertyTypesByProperty["firstName"]).isEqualTo(PropertyType.PERSONAL_DETAILS)
     }
   }
 
   @Nested
-  inner class GroupDiffsByType {
+  inner class GetDifferencesByPropertyType {
     @Test
     fun `should report zero differences`() {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = "someCro"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc"; croNumber = "someCro"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByType(prisoner1, prisoner2)
+      val diffsByType = getDifferencesByPropertyType(prisoner1, prisoner2)
 
       assertThat(diffsByType).isEmpty()
     }
@@ -140,14 +140,14 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByType(prisoner1, prisoner2)
+      val diffsByType = getDifferencesByPropertyType(prisoner1, prisoner2)
 
-      assertThat(diffsByType.keys).containsExactly(DiffType.IDENTIFIERS)
-      val identifierDiffs = diffsByType[DiffType.IDENTIFIERS]
+      assertThat(diffsByType.keys).containsExactly(PropertyType.IDENTIFIERS)
+      val identifierDiffs = diffsByType[PropertyType.IDENTIFIERS]
       assertThat(identifierDiffs)
         .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("pncNumber", DiffType.IDENTIFIERS, "somePnc1", "somePnc2"),
+          Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc1", "somePnc2"),
         )
     }
 
@@ -156,39 +156,39 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByType(prisoner1, prisoner2)
+      val diffsByType = getDifferencesByPropertyType(prisoner1, prisoner2)
 
-      assertThat(diffsByType.keys).containsExactly(DiffType.IDENTIFIERS)
-      val identifierDiffs = diffsByType[DiffType.IDENTIFIERS]
+      assertThat(diffsByType.keys).containsExactly(PropertyType.IDENTIFIERS)
+      val identifierDiffs = diffsByType[PropertyType.IDENTIFIERS]
       assertThat(identifierDiffs)
         .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("pncNumber", DiffType.IDENTIFIERS, "somePnc1", "somePnc2"),
-          Tuple("croNumber", DiffType.IDENTIFIERS, "someCro1", "someCro2"),
+          Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc1", "somePnc2"),
+          Tuple("croNumber", PropertyType.IDENTIFIERS, "someCro1", "someCro2"),
         )
     }
 
     @Test
-    fun `should report multiple differences of multiple types`() {
+    fun `should report multiple differences of multiple property types`() {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someName1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someName2" }
 
-      val diffsByType = getDifferencesByType(prisoner1, prisoner2)
+      val diffsByType = getDifferencesByPropertyType(prisoner1, prisoner2)
 
-      assertThat(diffsByType.keys).containsExactlyInAnyOrder(DiffType.IDENTIFIERS, DiffType.PERSONAL_DETAILS)
-      val identifierDiffs = diffsByType[DiffType.IDENTIFIERS]
-      val personalDetailDiffs = diffsByType[DiffType.PERSONAL_DETAILS]
+      assertThat(diffsByType.keys).containsExactlyInAnyOrder(PropertyType.IDENTIFIERS, PropertyType.PERSONAL_DETAILS)
+      val identifierDiffs = diffsByType[PropertyType.IDENTIFIERS]
+      val personalDetailDiffs = diffsByType[PropertyType.PERSONAL_DETAILS]
 
       assertThat(identifierDiffs)
         .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("pncNumber", DiffType.IDENTIFIERS, "somePnc1", "somePnc2"),
-          Tuple("croNumber", DiffType.IDENTIFIERS, "someCro1", "someCro2")
+          Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc1", "somePnc2"),
+          Tuple("croNumber", PropertyType.IDENTIFIERS, "someCro1", "someCro2")
         )
       assertThat(personalDetailDiffs)
         .extracting("property", "diffType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          Tuple("firstName", DiffType.PERSONAL_DETAILS, "someName1", "someName2"),
+          Tuple("firstName", PropertyType.PERSONAL_DETAILS, "someName1", "someName2"),
         )
     }
   }
