@@ -145,7 +145,7 @@ class PrisonerDiffServiceTest {
       assertThat(diffsByType.keys).containsExactly(PropertyType.IDENTIFIERS)
       val identifierDiffs = diffsByType[PropertyType.IDENTIFIERS]
       assertThat(identifierDiffs)
-        .extracting("property", "diffType", "oldValue", "newValue")
+        .extracting("property", "propertyType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc1", "somePnc2"),
         )
@@ -161,7 +161,7 @@ class PrisonerDiffServiceTest {
       assertThat(diffsByType.keys).containsExactly(PropertyType.IDENTIFIERS)
       val identifierDiffs = diffsByType[PropertyType.IDENTIFIERS]
       assertThat(identifierDiffs)
-        .extracting("property", "diffType", "oldValue", "newValue")
+        .extracting("property", "propertyType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc1", "somePnc2"),
           Tuple("croNumber", PropertyType.IDENTIFIERS, "someCro1", "someCro2"),
@@ -180,13 +180,13 @@ class PrisonerDiffServiceTest {
       val personalDetailDiffs = diffsByType[PropertyType.PERSONAL_DETAILS]
 
       assertThat(identifierDiffs)
-        .extracting("property", "diffType", "oldValue", "newValue")
+        .extracting("property", "propertyType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", PropertyType.IDENTIFIERS, "somePnc1", "somePnc2"),
           Tuple("croNumber", PropertyType.IDENTIFIERS, "someCro1", "someCro2")
         )
       assertThat(personalDetailDiffs)
-        .extracting("property", "diffType", "oldValue", "newValue")
+        .extracting("property", "propertyType", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
           Tuple("firstName", PropertyType.PERSONAL_DETAILS, "someName1", "someName2"),
         )
