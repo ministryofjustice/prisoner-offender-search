@@ -23,6 +23,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.getDifferencesByPropertyType
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.raiseDifferencesTelemetry
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
@@ -72,6 +74,8 @@ class PrisonerIndexService(
   }
 
   fun sync(offenderBooking: OffenderBooking): Prisoner {
+    val existingPrisoner = get(offenderBooking.offenderNo)
+
     val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
 
     val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
@@ -91,6 +95,15 @@ class PrisonerIndexService(
       } else {
         prisonerARepository.save(prisonerA)
       }
+    }
+
+    existingPrisoner?.also {
+      raiseDifferencesTelemetry(
+        offenderBooking.offenderNo,
+        offenderBooking.bookingNo,
+        getDifferencesByPropertyType(it, storedPrisoner),
+        telemetryClient
+      )
     }
 
     return storedPrisoner
