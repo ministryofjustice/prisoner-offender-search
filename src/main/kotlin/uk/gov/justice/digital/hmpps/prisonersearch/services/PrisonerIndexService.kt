@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
@@ -40,6 +41,7 @@ class PrisonerIndexService(
   private val telemetryClient: TelemetryClient,
   private val indexProperties: IndexProperties,
   private val restrictedPatientService: RestrictedPatientService,
+  private val diffProperties: DiffProperties,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -97,13 +99,19 @@ class PrisonerIndexService(
       }
     }
 
-    existingPrisoner?.also {
-      raiseDifferencesTelemetry(
-        offenderBooking.offenderNo,
-        offenderBooking.bookingNo,
-        getDifferencesByPropertyType(it, storedPrisoner),
-        telemetryClient
-      )
+    if (diffProperties.telemetry) {
+      existingPrisoner?.also {
+        kotlin.runCatching {
+          raiseDifferencesTelemetry(
+            offenderBooking.offenderNo,
+            offenderBooking.bookingNo,
+            getDifferencesByPropertyType(it, storedPrisoner),
+            telemetryClient
+          )
+        }.onFailure {
+          log.error("POSPrisonerUpdated failed with error", it)
+        }
+      }
     }
 
     return storedPrisoner

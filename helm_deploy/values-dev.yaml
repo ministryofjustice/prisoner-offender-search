@@ -11,6 +11,7 @@ generic-service:
     API_BASE_URL_RESTRICTED_PATIENTS: "https://restricted-patients-api-dev.hmpps.service.justice.gov.uk"
     INDEX_COMPLETE_THRESHOLD: 500000
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
+    DIFF_TELEMETRY: true
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:

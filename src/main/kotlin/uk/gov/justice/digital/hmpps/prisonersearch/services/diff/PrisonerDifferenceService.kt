@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.DiffBuilder
 import org.apache.commons.lang3.builder.DiffResult
 import org.apache.commons.lang3.builder.ToStringStyle
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import java.time.LocalDateTime
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -55,6 +56,7 @@ fun raiseDifferencesTelemetry(
     telemetryClient.trackEvent(
       "POSPrisonerUpdated",
       mapOf(
+        "processedTime" to LocalDateTime.now().toString(),
         "offenderNumber" to offenderNo,
         "bookingNumber" to bookingNo,
         "propertyTypes" to propertyTypeMap.key.name,

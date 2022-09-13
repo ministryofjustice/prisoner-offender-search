@@ -13,6 +13,7 @@ import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlias
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class PrisonerDiffServiceTest {
 
@@ -236,6 +237,7 @@ class PrisonerDiffServiceTest {
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
         check<Map<String, String>> {
+          assertThat(LocalDateTime.parse(it["processedTime"]).toLocalDate()).isEqualTo(LocalDate.now())
           assertThat(it["offenderNumber"]).isEqualTo("someOffenderNo")
           assertThat(it["bookingNumber"]).isEqualTo("someBookingNo")
         },

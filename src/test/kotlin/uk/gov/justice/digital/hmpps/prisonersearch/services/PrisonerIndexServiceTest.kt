@@ -23,6 +23,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.IndexOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
@@ -48,6 +49,7 @@ class PrisonerIndexServiceTest {
   private val telemetryClient = mock<TelemetryClient>()
   private val indexProperties = mock<IndexProperties>()
   private val restrictedPatientService = mock<RestrictedPatientService>()
+  private val diffProperties = mock<DiffProperties>()
 
   private val prisonerIndexService = PrisonerIndexService(
     nomisService,
@@ -58,7 +60,8 @@ class PrisonerIndexServiceTest {
     searchClient,
     telemetryClient,
     indexProperties,
-    restrictedPatientService
+    restrictedPatientService,
+    diffProperties,
   )
 
   @Nested
@@ -228,12 +231,14 @@ class PrisonerIndexServiceTest {
 
   @Nested
   inner class SyncPrisonerDifferences {
+    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
     @BeforeEach
     fun setUp() {
       whenever(indexStatusService.getCurrentIndex()).thenReturn(
         IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
       )
-      whenever(prisonerARepository.save(any())).thenReturn(PrisonerA().apply { pncNumber = "somePncNumber2" })
+      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
+      whenever(diffProperties.telemetry).thenReturn(true)
     }
 
     @Test
@@ -248,6 +253,26 @@ class PrisonerIndexServiceTest {
     @Test
     fun `should not raise telemetry if prisoner is new`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+
+      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+
+      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
+    }
+
+    @Test
+    fun `should handle exceptions when generating telemetry`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
+      whenever(telemetryClient.trackEvent(anyString(), anyMap(), any())).thenThrow(RuntimeException::class.java)
+
+      val saved = prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+
+      assertThat(saved).isEqualTo(savedPrisoner)
+    }
+
+    @Test
+    fun `should not produce telemetry if feature switch is off`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
+      whenever(diffProperties.telemetry).thenReturn(false)
 
       prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
 
