@@ -98,12 +98,16 @@ class PrisonerIndexService(
     }
 
     existingPrisoner?.also {
-      raiseDifferencesTelemetry(
-        offenderBooking.offenderNo,
-        offenderBooking.bookingNo,
-        getDifferencesByPropertyType(it, storedPrisoner),
-        telemetryClient
-      )
+      kotlin.runCatching {
+        raiseDifferencesTelemetry(
+          offenderBooking.offenderNo,
+          offenderBooking.bookingNo,
+          getDifferencesByPropertyType(it, storedPrisoner),
+          telemetryClient
+        )
+      }.onFailure {
+        log.error("POSPrisonerUpdated failed with error", it)
+      }
     }
 
     return storedPrisoner

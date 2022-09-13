@@ -228,12 +228,13 @@ class PrisonerIndexServiceTest {
 
   @Nested
   inner class SyncPrisonerDifferences {
+    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
     @BeforeEach
     fun setUp() {
       whenever(indexStatusService.getCurrentIndex()).thenReturn(
         IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
       )
-      whenever(prisonerARepository.save(any())).thenReturn(PrisonerA().apply { pncNumber = "somePncNumber2" })
+      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
     }
 
     @Test
@@ -252,6 +253,16 @@ class PrisonerIndexServiceTest {
       prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
 
       verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
+    }
+
+    @Test
+    fun `should handle exceptions when generating telemetry`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
+      whenever(telemetryClient.trackEvent(anyString(), anyMap(), any())).thenThrow(RuntimeException::class.java)
+
+      val saved = prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+
+      assertThat(saved).isEqualTo(savedPrisoner)
     }
   }
 }
