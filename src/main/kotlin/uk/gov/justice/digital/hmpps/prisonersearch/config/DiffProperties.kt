@@ -5,4 +5,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "diff")
-data class DiffProperties(val telemetry: Boolean)
+data class DiffProperties(val telemetry: Boolean, val host: String)
