@@ -1,11 +1,13 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.integration
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.google.gson.Gson
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -21,12 +23,16 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.RestrictedPatientMockServer
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import java.time.Clock
 import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -40,6 +46,9 @@ abstract class IntegrationTest {
 
   @SpyBean
   lateinit var hmppsQueueService: HmppsQueueService
+
+  @SpyBean
+  lateinit var clock: Clock
 
   protected val eventQueue by lazy { hmppsQueueService.findByQueueId("eventqueue") ?: throw MissingQueueException("HmppsQueue eventqueue not found") }
   protected val indexQueue by lazy { hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found") }
@@ -61,6 +70,12 @@ abstract class IntegrationTest {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
+
+  @Autowired
+  protected lateinit var hmppsDomainEventEmitter: HmppsDomainEventEmitter
+
+  @Autowired
+  protected lateinit var objectMapper: ObjectMapper
 
   companion object {
     internal val prisonMockServer = PrisonMockServer()
@@ -98,6 +113,12 @@ abstract class IntegrationTest {
     restrictedPatientMockServer.resetAll()
   }
 
+  @BeforeEach
+  fun mockClock() {
+    val fixedClock = Clock.fixed(Instant.parse("2022-09-16T10:40:34Z"), ZoneId.of("UTC"))
+    whenever(clock.instant()).thenReturn(fixedClock.instant())
+    whenever(clock.zone).thenReturn(fixedClock.zone)
+  }
   internal fun Any.asJson() = gson.toJson(this)
 
   internal fun setAuthorisation(user: String = "prisoner-search-client", roles: List<String> = listOf()): (HttpHeaders) -> Unit {

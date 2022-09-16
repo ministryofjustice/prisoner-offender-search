@@ -74,6 +74,10 @@ generic-service:
       HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_ACCESS_KEY_ID: "access_key_id"
       HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_NAME: "sqs_pos_name"
+    hmpps-domain-events-topic:
+      HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_ARN: "topic_arn"
     elasticsearch:
       ELASTICSEARCH_PROXY_URL: "aws_es_proxy_url"
 

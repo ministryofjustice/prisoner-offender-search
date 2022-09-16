@@ -48,6 +48,8 @@ dependencies {
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:4.8.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.35.0")
+  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
 }
 
 java {

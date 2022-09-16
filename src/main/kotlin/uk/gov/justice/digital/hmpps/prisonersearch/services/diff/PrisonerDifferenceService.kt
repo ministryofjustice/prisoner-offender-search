@@ -19,7 +19,9 @@ enum class PropertyType {
 
 data class Difference(val property: String, val propertyType: PropertyType, val oldValue: Any?, val newValue: Any?)
 
-fun getDifferencesByPropertyType(prisoner: Prisoner, other: Prisoner): Map<PropertyType, List<Difference>> =
+typealias PrisonerDifferences = Map<PropertyType, List<Difference>>
+
+fun getDifferencesByPropertyType(prisoner: Prisoner, other: Prisoner): PrisonerDifferences =
   getDiffResult(prisoner, other).let { diffResult ->
     propertiesByPropertyType.mapValues { properties ->
       val diffs = diffResult.diffs as List<Diff<Prisoner>>
@@ -49,7 +51,7 @@ val propertyTypesByProperty: Map<String, PropertyType> =
 fun raiseDifferencesTelemetry(
   offenderNo: String,
   bookingNo: String?,
-  differences: Map<PropertyType, List<Difference>>,
+  differences: PrisonerDifferences,
   telemetryClient: TelemetryClient
 ) {
   differences.forEach { propertyTypeMap ->
