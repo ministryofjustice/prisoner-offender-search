@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.integration
 
 import com.amazonaws.services.sqs.AmazonSQS
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.google.gson.Gson
 import org.junit.jupiter.api.AfterAll
@@ -22,6 +23,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.RestrictedPatientMockServer
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -68,6 +70,12 @@ abstract class IntegrationTest {
 
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
+
+  @Autowired
+  protected lateinit var hmppsDomainEventEmitter: HmppsDomainEventEmitter
+
+  @Autowired
+  protected lateinit var objectMapper: ObjectMapper
 
   companion object {
     internal val prisonMockServer = PrisonMockServer()

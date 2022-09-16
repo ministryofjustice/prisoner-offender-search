@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -12,19 +11,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType.LOCATION
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
-
-  @Autowired
-  private lateinit var hmppsDomainEventEmitter: HmppsDomainEventEmitter
-
-  @Autowired
-  private lateinit var objectMapper: ObjectMapper
 
   protected val topicQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
 
