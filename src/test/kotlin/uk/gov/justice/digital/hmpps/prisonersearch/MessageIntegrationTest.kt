@@ -165,7 +165,3 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     search(SearchCriteria("A7089FE", null, null), "/results/search_results_A7089FE.json")
   }
 }
-
-private fun String.readResourceAsText(): String {
-  return MessageIntegrationTest::class.java.getResource(this).readText()
-}

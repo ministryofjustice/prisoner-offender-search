@@ -13,6 +13,7 @@ generic-service:
     INDEX_COMPLETE_THRESHOLD: 500000
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
     DIFF_TELEMETRY: true
+    DIFF_EVENTS: true
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:

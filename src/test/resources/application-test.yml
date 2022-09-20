@@ -53,3 +53,6 @@ token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnRlcm5hbFVzZXIiOnRydWUsInVzZXJf
 index:
   page-size: 3
   complete-threshold: 0
+
+diff:
+  events: true
