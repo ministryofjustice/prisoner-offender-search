@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
+import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.Logger
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferences
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -37,8 +39,11 @@ class HmppsDomainEventEmitter(
     runCatching {
       PrisonerUpdatedEvent(offenderNo, bookingNo, differences.keys.toList().sorted())
         .let { event -> PrisonerUpdatedDomainEvent(event, Instant.now(clock), diffProperties.host) }
-        .also { domainEvent ->
-          topicSnsClient.publish(PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent)))
+        .let { domainEvent ->
+          PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent))
+            .addMessageAttributesEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue(EVENT_TYPE))
+        }.also { publishRequest ->
+          topicSnsClient.publish(publishRequest)
         }
     }
       .onFailure {
@@ -51,6 +56,7 @@ class HmppsDomainEventEmitter(
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+    const val EVENT_TYPE = "prisoner-offender-search.offender.updated"
   }
 }
 
@@ -72,7 +78,7 @@ data class PrisonerUpdatedDomainEvent(
     this(
       additionalInfo = additionalInfo,
       occurredAt = ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("Europe/London")).format(occurredAt),
-      eventType = "prisoner-offender-search.offender.updated",
+      eventType = EVENT_TYPE,
       version = 1,
       description = "A prisoner record has been updated",
       detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.offenderNo).toUri().toString(),
