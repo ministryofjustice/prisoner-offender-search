@@ -247,7 +247,7 @@ class PrisonerIndexServiceTest {
     fun `should raise telemetry if prisoner updated`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(telemetryClient).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
     }
@@ -256,7 +256,7 @@ class PrisonerIndexServiceTest {
     fun `should not raise telemetry if prisoner is new`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
     }
@@ -266,7 +266,7 @@ class PrisonerIndexServiceTest {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
       whenever(telemetryClient.trackEvent(anyString(), anyMap(), any())).thenThrow(RuntimeException::class.java)
 
-      val saved = prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      val saved = prisonerIndexService.sync(someOffenderBooking())
 
       assertThat(saved).isEqualTo(savedPrisoner)
     }
@@ -276,7 +276,7 @@ class PrisonerIndexServiceTest {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
       whenever(diffProperties.telemetry).thenReturn(false)
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
     }
@@ -298,7 +298,7 @@ class PrisonerIndexServiceTest {
     fun `should send event if prisoner updated`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
     }
@@ -307,7 +307,7 @@ class PrisonerIndexServiceTest {
     fun `should not send event if prisoner is new`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
     }
@@ -316,7 +316,7 @@ class PrisonerIndexServiceTest {
     fun `should not send event if there are no differences`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(savedPrisoner))
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
     }
@@ -326,7 +326,7 @@ class PrisonerIndexServiceTest {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
       whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), anyString(), anyMap())).thenThrow(RuntimeException::class.java)
 
-      val saved = prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      val saved = prisonerIndexService.sync(someOffenderBooking())
 
       assertThat(saved).isEqualTo(savedPrisoner)
     }
@@ -336,9 +336,18 @@ class PrisonerIndexServiceTest {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
       whenever(diffProperties.events).thenReturn(false)
 
-      prisonerIndexService.sync(OffenderBooking(offenderNo = "someOffenderNo", firstName = "someFirstName", lastName = "someLastName", dateOfBirth = LocalDate.now(), activeFlag = true))
+      prisonerIndexService.sync(someOffenderBooking())
 
       verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
     }
   }
+
+  private fun someOffenderBooking() =
+    OffenderBooking(
+      offenderNo = "someOffenderNo",
+      firstName = "someFirstName",
+      lastName = "someLastName",
+      dateOfBirth = LocalDate.now(),
+      activeFlag = true
+    )
 }
