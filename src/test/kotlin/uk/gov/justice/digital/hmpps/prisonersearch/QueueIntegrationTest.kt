@@ -41,6 +41,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
+import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -75,6 +76,8 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   @SpyBean
   lateinit var telemetryClient: TelemetryClient
 
+  protected val hmppsEventsQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
+
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
@@ -82,6 +85,10 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
+    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
+  }
+  fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? {
+    val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(hmppsEventsQueue.queueUrl, listOf("ApproximateNumberOfMessages"))
     return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
   }
 
@@ -416,7 +423,7 @@ data class PrisonerBuilder(
   val cellLocation: String = "A-1-1",
 )
 
-private fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
+fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
 
 fun generatePrisonerNumber(): String {
   // generate random string starting with a letter, followed by 4 numbers and 2 letters

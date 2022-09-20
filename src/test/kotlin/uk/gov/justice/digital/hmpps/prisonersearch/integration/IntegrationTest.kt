@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMo
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.RestrictedPatientMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
@@ -71,11 +72,14 @@ abstract class IntegrationTest {
   @Autowired
   internal lateinit var jwtHelper: JwtAuthHelper
 
-  @Autowired
+  @SpyBean
   protected lateinit var hmppsDomainEventEmitter: HmppsDomainEventEmitter
 
   @Autowired
   protected lateinit var objectMapper: ObjectMapper
+
+  @Autowired
+  protected lateinit var prisonerIndexService: PrisonerIndexService
 
   companion object {
     internal val prisonMockServer = PrisonMockServer()

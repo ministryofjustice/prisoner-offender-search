@@ -42,6 +42,7 @@ class PrisonerIndexService(
   private val indexProperties: IndexProperties,
   private val restrictedPatientService: RestrictedPatientService,
   private val diffProperties: DiffProperties,
+  private val domainEventEmitter: HmppsDomainEventEmitter,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -99,22 +100,51 @@ class PrisonerIndexService(
       }
     }
 
-    if (diffProperties.telemetry) {
-      existingPrisoner?.also {
-        kotlin.runCatching {
-          raiseDifferencesTelemetry(
-            offenderBooking.offenderNo,
-            offenderBooking.bookingNo,
-            getDifferencesByPropertyType(it, storedPrisoner),
-            telemetryClient
-          )
-        }.onFailure {
-          log.error("POSPrisonerUpdated failed with error", it)
-        }
-      }
-    }
+    generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
+    generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
 
     return storedPrisoner
+  }
+
+  private fun generateDiffTelemetry(
+    existingPrisoner: Prisoner?,
+    offenderBooking: OffenderBooking,
+    storedPrisoner: Prisoner
+  ) {
+    if (!diffProperties.telemetry) return
+
+    existingPrisoner?.also {
+      kotlin.runCatching {
+        raiseDifferencesTelemetry(
+          offenderBooking.offenderNo,
+          offenderBooking.bookingNo,
+          getDifferencesByPropertyType(it, storedPrisoner),
+          telemetryClient
+        )
+      }.onFailure {
+        log.error("POSPrisonerUpdated failed with error", it)
+      }
+    }
+  }
+
+  private fun generateDiffEvent(
+    existingPrisoner: Prisoner?,
+    offenderBooking: OffenderBooking,
+    storedPrisoner: Prisoner
+  ) {
+    if (!diffProperties.events) return
+
+    existingPrisoner?.also { prisoner ->
+      kotlin.runCatching {
+        getDifferencesByPropertyType(prisoner, storedPrisoner)
+          .takeIf { differences -> differences.isNotEmpty() }
+          ?.also { differences ->
+            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, offenderBooking.bookingNo, differences)
+          }
+      }.onFailure {
+        log.error("prisoner-offender-search.offender.updated event failed with error", it)
+      }
+    }
   }
 
   private fun checkIfIndexExists(indexName: String): Boolean {

@@ -106,4 +106,5 @@ index:
 
 diff:
   telemetry: false
+  events: false
   host: http://localhost:8080
