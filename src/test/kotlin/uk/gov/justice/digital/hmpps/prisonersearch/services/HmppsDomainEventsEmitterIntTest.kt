@@ -9,6 +9,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
@@ -18,8 +19,16 @@ import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType.LOCATION
+import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
 
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
+
+  @BeforeEach
+  fun purgeHmppsEventsQueue() {
+    with(hmppsEventsQueue) {
+      hmppsQueueService.purgeQueue(PurgeQueueRequest(queueName, sqsClient, queueUrl))
+    }
+  }
 
   @Nested
   inner class EmitPrisonerDifferenceEvent {
