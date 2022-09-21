@@ -139,7 +139,7 @@ open class Prisoner : Diffable<Prisoner> {
 
   @Field(type = FieldType.Nested, includeInParent = true)
   @Schema(description = "Alerts")
-  @DiffableProperty(PropertyType.STATUS)
+  @DiffableProperty(PropertyType.ALERTS)
   var alerts: List<PrisonerAlert>? = null
 
   @Schema(description = "Cell Sharing Risk Assessment", example = "HIGH")
