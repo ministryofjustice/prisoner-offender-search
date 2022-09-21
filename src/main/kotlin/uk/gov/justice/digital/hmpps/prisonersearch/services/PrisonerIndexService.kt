@@ -24,7 +24,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.getDifferencesByPropertyType
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.getDifferencesByCategory
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.raiseDifferencesTelemetry
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
@@ -117,8 +117,7 @@ class PrisonerIndexService(
       kotlin.runCatching {
         raiseDifferencesTelemetry(
           offenderBooking.offenderNo,
-          offenderBooking.bookingNo,
-          getDifferencesByPropertyType(it, storedPrisoner),
+          getDifferencesByCategory(it, storedPrisoner),
           telemetryClient
         )
       }.onFailure {
@@ -136,10 +135,10 @@ class PrisonerIndexService(
 
     existingPrisoner?.also { prisoner ->
       kotlin.runCatching {
-        getDifferencesByPropertyType(prisoner, storedPrisoner)
+        getDifferencesByCategory(prisoner, storedPrisoner)
           .takeIf { differences -> differences.isNotEmpty() }
           ?.also { differences ->
-            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, offenderBooking.bookingNo, differences)
+            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
           }
       }.onFailure {
         log.error("prisoner-offender-search.offender.updated event failed with error", it)

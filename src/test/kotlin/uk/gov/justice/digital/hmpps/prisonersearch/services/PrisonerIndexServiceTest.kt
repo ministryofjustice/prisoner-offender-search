@@ -300,7 +300,7 @@ class PrisonerIndexServiceTest {
 
       prisonerIndexService.sync(someOffenderBooking())
 
-      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
+      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
 
     @Test
@@ -309,7 +309,7 @@ class PrisonerIndexServiceTest {
 
       prisonerIndexService.sync(someOffenderBooking())
 
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
+      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
 
     @Test
@@ -318,13 +318,13 @@ class PrisonerIndexServiceTest {
 
       prisonerIndexService.sync(someOffenderBooking())
 
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
+      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
 
     @Test
     fun `should handle exceptions when sending events`() {
       whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), anyString(), anyMap())).thenThrow(RuntimeException::class.java)
+      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), anyMap())).thenThrow(RuntimeException::class.java)
 
       val saved = prisonerIndexService.sync(someOffenderBooking())
 
@@ -338,7 +338,7 @@ class PrisonerIndexServiceTest {
 
       prisonerIndexService.sync(someOffenderBooking())
 
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), isNull(), anyMap())
+      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
   }
 

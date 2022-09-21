@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.EVENT_TYPE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferences
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.Clock
 import java.time.Instant
@@ -33,11 +33,10 @@ class HmppsDomainEventEmitter(
 
   fun emitPrisonerDifferenceEvent(
     offenderNo: String,
-    bookingNo: String?,
     differences: PrisonerDifferences,
   ) {
     runCatching {
-      PrisonerUpdatedEvent(offenderNo, bookingNo, differences.keys.toList().sorted())
+      PrisonerUpdatedEvent(offenderNo, differences.keys.toList().sorted())
         .let { event -> PrisonerUpdatedDomainEvent(event, Instant.now(clock), diffProperties.host) }
         .let { domainEvent ->
           PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent))
@@ -48,7 +47,7 @@ class HmppsDomainEventEmitter(
     }
       .onFailure {
         log.error(
-          "Failed to send prisoner updated event for offenderNo=$offenderNo, bookingNo=$bookingNo, differences=$differences",
+          "Failed to send prisoner updated event for offenderNo=$offenderNo, differences=$differences",
           it
         )
       }
@@ -56,14 +55,13 @@ class HmppsDomainEventEmitter(
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
-    const val EVENT_TYPE = "prisoner-offender-search.offender.updated"
+    const val EVENT_TYPE = "prisoner-offender-search.prisoner.updated"
   }
 }
 
 data class PrisonerUpdatedEvent(
-  val offenderNo: String,
-  val bookingNo: String?,
-  val propertyTypes: List<PropertyType>,
+  val nomsNumber: String,
+  val categoriesChanged: List<DiffCategory>,
 )
 
 data class PrisonerUpdatedDomainEvent(
@@ -81,6 +79,6 @@ data class PrisonerUpdatedDomainEvent(
       eventType = EVENT_TYPE,
       version = 1,
       description = "A prisoner record has been updated",
-      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.offenderNo).toUri().toString(),
+      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.nomsNumber).toUri().toString(),
     )
 }
