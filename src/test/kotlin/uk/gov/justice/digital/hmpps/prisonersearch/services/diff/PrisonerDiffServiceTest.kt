@@ -258,7 +258,7 @@ class PrisonerDiffServiceTest {
         eq("POSPrisonerUpdated"),
         check<Map<String, String>> {
           assertThat(LocalDateTime.parse(it["processedTime"]).toLocalDate()).isEqualTo(LocalDate.now())
-          assertThat(it["offenderNumber"]).isEqualTo("someOffenderNo")
+          assertThat(it["nomsNumber"]).isEqualTo("someOffenderNo")
         },
         isNull()
       )

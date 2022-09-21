@@ -58,7 +58,7 @@ fun raiseDifferencesTelemetry(
       "POSPrisonerUpdated",
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
-        "offenderNumber" to offenderNo,
+        "nomsNumber" to offenderNo,
         "categoryChanged" to diffCategoryMap.key.name,
       ) + diffCategoryMap.value.associate { difference ->
         difference.property to """${difference.oldValue} -> ${difference.newValue}"""
