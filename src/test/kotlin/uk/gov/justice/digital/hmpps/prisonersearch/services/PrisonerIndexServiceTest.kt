@@ -283,6 +283,57 @@ class PrisonerIndexServiceTest {
   }
 
   @Nested
+  inner class SyncPrisonerCreatedTelemetry {
+    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
+    @BeforeEach
+    fun setUp() {
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(
+        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
+      )
+      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
+      whenever(diffProperties.telemetry).thenReturn(true)
+    }
+
+    @Test
+    fun `should raise telemetry if prisoner new`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+
+      prisonerIndexService.sync(someOffenderBooking())
+
+      verify(telemetryClient).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
+    }
+
+    @Test
+    fun `should not raise telemetry if prisoner exists`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
+
+      prisonerIndexService.sync(someOffenderBooking())
+
+      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
+    }
+
+    @Test
+    fun `should handle exceptions when generating telemetry`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+      whenever(telemetryClient.trackEvent(anyString(), anyMap(), any())).thenThrow(RuntimeException::class.java)
+
+      val saved = prisonerIndexService.sync(someOffenderBooking())
+
+      assertThat(saved).isEqualTo(savedPrisoner)
+    }
+
+    @Test
+    fun `should not produce telemetry if feature switch is off`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+      whenever(diffProperties.telemetry).thenReturn(false)
+
+      prisonerIndexService.sync(someOffenderBooking())
+
+      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
+    }
+  }
+
+  @Nested
   inner class SyncPrisonerDifferencesEvent {
     private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
     @BeforeEach

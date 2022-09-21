@@ -67,3 +67,6 @@ fun raiseDifferencesTelemetry(
     )
   }
 }
+
+fun raiseCreatedTelemetry(offenderNo: String, telemetryClient: TelemetryClient) =
+  telemetryClient.trackEvent("POSPrisonerCreated", mapOf("nomsNumber" to offenderNo), null)
