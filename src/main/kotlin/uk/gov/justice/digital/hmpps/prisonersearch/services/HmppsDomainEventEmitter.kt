@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.EVENT_TYPE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferences
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.time.Clock
 import java.time.Instant
@@ -63,7 +63,7 @@ class HmppsDomainEventEmitter(
 data class PrisonerUpdatedEvent(
   val offenderNo: String,
   val bookingNo: String?,
-  val propertyTypes: List<PropertyType>,
+  val categoriesChanged: List<DiffCategory>,
 )
 
 data class PrisonerUpdatedDomainEvent(

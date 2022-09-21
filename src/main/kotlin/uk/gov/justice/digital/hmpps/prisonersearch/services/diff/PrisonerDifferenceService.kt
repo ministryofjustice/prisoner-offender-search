@@ -11,24 +11,24 @@ import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class DiffableProperty(val type: PropertyType)
+annotation class DiffableProperty(val type: DiffCategory)
 
-enum class PropertyType {
+enum class DiffCategory {
   IDENTIFIERS, PERSONAL_DETAILS, ALERTS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT
 }
 
-data class Difference(val property: String, val propertyType: PropertyType, val oldValue: Any?, val newValue: Any?)
+data class Difference(val property: String, val diffCategory: DiffCategory, val oldValue: Any?, val newValue: Any?)
 
-typealias PrisonerDifferences = Map<PropertyType, List<Difference>>
+typealias PrisonerDifferences = Map<DiffCategory, List<Difference>>
 
-fun getDifferencesByPropertyType(prisoner: Prisoner, other: Prisoner): PrisonerDifferences =
+fun getDifferencesByCategory(prisoner: Prisoner, other: Prisoner): PrisonerDifferences =
   getDiffResult(prisoner, other).let { diffResult ->
-    propertiesByPropertyType.mapValues { properties ->
+    propertiesByDiffCategory.mapValues { properties ->
       val diffs = diffResult.diffs as List<Diff<Prisoner>>
       diffs.filter { diff -> properties.value.contains(diff.fieldName) }
         .map { diff -> Difference(diff.fieldName, properties.key, diff.left, diff.right) }
     }
-  }.filter { differencesByPropertyType -> differencesByPropertyType.value.isNotEmpty() }
+  }.filter { differencesByCategory -> differencesByCategory.value.isNotEmpty() }
 
 internal fun getDiffResult(prisoner: Prisoner, other: Prisoner): DiffResult<Prisoner> =
   DiffBuilder(prisoner, other, ToStringStyle.JSON_STYLE).apply {
@@ -37,13 +37,13 @@ internal fun getDiffResult(prisoner: Prisoner, other: Prisoner): DiffResult<Pris
       .forEach { property -> append(property.name, property.call(prisoner), property.call(other)) }
   }.build()
 
-val propertiesByPropertyType: Map<PropertyType, List<String>> =
+val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
   Prisoner::class.members
     .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
     .groupBy { property -> property.findAnnotations<DiffableProperty>().first().type }
-    .mapValues { propertiesByPropertyType -> propertiesByPropertyType.value.map { property -> property.name } }
+    .mapValues { propertiesByDiffCategory -> propertiesByDiffCategory.value.map { property -> property.name } }
 
-val propertyTypesByProperty: Map<String, PropertyType> =
+val diffCategoriesByProperty: Map<String, DiffCategory> =
   Prisoner::class.members
     .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
     .associate { property -> property.name to property.findAnnotations<DiffableProperty>().first().type }
@@ -54,15 +54,15 @@ fun raiseDifferencesTelemetry(
   differences: PrisonerDifferences,
   telemetryClient: TelemetryClient
 ) {
-  differences.forEach { propertyTypeMap ->
+  differences.forEach { diffCategoryMap ->
     telemetryClient.trackEvent(
       "POSPrisonerUpdated",
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
         "offenderNumber" to offenderNo,
         "bookingNumber" to bookingNo,
-        "propertyTypes" to propertyTypeMap.key.name,
-      ) + propertyTypeMap.value.associate { difference ->
+        "categoryChanged" to diffCategoryMap.key.name,
+      ) + diffCategoryMap.value.associate { difference ->
         difference.property to """${difference.oldValue} -> ${difference.newValue}"""
       },
       null

@@ -13,7 +13,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
 import java.time.Clock
@@ -45,7 +45,7 @@ class HmppsDomainEventsEmitterTest {
 
   @Test
   fun `should include event type as a message attribute`() {
-    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(PropertyType.LOCATION to listOf()))
+    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(DiffCategory.LOCATION to listOf()))
 
     verify(topicSnsClient).publish(
       check {
@@ -59,7 +59,7 @@ class HmppsDomainEventsEmitterTest {
     whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
 
     assertDoesNotThrow {
-      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(PropertyType.LOCATION to listOf()))
+      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(DiffCategory.LOCATION to listOf()))
     }
   }
 }

@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType.IDENTIFIERS
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PropertyType.LOCATION
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.IDENTIFIERS
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.LOCATION
 import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
 
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
@@ -47,7 +47,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
       assertThatJson(message.Message).node("additionalInfo.offenderNo").isEqualTo("some_offender")
       assertThatJson(message.Message).node("additionalInfo.bookingNo").isEqualTo("some_booking")
-      assertThatJson(message.Message).node("additionalInfo.propertyTypes").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
+      assertThatJson(message.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
     }
 
     @Test
@@ -91,7 +91,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       val msgBody: MsgBody = objectMapper.readValue(result.body)
       assertThatJson(msgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
       assertThatJson(msgBody.Message).node("additionalInfo.offenderNo").isEqualTo("A1239DD")
-      assertThatJson(msgBody.Message).node("additionalInfo.propertyTypes").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
+      assertThatJson(msgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
     }
   }
 
