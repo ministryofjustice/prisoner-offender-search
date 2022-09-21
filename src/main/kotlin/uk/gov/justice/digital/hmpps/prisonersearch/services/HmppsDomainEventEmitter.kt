@@ -56,7 +56,7 @@ class HmppsDomainEventEmitter(
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
-    const val EVENT_TYPE = "prisoner-offender-search.offender.updated"
+    const val EVENT_TYPE = "prisoner-offender-search.prisoner.updated"
   }
 }
 

@@ -49,7 +49,7 @@ class HmppsDomainEventsEmitterTest {
 
     verify(topicSnsClient).publish(
       check {
-        assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.offender.updated")
+        assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.updated")
       }
     )
   }

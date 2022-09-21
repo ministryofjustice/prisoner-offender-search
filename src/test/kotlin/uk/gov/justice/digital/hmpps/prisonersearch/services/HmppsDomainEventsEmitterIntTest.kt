@@ -41,7 +41,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
       val message: MsgBody = objectMapper.readValue(result.body)
 
-      assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.offender.updated")
+      assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
       assertThatJson(message.Message).node("version").isEqualTo(1)
       assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
       assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
@@ -89,7 +89,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       // The update should have triggered a prisoner updated domain event
       val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
       val msgBody: MsgBody = objectMapper.readValue(result.body)
-      assertThatJson(msgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.offender.updated")
+      assertThatJson(msgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
       assertThatJson(msgBody.Message).node("additionalInfo.offenderNo").isEqualTo("A1239DD")
       assertThatJson(msgBody.Message).node("additionalInfo.propertyTypes").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
     }
