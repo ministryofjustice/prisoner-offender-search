@@ -14,7 +14,7 @@ import kotlin.reflect.full.findAnnotations
 annotation class DiffableProperty(val type: PropertyType)
 
 enum class PropertyType {
-  IDENTIFIERS, PERSONAL_DETAILS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT
+  IDENTIFIERS, PERSONAL_DETAILS, ALERTS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT
 }
 
 data class Difference(val property: String, val propertyType: PropertyType, val oldValue: Any?, val newValue: Any?)

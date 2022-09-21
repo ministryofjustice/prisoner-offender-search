@@ -11,6 +11,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlert
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlias
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -216,6 +217,26 @@ class PrisonerDiffServiceTest {
           Tuple("firstName", PropertyType.PERSONAL_DETAILS, "someName1", "someName2"),
         )
     }
+
+    @Test
+    fun `should report alerts differences`() {
+      val prisoner1 = Prisoner().apply { alerts = listOf(alert()) }
+      val prisoner2 = Prisoner().apply { alerts = listOf(alert(active = false)) }
+
+      val diffsByType = getDifferencesByPropertyType(prisoner1, prisoner2)
+
+      assertThat(diffsByType.keys).containsExactlyInAnyOrder(PropertyType.ALERTS)
+      val alertsDiffs = diffsByType[PropertyType.ALERTS]
+
+      assertThat(alertsDiffs)
+        .extracting("property", "propertyType", "oldValue", "newValue")
+        .containsExactlyInAnyOrder(
+          (Tuple("alerts", PropertyType.ALERTS, listOf(alert()), listOf(alert(active = false))))
+        )
+    }
+
+    private fun alert(alertType: String = "SOME_TYPE", alertCode: String = "SOME_CODE", active: Boolean = true, expired: Boolean = false) =
+      PrisonerAlert(alertType, alertCode, active, expired)
   }
 
   @Nested
