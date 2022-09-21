@@ -135,16 +135,17 @@ class PrisonerIndexService(
   ) {
     if (!diffProperties.events) return
 
-    existingPrisoner?.also { prisoner ->
-      kotlin.runCatching {
+    kotlin.runCatching {
+      existingPrisoner?.also { prisoner ->
         getDifferencesByCategory(prisoner, storedPrisoner)
           .takeIf { differences -> differences.isNotEmpty() }
           ?.also { differences ->
             domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
           }
-      }.onFailure {
-        log.error("prisoner-offender-search.offender.updated event failed with error", it)
       }
+        ?: domainEventEmitter.emitPrisonerCreatedEvent(offenderBooking.offenderNo)
+    }.onFailure {
+      log.error("prisoner-offender-search.offender.updated event failed with error", it)
     }
   }
 
