@@ -250,7 +250,6 @@ class PrisonerDiffServiceTest {
 
       raiseDifferencesTelemetry(
         "someOffenderNo",
-        "someBookingNo",
         getDifferencesByCategory(prisoner1, prisoner2),
         telemetryClient
       )
@@ -260,7 +259,6 @@ class PrisonerDiffServiceTest {
         check<Map<String, String>> {
           assertThat(LocalDateTime.parse(it["processedTime"]).toLocalDate()).isEqualTo(LocalDate.now())
           assertThat(it["offenderNumber"]).isEqualTo("someOffenderNo")
-          assertThat(it["bookingNumber"]).isEqualTo("someBookingNo")
         },
         isNull()
       )
@@ -273,7 +271,6 @@ class PrisonerDiffServiceTest {
 
       raiseDifferencesTelemetry(
         "someOffenderNo",
-        "someBookingNo",
         getDifferencesByCategory(prisoner1, prisoner2),
         telemetryClient
       )
@@ -295,7 +292,6 @@ class PrisonerDiffServiceTest {
 
       raiseDifferencesTelemetry(
         "someOffenderNo",
-        "someBookingNo",
         getDifferencesByCategory(prisoner1, prisoner2),
         telemetryClient
       )
@@ -318,7 +314,6 @@ class PrisonerDiffServiceTest {
 
       raiseDifferencesTelemetry(
         "someOffenderNo",
-        "someBookingNo",
         getDifferencesByCategory(prisoner1, prisoner2),
         telemetryClient
       )
@@ -341,7 +336,6 @@ class PrisonerDiffServiceTest {
 
       raiseDifferencesTelemetry(
         "someOffenderNo",
-        "someBookingNo",
         getDifferencesByCategory(prisoner1, prisoner2),
         telemetryClient
       )

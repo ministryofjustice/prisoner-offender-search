@@ -117,7 +117,6 @@ class PrisonerIndexService(
       kotlin.runCatching {
         raiseDifferencesTelemetry(
           offenderBooking.offenderNo,
-          offenderBooking.bookingNo,
           getDifferencesByCategory(it, storedPrisoner),
           telemetryClient
         )
@@ -139,7 +138,7 @@ class PrisonerIndexService(
         getDifferencesByCategory(prisoner, storedPrisoner)
           .takeIf { differences -> differences.isNotEmpty() }
           ?.also { differences ->
-            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, offenderBooking.bookingNo, differences)
+            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
           }
       }.onFailure {
         log.error("prisoner-offender-search.offender.updated event failed with error", it)

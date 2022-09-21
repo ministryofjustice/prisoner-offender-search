@@ -34,7 +34,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
   inner class EmitPrisonerDifferenceEvent {
     @Test
     fun `sends prisoner differences to the domain topic`() {
-      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(IDENTIFIERS to listOf(), LOCATION to listOf()))
+      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(IDENTIFIERS to listOf(), LOCATION to listOf()))
 
       await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
@@ -46,7 +46,6 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
       assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
       assertThatJson(message.Message).node("additionalInfo.offenderNo").isEqualTo("some_offender")
-      assertThatJson(message.Message).node("additionalInfo.bookingNo").isEqualTo("some_booking")
       assertThatJson(message.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
     }
 

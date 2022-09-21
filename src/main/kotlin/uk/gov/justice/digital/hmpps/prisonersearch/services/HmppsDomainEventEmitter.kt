@@ -33,11 +33,10 @@ class HmppsDomainEventEmitter(
 
   fun emitPrisonerDifferenceEvent(
     offenderNo: String,
-    bookingNo: String?,
     differences: PrisonerDifferences,
   ) {
     runCatching {
-      PrisonerUpdatedEvent(offenderNo, bookingNo, differences.keys.toList().sorted())
+      PrisonerUpdatedEvent(offenderNo, differences.keys.toList().sorted())
         .let { event -> PrisonerUpdatedDomainEvent(event, Instant.now(clock), diffProperties.host) }
         .let { domainEvent ->
           PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent))
@@ -48,7 +47,7 @@ class HmppsDomainEventEmitter(
     }
       .onFailure {
         log.error(
-          "Failed to send prisoner updated event for offenderNo=$offenderNo, bookingNo=$bookingNo, differences=$differences",
+          "Failed to send prisoner updated event for offenderNo=$offenderNo, differences=$differences",
           it
         )
       }
@@ -61,8 +60,7 @@ class HmppsDomainEventEmitter(
 }
 
 data class PrisonerUpdatedEvent(
-  val offenderNo: String,
-  val bookingNo: String?,
+  val nomsNumber: String,
   val categoriesChanged: List<DiffCategory>,
 )
 
@@ -81,6 +79,6 @@ data class PrisonerUpdatedDomainEvent(
       eventType = EVENT_TYPE,
       version = 1,
       description = "A prisoner record has been updated",
-      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.offenderNo).toUri().toString(),
+      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.nomsNumber).toUri().toString(),
     )
 }

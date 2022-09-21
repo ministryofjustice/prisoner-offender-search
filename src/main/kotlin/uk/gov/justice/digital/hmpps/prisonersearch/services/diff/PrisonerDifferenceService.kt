@@ -50,7 +50,6 @@ val diffCategoriesByProperty: Map<String, DiffCategory> =
 
 fun raiseDifferencesTelemetry(
   offenderNo: String,
-  bookingNo: String?,
   differences: PrisonerDifferences,
   telemetryClient: TelemetryClient
 ) {
@@ -60,7 +59,6 @@ fun raiseDifferencesTelemetry(
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
         "offenderNumber" to offenderNo,
-        "bookingNumber" to bookingNo,
         "categoryChanged" to diffCategoryMap.key.name,
       ) + diffCategoryMap.value.associate { difference ->
         difference.property to """${difference.oldValue} -> ${difference.newValue}"""

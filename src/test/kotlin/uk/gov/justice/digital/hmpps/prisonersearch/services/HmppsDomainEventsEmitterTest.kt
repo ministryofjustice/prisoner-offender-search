@@ -45,7 +45,7 @@ class HmppsDomainEventsEmitterTest {
 
   @Test
   fun `should include event type as a message attribute`() {
-    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(DiffCategory.LOCATION to listOf()))
+    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
 
     verify(topicSnsClient).publish(
       check {
@@ -59,7 +59,7 @@ class HmppsDomainEventsEmitterTest {
     whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
 
     assertDoesNotThrow {
-      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", "some_booking", mapOf(DiffCategory.LOCATION to listOf()))
+      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
     }
   }
 }
