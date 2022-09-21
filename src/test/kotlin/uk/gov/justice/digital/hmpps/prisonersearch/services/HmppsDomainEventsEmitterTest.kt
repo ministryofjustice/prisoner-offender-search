@@ -4,6 +4,7 @@ import com.amazonaws.services.sns.AmazonSNS
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.ArgumentMatchers.anyString
@@ -43,23 +44,49 @@ class HmppsDomainEventsEmitterTest {
     whenever(diffProperties.host).thenReturn("some_host")
   }
 
-  @Test
-  fun `should include event type as a message attribute`() {
-    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
+  @Nested
+  inner class PrisonerDifferenceEvent {
+    @Test
+    fun `should include event type as a message attribute`() {
+      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
 
-    verify(topicSnsClient).publish(
-      check {
-        assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.updated")
+      verify(topicSnsClient).publish(
+        check {
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.updated")
+        }
+      )
+    }
+
+    @Test
+    fun `should swallow exceptions`() {
+      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+
+      assertDoesNotThrow {
+        hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
       }
-    )
+    }
   }
 
-  @Test
-  fun `should swallow exceptions`() {
-    whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+  @Nested
+  inner class PrisonerCreatedEvent {
+    @Test
+    fun `should include event type as a message attribute`() {
+      hmppsDomainEventEmitter.emitPrisonerCreatedEvent("some_offender")
 
-    assertDoesNotThrow {
-      hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
+      verify(topicSnsClient).publish(
+        check {
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.created")
+        }
+      )
+    }
+
+    @Test
+    fun `should swallow exceptions`() {
+      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+
+      assertDoesNotThrow {
+        hmppsDomainEventEmitter.emitPrisonerCreatedEvent("some_offender")
+      }
     }
   }
 }
