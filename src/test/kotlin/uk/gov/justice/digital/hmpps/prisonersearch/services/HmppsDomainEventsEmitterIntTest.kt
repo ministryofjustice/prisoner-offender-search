@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.client.WireMock
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
-import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -82,8 +81,12 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A1239DD") } matches { it == 1 }
 
-    // Creating a prisoner does not trigger a prisoner difference (TODO SDI-287 handle new prisoners)
-    assertThat(getNumberOfMessagesCurrentlyOnDomainQueue()).isEqualTo(0)
+    // Should receive a prisoner created domain event
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
+    val createResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    val createMsgBody: MsgBody = objectMapper.readValue(createResult.body)
+    assertThatJson(createMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
+    assertThatJson(createMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
@@ -99,11 +102,11 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
     // The update should have triggered a prisoner updated domain event
-    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    val msgBody: MsgBody = objectMapper.readValue(result.body)
-    assertThatJson(msgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
-    assertThatJson(msgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
-    assertThatJson(msgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
+    val updateResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    val updateMsgBody: MsgBody = objectMapper.readValue(updateResult.body)
+    assertThatJson(updateMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
+    assertThatJson(updateMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
+    assertThatJson(updateMsgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
   }
 
   companion object {

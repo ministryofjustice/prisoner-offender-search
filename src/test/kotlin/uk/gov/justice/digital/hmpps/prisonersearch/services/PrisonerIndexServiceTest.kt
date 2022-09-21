@@ -393,6 +393,57 @@ class PrisonerIndexServiceTest {
     }
   }
 
+  @Nested
+  inner class SyncPrisonerCreatedEvent {
+    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
+    @BeforeEach
+    fun setUp() {
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(
+        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
+      )
+      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
+      whenever(diffProperties.events).thenReturn(true)
+    }
+
+    @Test
+    fun `should not send event if prisoner updated`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
+
+      prisonerIndexService.sync(someOffenderBooking())
+
+      verify(domainEventsEmitter, never()).emitPrisonerCreatedEvent("someOffenderNo")
+    }
+
+    @Test
+    fun `should send event if prisoner is new`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+
+      prisonerIndexService.sync(someOffenderBooking())
+
+      verify(domainEventsEmitter).emitPrisonerCreatedEvent("someOffenderNo")
+    }
+
+    @Test
+    fun `should handle exceptions when sending events`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), anyMap())).thenThrow(RuntimeException::class.java)
+
+      val saved = prisonerIndexService.sync(someOffenderBooking())
+
+      assertThat(saved).isEqualTo(savedPrisoner)
+    }
+
+    @Test
+    fun `should not send event if feature switch is off`() {
+      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
+      whenever(diffProperties.events).thenReturn(false)
+
+      prisonerIndexService.sync(someOffenderBooking())
+
+      verify(domainEventsEmitter, never()).emitPrisonerCreatedEvent("someOffenderNo")
+    }
+  }
+
   private fun someOffenderBooking() =
     OffenderBooking(
       offenderNo = "someOffenderNo",
