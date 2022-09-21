@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -360,6 +361,18 @@ class PrisonerDiffServiceTest {
           },
           isNull()
         )
+    }
+  }
+
+  @Nested
+  inner class RaiseCreatedTelemetry {
+    private val telemetryClient = mock<TelemetryClient>()
+
+    @Test
+    fun `should send telemetry event`() {
+      raiseCreatedTelemetry("some_offender", telemetryClient)
+
+      verify(telemetryClient).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
     }
   }
 }

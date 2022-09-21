@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.getDifferencesByCategory
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.raiseCreatedTelemetry
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.raiseDifferencesTelemetry
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
@@ -113,16 +114,17 @@ class PrisonerIndexService(
   ) {
     if (!diffProperties.telemetry) return
 
-    existingPrisoner?.also {
-      kotlin.runCatching {
+    kotlin.runCatching {
+      existingPrisoner?.also {
         raiseDifferencesTelemetry(
           offenderBooking.offenderNo,
           getDifferencesByCategory(it, storedPrisoner),
           telemetryClient
         )
-      }.onFailure {
-        log.error("POSPrisonerUpdated failed with error", it)
       }
+        ?: raiseCreatedTelemetry(offenderBooking.offenderNo, telemetryClient)
+    }.onFailure {
+      log.error("Prisoner difference telemetry failed with error", it)
     }
   }
 
