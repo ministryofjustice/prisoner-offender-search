@@ -17,7 +17,7 @@ enum class DiffCategory {
   IDENTIFIERS, PERSONAL_DETAILS, ALERTS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT
 }
 
-data class Difference(val property: String, val diffCategory: DiffCategory, val oldValue: Any?, val newValue: Any?)
+data class Difference(val property: String, val categoryChanged: DiffCategory, val oldValue: Any?, val newValue: Any?)
 
 typealias PrisonerDifferences = Map<DiffCategory, List<Difference>>
 

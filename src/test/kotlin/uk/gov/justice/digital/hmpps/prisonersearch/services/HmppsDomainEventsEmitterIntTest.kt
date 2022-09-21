@@ -45,7 +45,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       assertThatJson(message.Message).node("version").isEqualTo(1)
       assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
       assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
-      assertThatJson(message.Message).node("additionalInfo.offenderNo").isEqualTo("some_offender")
+      assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
       assertThatJson(message.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
     }
 
@@ -89,7 +89,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
       val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
       val msgBody: MsgBody = objectMapper.readValue(result.body)
       assertThatJson(msgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
-      assertThatJson(msgBody.Message).node("additionalInfo.offenderNo").isEqualTo("A1239DD")
+      assertThatJson(msgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
       assertThatJson(msgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
     }
   }
