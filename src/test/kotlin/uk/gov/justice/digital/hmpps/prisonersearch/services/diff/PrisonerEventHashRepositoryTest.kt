@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.toNullable
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class PrisonerEventHashRepositoryTest : IntegrationTest() {
 
@@ -15,11 +16,12 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
 
   private fun upsert(nomsNumber: String, hash: Int, dateTime: Instant) = prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, hash, dateTime)
   private fun find(nomsNumber: String) = prisonerEventHashRepository.findById(nomsNumber).toNullable()
+  private fun now() = Instant.now().truncatedTo(ChronoUnit.MICROS) // Postgres only handles microseconds, but some System clocks can go to nanoseconds.
 
   @Test
   @Transactional
   fun `should save a new prisoner event hash`() {
-    val rowsUpdated = upsert("A1111AA", 111, Instant.now())
+    val rowsUpdated = upsert("A1111AA", 111, now())
     assertThat(rowsUpdated).isEqualTo(1)
 
     val saved = find("A1111AA")
@@ -29,10 +31,10 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
   @Test
   @Transactional
   fun `should save multiple new prisoner event hashes`() {
-    var rowsUpdated = upsert("A1111AA", 111, Instant.now())
+    var rowsUpdated = upsert("A1111AA", 111, now())
     assertThat(rowsUpdated).isEqualTo(1)
 
-    rowsUpdated = upsert("A2222AA", 222, Instant.now())
+    rowsUpdated = upsert("A2222AA", 222, now())
     assertThat(rowsUpdated).isEqualTo(1)
 
     val saved = find("A2222AA")
@@ -42,7 +44,7 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
   @Test
   @Transactional
   fun `should update a changed prisoner event hash`() {
-    val insertTime = Instant.now().minusSeconds(1)
+    val insertTime = now().minusSeconds(1)
     var rowsUpdated = upsert("A1111AA", 111, insertTime)
     assertThat(rowsUpdated).isEqualTo(1)
 
@@ -58,7 +60,7 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
   @Test
   @Transactional
   fun `should not update an unchanged prisoner event hash`() {
-    val insertTime = Instant.now().minusSeconds(1)
+    val insertTime = now().minusSeconds(1)
     var rowsUpdated = upsert("A1111AA", 111, insertTime)
     assertThat(rowsUpdated).isEqualTo(1)
 
@@ -74,7 +76,7 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
   @Test
   @Transactional
   fun `should update multiple existing prisoner event hashes`() {
-    val insertTime = Instant.now().minusSeconds(1)
+    val insertTime = now().minusSeconds(1)
     var rowsUpdated = upsert("A1111AA", 111, insertTime)
     assertThat(rowsUpdated).isEqualTo(1)
     rowsUpdated = upsert("A2222AA", 222, insertTime)
