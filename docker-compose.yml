@@ -22,6 +22,18 @@ services:
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
       - OAUTH_CLIENT_SECRET=clientsecret
 
+  pos-db:
+    image: postgres:14
+    networks:
+      - hmpps
+    container_name: pos-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin_password
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=pos_db
+
   prisonapi:
     image: quay.io/hmpps/prison-api:latest
     networks:
@@ -81,7 +93,6 @@ services:
       - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DEFAULT_REGION=eu-west-2
-      - HOSTNAME_EXTERNAL=${ES_HOSTNAME:-localstack}
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"

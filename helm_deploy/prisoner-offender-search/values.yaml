@@ -80,6 +80,11 @@ generic-service:
       HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_ARN: "topic_arn"
     elasticsearch:
       ELASTICSEARCH_PROXY_URL: "aws_es_proxy_url"
+    pos-rds-instance-output:
+      DB_SERVER: "rds_instance_address"
+      DB_NAME: "database_name"
+      DB_USER: "database_username"
+      DB_PASS: "database_password"
 
   allowlist:
     office: "217.33.148.210/32"
