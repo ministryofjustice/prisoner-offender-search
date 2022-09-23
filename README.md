@@ -68,7 +68,7 @@ The CronJob calls the endpoint `/prisoner-index/queue-housekeeping` which is not
 #### Running prisoner offender search in Docker
 To start up localstack and other dependencies with prisoner offender search running in Docker too:
 ```shell
-docker compose up localstack oauth prisonapi restricted-patients
+docker compose up localstack oauth prisonapi restricted-patients pos-db
 
 Once localstack has started then, in another terminal, run the following command to start prisoner offender search too:
 ```shell

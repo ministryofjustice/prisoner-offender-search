@@ -18,5 +18,18 @@ services:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
+
+  pos-db:
+    image: postgres:14
+    networks:
+      - hmpps
+    container_name: pos-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=pos
+      - POSTGRES_USER=pos
+      - POSTGRES_DB=pos
+
 networks:
   hmpps:

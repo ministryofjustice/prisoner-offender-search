@@ -28,6 +28,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
   implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.11")
   implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
@@ -43,6 +44,9 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.9")
   implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.304")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
+
+  runtimeOnly("org.postgresql:postgresql:42.4.2")
+  runtimeOnly("org.flywaydb:flyway-core:8.5.13")
 
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.2")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
