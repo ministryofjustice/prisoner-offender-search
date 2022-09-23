@@ -9,11 +9,8 @@ import org.elasticsearch.client.RestClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -23,20 +20,18 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.IndexOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
-import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
-import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Agency
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.AssignedLivingUnit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatientDto
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Optional
 
 class PrisonerIndexServiceTest {
 
@@ -49,8 +44,7 @@ class PrisonerIndexServiceTest {
   private val telemetryClient = mock<TelemetryClient>()
   private val indexProperties = mock<IndexProperties>()
   private val restrictedPatientService = mock<RestrictedPatientService>()
-  private val diffProperties = mock<DiffProperties>()
-  private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
+  private val prisonerDifferenceService = mock<PrisonerDifferenceService>()
 
   private val prisonerIndexService = PrisonerIndexService(
     nomisService,
@@ -62,8 +56,7 @@ class PrisonerIndexServiceTest {
     telemetryClient,
     indexProperties,
     restrictedPatientService,
-    diffProperties,
-    domainEventsEmitter
+    prisonerDifferenceService,
   )
 
   @Nested
@@ -230,226 +223,4 @@ class PrisonerIndexServiceTest {
       latestLocationId = "MDI"
     )
   }
-
-  @Nested
-  inner class SyncPrisonerDifferencesTelemetry {
-    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
-    @BeforeEach
-    fun setUp() {
-      whenever(indexStatusService.getCurrentIndex()).thenReturn(
-        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
-      )
-      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
-      whenever(diffProperties.telemetry).thenReturn(true)
-    }
-
-    @Test
-    fun `should raise telemetry if prisoner updated`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
-    }
-
-    @Test
-    fun `should not raise telemetry if prisoner is new`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
-    }
-
-    @Test
-    fun `should handle exceptions when generating telemetry`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-      whenever(telemetryClient.trackEvent(anyString(), anyMap(), any())).thenThrow(RuntimeException::class.java)
-
-      val saved = prisonerIndexService.sync(someOffenderBooking())
-
-      assertThat(saved).isEqualTo(savedPrisoner)
-    }
-
-    @Test
-    fun `should not produce telemetry if feature switch is off`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-      whenever(diffProperties.telemetry).thenReturn(false)
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerUpdated"), anyMap(), isNull())
-    }
-  }
-
-  @Nested
-  inner class SyncPrisonerCreatedTelemetry {
-    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
-    @BeforeEach
-    fun setUp() {
-      whenever(indexStatusService.getCurrentIndex()).thenReturn(
-        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
-      )
-      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
-      whenever(diffProperties.telemetry).thenReturn(true)
-    }
-
-    @Test
-    fun `should raise telemetry if prisoner new`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(telemetryClient).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
-    }
-
-    @Test
-    fun `should not raise telemetry if prisoner exists`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
-    }
-
-    @Test
-    fun `should handle exceptions when generating telemetry`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-      whenever(telemetryClient.trackEvent(anyString(), anyMap(), any())).thenThrow(RuntimeException::class.java)
-
-      val saved = prisonerIndexService.sync(someOffenderBooking())
-
-      assertThat(saved).isEqualTo(savedPrisoner)
-    }
-
-    @Test
-    fun `should not produce telemetry if feature switch is off`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-      whenever(diffProperties.telemetry).thenReturn(false)
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(telemetryClient, never()).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
-    }
-  }
-
-  @Nested
-  inner class SyncPrisonerDifferencesEvent {
-    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
-    @BeforeEach
-    fun setUp() {
-      whenever(indexStatusService.getCurrentIndex()).thenReturn(
-        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
-      )
-      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
-      whenever(diffProperties.events).thenReturn(true)
-    }
-
-    @Test
-    fun `should send event if prisoner updated`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
-    }
-
-    @Test
-    fun `should not send event if prisoner is new`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
-    }
-
-    @Test
-    fun `should not send event if there are no differences`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(savedPrisoner))
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
-    }
-
-    @Test
-    fun `should handle exceptions when sending events`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), anyMap())).thenThrow(RuntimeException::class.java)
-
-      val saved = prisonerIndexService.sync(someOffenderBooking())
-
-      assertThat(saved).isEqualTo(savedPrisoner)
-    }
-
-    @Test
-    fun `should not send event if feature switch is off`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-      whenever(diffProperties.events).thenReturn(false)
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
-    }
-  }
-
-  @Nested
-  inner class SyncPrisonerCreatedEvent {
-    private val savedPrisoner = PrisonerA().apply { pncNumber = "somePncNumber2" }
-    @BeforeEach
-    fun setUp() {
-      whenever(indexStatusService.getCurrentIndex()).thenReturn(
-        IndexStatus(currentIndex = SyncIndex.INDEX_A, inProgress = false, startIndexTime = null, endIndexTime = null)
-      )
-      whenever(prisonerARepository.save(any())).thenReturn(savedPrisoner)
-      whenever(diffProperties.events).thenReturn(true)
-    }
-
-    @Test
-    fun `should not send event if prisoner updated`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.of(PrisonerA().apply { pncNumber = "somePncNumber1" }))
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter, never()).emitPrisonerCreatedEvent("someOffenderNo")
-    }
-
-    @Test
-    fun `should send event if prisoner is new`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter).emitPrisonerCreatedEvent("someOffenderNo")
-    }
-
-    @Test
-    fun `should handle exceptions when sending events`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), anyMap())).thenThrow(RuntimeException::class.java)
-
-      val saved = prisonerIndexService.sync(someOffenderBooking())
-
-      assertThat(saved).isEqualTo(savedPrisoner)
-    }
-
-    @Test
-    fun `should not send event if feature switch is off`() {
-      whenever(prisonerARepository.findById(anyString())).thenReturn(Optional.empty())
-      whenever(diffProperties.events).thenReturn(false)
-
-      prisonerIndexService.sync(someOffenderBooking())
-
-      verify(domainEventsEmitter, never()).emitPrisonerCreatedEvent("someOffenderNo")
-    }
-  }
-
-  private fun someOffenderBooking() =
-    OffenderBooking(
-      offenderNo = "someOffenderNo",
-      firstName = "someFirstName",
-      lastName = "someLastName",
-      dateOfBirth = LocalDate.now(),
-      activeFlag = true
-    )
 }

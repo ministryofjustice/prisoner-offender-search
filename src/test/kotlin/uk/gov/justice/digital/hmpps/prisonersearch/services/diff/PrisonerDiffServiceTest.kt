@@ -3,21 +3,35 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.ArgumentMatchers.anyMap
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.any
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlert
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlias
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class PrisonerDiffServiceTest {
+
+  private val telemetryClient = mock<TelemetryClient>()
+  private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
+  private val diffProperties = mock<DiffProperties>()
+  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties)
 
   @Nested
   inner class GetDiff {
@@ -121,15 +135,15 @@ class PrisonerDiffServiceTest {
   inner class Groupings {
     @Test
     fun `groups properties by property type`() {
-      assertThat(propertiesByDiffCategory[DiffCategory.IDENTIFIERS]).contains("pncNumber", "croNumber")
-      assertThat(propertiesByDiffCategory[DiffCategory.PERSONAL_DETAILS]).contains("firstName")
+      assertThat(prisonerDifferenceService.propertiesByDiffCategory[DiffCategory.IDENTIFIERS]).contains("pncNumber", "croNumber")
+      assertThat(prisonerDifferenceService.propertiesByDiffCategory[DiffCategory.PERSONAL_DETAILS]).contains("firstName")
     }
 
     @Test
     fun `maps property types by property`() {
-      assertThat(diffCategoriesByProperty["pncNumber"]).isEqualTo(DiffCategory.IDENTIFIERS)
-      assertThat(diffCategoriesByProperty["croNumber"]).isEqualTo(DiffCategory.IDENTIFIERS)
-      assertThat(diffCategoriesByProperty["firstName"]).isEqualTo(DiffCategory.PERSONAL_DETAILS)
+      assertThat(prisonerDifferenceService.diffCategoriesByProperty["pncNumber"]).isEqualTo(DiffCategory.IDENTIFIERS)
+      assertThat(prisonerDifferenceService.diffCategoriesByProperty["croNumber"]).isEqualTo(DiffCategory.IDENTIFIERS)
+      assertThat(prisonerDifferenceService.diffCategoriesByProperty["firstName"]).isEqualTo(DiffCategory.PERSONAL_DETAILS)
     }
   }
 
@@ -140,7 +154,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = "someCro"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc"; croNumber = "someCro"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByCategory(prisoner1, prisoner2)
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
       assertThat(diffsByType).isEmpty()
     }
@@ -150,7 +164,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByCategory(prisoner1, prisoner2)
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
       assertThat(diffsByType.keys).containsExactly(DiffCategory.IDENTIFIERS)
       val identifierDiffs = diffsByType[DiffCategory.IDENTIFIERS]
@@ -166,7 +180,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByCategory(prisoner1, prisoner2)
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
       assertThat(diffsByType.keys).containsExactly(DiffCategory.IDENTIFIERS)
       val identifierDiffs = diffsByType[DiffCategory.IDENTIFIERS]
@@ -183,7 +197,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someName" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someName" }
 
-      val diffsByType = getDifferencesByCategory(prisoner1, prisoner2)
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
       assertThat(diffsByType.keys).containsExactly(DiffCategory.IDENTIFIERS)
       val identifierDiffs = diffsByType[DiffCategory.IDENTIFIERS]
@@ -200,7 +214,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someName1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someName2" }
 
-      val diffsByType = getDifferencesByCategory(prisoner1, prisoner2)
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
       assertThat(diffsByType.keys).containsExactlyInAnyOrder(DiffCategory.IDENTIFIERS, DiffCategory.PERSONAL_DETAILS)
       val identifierDiffs = diffsByType[DiffCategory.IDENTIFIERS]
@@ -224,7 +238,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { alerts = listOf(alert()) }
       val prisoner2 = Prisoner().apply { alerts = listOf(alert(active = false)) }
 
-      val diffsByType = getDifferencesByCategory(prisoner1, prisoner2)
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
       assertThat(diffsByType.keys).containsExactlyInAnyOrder(DiffCategory.ALERTS)
       val alertsDiffs = diffsByType[DiffCategory.ALERTS]
@@ -241,19 +255,18 @@ class PrisonerDiffServiceTest {
   }
 
   @Nested
-  inner class RaiseDifferencesTelemetry {
-    private val telemetryClient = mock<TelemetryClient>()
+  inner class GenerateDifferencesTelemetry {
+    @BeforeEach
+    fun setUp() {
+      whenever(diffProperties.telemetry).thenReturn(true)
+    }
 
     @Test
     fun `should report identifiers`() {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
-      raiseDifferencesTelemetry(
-        "someOffenderNo",
-        getDifferencesByCategory(prisoner1, prisoner2),
-        telemetryClient
-      )
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
@@ -270,11 +283,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
-      raiseDifferencesTelemetry(
-        "someOffenderNo",
-        getDifferencesByCategory(prisoner1, prisoner2),
-        telemetryClient
-      )
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
@@ -291,11 +300,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2" }
 
-      raiseDifferencesTelemetry(
-        "someOffenderNo",
-        getDifferencesByCategory(prisoner1, prisoner2),
-        telemetryClient
-      )
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
@@ -313,11 +318,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null }
       val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro" }
 
-      raiseDifferencesTelemetry(
-        "someOffenderNo",
-        getDifferencesByCategory(prisoner1, prisoner2),
-        telemetryClient
-      )
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
@@ -335,11 +336,7 @@ class PrisonerDiffServiceTest {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someFirstName1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someFirstName2" }
 
-      raiseDifferencesTelemetry(
-        "someOffenderNo",
-        getDifferencesByCategory(prisoner1, prisoner2),
-        telemetryClient
-      )
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
       verify(telemetryClient)
         .trackEvent(
@@ -362,17 +359,133 @@ class PrisonerDiffServiceTest {
           isNull()
         )
     }
-  }
-
-  @Nested
-  inner class RaiseCreatedTelemetry {
-    private val telemetryClient = mock<TelemetryClient>()
 
     @Test
-    fun `should send telemetry event`() {
-      raiseCreatedTelemetry("some_offender", telemetryClient)
+    fun `should send telemetry created event`() {
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someFirstName2" }
+
+      prisonerDifferenceService.generateDiffTelemetry(null, someOffenderBooking(), prisoner2)
 
       verify(telemetryClient).trackEvent(eq("POSPrisonerCreated"), anyMap(), isNull())
     }
+
+    @Test
+    fun `should not raise telemetry if feature switch is off`() {
+      whenever(diffProperties.telemetry).thenReturn(false)
+
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(telemetryClient, never()).trackEvent(anyString(), anyMap(), anyMap())
+    }
+
+    @Test
+    fun `should swallow exceptions when raising telemetry`() {
+      whenever(telemetryClient.trackEvent(anyString(), anyMap(), anyMap())).thenThrow(RuntimeException::class.java)
+
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      assertDoesNotThrow {
+        prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
+      }
+    }
   }
+
+  @Nested
+  inner class GenerateDifferencesEvent {
+    @BeforeEach
+    fun setUp() {
+      whenever(diffProperties.events).thenReturn(true)
+    }
+
+    @Test
+    fun `should report identifiers`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.generateDiffEvent(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(
+        eq("someOffenderNo"),
+        check {
+          assertThat(it.keys).containsExactly(DiffCategory.IDENTIFIERS)
+        }
+      )
+    }
+
+    @Test
+    fun `should report null differences`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null }
+      val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro" }
+
+      prisonerDifferenceService.generateDiffEvent(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(
+        eq("someOffenderNo"),
+        check {
+          assertThat(it.keys).containsExactly(DiffCategory.IDENTIFIERS)
+        }
+      )
+    }
+
+    @Test
+    fun `should report multiple types`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1"; firstName = "someFirstName1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someFirstName2" }
+
+      prisonerDifferenceService.generateDiffEvent(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(
+        eq("someOffenderNo"),
+        check {
+          assertThat(it.keys).containsExactlyInAnyOrder(DiffCategory.IDENTIFIERS, DiffCategory.PERSONAL_DETAILS)
+        }
+      )
+    }
+
+    @Test
+    fun `should send created event`() {
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2"; firstName = "someFirstName2" }
+
+      prisonerDifferenceService.generateDiffEvent(null, someOffenderBooking(), prisoner2)
+
+      verify(domainEventsEmitter).emitPrisonerCreatedEvent("someOffenderNo")
+    }
+
+    @Test
+    fun `should not create events if feature switch is off`() {
+      whenever(diffProperties.events).thenReturn(false)
+
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.generateDiffEvent(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(anyString(), any())
+    }
+
+    @Test
+    fun `should swallow exceptions when raising telemetry`() {
+      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), any())).thenThrow(RuntimeException::class.java)
+
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      assertDoesNotThrow {
+        prisonerDifferenceService.generateDiffEvent(prisoner1, someOffenderBooking(), prisoner2)
+      }
+    }
+  }
+
+  private fun someOffenderBooking() =
+    OffenderBooking(
+      offenderNo = "someOffenderNo",
+      firstName = "someFirstName",
+      lastName = "someLastName",
+      dateOfBirth = LocalDate.now(),
+      activeFlag = true
+    )
 }
