@@ -12,8 +12,8 @@ jobs:
       localstack_type: "localstack-full"
       services: "sqs,sns,es"
       postgres_tag: "14"
-      postgres_username: "admin"
-      postgres_password: "admin_password"
+      postgres_username: "pos"
+      postgres_password: "pos"
     steps:
       - run:
           command: |

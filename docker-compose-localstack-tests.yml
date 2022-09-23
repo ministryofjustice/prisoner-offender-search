@@ -27,9 +27,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=admin_password
-      - POSTGRES_USER=admin
-      - POSTGRES_DB=pos_db
+      - POSTGRES_PASSWORD=pos
+      - POSTGRES_USER=pos
+      - POSTGRES_DB=pos
 
 networks:
   hmpps:
