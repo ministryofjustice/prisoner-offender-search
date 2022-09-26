@@ -5,21 +5,30 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.client.WireMock
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
+import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.LOCATION
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerEventHashRepository
 import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
 
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
+
+  @Autowired
+  private lateinit var prisonerEventHashRepository: PrisonerEventHashRepository
 
   @BeforeEach
   fun purgeHmppsEventsQueue() {
@@ -109,8 +118,78 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(updateMsgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
   }
 
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  /*
+   * This is to test what happens if we fail to send a domain event.
+   * In real life:
+   * 1. We receive a prison event indicating "something" happened to the prisoner
+   * 2. The prisoner is updated in Elastic Search
+   * 3. We update the prisoner event hash to reflect the changes to the prisoner
+   * 4. We try to send a domain event BUT IT FAILS
+   * 5. The prison event is rejected and is sent to the DLQ
+   * 6. The prison event is automatically retried
+   * 7. We attempt to update the prisoner event hash again and if successful then send a domain event
+   * 8. If the previous update of the prisoner event hash persisted then we can't update it so a domain event would not be sent
+   *
+   * So this test checks that the prisoner event hash update is rolled back if sending the domain event fails.
+   */
+  @Test
+  fun `e2e - should not update prisoner hash if there is an exception when sending the event`() {
+    prisonerIndexService.delete("A1239DD")
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD").toOffenderBooking())
+        )
+    )
+    val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+
+    // create the prisoner in ES
+    search(SearchCriteria("A1239DD", null, null), "/results/empty.json")
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A1239DD") } matches { it == 1 }
+
+    // Should receive a prisoner created domain event
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
+    val createResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    val createMsgBody: MsgBody = objectMapper.readValue(createResult.body)
+    assertThatJson(createMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
+    assertThatJson(createMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
+
+    // remember the prisoner event hash
+    val insertedPrisonerEventHash = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
+    assertThat(insertedPrisonerEventHash).isNotNull
+
+    // update the prisoner on ES BUT fail to send an event
+    doThrow(RuntimeException("Failed to send event")).whenever(hmppsEventTopicSnsClient).publish(any())
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
+        )
+    )
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { attemptedToSendBothDomainEvents() } matches { it == true }
+
+    // The prisoner hash update should have been rolled back
+    val prisonerEventHashAfterAttemptedUpdate = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
+    assertThat(prisonerEventHashAfterAttemptedUpdate).isEqualTo(insertedPrisonerEventHash)
+  }
+
+  private fun attemptedToSendBothDomainEvents(): Boolean {
+    kotlin.runCatching {
+      verify(hmppsEventTopicSnsClient, times(2)).publish(any())
+    }
+      .onFailure {
+        return false
+      }
+    return true
   }
 }
 

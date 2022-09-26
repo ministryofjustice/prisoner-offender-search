@@ -6,12 +6,15 @@ import org.apache.commons.lang3.builder.DiffBuilder
 import org.apache.commons.lang3.builder.DiffResult
 import org.apache.commons.lang3.builder.ToStringStyle
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import java.time.Instant
 import java.time.LocalDateTime
+import java.util.Objects
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -37,7 +40,8 @@ internal fun getDiffResult(prisoner: Prisoner, other: Prisoner): DiffResult<Pris
 class PrisonerDifferenceService(
   private val telemetryClient: TelemetryClient,
   private val domainEventEmitter: HmppsDomainEventEmitter,
-  private val diffProperties: DiffProperties
+  private val diffProperties: DiffProperties,
+  private val prisonerEventHashRepository: PrisonerEventHashRepository
 ) {
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
@@ -51,10 +55,16 @@ class PrisonerDifferenceService(
       .filter { property -> property.findAnnotations<DiffableProperty>().isNotEmpty() }
       .associate { property -> property.name to property.findAnnotations<DiffableProperty>().first().type }
 
+  @Transactional
   fun handleDifferences(existingPrisoner: Prisoner?, offenderBooking: OffenderBooking, storedPrisoner: Prisoner) {
-    generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
-    generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
+    if (prisonerHasChanged(offenderBooking.offenderNo, storedPrisoner)) {
+      generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
+      generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
+    }
   }
+
+  private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+    prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, Objects.hashCode(prisoner), Instant.now()) > 0
 
   internal fun generateDiffTelemetry(
     existingPrisoner: Prisoner?,
@@ -82,19 +92,14 @@ class PrisonerDifferenceService(
     storedPrisoner: Prisoner
   ) {
     if (!diffProperties.events) return
-
-    kotlin.runCatching {
-      existingPrisoner?.also { prisoner ->
-        getDifferencesByCategory(prisoner, storedPrisoner)
-          .takeIf { differences -> differences.isNotEmpty() }
-          ?.also { differences ->
-            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
-          }
-      }
-        ?: domainEventEmitter.emitPrisonerCreatedEvent(offenderBooking.offenderNo)
-    }.onFailure {
-      PrisonerIndexService.log.error("prisoner-offender-search.offender.updated event failed with error", it)
+    existingPrisoner?.also { prisoner ->
+      getDifferencesByCategory(prisoner, storedPrisoner)
+        .takeIf { differences -> differences.isNotEmpty() }
+        ?.also { differences ->
+          domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
+        }
     }
+      ?: domainEventEmitter.emitPrisonerCreatedEvent(offenderBooking.offenderNo)
   }
   internal fun getDifferencesByCategory(prisoner: Prisoner, other: Prisoner): PrisonerDifferences =
     getDiffResult(prisoner, other).let { diffResult ->

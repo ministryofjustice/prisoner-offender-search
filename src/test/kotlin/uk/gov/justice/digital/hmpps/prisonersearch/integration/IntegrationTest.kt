@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.integration
 
+import com.amazonaws.services.sns.AmazonSNS
 import com.amazonaws.services.sqs.AmazonSQS
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -29,7 +30,9 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
+import uk.gov.justice.hmpps.sqs.HmppsTopicFactory
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import uk.gov.justice.hmpps.sqs.MissingTopicException
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -44,6 +47,10 @@ abstract class IntegrationTest {
   @SpyBean
   @Qualifier("eventqueue-sqs-client")
   internal lateinit var eventQueueSqsClient: AmazonSQS
+
+  @SpyBean
+  @Qualifier("hmppseventtopic-sns-client")
+  internal lateinit var hmppsEventTopicSnsClient: AmazonSNS
 
   @SpyBean
   lateinit var hmppsQueueService: HmppsQueueService
@@ -165,7 +172,7 @@ abstract class IntegrationTest {
   }
 
   @TestConfiguration
-  class SqsConfig(private val hmppsQueueFactory: HmppsQueueFactory) {
+  class SqsConfig(private val hmppsQueueFactory: HmppsQueueFactory, private val hmppsTopicFactory: HmppsTopicFactory) {
 
     @Bean("eventqueue-sqs-client")
     fun eventQueueSqsClient(
@@ -176,6 +183,16 @@ abstract class IntegrationTest {
         val config = queues["eventqueue"]
           ?: throw MissingQueueException("HmppsSqsProperties config for eventqueue not found")
         hmppsQueueFactory.createSqsClient("eventqueue", config, hmppsSqsProperties, eventQueueSqsDlqClient)
+      }
+
+    @Bean("hmppseventtopic-sns-client")
+    fun eventQueueSqsClient(
+      hmppsSqsProperties: HmppsSqsProperties,
+    ): AmazonSNS =
+      with(hmppsSqsProperties) {
+        val config = topics["hmppseventtopic"]
+          ?: throw MissingTopicException("HmppsSqsProperties config for hmppseventtopic not found")
+        hmppsTopicFactory.createSnsClient("hmppseventtopic", config, hmppsSqsProperties,)
       }
   }
 }

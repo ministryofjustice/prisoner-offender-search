@@ -47,10 +47,8 @@ class HmppsDomainEventEmitter(
         }
     }
       .onFailure {
-        log.error(
-          "Failed to send prisoner updated event for offenderNo=$offenderNo, differences=$differences",
-          it
-        )
+        log.error("Failed to send event $UPDATED_EVENT_TYPE for offenderNo=$offenderNo, differences=$differences")
+        throw it
       }
   }
 
@@ -66,7 +64,8 @@ class HmppsDomainEventEmitter(
         }
     }
       .onFailure {
-        log.error("Failed to send prisoner created event for offenderNo=$offenderNo", it)
+        log.error("Failed to send event $CREATED_EVENT_TYPE for offenderNo=$offenderNo", it)
+        throw it
       }
   }
 
