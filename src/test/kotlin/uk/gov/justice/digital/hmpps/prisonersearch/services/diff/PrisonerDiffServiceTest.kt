@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.groups.Tuple
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -502,15 +503,15 @@ class PrisonerDiffServiceTest {
     }
 
     @Test
-    fun `should swallow exceptions when raising telemetry`() {
+    fun `should NOT swallow exceptions when sending domain events`() {
       whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), any())).thenThrow(RuntimeException::class.java)
 
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
-      assertDoesNotThrow {
+      assertThatThrownBy {
         prisonerDifferenceService.generateDiffEvent(prisoner1, someOffenderBooking(), prisoner2)
-      }
+      }.isInstanceOf(RuntimeException::class.java)
     }
   }
 

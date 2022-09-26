@@ -3,10 +3,10 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import com.amazonaws.services.sns.AmazonSNS
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
@@ -58,12 +58,12 @@ class HmppsDomainEventsEmitterTest {
     }
 
     @Test
-    fun `should swallow exceptions`() {
+    fun `should not swallow exceptions`() {
       whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
 
-      assertDoesNotThrow {
+      assertThatThrownBy {
         hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
-      }
+      }.isInstanceOf(RuntimeException::class.java)
     }
   }
 
@@ -81,12 +81,12 @@ class HmppsDomainEventsEmitterTest {
     }
 
     @Test
-    fun `should swallow exceptions`() {
+    fun `should not swallow exceptions`() {
       whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
 
-      assertDoesNotThrow {
+      assertThatThrownBy {
         hmppsDomainEventEmitter.emitPrisonerCreatedEvent("some_offender")
-      }
+      }.isInstanceOf(RuntimeException::class.java)
     }
   }
 }
