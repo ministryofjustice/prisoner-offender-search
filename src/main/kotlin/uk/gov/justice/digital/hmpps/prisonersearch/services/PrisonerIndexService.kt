@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
@@ -24,9 +23,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.getDifferencesByCategory
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.raiseCreatedTelemetry
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.raiseDifferencesTelemetry
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
@@ -42,8 +39,7 @@ class PrisonerIndexService(
   private val telemetryClient: TelemetryClient,
   private val indexProperties: IndexProperties,
   private val restrictedPatientService: RestrictedPatientService,
-  private val diffProperties: DiffProperties,
-  private val domainEventEmitter: HmppsDomainEventEmitter,
+  private val prisonerDifferenceService: PrisonerDifferenceService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -101,52 +97,9 @@ class PrisonerIndexService(
       }
     }
 
-    generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
-    generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
+    prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
 
     return storedPrisoner
-  }
-
-  private fun generateDiffTelemetry(
-    existingPrisoner: Prisoner?,
-    offenderBooking: OffenderBooking,
-    storedPrisoner: Prisoner
-  ) {
-    if (!diffProperties.telemetry) return
-
-    kotlin.runCatching {
-      existingPrisoner?.also {
-        raiseDifferencesTelemetry(
-          offenderBooking.offenderNo,
-          getDifferencesByCategory(it, storedPrisoner),
-          telemetryClient
-        )
-      }
-        ?: raiseCreatedTelemetry(offenderBooking.offenderNo, telemetryClient)
-    }.onFailure {
-      log.error("Prisoner difference telemetry failed with error", it)
-    }
-  }
-
-  private fun generateDiffEvent(
-    existingPrisoner: Prisoner?,
-    offenderBooking: OffenderBooking,
-    storedPrisoner: Prisoner
-  ) {
-    if (!diffProperties.events) return
-
-    kotlin.runCatching {
-      existingPrisoner?.also { prisoner ->
-        getDifferencesByCategory(prisoner, storedPrisoner)
-          .takeIf { differences -> differences.isNotEmpty() }
-          ?.also { differences ->
-            domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
-          }
-      }
-        ?: domainEventEmitter.emitPrisonerCreatedEvent(offenderBooking.offenderNo)
-    }.onFailure {
-      log.error("prisoner-offender-search.offender.updated event failed with error", it)
-    }
   }
 
   private fun checkIfIndexExists(indexName: String): Boolean {

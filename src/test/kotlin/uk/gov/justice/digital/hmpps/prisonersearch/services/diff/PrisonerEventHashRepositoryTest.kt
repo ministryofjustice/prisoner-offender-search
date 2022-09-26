@@ -87,7 +87,8 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
     assertThat(rowsUpdated).isEqualTo(1)
     rowsUpdated = upsert("A2222AA", 222, updateTime)
     assertThat(rowsUpdated).isEqualTo(0)
-    rowsUpdated = upsert("A2222AA", 223, updateTime)
+    val updateTime2 = updateTime.plusSeconds(1)
+    rowsUpdated = upsert("A2222AA", 223, updateTime2)
     assertThat(rowsUpdated).isEqualTo(1)
 
     var saved = find("A1111AA")
@@ -96,6 +97,6 @@ class PrisonerEventHashRepositoryTest : IntegrationTest() {
 
     saved = find("A2222AA")
     assertThat(saved?.prisonerHash).isEqualTo(223)
-    assertThat(saved?.updatedDateTime).isEqualTo(updateTime)
+    assertThat(saved?.updatedDateTime).isEqualTo(updateTime2)
   }
 }
