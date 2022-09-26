@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
@@ -31,7 +32,40 @@ class PrisonerDiffServiceTest {
   private val telemetryClient = mock<TelemetryClient>()
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
   private val diffProperties = mock<DiffProperties>()
-  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties)
+  private val prisonerEventHashRepository = mock<PrisonerEventHashRepository>()
+  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties, prisonerEventHashRepository)
+
+  @Nested
+  inner class HandleDifferences {
+    @BeforeEach
+    fun setUp() {
+      whenever(diffProperties.events).thenReturn(true)
+    }
+
+    @Test
+    fun `should send event if prisoner hash has changed`() {
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyInt(), any())).thenReturn(1)
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyInt(), any())
+      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
+    }
+
+    @Test
+    fun `should not send event if prisoner hash not changed`() {
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyInt(), any())).thenReturn(0)
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyInt(), any())
+      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
+    }
+  }
 
   @Nested
   inner class GetDiff {

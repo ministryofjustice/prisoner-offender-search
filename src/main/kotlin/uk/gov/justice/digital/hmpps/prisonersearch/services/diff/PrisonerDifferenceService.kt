@@ -11,7 +11,9 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import java.time.Instant
 import java.time.LocalDateTime
+import java.util.Objects
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -37,7 +39,8 @@ internal fun getDiffResult(prisoner: Prisoner, other: Prisoner): DiffResult<Pris
 class PrisonerDifferenceService(
   private val telemetryClient: TelemetryClient,
   private val domainEventEmitter: HmppsDomainEventEmitter,
-  private val diffProperties: DiffProperties
+  private val diffProperties: DiffProperties,
+  private val prisonerEventHashRepository: PrisonerEventHashRepository
 ) {
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
@@ -52,9 +55,14 @@ class PrisonerDifferenceService(
       .associate { property -> property.name to property.findAnnotations<DiffableProperty>().first().type }
 
   fun handleDifferences(existingPrisoner: Prisoner?, offenderBooking: OffenderBooking, storedPrisoner: Prisoner) {
-    generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
-    generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
+    if (prisonerHasChanged(offenderBooking.offenderNo, storedPrisoner)) {
+      generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
+      generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
+    }
   }
+
+  private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+    prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, Objects.hashCode(prisoner), Instant.now()) > 0
 
   internal fun generateDiffTelemetry(
     existingPrisoner: Prisoner?,
