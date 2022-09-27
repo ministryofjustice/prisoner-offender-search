@@ -12,23 +12,19 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.LOCATION
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerEventHashRepository
 import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
 
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
-
-  @Autowired
-  private lateinit var prisonerEventHashRepository: PrisonerEventHashRepository
 
   @BeforeEach
   fun purgeHmppsEventsQueue() {
@@ -116,6 +112,63 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(updateMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
     assertThatJson(updateMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
     assertThatJson(updateMsgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
+  }
+
+  @Test
+  fun `e2e - will send single prisoner updated event for 2 identical updates`() {
+    prisonerIndexService.delete("A1239DD")
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD").toOffenderBooking())
+        )
+    )
+    val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+
+    // create the prisoner in ES
+    search(SearchCriteria("A1239DD", null, null), "/results/empty.json")
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { prisonRequestCountFor("/api/offenders/A1239DD") } matches { it == 1 }
+
+    // Should receive a prisoner created domain event
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
+    val createResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    val createMsgBody: MsgBody = objectMapper.readValue(createResult.body)
+    assertThatJson(createMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
+    assertThatJson(createMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
+
+    // update the prisoner on ES - TWICE
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
+        )
+    )
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
+    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
+    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+
+    // expecting 3 attempts at messages - the initial create then 2 updates
+    await untilCallTo { calledHandleDifferences(times = 3) } matches { it == true }
+
+    // but there is only 1 message on the domain queue because the last update was ignored
+    assertThat(getNumberOfMessagesCurrentlyOnDomainQueue()).isEqualTo(1)
+  }
+
+  fun calledHandleDifferences(times: Int): Boolean {
+    kotlin.runCatching {
+      verify(prisonerDifferenceService, times(times)).handleDifferences(anyOrNull(), any(), any())
+    }
+      .onFailure {
+        return false
+      }
+    return true
   }
 
   /*

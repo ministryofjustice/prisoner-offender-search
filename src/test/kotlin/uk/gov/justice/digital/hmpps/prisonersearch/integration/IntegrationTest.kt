@@ -27,6 +27,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.Restrict
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerEventHashRepository
 import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
@@ -88,6 +90,12 @@ abstract class IntegrationTest {
   @Autowired
   protected lateinit var prisonerIndexService: PrisonerIndexService
 
+  @SpyBean
+  protected lateinit var prisonerDifferenceService: PrisonerDifferenceService
+
+  @Autowired
+  protected lateinit var prisonerEventHashRepository: PrisonerEventHashRepository
+
   companion object {
     internal val prisonMockServer = PrisonMockServer()
     internal val oauthMockServer = OAuthMockServer()
@@ -130,6 +138,12 @@ abstract class IntegrationTest {
     whenever(clock.instant()).thenReturn(fixedClock.instant())
     whenever(clock.zone).thenReturn(fixedClock.zone)
   }
+
+  @BeforeEach
+  fun clearPrisonerHashes() {
+    prisonerEventHashRepository.deleteAll()
+  }
+
   internal fun Any.asJson() = gson.toJson(this)
 
   internal fun setAuthorisation(user: String = "prisoner-search-client", roles: List<String> = listOf()): (HttpHeaders) -> Unit {
