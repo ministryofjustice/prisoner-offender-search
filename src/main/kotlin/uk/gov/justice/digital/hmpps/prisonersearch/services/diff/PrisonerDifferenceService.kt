@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
+import com.amazonaws.util.Base64
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.commons.lang3.builder.Diff
 import org.apache.commons.lang3.builder.DiffBuilder
@@ -7,6 +9,7 @@ import org.apache.commons.lang3.builder.DiffResult
 import org.apache.commons.lang3.builder.ToStringStyle
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.DigestUtils
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
@@ -14,7 +17,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.Objects
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -41,7 +43,8 @@ class PrisonerDifferenceService(
   private val telemetryClient: TelemetryClient,
   private val domainEventEmitter: HmppsDomainEventEmitter,
   private val diffProperties: DiffProperties,
-  private val prisonerEventHashRepository: PrisonerEventHashRepository
+  private val prisonerEventHashRepository: PrisonerEventHashRepository,
+  private val objectMapper: ObjectMapper,
 ) {
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
@@ -64,7 +67,14 @@ class PrisonerDifferenceService(
   }
 
   private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
-    prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, Objects.hashCode(prisoner), Instant.now()) > 0
+    prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, generatePrisonerHash(prisoner), Instant.now()) > 0
+
+  private fun generatePrisonerHash(prisoner: Prisoner) =
+    objectMapper.writeValueAsString(prisoner)
+      .toByteArray()
+      .let {
+        Base64.encodeAsString(*DigestUtils.md5Digest(it))
+      }
 
   internal fun generateDiffTelemetry(
     existingPrisoner: Prisoner?,

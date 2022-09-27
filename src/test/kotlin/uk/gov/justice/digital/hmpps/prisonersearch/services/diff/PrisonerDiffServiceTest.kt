@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyMap
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
@@ -34,7 +34,8 @@ class PrisonerDiffServiceTest {
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
   private val diffProperties = mock<DiffProperties>()
   private val prisonerEventHashRepository = mock<PrisonerEventHashRepository>()
-  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties, prisonerEventHashRepository)
+  private val objectMapper = mock<ObjectMapper>()
+  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties, prisonerEventHashRepository, objectMapper)
 
   @Nested
   inner class HandleDifferences {
@@ -45,25 +46,27 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should send event if prisoner hash has changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyInt(), any())).thenReturn(1)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(1)
+      whenever(objectMapper.writeValueAsString(any())).thenReturn("")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyInt(), any())
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any())
       verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
 
     @Test
     fun `should not send event if prisoner hash not changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyInt(), any())).thenReturn(0)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
+      whenever(objectMapper.writeValueAsString(any())).thenReturn("")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyInt(), any())
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any())
       verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
   }

@@ -30,7 +30,7 @@ interface PrisonerEventHashRepository : JpaRepository<PrisonerEventHash, String>
       "SET prisoner_hash=:prisonerHash, updated_date_time=:updatedDateTime WHERE prisoner_event_hashes.prisoner_hash<>:prisonerHash",
     nativeQuery = true
   )
-  fun upsertPrisonerEventHashIfChanged(nomsNumber: String, prisonerHash: Int, updatedDateTime: Instant): Int
+  fun upsertPrisonerEventHashIfChanged(nomsNumber: String, prisonerHash: String, updatedDateTime: Instant): Int
 }
 
 @Entity
@@ -39,7 +39,7 @@ data class PrisonerEventHash(
   @Id
   val nomsNumber: String = "",
   @Column(name = "prisoner_hash")
-  val prisonerHash: Int = 0,
+  val prisonerHash: String = "",
   val updatedDateTime: Instant = Instant.now(),
 ) {
   override fun equals(other: Any?): Boolean {

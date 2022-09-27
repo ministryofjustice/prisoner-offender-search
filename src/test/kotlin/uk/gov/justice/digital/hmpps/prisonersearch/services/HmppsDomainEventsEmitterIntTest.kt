@@ -17,19 +17,14 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.LOCATION
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerEventHashRepository
 import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
 
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
-
-  @Autowired
-  private lateinit var prisonerEventHashRepository: PrisonerEventHashRepository
 
   @BeforeEach
   fun purgeHmppsEventsQueue() {
