@@ -45,7 +45,7 @@ dependencies {
   implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.312")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  runtimeOnly("org.postgresql:postgresql:42.5.0")
+  runtimeOnly("org.postgresql:postgresql:42.4.2")
   runtimeOnly("org.flywaydb:flyway-core:9.3.1")
 
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.3")
