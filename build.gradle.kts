@@ -46,7 +46,7 @@ dependencies {
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.5.0")
-  runtimeOnly("org.flywaydb:flyway-core:8.5.13")
+  runtimeOnly("org.flywaydb:flyway-core:9.3.1")
 
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.3")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
