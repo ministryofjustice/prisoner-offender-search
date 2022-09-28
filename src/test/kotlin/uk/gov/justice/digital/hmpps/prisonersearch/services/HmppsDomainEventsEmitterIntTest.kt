@@ -231,8 +231,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { attemptedToSendBothDomainEvents() } matches { it == true }
 
     // The prisoner hash update should have been rolled back
-    val prisonerEventHashAfterAttemptedUpdate = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
-    assertThat(prisonerEventHashAfterAttemptedUpdate).isEqualTo(insertedPrisonerEventHash)
+    await untilCallTo { prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash } matches { it == insertedPrisonerEventHash }
   }
 
   private fun attemptedToSendBothDomainEvents(): Boolean {
