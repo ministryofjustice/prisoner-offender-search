@@ -22,11 +22,11 @@ spec:
               args:
                 - /bin/sh
                 - -c
-                - curl -XPUT http://prisoner-offender-search/prisoner-index/queue-housekeeping
+                - curl --retry 2 -XPUT http://prisoner-offender-search/prisoner-index/queue-housekeeping
             - name: retryalldlqs
               image: ghcr.io/ministryofjustice/hmpps-devops-tools
               args:
                 - /bin/sh
                 - -c
-                - curl -XPUT http://prisoner-offender-search/queue-admin/retry-all-dlqs
+                - curl --retry 2 -XPUT http://prisoner-offender-search/queue-admin/retry-all-dlqs
           restartPolicy: Never
