@@ -22,5 +22,5 @@ spec:
               args:
                 - /bin/sh
                 - -c
-                - curl http://prisoner-offender-search/synthetic-monitor
+                - curl --retry 2 http://prisoner-offender-search/synthetic-monitor
           restartPolicy: Never
