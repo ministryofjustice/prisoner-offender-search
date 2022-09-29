@@ -6,6 +6,7 @@ aws:
 
 hmpps.sqs:
   provider: localstack
+  dlqMaxReceiveCount: 1
   queues:
     eventqueue:
       queueName: ${random.uuid}
