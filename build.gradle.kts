@@ -41,19 +41,19 @@ dependencies {
   implementation("com.google.code.gson:gson:2.9.1")
   implementation("com.google.guava:guava:31.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.10")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.312")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.9")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.304")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.4.2")
-  runtimeOnly("org.flywaydb:flyway-core:9.3.1")
+  runtimeOnly("org.flywaydb:flyway-core:8.5.13")
 
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.3")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.2")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:4.8.0")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.35.0")
-  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
+  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3")
 }
 
 java {
