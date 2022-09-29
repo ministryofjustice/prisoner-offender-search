@@ -41,7 +41,7 @@ dependencies {
   implementation("com.google.code.gson:gson:2.9.1")
   implementation("com.google.guava:guava:31.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.9")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.10")
   implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.312")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
