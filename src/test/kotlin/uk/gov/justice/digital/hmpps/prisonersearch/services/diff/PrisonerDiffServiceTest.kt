@@ -383,7 +383,17 @@ class PrisonerDiffServiceTest {
 
       prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(telemetryClient, never()).trackEvent(anyString(), anyMap(), anyMap())
+      verify(telemetryClient, never()).trackEvent(anyString(), anyMap(), isNull())
+    }
+
+    @Test
+    fun `should not raise telemetry if there are no changes`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc1" }
+
+      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(telemetryClient, never()).trackEvent(anyString(), anyMap(), isNull())
     }
 
     @Test
