@@ -85,10 +85,14 @@ class PrisonerDifferenceService(
 
     kotlin.runCatching {
       existingPrisoner?.also {
-        raiseDifferencesTelemetry(
-          offenderBooking.offenderNo,
-          getDifferencesByCategory(it, storedPrisoner),
-        )
+        getDifferencesByCategory(it, storedPrisoner)
+          .takeIf { differences -> differences.isNotEmpty() }
+          ?.also { differences ->
+            raiseDifferencesTelemetry(
+              offenderBooking.offenderNo,
+              differences,
+            )
+          }
       }
         ?: raiseCreatedTelemetry(offenderBooking.offenderNo)
     }.onFailure {
