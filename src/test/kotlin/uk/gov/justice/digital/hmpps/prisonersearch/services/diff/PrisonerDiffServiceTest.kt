@@ -326,26 +326,7 @@ class PrisonerDiffServiceTest {
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
         check<Map<String, String>> {
-          assertThat(it["categoryChanged"]).isEqualTo(DiffCategory.IDENTIFIERS.name)
-          assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
-        },
-        isNull()
-      )
-    }
-
-    @Test
-    fun `should report multiple differences`() {
-      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1"; croNumber = "someCro1" }
-      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2"; croNumber = "someCro2" }
-
-      prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
-
-      verify(telemetryClient).trackEvent(
-        eq("POSPrisonerUpdated"),
-        check<Map<String, String>> {
-          assertThat(it["categoryChanged"]).isEqualTo(DiffCategory.IDENTIFIERS.name)
-          assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
-          assertThat(it["croNumber"]).isEqualTo("someCro1 -> someCro2")
+          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
         },
         isNull()
       )
@@ -361,9 +342,7 @@ class PrisonerDiffServiceTest {
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerUpdated"),
         check<Map<String, String>> {
-          assertThat(it["categoryChanged"]).isEqualTo(DiffCategory.IDENTIFIERS.name)
-          assertThat(it["pncNumber"]).isEqualTo("somePnc -> null")
-          assertThat(it["croNumber"]).isEqualTo("null -> someCro")
+          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
         },
         isNull()
       )
@@ -380,19 +359,7 @@ class PrisonerDiffServiceTest {
         .trackEvent(
           eq("POSPrisonerUpdated"),
           check<Map<String, String>> {
-            assertThat(it["categoryChanged"]).isEqualTo(DiffCategory.IDENTIFIERS.name)
-            assertThat(it["pncNumber"]).isEqualTo("somePnc1 -> somePnc2")
-            assertThat(it["croNumber"]).isEqualTo("someCro1 -> someCro2")
-          },
-          isNull()
-        )
-
-      verify(telemetryClient)
-        .trackEvent(
-          eq("POSPrisonerUpdated"),
-          check<Map<String, String>> {
-            assertThat(it["categoryChanged"]).isEqualTo(DiffCategory.PERSONAL_DETAILS.name)
-            assertThat(it["firstName"]).isEqualTo("someFirstName1 -> someFirstName2")
+            assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS, PERSONAL_DETAILS]")
           },
           isNull()
         )

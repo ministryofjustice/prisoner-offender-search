@@ -120,24 +120,16 @@ class PrisonerDifferenceService(
       }
     }.filter { differencesByCategory -> differencesByCategory.value.isNotEmpty() }
 
-  private fun raiseDifferencesTelemetry(
-    offenderNo: String,
-    differences: PrisonerDifferences,
-  ) {
-    differences.forEach { diffCategoryMap ->
-      telemetryClient.trackEvent(
-        "POSPrisonerUpdated",
-        mapOf(
-          "processedTime" to LocalDateTime.now().toString(),
-          "nomsNumber" to offenderNo,
-          "categoryChanged" to diffCategoryMap.key.name,
-        ) + diffCategoryMap.value.associate { difference ->
-          difference.property to """${difference.oldValue} -> ${difference.newValue}"""
-        },
-        null
-      )
-    }
-  }
+  private fun raiseDifferencesTelemetry(offenderNo: String, differences: PrisonerDifferences) =
+    telemetryClient.trackEvent(
+      "POSPrisonerUpdated",
+      mapOf(
+        "processedTime" to LocalDateTime.now().toString(),
+        "nomsNumber" to offenderNo,
+        "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
+      ),
+      null
+    )
 
   private fun raiseCreatedTelemetry(offenderNo: String) =
     telemetryClient.trackEvent("POSPrisonerCreated", mapOf("nomsNumber" to offenderNo), null)
