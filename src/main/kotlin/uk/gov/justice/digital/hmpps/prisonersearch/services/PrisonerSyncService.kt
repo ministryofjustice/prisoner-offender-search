@@ -63,6 +63,23 @@ class PrisonerSyncService(
     }
   }
 
+  fun maybeDeleteOffender(message: OffenderChangedMessage) {
+    val prisonerId = message.offenderIdDisplay
+    if (prisonerId != null) {
+      // This event only means that one of potentially several aliases has been deleted
+      val offender = nomisService.getOffender(prisonerId)
+      if (offender == null) {
+        log.debug("Delete check: offender ID {} no longer exists, deleting", prisonerId)
+        prisonerIndexService.delete(prisonerId)
+      } else {
+        log.debug("Delete check: offender ID {} still exists, so assuming an alias deletion", prisonerId)
+        prisonerIndexService.sync(offender)
+      }
+    } else {
+      customEventForMissingOffenderIdDisplay(message)
+    }
+  }
+
   private fun customEventForMissingOffenderIdDisplay(
     message: OffenderChangedMessage
   ) {
