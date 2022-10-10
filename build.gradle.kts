@@ -41,8 +41,8 @@ dependencies {
   implementation("com.google.code.gson:gson:2.9.1")
   implementation("com.google.guava:guava:31.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.11")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.316")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.319")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.5.0")
@@ -52,7 +52,7 @@ dependencies {
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:4.8.0")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.35.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.0")
   testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
 }
 
