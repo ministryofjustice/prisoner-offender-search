@@ -54,7 +54,7 @@ spring:
     password: ${DB_PASS}
     hikari:
       pool-name: POS-DB-CP
-      maximum-pool-size: 20
+      maximum-pool-size: 10
       connection-timeout: 30000
       validation-timeout: 5000
 
