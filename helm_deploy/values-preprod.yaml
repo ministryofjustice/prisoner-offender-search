@@ -30,8 +30,8 @@ generic-prometheus-alerts:
     - "Digital-Prison-Services-preprod-prisoner_offender_search_queue_dl"
     - "dps-preprod-prisoner_offender_index_queue"
     - "dps-preprod-prisoner_offender_index_queue_dl"
-  sqsAlertsOldestThreshold: 30 #default
-  sqsAlertsTotalMessagesThreshold: 100 #default
+  sqsAlertsOldestThreshold: 10
+  sqsAlertsTotalMessagesThreshold: 1
 
 cron:
   snapshotNamespace: prisoner-offender-search-prod

@@ -25,5 +25,5 @@ generic-prometheus-alerts:
     - "Digital-Prison-Services-dev-prisoner_offender_search_queue_dl"
     - "dps-dev-prisoner_offender_index_queue"
     - "dps-dev-prisoner_offender_index_queue_dl"
-  sqsAlertsOldestThreshold: 30 #default
-  sqsAlertsTotalMessagesThreshold: 100 #default
+  sqsAlertsOldestThreshold: 10
+  sqsAlertsTotalMessagesThreshold: 1
