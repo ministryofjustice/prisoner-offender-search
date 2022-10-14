@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.4"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.5"
   kotlin("plugin.spring") version "1.7.10"
 }
 
@@ -42,7 +42,7 @@ dependencies {
   implementation("com.google.guava:guava:31.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.319")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.320")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.5.0")
