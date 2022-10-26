@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.6-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.6"
   kotlin("plugin.spring") version "1.7.20"
 }
 
@@ -38,11 +38,11 @@ dependencies {
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.apache.commons:commons-lang3:3.12.0")
-  implementation("com.google.code.gson:gson:2.9.1")
+  implementation("com.google.code.gson:gson:2.10")
   implementation("com.google.guava:guava:31.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.326")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.328")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.5.0")
