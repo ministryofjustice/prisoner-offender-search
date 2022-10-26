@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@6.0
+  hmpps: ministryofjustice/hmpps@dev:alpha
 
 jobs:
   validate:
@@ -58,6 +58,10 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
+      - hmpps/trivy_latest_scan:
+          slack_channel: syscon-alerts
+          context:
+            - hmpps-common-vars
       - validate:
           filters:
             tags:
