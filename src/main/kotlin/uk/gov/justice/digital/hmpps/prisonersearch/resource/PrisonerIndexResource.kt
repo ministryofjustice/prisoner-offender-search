@@ -86,7 +86,7 @@ class PrisonerIndexResource(
       example = "A1234AA"
     ) @NotNull @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}") @PathVariable("prisonerNumber") prisonerNumber: String
   ): Prisoner {
-    val indexedPrisoner = prisonerIndexService.indexPrisoner(prisonerNumber)
+    val indexedPrisoner = prisonerIndexService.syncPrisoner(prisonerNumber)
     return indexedPrisoner.takeIf { it != null } ?: throw NotFoundException("$prisonerNumber not found")
   }
 

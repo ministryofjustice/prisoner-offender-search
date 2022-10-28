@@ -45,7 +45,19 @@ class PrisonerIndexService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun indexPrisoner(prisonerId: String): Prisoner? =
+  fun indexPrisoner(prisonerId: String) {
+    nomisService.getOffender(prisonerId)?.let {
+      reIndex(it)
+    } ?: run {
+      telemetryClient.trackEvent(
+        "POSOffenderNotFoundForIndexing",
+        mapOf("prisonerID" to prisonerId),
+        null
+      )
+    }
+  }
+
+  fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
       sync(it)
     } ?: run {
@@ -99,6 +111,23 @@ class PrisonerIndexService(
     }
 
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
+
+    return storedPrisoner
+  }
+
+  fun reIndex(offenderBooking: OffenderBooking): Prisoner {
+    val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
+
+    val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
+    val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
+
+    val currentIndexStatus = indexStatusService.getCurrentIndex()
+
+    val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerBRepository.save(prisonerB)
+    } else {
+      prisonerARepository.save(prisonerA)
+    }
 
     return storedPrisoner
   }
