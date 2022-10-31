@@ -45,6 +45,7 @@ class PrisonerDifferenceService(
   private val diffProperties: DiffProperties,
   private val prisonerEventHashRepository: PrisonerEventHashRepository,
   private val objectMapper: ObjectMapper,
+  private val prisonerMovementsEventService: PrisonerMovementsEventService,
 ) {
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
@@ -63,6 +64,7 @@ class PrisonerDifferenceService(
     if (prisonerHasChanged(offenderBooking.offenderNo, storedPrisoner)) {
       generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
       generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
+      prisonerMovementsEventService.generateAnyMovementEvents(existingPrisoner, storedPrisoner)
     }
   }
 

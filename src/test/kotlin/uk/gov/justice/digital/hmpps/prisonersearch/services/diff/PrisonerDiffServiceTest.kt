@@ -35,7 +35,8 @@ class PrisonerDiffServiceTest {
   private val diffProperties = mock<DiffProperties>()
   private val prisonerEventHashRepository = mock<PrisonerEventHashRepository>()
   private val objectMapper = mock<ObjectMapper>()
-  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties, prisonerEventHashRepository, objectMapper)
+  private val prisonerMovementsEventService = mock<PrisonerMovementsEventService>()
+  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties, prisonerEventHashRepository, objectMapper, prisonerMovementsEventService)
 
   @Nested
   inner class HandleDifferences {
