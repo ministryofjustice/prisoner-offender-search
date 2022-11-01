@@ -135,7 +135,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     createPrisonerIndex(SyncIndex.INDEX_B)
   }
 
-  fun loadPrisoners(vararg prisoner: PrisonerBuilder) {
+  fun loadPrisoners(prisoner: List<PrisonerBuilder>) {
     setupIndexes()
     val prisonerNumbers = prisoner.map { it.prisonerNumber }.toList()
     prisonMockServer.stubFor(

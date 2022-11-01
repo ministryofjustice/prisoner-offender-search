@@ -20,7 +20,7 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   @BeforeEach
   fun setup() {
     if (initialiseSearchData) {
-      loadPrisoners(*getTestPrisonerNumbers(12).map { PrisonerBuilder(prisonerNumber = it) }.toTypedArray())
+      loadPrisoners(getTestPrisonerNumbers(12).map { PrisonerBuilder(prisonerNumber = it) })
       initialiseSearchData = false
     }
   }
