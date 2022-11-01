@@ -108,8 +108,8 @@ class PrisonerDifferenceService(
     prisoner: Prisoner
   ) {
     if (!diffProperties.events) return
-    previousPrisonerSnapshot?.also { prisoner ->
-      getDifferencesByCategory(prisoner, prisoner)
+    previousPrisonerSnapshot?.also {
+      getDifferencesByCategory(it, prisoner)
         .takeIf { differences -> differences.isNotEmpty() }
         ?.also { differences ->
           domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
