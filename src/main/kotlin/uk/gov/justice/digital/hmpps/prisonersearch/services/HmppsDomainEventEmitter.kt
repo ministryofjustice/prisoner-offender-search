@@ -34,39 +34,50 @@ class HmppsDomainEventEmitter(
   private val topicArn by lazy { hmppsDomainTopic.arn }
   private val topicSnsClient by lazy { hmppsDomainTopic.snsClient }
 
+  fun <T : PrisonerAdditionalInfo> PrisonerDomainEvent<T>.publish(onFailure: (error: Throwable) -> Unit = { log.error("Failed to send event ${this.eventType} for offenderNo= ${this.additionalInfo.nomsNumber}. Event must be manually created") }) {
+    val request = PublishRequest(topicArn, objectMapper.writeValueAsString(this))
+      .addMessageAttributesEntry(
+        "eventType",
+        MessageAttributeValue().withDataType("String").withStringValue(this.eventType)
+      )
+
+    runCatching {
+      topicSnsClient.publish(request)
+    }.onFailure(onFailure)
+  }
+
   fun emitPrisonerDifferenceEvent(
     offenderNo: String,
     differences: PrisonerDifferences,
   ) {
-    runCatching {
-      PrisonerUpdatedDomainEvent(PrisonerUpdatedEvent(offenderNo, differences.keys.toList().sorted()), Instant.now(clock), diffProperties.host)
-        .let { domainEvent ->
-          PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent))
-            .addMessageAttributesEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue(UPDATED_EVENT_TYPE))
-        }.also { publishRequest ->
-          topicSnsClient.publish(publishRequest)
-        }
+    PrisonerUpdatedDomainEvent(
+      PrisonerUpdatedEvent(offenderNo, differences.keys.toList().sorted()),
+      Instant.now(clock),
+      diffProperties.host
+    ).publish {
+      log.error("Failed to send event $UPDATED_EVENT_TYPE for offenderNo=$offenderNo, differences=$differences. Event will be retried")
+      throw it
     }
-      .onFailure {
-        log.error("Failed to send event $UPDATED_EVENT_TYPE for offenderNo=$offenderNo, differences=$differences")
-        throw it
-      }
   }
 
   fun emitPrisonerCreatedEvent(offenderNo: String) {
-    runCatching {
-      PrisonerCreatedDomainEvent(PrisonerCreatedEvent(offenderNo), Instant.now(clock), diffProperties.host)
-        .let { domainEvent ->
-          PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent))
-            .addMessageAttributesEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue(CREATED_EVENT_TYPE))
-        }.also { publishRequest ->
-          topicSnsClient.publish(publishRequest)
-        }
+    PrisonerCreatedDomainEvent(PrisonerCreatedEvent(offenderNo), Instant.now(clock), diffProperties.host).publish {
+      log.error("Failed to send event $CREATED_EVENT_TYPE for offenderNo=$offenderNo. Event will be retried")
+      throw it
     }
-      .onFailure {
-        log.error("Failed to send event $CREATED_EVENT_TYPE for offenderNo=$offenderNo", it)
-        throw it
-      }
+  }
+
+  fun emitPrisonerReceiveEvent(
+    offenderNo: String,
+    reason: PrisonerReceiveReason,
+    prisonId: String,
+    fromPrisonId: String? = null,
+  ) {
+    PrisonerReceivedDomainEvent(
+      PrisonerReceivedEvent(offenderNo, reason.name, prisonId, fromPrisonId),
+      Instant.now(clock),
+      diffProperties.host
+    ).publish()
   }
 
   enum class PrisonerReceiveReason {
@@ -76,26 +87,7 @@ class HmppsDomainEventEmitter(
     RETURN_FROM_COURT,
     TEMPORARY_ABSENCE_RETURN,
   }
-  fun emitPrisonerReceiveEvent(
-    offenderNo: String,
-    reason: PrisonerReceiveReason,
-    prisonId: String,
-    fromPrisonId: String? = null,
-  ) {
-    runCatching {
-      PrisonerReceivedDomainEvent(PrisonerReceivedEvent(offenderNo, reason.name, prisonId, fromPrisonId), Instant.now(clock), diffProperties.host)
-        .let { domainEvent ->
-          PublishRequest(topicArn, objectMapper.writeValueAsString(domainEvent))
-            .addMessageAttributesEntry("eventType", MessageAttributeValue().withDataType("String").withStringValue(PRISONER_RECEIVED_EVENT_TYPE))
-        }.also { publishRequest ->
-          topicSnsClient.publish(publishRequest)
-        }
-    }
-      .onFailure {
-        log.error("Failed to send event $CREATED_EVENT_TYPE for offenderNo=$offenderNo", it)
-        // TODO how do we retry without sending other messages?
-      }
-  }
+
   enum class PrisonerReleaseReason {
     TEMPORARY_ABSENCE_RELEASE,
     RELEASED_TO_HOSPITAL,
@@ -103,6 +95,7 @@ class HmppsDomainEventEmitter(
     SENT_TO_COURT,
     TRANSFERRED,
   }
+
   fun emitPrisonerReleaseEvent(
     offenderNo: String,
     reason: PrisonerReleaseReason,
@@ -119,68 +112,72 @@ class HmppsDomainEventEmitter(
   }
 }
 
+abstract class PrisonerAdditionalInfo {
+  abstract val nomsNumber: String
+}
+
+open class PrisonerDomainEvent<T : PrisonerAdditionalInfo>(
+  val additionalInfo: T,
+  private val occurredAt: String,
+  val eventType: String,
+  val version: Int,
+  val description: String,
+  private val detailUrl: String,
+) {
+  constructor(
+    additionalInfo: T,
+    occurredAt: Instant = Instant.now(),
+    host: String,
+    description: String,
+    eventType: String
+  ) :
+    this(
+      additionalInfo = additionalInfo,
+      occurredAt = ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("Europe/London")).format(occurredAt),
+      eventType = eventType,
+      version = 1,
+      description = description,
+      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}")
+        .buildAndExpand(additionalInfo.nomsNumber).toUri().toString(),
+    )
+}
+
 data class PrisonerUpdatedEvent(
-  val nomsNumber: String,
+  override val nomsNumber: String,
   val categoriesChanged: List<DiffCategory>,
-)
+) : PrisonerAdditionalInfo()
 
-data class PrisonerCreatedEvent(val nomsNumber: String)
+class PrisonerUpdatedDomainEvent(additionalInfo: PrisonerUpdatedEvent, occurredAt: Instant, host: String) :
+  PrisonerDomainEvent<PrisonerUpdatedEvent>(
+    additionalInfo = additionalInfo,
+    host = host,
+    occurredAt = occurredAt,
+    description = "A prisoner record has been updated",
+    eventType = UPDATED_EVENT_TYPE
+  )
 
-data class PrisonerUpdatedDomainEvent(
-  val additionalInfo: PrisonerUpdatedEvent,
-  val occurredAt: String,
-  val eventType: String,
-  val version: Int,
-  val description: String,
-  val detailUrl: String,
-) {
-  constructor(additionalInfo: PrisonerUpdatedEvent, occurredAt: Instant, host: String) :
-    this(
-      additionalInfo = additionalInfo,
-      occurredAt = ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("Europe/London")).format(occurredAt),
-      eventType = UPDATED_EVENT_TYPE,
-      version = 1,
-      description = "A prisoner record has been updated",
-      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.nomsNumber).toUri().toString(),
-    )
-}
+data class PrisonerCreatedEvent(override val nomsNumber: String) : PrisonerAdditionalInfo()
+class PrisonerCreatedDomainEvent(additionalInfo: PrisonerCreatedEvent, occurredAt: Instant, host: String) :
+  PrisonerDomainEvent<PrisonerCreatedEvent>(
+    additionalInfo = additionalInfo,
+    host = host,
+    occurredAt = occurredAt,
+    description = "A prisoner record has been created",
+    eventType = CREATED_EVENT_TYPE
+  )
 
-data class PrisonerCreatedDomainEvent(
-  val additionalInfo: PrisonerCreatedEvent,
-  val occurredAt: String,
-  val eventType: String,
-  val version: Int,
-  val description: String,
-  val detailUrl: String,
-) {
-  constructor(additionalInfo: PrisonerCreatedEvent, occurredAt: Instant, host: String) :
-    this(
-      additionalInfo = additionalInfo,
-      occurredAt = ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("Europe/London")).format(occurredAt),
-      eventType = CREATED_EVENT_TYPE,
-      version = 1,
-      description = "A prisoner record has been created",
-      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.nomsNumber).toUri().toString(),
-    )
-}
+data class PrisonerReceivedEvent(
+  override val nomsNumber: String,
+  val reason: String,
+  val prisonId: String,
+  val fromPrisonId: String?
+) : PrisonerAdditionalInfo()
 
-data class PrisonerReceivedEvent(val nomsNumber: String, val reason: String, val prisonId: String, val fromPrisonId: String?)
-
-data class PrisonerReceivedDomainEvent(
-  val additionalInfo: PrisonerReceivedEvent,
-  val occurredAt: String,
-  val eventType: String,
-  val version: Int,
-  val description: String,
-  val detailUrl: String,
-) {
-  constructor(additionalInfo: PrisonerReceivedEvent, occurredAt: Instant, host: String) :
-    this(
-      additionalInfo = additionalInfo,
-      occurredAt = ISO_OFFSET_DATE_TIME.withZone(ZoneId.of("Europe/London")).format(occurredAt),
-      eventType = PRISONER_RECEIVED_EVENT_TYPE,
-      version = 1,
-      description = "A prisoner has been received into a prison",
-      detailUrl = ServletUriComponentsBuilder.fromUriString(host).path("/prisoner/{offenderNo}").buildAndExpand(additionalInfo.nomsNumber).toUri().toString(),
-    )
-}
+class PrisonerReceivedDomainEvent(additionalInfo: PrisonerReceivedEvent, occurredAt: Instant, host: String) :
+  PrisonerDomainEvent<PrisonerReceivedEvent>(
+    additionalInfo = additionalInfo,
+    occurredAt = occurredAt,
+    host = host,
+    description = "A prisoner has been received into a prison",
+    eventType = PRISONER_RECEIVED_EVENT_TYPE
+  )

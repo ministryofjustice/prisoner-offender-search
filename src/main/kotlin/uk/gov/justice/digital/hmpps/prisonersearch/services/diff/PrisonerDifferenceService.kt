@@ -60,11 +60,11 @@ class PrisonerDifferenceService(
       .associate { property -> property.name to property.findAnnotations<DiffableProperty>().first().type }
 
   @Transactional
-  fun handleDifferences(existingPrisoner: Prisoner?, offenderBooking: OffenderBooking, storedPrisoner: Prisoner) {
-    if (prisonerHasChanged(offenderBooking.offenderNo, storedPrisoner)) {
-      generateDiffEvent(existingPrisoner, offenderBooking, storedPrisoner)
-      generateDiffTelemetry(existingPrisoner, offenderBooking, storedPrisoner)
-      prisonerMovementsEventService.generateAnyMovementEvents(existingPrisoner, storedPrisoner)
+  fun handleDifferences(previousPrisonerSnapshot: Prisoner?, offenderBooking: OffenderBooking, prisoner: Prisoner) {
+    if (prisonerHasChanged(offenderBooking.offenderNo, prisoner)) {
+      generateDiffEvent(previousPrisonerSnapshot, offenderBooking, prisoner)
+      generateDiffTelemetry(previousPrisonerSnapshot, offenderBooking, prisoner)
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
     }
   }
 
@@ -79,15 +79,15 @@ class PrisonerDifferenceService(
       }
 
   internal fun generateDiffTelemetry(
-    existingPrisoner: Prisoner?,
+    previousPrisonerSnapshot: Prisoner?,
     offenderBooking: OffenderBooking,
-    storedPrisoner: Prisoner
+    prisoner: Prisoner
   ) {
     if (!diffProperties.telemetry) return
 
     kotlin.runCatching {
-      existingPrisoner?.also {
-        getDifferencesByCategory(it, storedPrisoner)
+      previousPrisonerSnapshot?.also {
+        getDifferencesByCategory(it, prisoner)
           .takeIf { differences -> differences.isNotEmpty() }
           ?.also { differences ->
             raiseDifferencesTelemetry(
@@ -103,13 +103,13 @@ class PrisonerDifferenceService(
   }
 
   internal fun generateDiffEvent(
-    existingPrisoner: Prisoner?,
+    previousPrisonerSnapshot: Prisoner?,
     offenderBooking: OffenderBooking,
-    storedPrisoner: Prisoner
+    prisoner: Prisoner
   ) {
     if (!diffProperties.events) return
-    existingPrisoner?.also { prisoner ->
-      getDifferencesByCategory(prisoner, storedPrisoner)
+    previousPrisonerSnapshot?.also { prisoner ->
+      getDifferencesByCategory(prisoner, prisoner)
         .takeIf { differences -> differences.isNotEmpty() }
         ?.also { differences ->
           domainEventEmitter.emitPrisonerDifferenceEvent(offenderBooking.offenderNo, differences)
