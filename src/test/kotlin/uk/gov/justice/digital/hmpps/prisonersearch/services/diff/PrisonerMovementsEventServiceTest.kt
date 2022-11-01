@@ -59,6 +59,67 @@ internal class PrisonerMovementsEventServiceTest {
     }
   }
 
+  @Nested
+  inner class OutAtCourt {
+    private val previousPrisonerSnapshot = prisonerOutAtCourt()
+
+    @Test
+    internal fun `will emit receive event with reason of court return for return to same prison`() {
+      val prisoner = prisonerReturnFromCourtSamePrison()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.RETURN_FROM_COURT,
+        prisonId = "WWI",
+      )
+    }
+
+    @Test
+    internal fun `will emit receive event with reason of transfer for return to different prison`() {
+      val prisoner = prisonerReturnFromCourtDifferentPrison("BXI")
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED,
+        prisonId = "BXI",
+      )
+    }
+  }
+  @Nested
+  inner class OutOnTAP {
+    private val previousPrisonerSnapshot = prisonerOutOnTAP()
+
+    @Test
+    internal fun `will emit receive event with reason of TAP return for return to same prison`() {
+      val prisoner = prisonerReturnFromTAPSamePrison()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.TEMPORARY_ABSENCE_RETURN,
+        prisonId = "WWI",
+      )
+    }
+
+    @Test
+    internal fun `will emit receive event with reason of transfer for return to different prison`() {
+      val prisoner = prisonerReturnFromTAPDifferentPrison("BXI")
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED,
+        prisonId = "BXI",
+      )
+    }
+  }
+
   private fun newPrisoner() = prisoner("/receive-state-changes/new-prisoner.json")
   private fun prisonerInWithBooking() = prisoner("/receive-state-changes/first-new-booking.json")
   private fun prisonerBeingTransferred() = prisoner("/receive-state-changes/transfer-out.json")
@@ -66,6 +127,15 @@ internal class PrisonerMovementsEventServiceTest {
     prisoner("/receive-state-changes/transfer-in.json").apply {
       this.prisonId = prisonId
     }
+
+  private fun prisonerOutAtCourt() = prisoner("/receive-state-changes/court-out.json")
+  private fun prisonerReturnFromCourtSamePrison() = prisoner("/receive-state-changes/court-in-same-prison.json")
+  private fun prisonerReturnFromCourtDifferentPrison(prisonId: String = "NMI") =
+    prisoner("/receive-state-changes/court-in-different-prison.json").apply { this.prisonId = prisonId }
+  private fun prisonerOutOnTAP() = prisoner("/receive-state-changes/tap-out.json")
+  private fun prisonerReturnFromTAPSamePrison() = prisoner("/receive-state-changes/tap-in-same-prison.json")
+  private fun prisonerReturnFromTAPDifferentPrison(prisonId: String = "NMI") =
+    prisoner("/receive-state-changes/tap-in-different-prison.json").apply { this.prisonId = prisonId }
 
   private fun prisoner(resource: String): Prisoner =
     objectMapper.readValue(resource.readResourceAsText(), Prisoner::class.java)
