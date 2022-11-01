@@ -33,7 +33,7 @@ internal class PrisonerMovementsEventServiceTest {
   }
 
   @Test
-  internal fun `will emit anything for a new prisoner `() {
+  internal fun `will not emit anything for a new prisoner `() {
     val prisoner = newPrisoner()
 
     prisonerMovementsEventService.generateAnyMovementEvents(null, prisoner)
