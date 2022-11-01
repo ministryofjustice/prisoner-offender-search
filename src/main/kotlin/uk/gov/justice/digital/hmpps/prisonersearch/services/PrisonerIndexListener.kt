@@ -37,13 +37,14 @@ class PrisonerIndexListener(
         OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
         else -> log.warn("Unexpected Message {}", requestJson)
       }
+      log.debug("Finished index message request {}", indexRequest)
     } catch (e: Exception) {
+      log.error("processIndexRequest() Unexpected error for " + msg, e)
       telemetryClient.trackEvent(
         "POSProcessIndexRequestError",
         mapOf("requestPayload" to requestJson, "message" to e.message),
         null
       )
-
       throw e
     }
   }

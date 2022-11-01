@@ -11,7 +11,6 @@ import org.elasticsearch.index.reindex.DeleteByQueryRequest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
@@ -35,7 +34,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     )
     resetStubs()
     setupIndexes()
-    Mockito.reset(indexQueueService)
+    // Mockito.reset(indexQueueService)
   }
 
   @Test

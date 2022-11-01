@@ -54,6 +54,7 @@ class PrisonerIndexService(
         mapOf("prisonerID" to prisonerId),
         null
       )
+      log.error("POSOffenderNotFoundForIndexing {}", prisonerId)
       return null
     }
 
