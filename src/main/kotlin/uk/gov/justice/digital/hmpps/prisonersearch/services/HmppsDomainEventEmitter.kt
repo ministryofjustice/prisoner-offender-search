@@ -42,9 +42,7 @@ class HmppsDomainEventEmitter(
       )
 
     runCatching {
-      log.debug("Publishing $request")
       topicSnsClient.publish(request)
-      log.debug("Yep published")
     }.onFailure(onFailure)
   }
 
@@ -52,7 +50,6 @@ class HmppsDomainEventEmitter(
     offenderNo: String,
     differences: PrisonerDifferences,
   ) {
-    log.debug("emitPrisonerDifferenceEvent")
     PrisonerUpdatedDomainEvent(
       PrisonerUpdatedEvent(offenderNo, differences.keys.toList().sorted()),
       Instant.now(clock),
@@ -64,7 +61,6 @@ class HmppsDomainEventEmitter(
   }
 
   fun emitPrisonerCreatedEvent(offenderNo: String) {
-    log.debug("emitPrisonerCreatedEvent")
     PrisonerCreatedDomainEvent(PrisonerCreatedEvent(offenderNo), Instant.now(clock), diffProperties.host).publish {
       log.error("Failed to send event $CREATED_EVENT_TYPE for offenderNo=$offenderNo. Event will be retried")
       throw it
