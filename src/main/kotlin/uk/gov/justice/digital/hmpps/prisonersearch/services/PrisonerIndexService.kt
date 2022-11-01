@@ -112,6 +112,7 @@ class PrisonerIndexService(
 
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
 
+    log.debug("finished sync() {}", offenderBooking)
     return storedPrisoner
   }
 

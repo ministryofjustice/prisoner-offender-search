@@ -102,14 +102,14 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           alertCodes = listOf("X" to "XTACT", "W" to "WO")
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AC",
+          prisonerNumber = "A1830AC", // ****************************** goes to DLQ
           firstName = "MOHAMAD",
           lastName = "HUSAIN",
           agencyId = "ACI",
           alertCodes = listOf("W" to "WO")
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AD", firstName = "ADJEI", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf()
+          prisonerNumber = "A1830AD", firstName = "ADJEI", lastName = "BOATENG", agencyId = "ACI" // ****************************** goes to DLQ
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AE",

@@ -51,6 +51,10 @@ abstract class IntegrationTest {
   internal lateinit var eventQueueSqsClient: AmazonSQS
 
   @SpyBean
+  @Qualifier("indexqueue-sqs-client")
+  internal lateinit var indexQueueSqsClient: AmazonSQS
+
+  @SpyBean
   @Qualifier("hmppseventtopic-sns-client")
   internal lateinit var hmppsEventTopicSnsClient: AmazonSNS
 
@@ -197,6 +201,17 @@ abstract class IntegrationTest {
         val config = queues["eventqueue"]
           ?: throw MissingQueueException("HmppsSqsProperties config for eventqueue not found")
         hmppsQueueFactory.createSqsClient("eventqueue", config, hmppsSqsProperties, eventQueueSqsDlqClient)
+      }
+
+    @Bean("indexqueue-sqs-client")
+    fun indexQueueSqsClient(
+      hmppsSqsProperties: HmppsSqsProperties,
+      @Qualifier("indexqueue-sqs-dlq-client") indexQueueSqsDlqClient: AmazonSQS
+    ): AmazonSQS =
+      with(hmppsSqsProperties) {
+        val config = queues["indexqueue"]
+          ?: throw MissingQueueException("HmppsSqsProperties config for indexqueue not found")
+        hmppsQueueFactory.createSqsClient("indexqueue", config, hmppsSqsProperties, indexQueueSqsDlqClient)
       }
 
     @Bean("hmppseventtopic-sns-client")

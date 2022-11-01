@@ -36,7 +36,7 @@ class PrisonerEventListener(
 
         else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
       }
-      log.trace("Finished event message request {}", message)
+      log.debug("Finished event message request {}", message)
     } catch (e: Exception) {
       log.error("processOffenderEvent() Unexpected error", e)
       telemetryClient.trackEvent(
