@@ -8,12 +8,12 @@ hmpps.sqs:
   provider: localstack
   queues:
     eventqueue:
-      queueName: eventqueue # ${random.uuid}
-      dlqName: eventqueueDLQ # ${random.uuid}
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
       dlqMaxReceiveCount: 1
     indexqueue:
-      queueName: indexqueue # ${random.uuid}
-      dlqName: indexqueueDLQ # ${random.uuid}
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
       dlqMaxReceiveCount: 1
     hmppseventtestqueue:
       queueName: ${random.uuid}
