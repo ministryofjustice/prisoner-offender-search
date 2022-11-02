@@ -84,27 +84,29 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
-    log.debug("Messages on event queue: {}", number)
+    log.trace("Messages on event queue: {}", number)
     return number
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
-    log.debug("Messages on index queue: {}", number)
+    log.trace("Messages on index queue: {}", number)
     return number
   }
 
   fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? {
     val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(hmppsEventsQueue.queueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
-    log.debug("Messages on domain queue: {}", number)
+    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
+    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val number = visible + notVisible
+    log.trace("Messages on domain queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
   }
 
   fun prisonRequestCountFor(url: String): Int {
     val count = prisonMockServer.findAll(getRequestedFor(urlEqualTo(url))).count()
-    log.debug("Count for {}: {}", url, count)
+    log.trace("Count for {}: {}", url, count)
     return count
   }
 
@@ -140,7 +142,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A1090AA") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
-    Thread.sleep(500)
   }
 
   fun setupIndexes() {

@@ -29,7 +29,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
   @BeforeEach
   fun loadPrisoners() {
     if (initialiseSearchData) {
-    val prisonerData = listOf(
+      val prisonerData = listOf(
         PrisonerBuilder(
           prisonerNumber = "A7089EY", firstName = "SMITH", lastName = "JONES", agencyId = "MDI"
         ),

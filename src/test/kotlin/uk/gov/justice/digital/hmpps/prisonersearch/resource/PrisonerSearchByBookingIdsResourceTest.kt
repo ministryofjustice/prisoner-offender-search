@@ -68,8 +68,8 @@ class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
       .expectStatus().isOk
 
     // wait for last offender to be available
-    await.atMost(Duration.ofSeconds(30)) untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
-    await.atMost(Duration.ofSeconds(30)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
   @Test
