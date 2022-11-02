@@ -69,6 +69,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
     assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
   }
+
   @Test
   fun `sends prisoner received events to the domain topic`() {
     hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED, "MDI")
@@ -76,6 +77,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
     val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
     val message: MsgBody = objectMapper.readValue(result.body)
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.received")
