@@ -130,6 +130,7 @@ class PrisonerIndexService(
       prisonerARepository.save(prisonerA)
     }
 
+    log.trace("finished reIndex() {}", offenderBooking)
     return storedPrisoner
   }
 
@@ -151,10 +152,8 @@ class PrisonerIndexService(
         val otherIndexCount = countIndex(currentIndex.otherIndex())
         log.info(
           "Current index is {} [{}], rebuilding index {} [{}]",
-          currentIndex,
-          countIndex(currentIndex),
-          currentIndex.otherIndex(),
-          otherIndexCount
+          currentIndex, countIndex(currentIndex),
+          currentIndex.otherIndex(), otherIndexCount
         )
         checkExistsAndReset(currentIndex.otherIndex())
 
