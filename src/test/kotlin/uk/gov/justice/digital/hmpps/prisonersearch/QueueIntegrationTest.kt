@@ -114,17 +114,13 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     return count
   }
 
-  private val untilMessagesGetOnTheQueueInTheFirstPlace = Duration.ofSeconds(1)
-
   fun indexPrisoners() {
     webTestClient.put().uri("/prisoner-index/build-index")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isOk
 
-    await
-      .atLeast(untilMessagesGetOnTheQueueInTheFirstPlace)
-      .atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
   fun setupIndexes() {

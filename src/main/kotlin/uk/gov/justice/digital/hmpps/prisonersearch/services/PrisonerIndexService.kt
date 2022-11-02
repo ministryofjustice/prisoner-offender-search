@@ -93,13 +93,13 @@ class PrisonerIndexService(
 
     val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
     val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
-    val storedPrisoner: Prisoner
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
-    if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      storedPrisoner = prisonerARepository.save(prisonerA)
+
+    val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerARepository.save(prisonerA)
     } else {
-      storedPrisoner = prisonerBRepository.save(prisonerB)
+      prisonerBRepository.save(prisonerB)
     }
 
     if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding

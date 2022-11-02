@@ -87,14 +87,12 @@ class PrisonerDifferenceService(
 
     kotlin.runCatching {
       previousPrisonerSnapshot?.also {
-        getDifferencesByCategory(it, prisoner)
-          .takeIf { differences -> differences.isNotEmpty() }
-          ?.also { differences ->
-            raiseDifferencesTelemetry(
-              offenderBooking.offenderNo,
-              differences,
-            )
-          }
+        val differences = getDifferencesByCategory(it, prisoner)
+        if (differences.isEmpty()) {
+          raiseNoDifferencesTelemetry(offenderBooking.offenderNo)
+        } else {
+          raiseDifferencesTelemetry(offenderBooking.offenderNo, differences)
+        }
       }
         ?: raiseCreatedTelemetry(offenderBooking.offenderNo)
     }.onFailure {
@@ -117,6 +115,7 @@ class PrisonerDifferenceService(
     }
       ?: domainEventEmitter.emitPrisonerCreatedEvent(offenderBooking.offenderNo)
   }
+
   internal fun getDifferencesByCategory(prisoner: Prisoner, other: Prisoner): PrisonerDifferences =
     getDiffResult(prisoner, other).let { diffResult ->
       propertiesByDiffCategory.mapValues { properties ->
@@ -133,6 +132,16 @@ class PrisonerDifferenceService(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
         "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
+      ),
+      null
+    )
+
+  private fun raiseNoDifferencesTelemetry(offenderNo: String) =
+    telemetryClient.trackEvent(
+      "POSPrisonerUpdatedNoChange",
+      mapOf(
+        "processedTime" to LocalDateTime.now().toString(),
+        "nomsNumber" to offenderNo,
       ),
       null
     )
