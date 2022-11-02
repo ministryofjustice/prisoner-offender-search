@@ -154,7 +154,7 @@ curl --location --request POST "http://localhost:8080/prisoner-search/match" --h
 
 #### View ES indexes
 ```shell
-curl --location --request POST "http://es1.eu-west-2.es.localhost.localstack.cloud:4566/prisoner-search-a/_search" | jq
+curl --location --request POST "http://es01.eu-west-2.es.localhost.localstack.cloud:4566/prisoner-search-a/_search" | jq
 ```
 
 ### Alternative running

@@ -27,7 +27,7 @@ hmpps.sqs:
 
 elasticsearch:
   proxy:
-    url: http://es1.eu-west-2.es.localhost.localstack.cloud:4566
+    url: http://es01.eu-west-2.es.localhost.localstack.cloud:4566
 
 api:
   base:

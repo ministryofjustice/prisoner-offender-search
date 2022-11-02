@@ -33,3 +33,4 @@ dps-gradle-spring-boot-suppressions.xml
 # Helm
 helm_deploy/prisoner-offender-search/charts/
 Chart.lock
+/volume/

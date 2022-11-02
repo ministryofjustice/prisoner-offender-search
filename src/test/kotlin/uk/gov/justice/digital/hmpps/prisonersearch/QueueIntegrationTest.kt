@@ -13,6 +13,8 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
 import org.elasticsearch.client.RestHighLevelClient
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -42,6 +44,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 import uk.gov.justice.hmpps.sqs.MissingQueueException
+import java.time.Duration
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -79,20 +82,33 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   protected val hmppsEventsQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
-    val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
+    val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
+    val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    log.trace("Messages on event queue: {}", number)
+    return number
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
-    val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
-  }
-  fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? {
-    val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(hmppsEventsQueue.queueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()
+    val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
+    val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    log.trace("Messages on index queue: {}", number)
+    return number
   }
 
-  fun prisonRequestCountFor(url: String) = prisonMockServer.findAll(getRequestedFor(urlEqualTo(url))).count()
+  fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? {
+    val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(hmppsEventsQueue.queueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
+    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
+    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val number = visible + notVisible
+    log.trace("Messages on domain queue: visible = {} notVisible = {} ", visible, notVisible)
+    return number
+  }
+
+  fun prisonRequestCountFor(url: String): Int {
+    val count = prisonMockServer.findAll(getRequestedFor(urlEqualTo(url))).count()
+    log.trace("Count for {}: {}", url, count)
+    return count
+  }
 
   fun indexPrisoners() {
     webTestClient.put().uri("/prisoner-index/build-index")
@@ -126,7 +142,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     await untilCallTo { prisonRequestCountFor("/api/offenders/A1090AA") } matches { it == 1 }
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
-    Thread.sleep(500)
   }
 
   fun setupIndexes() {
@@ -135,7 +150,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     createPrisonerIndex(SyncIndex.INDEX_B)
   }
 
-  fun loadPrisoners(vararg prisoner: PrisonerBuilder) {
+  fun loadPrisoners(prisoner: List<PrisonerBuilder>) {
     setupIndexes()
     val prisonerNumbers = prisoner.map { it.prisonerNumber }.toList()
     prisonMockServer.stubFor(
@@ -163,9 +178,8 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
 
-    await untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
-
-    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -409,6 +423,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         }
       }
     )
+  }
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 }
 
