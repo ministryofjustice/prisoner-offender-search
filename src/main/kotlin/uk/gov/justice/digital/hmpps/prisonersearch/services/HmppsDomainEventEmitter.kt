@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import com.amazonaws.services.sns.model.MessageAttributeValue
 import com.amazonaws.services.sns.model.PublishRequest
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,6 +19,8 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
+import kotlin.reflect.KClass
+import kotlin.reflect.full.memberProperties
 
 @Suppress("unused")
 @Service
@@ -26,6 +29,7 @@ class HmppsDomainEventEmitter(
   private val hmppsQueueService: HmppsQueueService,
   private val diffProperties: DiffProperties,
   private val clock: Clock,
+  private val telemetryClient: TelemetryClient,
 ) {
 
   private val hmppsDomainTopic by lazy {
@@ -34,7 +38,19 @@ class HmppsDomainEventEmitter(
   private val topicArn by lazy { hmppsDomainTopic.arn }
   private val topicSnsClient by lazy { hmppsDomainTopic.snsClient }
 
-  fun <T : PrisonerAdditionalInfo> PrisonerDomainEvent<T>.publish(onFailure: (error: Throwable) -> Unit = { log.error("Failed to send event ${this.eventType} for offenderNo= ${this.additionalInfo.nomsNumber}. Event must be manually created") }) {
+  fun <T : PrisonerAdditionalInfo> defaultFailureHandler(event: PrisonerDomainEvent<T>, exception: Throwable) {
+    log.error(
+      "Failed to send event ${event.eventType} for offenderNo= ${event.additionalInfo.nomsNumber}. Event must be manually created",
+      exception
+    )
+    telemetryClient.trackEvent("POSPrisonerDomainEventSendFailure", event.asMap(), null)
+  }
+
+  fun <T : PrisonerAdditionalInfo> PrisonerDomainEvent<T>.publish(
+    onFailure: (error: Throwable) -> Unit = {
+      defaultFailureHandler(this, it)
+    }
+  ) {
     val request = PublishRequest(topicArn, objectMapper.writeValueAsString(this))
       .addMessageAttributesEntry(
         "eventType",
@@ -43,6 +59,7 @@ class HmppsDomainEventEmitter(
 
     runCatching {
       topicSnsClient.publish(request)
+      telemetryClient.trackEvent(this.eventType, this.asMap(), null)
     }.onFailure(onFailure)
   }
 
@@ -182,3 +199,22 @@ class PrisonerReceivedDomainEvent(additionalInfo: PrisonerReceivedEvent, occurre
     description = "A prisoner has been received into a prison",
     eventType = PRISONER_RECEIVED_EVENT_TYPE
   )
+
+fun <T : PrisonerAdditionalInfo> PrisonerDomainEvent<T>.asMap(): Map<String, String> {
+  return mutableMapOf(
+    "occurredAt" to occurredAt,
+    "eventType" to eventType,
+    "version" to version.toString(),
+    "description" to description,
+    "detailUrl" to detailUrl
+  ).also { it.putAll(additionalInfo.asMap()) }
+}
+
+fun <T : PrisonerAdditionalInfo> T.asMap(): Map<String, String> {
+  @Suppress("UNCHECKED_CAST")
+  return (this::class as KClass<T>).memberProperties
+    .filter { it.get(this) != null }
+    .associate { prop ->
+      "additionalInfo.${prop.name}" to prop.get(this).toString()
+    }
+}

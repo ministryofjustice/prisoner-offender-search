@@ -2,18 +2,22 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.amazonaws.services.sns.AmazonSNS
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.check
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.READMISSION
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.HmppsTopic
@@ -30,7 +34,9 @@ class HmppsDomainEventsEmitterTest {
   private val hmppsQueueService = mock<HmppsQueueService>()
   private val diffProperties = mock<DiffProperties>()
   private val clock = mock<Clock>()
-  private val hmppsDomainEventEmitter = HmppsDomainEventEmitter(objectMapper, hmppsQueueService, diffProperties, clock)
+  private val telemetryClient = mock<TelemetryClient>()
+  private val hmppsDomainEventEmitter =
+    HmppsDomainEventEmitter(objectMapper, hmppsQueueService, diffProperties, clock, telemetryClient)
   private val topicSnsClient = mock<AmazonSNS>()
   private val hmppsEventsTopic = HmppsTopic("hmppseventstopic", "some_arn", topicSnsClient)
 
@@ -87,6 +93,55 @@ class HmppsDomainEventsEmitterTest {
       assertThatThrownBy {
         hmppsDomainEventEmitter.emitPrisonerCreatedEvent("some_offender")
       }.isInstanceOf(RuntimeException::class.java)
+    }
+  }
+
+  @Nested
+  inner class PrisonerReceivedEvent {
+    @Test
+    fun `should include event type as a message attribute`() {
+      hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", READMISSION, "MDI")
+
+      verify(topicSnsClient).publish(
+        check {
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.received")
+        }
+      )
+    }
+
+    @Test
+    fun `should also log event`() {
+      hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", READMISSION, "MDI")
+
+      verify(telemetryClient).trackEvent(
+        eq("prisoner-offender-search.prisoner.received"),
+        check {
+          assertThat(it["eventType"]).isEqualTo("prisoner-offender-search.prisoner.received")
+          assertThat(it["version"]).isEqualTo("1")
+          assertThat(it["description"]).isEqualTo("A prisoner has been received into a prison")
+          assertThat(it["additionalInfo.nomsNumber"]).isEqualTo("some_offender")
+          assertThat(it["additionalInfo.reason"]).isEqualTo("READMISSION")
+          assertThat(it["additionalInfo.prisonId"]).isEqualTo("MDI")
+        },
+        isNull()
+      )
+    }
+
+    @Test
+    fun `should swallow exceptions and indicate a manual fix is required`() {
+      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+
+      hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", READMISSION, "MDI")
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerDomainEventSendFailure"),
+        check {
+          assertThat(it["eventType"]).isEqualTo("prisoner-offender-search.prisoner.received")
+          assertThat(it["additionalInfo.nomsNumber"]).isEqualTo("some_offender")
+          assertThat(it["additionalInfo.reason"]).isEqualTo("READMISSION")
+          assertThat(it["additionalInfo.prisonId"]).isEqualTo("MDI")
+        },
+        isNull()
+      )
     }
   }
 }
