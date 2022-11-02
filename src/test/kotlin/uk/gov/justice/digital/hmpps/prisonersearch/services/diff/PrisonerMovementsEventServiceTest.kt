@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
 import com.fasterxml.jackson.databind.json.JsonMapper
+import com.microsoft.applicationinsights.TelemetryClient
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -13,8 +14,9 @@ const val OFFENDER_NO = "A9460DY"
 
 internal class PrisonerMovementsEventServiceTest {
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
+  private val telemetryClient = mock<TelemetryClient>()
 
-  private val prisonerMovementsEventService = PrisonerMovementsEventService(domainEventsEmitter)
+  private val prisonerMovementsEventService = PrisonerMovementsEventService(domainEventsEmitter, telemetryClient)
 
   private val objectMapper = JsonMapper.builder()
     .findAndAddModules()
@@ -120,8 +122,64 @@ internal class PrisonerMovementsEventServiceTest {
     }
   }
 
+  @Nested
+  inner class NewOffender {
+    private val previousPrisonerSnapshot = newPrisoner()
+
+    @Test
+    internal fun `will emit receive event with reason of new admission for new booking`() {
+      val prisoner = prisonerInWithBooking("BXI")
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.NEW_ADMISSION,
+        prisonId = "BXI",
+      )
+    }
+  }
+  @Nested
+  inner class ReleasedOffender {
+    private val previousPrisonerSnapshot = releasedPrisoner()
+
+    @Test
+    internal fun `will emit receive event with reason of new admission for new booking`() {
+      val prisoner = prisonerInWithNewBooking("BXI")
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.NEW_ADMISSION,
+        prisonId = "BXI",
+      )
+    }
+    @Test
+    internal fun `will emit receive event with reason of readmission for existing booking`() {
+      val prisoner = recalledPrisoner("BXI")
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReceiveReason.READMISSION,
+        prisonId = "BXI",
+      )
+    }
+  }
+
   private fun newPrisoner() = prisoner("/receive-state-changes/new-prisoner.json")
-  private fun prisonerInWithBooking() = prisoner("/receive-state-changes/first-new-booking.json")
+  private fun prisonerInWithBooking(prisonId: String = "NMI") = prisoner("/receive-state-changes/first-new-booking.json").apply {
+    this.prisonId = prisonId
+  }
+  private fun prisonerInWithNewBooking(prisonId: String = "NMI") = prisoner("/receive-state-changes/second-new-booking.json").apply {
+    this.prisonId = prisonId
+  }
+  private fun releasedPrisoner() = prisoner("/receive-state-changes/released.json")
+  private fun recalledPrisoner(prisonId: String = "NMI") = prisoner("/receive-state-changes/recalled.json").apply {
+    this.prisonId = prisonId
+  }
   private fun prisonerBeingTransferred() = prisoner("/receive-state-changes/transfer-out.json")
   private fun prisonerTransferredIn(prisonId: String = "WWI") =
     prisoner("/receive-state-changes/transfer-in.json").apply {
