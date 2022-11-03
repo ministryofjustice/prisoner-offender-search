@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -20,7 +21,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
-  private val indexCount = 24
+  private val indexCount = 2
 
   @BeforeEach
   fun init() {
@@ -34,7 +35,25 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     )
     resetStubs()
     setupIndexes()
-    // Mockito.reset(indexQueueService)
+
+    // Use reduced set of prisoners for speed in this test class
+    whenever(indexProperties.pageSize).thenReturn(100) // use a different page size to avoid matching a "getId.." file
+    StubOffendersIds()
+  }
+
+  private fun StubOffendersIds() {
+    prisonMockServer.stubFor(
+      WireMock.get(
+        WireMock.urlEqualTo("/api/offenders/ids")
+      )
+        .withHeader("Page-Limit", WireMock.equalTo("100"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withHeader("Total-Records", indexCount.toString())
+            .withBody("""[{"offenderNumber": "A7089EY"}, {"offenderNumber": "A7089EZ"}]""")
+        )
+    )
   }
 
   @Test
@@ -146,6 +165,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(0)
       .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount)
 
     webTestClient.put().uri("/prisoner-index/index/prisoner/A5432AA")
@@ -161,6 +181,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .isOk
       .expectBody()
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
+      .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(0)
       .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
   }
 
@@ -175,7 +196,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .exchange()
       .expectStatus().isOk
 
-    resetStubs()
     // Start indexing A
     indexPrisoners()
 
@@ -298,7 +318,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      resetStubs()
       // Start indexing A
       indexPrisoners()
 
@@ -366,7 +385,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      resetStubs()
       // Start indexing A
       indexPrisoners()
 
@@ -492,7 +510,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
     @Test
     fun `will complete if index size not reached threshold but ignoring threshold`() {
       indexPrisoners()
-      whenever(indexProperties.completeThreshold).thenReturn(21)
+      whenever(indexProperties.completeThreshold).thenReturn(indexCount - 1L)
 
       webTestClient.put().uri("/prisoner-index/mark-complete?ignoreThreshold=true")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
@@ -580,7 +598,8 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .expectStatus()
         .isOk
         .expectBody()
-        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(indexCount + 1)
+        .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(0) // current index unaffected
+        .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1) // other index receives dlq reindex request
     }
 
     @Test

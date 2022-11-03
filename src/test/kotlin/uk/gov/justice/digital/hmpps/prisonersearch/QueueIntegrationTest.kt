@@ -83,15 +83,19 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
-    log.trace("Messages on event queue: {}", number)
+    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
+    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val number = visible + notVisible
+    log.trace("Messages on event queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
   }
 
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val number = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!! + queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
-    log.trace("Messages on index queue: {}", number)
+    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
+    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val number = visible + notVisible
+    log.trace("Messages on index queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
   }
 
@@ -116,32 +120,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
 
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EY") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089EZ") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FA") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FB") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FC") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FX") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AA") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AB") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AC") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AD") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AE") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090AF") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BA") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BB") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BC") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BD") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BE") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A7090BF") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AA") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999AB") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RA") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RB") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A9999RC") } matches { it == 1 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A1090AA") } matches { it == 1 }
-
-    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
   fun setupIndexes() {

@@ -45,7 +45,19 @@ class PrisonerIndexService(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun indexPrisoner(prisonerId: String): Prisoner? =
+  fun indexPrisoner(prisonerId: String) {
+    nomisService.getOffender(prisonerId)?.let {
+      reIndex(it)
+    } ?: run {
+      telemetryClient.trackEvent(
+        "POSOffenderNotFoundForIndexing",
+        mapOf("prisonerID" to prisonerId),
+        null
+      )
+    }
+  }
+
+  fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
       sync(it)
     } ?: run {
@@ -81,13 +93,13 @@ class PrisonerIndexService(
 
     val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
     val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
-    val storedPrisoner: Prisoner
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
-    if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      storedPrisoner = prisonerARepository.save(prisonerA)
+
+    val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerARepository.save(prisonerA)
     } else {
-      storedPrisoner = prisonerBRepository.save(prisonerB)
+      prisonerBRepository.save(prisonerB)
     }
 
     if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
@@ -100,6 +112,25 @@ class PrisonerIndexService(
 
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
 
+    log.trace("finished sync() {}", offenderBooking)
+    return storedPrisoner
+  }
+
+  fun reIndex(offenderBooking: OffenderBooking): Prisoner {
+    val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
+
+    val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
+    val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
+
+    val currentIndexStatus = indexStatusService.getCurrentIndex()
+
+    val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerBRepository.save(prisonerB)
+    } else {
+      prisonerARepository.save(prisonerA)
+    }
+
+    log.trace("finished reIndex() {}", offenderBooking)
     return storedPrisoner
   }
 
@@ -121,10 +152,8 @@ class PrisonerIndexService(
         val otherIndexCount = countIndex(currentIndex.otherIndex())
         log.info(
           "Current index is {} [{}], rebuilding index {} [{}]",
-          currentIndex,
-          countIndex(currentIndex),
-          currentIndex.otherIndex(),
-          otherIndexCount
+          currentIndex, countIndex(currentIndex),
+          currentIndex.otherIndex(), otherIndexCount
         )
         checkExistsAndReset(currentIndex.otherIndex())
 
