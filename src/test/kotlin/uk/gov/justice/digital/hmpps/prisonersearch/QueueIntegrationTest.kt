@@ -81,7 +81,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   protected val hmppsEventsQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
 
-  fun getNumberOfMessagesCurrentlyOnQueue(): Int? {
+  fun getNumberOfMessagesCurrentlyOnQueue(): Int {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
     val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
@@ -90,7 +90,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     return number
   }
 
-  fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int? {
+  fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
     val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
@@ -99,7 +99,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     return number
   }
 
-  fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int? {
+  fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int {
     val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(hmppsEventsQueue.queueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
     val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
@@ -120,6 +120,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
 
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it!! > 0 }
     await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
