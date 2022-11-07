@@ -88,6 +88,24 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message.Message).node("additionalInfo.prisonId").isEqualTo("MDI")
     assertThatJson(message.Message).node("additionalInfo.reason").isEqualTo("TRANSFERRED")
   }
+  @Test
+  fun `sends prisoner released events to the domain topic`() {
+    hmppsDomainEventEmitter.emitPrisonerReleaseEvent("some_offender", HmppsDomainEventEmitter.PrisonerReleaseReason.TRANSFERRED, "MDI")
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
+
+    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
+    val message: MsgBody = objectMapper.readValue(result.body)
+
+    assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.released")
+    assertThatJson(message.Message).node("version").isEqualTo(1)
+    assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
+    assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
+    assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
+    assertThatJson(message.Message).node("additionalInfo.prisonId").isEqualTo("MDI")
+    assertThatJson(message.Message).node("additionalInfo.reason").isEqualTo("TRANSFERRED")
+  }
 
   @Test
   fun `e2e - will send prisoner updated event to the domain topic`() {

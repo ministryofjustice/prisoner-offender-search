@@ -9,6 +9,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.RELEASED
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.SENT_TO_COURT
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.TEMPORARY_ABSENCE_RELEASE
 
 const val OFFENDER_NO = "A9460DY"
 
@@ -164,6 +167,60 @@ internal class PrisonerMovementsEventServiceTest {
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
         reason = HmppsDomainEventEmitter.PrisonerReceiveReason.READMISSION,
+        prisonId = "BXI",
+      )
+    }
+  }
+
+  @Nested
+  inner class CurrentlyInPrison {
+    private val previousPrisonerSnapshot = prisonerInWithBooking("BXI")
+
+    @Test
+    internal fun `will emit release event with reason of transferred when released to different prison`() {
+      val prisoner = prisonerBeingTransferred()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReleaseEvent(
+        offenderNo = OFFENDER_NO,
+        reason = HmppsDomainEventEmitter.PrisonerReleaseReason.TRANSFERRED,
+        prisonId = "BXI",
+      )
+    }
+    @Test
+    internal fun `will emit release event with reason of sent to court when moved to court`() {
+      val prisoner = prisonerOutAtCourt()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReleaseEvent(
+        offenderNo = OFFENDER_NO,
+        reason = SENT_TO_COURT,
+        prisonId = "BXI",
+      )
+    }
+    @Test
+    internal fun `will emit release event with reason of TAP when released on TAP`() {
+      val prisoner = prisonerOutOnTAP()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReleaseEvent(
+        offenderNo = OFFENDER_NO,
+        reason = TEMPORARY_ABSENCE_RELEASE,
+        prisonId = "BXI",
+      )
+    }
+    @Test
+    internal fun `will emit release event with reason of released when released from prison`() {
+      val prisoner = releasedPrisoner()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReleaseEvent(
+        offenderNo = OFFENDER_NO,
+        reason = RELEASED,
         prisonId = "BXI",
       )
     }
