@@ -9,9 +9,19 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.RETURN_FROM_COURT
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.TEMPORARY_ABSENCE_RETURN
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementChange.CourtReturn
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementChange.TAPReturn
-import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementChange.TransferIn
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.RELEASED
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.SENT_TO_COURT
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.TEMPORARY_ABSENCE_RELEASE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.CourtReturn
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.NewAdmission
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.Readmission
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.TAPReturn
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.TransferIn
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.Released
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.SentToCourt
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.TAPRelease
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.TransferOut
 
 @Service
 class PrisonerMovementsEventService(
@@ -24,31 +34,13 @@ class PrisonerMovementsEventService(
   ) {
     when (val movementChange = calculateMovementChange(previousPrisonerSnapshot, prisoner)) {
       PossibleMovementChange.None -> {}
-      is TransferIn -> domainEventEmitter.emitPrisonerReceiveEvent(
+      is PossibleMovementChange.MovementInChange -> domainEventEmitter.emitPrisonerReceiveEvent(
         offenderNo = movementChange.offenderNo,
         reason = movementChange.reason,
         prisonId = movementChange.prisonId,
       )
 
-      is CourtReturn -> domainEventEmitter.emitPrisonerReceiveEvent(
-        offenderNo = movementChange.offenderNo,
-        reason = movementChange.reason,
-        prisonId = movementChange.prisonId,
-      )
-
-      is TAPReturn -> domainEventEmitter.emitPrisonerReceiveEvent(
-        offenderNo = movementChange.offenderNo,
-        reason = movementChange.reason,
-        prisonId = movementChange.prisonId,
-      )
-
-      is PossibleMovementChange.MovementChange.NewAdmission -> domainEventEmitter.emitPrisonerReceiveEvent(
-        offenderNo = movementChange.offenderNo,
-        reason = movementChange.reason,
-        prisonId = movementChange.prisonId,
-      )
-
-      is PossibleMovementChange.MovementChange.Readmission -> domainEventEmitter.emitPrisonerReceiveEvent(
+      is PossibleMovementChange.MovementOutChange -> domainEventEmitter.emitPrisonerReleaseEvent(
         offenderNo = movementChange.offenderNo,
         reason = movementChange.reason,
         prisonId = movementChange.prisonId,
@@ -64,20 +56,35 @@ class PrisonerMovementsEventService(
       } else if (prisoner.isCourtReturn(previousPrisonerSnapshot)) {
         CourtReturn(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isNewAdmission(previousPrisonerSnapshot)) {
-        PossibleMovementChange.MovementChange.NewAdmission(prisonerNumber, prisoner.prisonId!!)
+        NewAdmission(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isReadmission(previousPrisonerSnapshot)) {
-        PossibleMovementChange.MovementChange.Readmission(prisonerNumber, prisoner.prisonId!!)
+        Readmission(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isTransferViaCourt(previousPrisonerSnapshot)) {
         TransferIn(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isTAPReturn(previousPrisonerSnapshot)) {
         TAPReturn(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isTransferViaTAP(previousPrisonerSnapshot)) {
         TransferIn(prisonerNumber, prisoner.prisonId!!)
-      } else if (prisoner.isSomeOtherMovementIn(previousPrisonerSnapshot)) {
+      } else if (prisoner.isTransferOut(previousPrisonerSnapshot)) {
+        TransferOut(prisonerNumber, previousPrisonerSnapshot?.prisonId!!)
+      } else if (prisoner.isCourtOutMovement(previousPrisonerSnapshot)) {
+        SentToCourt(prisonerNumber, previousPrisonerSnapshot?.prisonId!!)
+      } else if (prisoner.isTAPOutMovement(previousPrisonerSnapshot)) {
+        TAPRelease(prisonerNumber, previousPrisonerSnapshot?.prisonId!!)
+      } else if (prisoner.isRelease(previousPrisonerSnapshot)) {
+        Released(prisonerNumber, previousPrisonerSnapshot?.prisonId!!)
+      } else if (
+        prisoner.isSomeOtherMovementIn(previousPrisonerSnapshot) ||
+        prisoner.isSomeOtherMovementOut(previousPrisonerSnapshot)
+      ) {
         PossibleMovementChange.None.also {
           // really can't think a scenario where will hit this line, so lets log since it means
           // we are not dealing with all scenarios correctly
-          telemetryClient.trackEvent("POSPrisonerUpdatedEventsUnknownMovement", mapOf("offenderNo" to prisonerNumber), null)
+          telemetryClient.trackEvent(
+            "POSPrisonerUpdatedEventsUnknownMovement",
+            mapOf("offenderNo" to prisonerNumber),
+            null
+          )
         }
       } else {
         PossibleMovementChange.None
@@ -89,16 +96,29 @@ class PrisonerMovementsEventService(
 private fun Prisoner.isTransferIn(previousPrisonerSnapshot: Prisoner?) =
   previousPrisonerSnapshot?.inOutStatus == "TRN" && inOutStatus == "IN"
 
+private fun Prisoner.isTransferOut(previousPrisonerSnapshot: Prisoner?) =
+  previousPrisonerSnapshot?.inOutStatus == "IN" && inOutStatus == "TRN"
+
 private fun Prisoner.isCourtReturn(previousPrisonerSnapshot: Prisoner?) =
   previousPrisonerSnapshot?.inOutStatus == "OUT" &&
     previousPrisonerSnapshot.lastMovementTypeCode == "CRT" &&
     this.inOutStatus == "IN" &&
     this.lastMovementTypeCode == "CRT"
 
+private fun Prisoner.isCourtOutMovement(previousPrisonerSnapshot: Prisoner?) =
+  previousPrisonerSnapshot?.inOutStatus == "IN" &&
+    this.inOutStatus == "OUT" &&
+    this.lastMovementTypeCode == "CRT"
+
 private fun Prisoner.isTAPReturn(previousPrisonerSnapshot: Prisoner?) =
   previousPrisonerSnapshot?.inOutStatus == "OUT" &&
     previousPrisonerSnapshot.lastMovementTypeCode == "TAP" &&
     this.inOutStatus == "IN" &&
+    this.lastMovementTypeCode == "TAP"
+
+private fun Prisoner.isTAPOutMovement(previousPrisonerSnapshot: Prisoner?) =
+  previousPrisonerSnapshot?.inOutStatus == "IN" &&
+    this.inOutStatus == "OUT" &&
     this.lastMovementTypeCode == "TAP"
 
 private fun Prisoner.isTransferViaCourt(previousPrisonerSnapshot: Prisoner?) =
@@ -126,18 +146,43 @@ private fun Prisoner.isReadmission(previousPrisonerSnapshot: Prisoner?) =
     this.status == "ACTIVE IN" &&
     previousPrisonerSnapshot?.status == "INACTIVE OUT"
 
+private fun Prisoner.isRelease(previousPrisonerSnapshot: Prisoner?) =
+  this.lastMovementTypeCode == "REL" &&
+    this.status == "INACTIVE OUT" &&
+    previousPrisonerSnapshot?.status == "ACTIVE IN"
+
 private fun Prisoner.isSomeOtherMovementIn(previousPrisonerSnapshot: Prisoner?) =
   this.inOutStatus == "IN" &&
     this.status != previousPrisonerSnapshot?.status
 
+private fun Prisoner.isSomeOtherMovementOut(previousPrisonerSnapshot: Prisoner?) =
+  this.inOutStatus == "OUT" &&
+    this.status != previousPrisonerSnapshot?.status
+
 sealed class PossibleMovementChange {
-  sealed class MovementChange(val offenderNo: String, val reason: HmppsDomainEventEmitter.PrisonerReceiveReason) :
+  sealed class MovementInChange(
+    val offenderNo: String,
+    val prisonId: String,
+    val reason: HmppsDomainEventEmitter.PrisonerReceiveReason
+  ) :
     PossibleMovementChange() {
-    class TransferIn(offenderNo: String, val prisonId: String) : MovementChange(offenderNo, TRANSFERRED)
-    class CourtReturn(offenderNo: String, val prisonId: String) : MovementChange(offenderNo, RETURN_FROM_COURT)
-    class TAPReturn(offenderNo: String, val prisonId: String) : MovementChange(offenderNo, TEMPORARY_ABSENCE_RETURN)
-    class NewAdmission(offenderNo: String, val prisonId: String) : MovementChange(offenderNo, NEW_ADMISSION)
-    class Readmission(offenderNo: String, val prisonId: String) : MovementChange(offenderNo, READMISSION)
+    class TransferIn(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, TRANSFERRED)
+    class CourtReturn(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, RETURN_FROM_COURT)
+    class TAPReturn(offenderNo: String, prisonId: String) :
+      MovementInChange(offenderNo, prisonId, TEMPORARY_ABSENCE_RETURN)
+
+    class NewAdmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, NEW_ADMISSION)
+    class Readmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, READMISSION)
+  }
+
+  sealed class MovementOutChange(val offenderNo: String, val prisonId: String, val reason: PrisonerReleaseReason) :
+    PossibleMovementChange() {
+    class TransferOut(offenderNo: String, prisonId: String) :
+      MovementOutChange(offenderNo, prisonId, PrisonerReleaseReason.TRANSFERRED)
+
+    class TAPRelease(offenderNo: String, prisonId: String) : MovementOutChange(offenderNo, prisonId, TEMPORARY_ABSENCE_RELEASE)
+    class Released(offenderNo: String, prisonId: String) : MovementOutChange(offenderNo, prisonId, RELEASED)
+    class SentToCourt(offenderNo: String, prisonId: String) : MovementOutChange(offenderNo, prisonId, SENT_TO_COURT)
   }
 
   object None : PossibleMovementChange()

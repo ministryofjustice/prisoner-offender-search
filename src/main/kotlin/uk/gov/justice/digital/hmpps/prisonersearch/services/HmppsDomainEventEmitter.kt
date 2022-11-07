@@ -11,6 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.CREATED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_RECEIVED_EVENT_TYPE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_RELEASED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.UPDATED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferences
@@ -115,9 +116,13 @@ class HmppsDomainEventEmitter(
   fun emitPrisonerReleaseEvent(
     offenderNo: String,
     reason: PrisonerReleaseReason,
-    fromPrisonId: String,
+    prisonId: String,
   ) {
-    // TODO create event and send to hmpps domain topic
+    PrisonerReleasedDomainEvent(
+      PrisonerReleasedEvent(offenderNo, reason.name, prisonId),
+      Instant.now(clock),
+      diffProperties.host
+    ).publish()
   }
 
   companion object {
@@ -125,6 +130,7 @@ class HmppsDomainEventEmitter(
     const val UPDATED_EVENT_TYPE = "prisoner-offender-search.prisoner.updated"
     const val CREATED_EVENT_TYPE = "prisoner-offender-search.prisoner.created"
     const val PRISONER_RECEIVED_EVENT_TYPE = "prisoner-offender-search.prisoner.received"
+    const val PRISONER_RELEASED_EVENT_TYPE = "prisoner-offender-search.prisoner.released"
   }
 }
 
@@ -196,6 +202,21 @@ class PrisonerReceivedDomainEvent(additionalInfo: PrisonerReceivedEvent, occurre
     host = host,
     description = "A prisoner has been received into a prison",
     eventType = PRISONER_RECEIVED_EVENT_TYPE
+  )
+
+data class PrisonerReleasedEvent(
+  override val nomsNumber: String,
+  val reason: String,
+  val prisonId: String,
+) : PrisonerAdditionalInfo()
+
+class PrisonerReleasedDomainEvent(additionalInfo: PrisonerReleasedEvent, occurredAt: Instant, host: String) :
+  PrisonerDomainEvent<PrisonerReleasedEvent>(
+    additionalInfo = additionalInfo,
+    occurredAt = occurredAt,
+    host = host,
+    description = "A prisoner has been released, possibly temporarily, from a prison",
+    eventType = PRISONER_RELEASED_EVENT_TYPE
   )
 
 fun <T : PrisonerAdditionalInfo> PrisonerDomainEvent<T>.asMap(): Map<String, String> {
