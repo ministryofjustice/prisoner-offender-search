@@ -12,7 +12,7 @@
     is received; this service also updates its records as a result of NOMIS prisoner events, so you might encounter a race
     condition if your read is triggered from the same event.
   </p>
-  <p>The data returned for each prisoner record is essentially a snapshot of key prisoner data. This includes the
+  <div>The data returned for each prisoner record is essentially a snapshot of key prisoner data. This includes the
     following:
   <ul>
     <li>Identifiers from both NOMIS and those held in other systems</li>
@@ -22,7 +22,7 @@
     <li>Alerts</li>
   </ul>
   See the schema definition for the API for full details.
-  </p>
+  </div>
   <h2>Types of endpoints</h2>
   <h3>Searching for a specific prisoner based on criteria</h3>
   <p>
@@ -48,4 +48,90 @@
     Retrieving a batch of records either by supplying a list of identifiers or a criteria that will a match many records;
     for instance, all people in a prison wing or people to be released on a specific date.
   </p>
+  <h3>HMPPS Domain Events</h3>
+  <div>
+    This service also raises HMPPS domain events. This is done by analysing deltas when the record is updated in Elastic Search.
+
+    The specific events currently being raised are
+    <ul>
+      <li>
+        <b>prison-offender-search.prisoner.released</b> is raised when a prisoner is released from prison, this includes temporary releases such as court appearances and transfers
+        <ul>
+          <li><b>eventType</b> string</li>
+          <li><b>occurredAt</b> ISO offset date time - when the release was recorded e.g 2021-02-08T14:41:11.526762Z</li>
+          <li><b>publishedAt</b> ISO offset date time - when this event was first published e.g 2021-06-08T14:41:11.526762+01:00</li>
+          <li><b>version</b> number - version of this event message. Currently <b>1</b></li>
+          <li><b>description</b> string - human-readable description of event</li>
+          <li><b>additionalInformation</b> object - additional information
+            <ul>
+              <li><b>nomsNumber</b> string - NOMIS offender number</li>
+              <li><b>reason</b> enum - reason for the release. Will be one of these values
+                <ul>
+                  <li><b>TEMPORARY_ABSENCE_RELEASE</b> prisoner has been temporarily released and is expected to return</li>
+                  <li><b>RELEASED</b> prisoner has been discharged, typically into the care of probation</li>
+                  <li><b>SENT_TO_COURT</b> prisoner has sent to court</li>
+                  <li><b>TRANSFERRED</b> prisoner is being transferred to another prison</li>
+                </ul>
+              </li>
+              <li><b>detail</b> string - further human readable information about the reason. The contents is developer focused and not to be relied on. Example<b>Movement reason code YY</b>
+              <li><b>prisonId</b> string - the current prison where the prisoner was last located</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <b>prison-offender-search.prisoner.received</b> is raised when a prisoner is received to prison, this may be due to remand, a conviction or a recall from a broken licence. Also included are returns from temporary absences and transfers.
+        <ul>
+          <li><b>eventType</b> string</li>
+          <li><b>occurredAt</b> ISO offset date time - when the receive booking was recorded e.g 2021-02-08T14:41:11.526762Z</li>
+          <li><b>publishedAt</b> ISO offset date time - when this event was first published e.g 2021-06-08T14:41:11.526762+01:00</li>
+          <li><b>version</b> number - version of this event message. Currently <b>1</b></li>
+          <li><b>description</b> string - human readable description of event</li>
+          <li><b>additionalInformation</b> object - additional information
+            <ul>
+              <li><b>nomsNumber</b> string - NOMIS offender number</li>
+              <li><b>reason</b> enum - reason for the receive. Will be one of these values below. It has been observed that administration mistakes in NOMIS can cause the reason for RECALL and CONVICTED to be not always be accurate.
+                <ul>
+                  <li><b>NEW_ADMISSION</b> prisoner is entering prison due to new charges</li>
+                  <li><b>READMISSION</b> prisoner is re-entering prison due to a new court order or recall</li>
+                  <li><b>TEMPORARY_ABSENCE_RETURN</b> prisoner is returning from temporary absence e.g. day release</li>
+                  <li><b>RETURN_FROM_COURT</b> prisoner is returning from court</li>
+                  <li><b>TRANSFERRED</b> prisoner has been transferred from another prison</li>
+                </ul>
+              </li>
+              <li><b>detail</b> string - further human readable information about the reason. The contents is developer focused and not to be relied on. Example<b>Recall referral date 2021-06-13</b>
+              </li>
+              <li><b>prisonId</b> string - the current prison where the prisoner is located</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <b>prison-offender-search.prisoner.updated</b> is raised when a prisoner is updated for any reason. This can be raised alongside the events above.
+        <ul>
+          <li><b>eventType</b> string</li>
+          <li><b>occurredAt</b> ISO offset date time - when the receive booking was recorded e.g 2021-02-08T14:41:11.526762Z</li>
+          <li><b>publishedAt</b> ISO offset date time - when this event was first published e.g 2021-06-08T14:41:11.526762+01:00</li>
+          <li><b>version</b> number - version of this event message. Currently <b>1</b></li>
+          <li><b>description</b> string - human-readable description of event</li>
+          <li><b>additionalInformation</b> object - additional information
+            <ul>
+              <li><b>nomsNumber</b> string - NOMS number of the prisoner</li>
+              <li><b>categoriesChanged</b> string - One of more category of change
+              <ul>
+                <li><b>IDENTIFIERS</b> key unique identifiers e.g PNC number</li>
+                <li><b>PERSONAL_DETAILS</b> personal details e.g. firstName</li>
+                <li><b>ALERTS</b> alert has changed</li>
+                <li><b>STATUS</b> in/out status or active/inactive status or legal and imprisonment status</li>
+                <li><b>LOCATION</b> prisoner location and last movement e.g. prisonName</li>
+                <li><b>SENTENCE</b> current sentence and sentence dates e.g conditionalReleaseDate</li>
+                <li><b>RESTRICTED_PATIENT</b> restricted hospital patient details have changed e.g. dischargedHospitalId</li>
+              </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
 </div>

@@ -28,7 +28,6 @@ class PrisonerMovementsEventService(
         offenderNo = movementChange.offenderNo,
         reason = movementChange.reason,
         prisonId = movementChange.prisonId,
-        fromPrisonId = null /* TODO: get previous prisonId from movements API */
       )
 
       is CourtReturn -> domainEventEmitter.emitPrisonerReceiveEvent(

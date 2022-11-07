@@ -88,10 +88,9 @@ class HmppsDomainEventEmitter(
     offenderNo: String,
     reason: PrisonerReceiveReason,
     prisonId: String,
-    fromPrisonId: String? = null,
   ) {
     PrisonerReceivedDomainEvent(
-      PrisonerReceivedEvent(offenderNo, reason.name, prisonId, fromPrisonId),
+      PrisonerReceivedEvent(offenderNo, reason.name, prisonId),
       Instant.now(clock),
       diffProperties.host
     ).publish()
@@ -188,7 +187,6 @@ data class PrisonerReceivedEvent(
   override val nomsNumber: String,
   val reason: String,
   val prisonId: String,
-  val fromPrisonId: String?
 ) : PrisonerAdditionalInfo()
 
 class PrisonerReceivedDomainEvent(additionalInfo: PrisonerReceivedEvent, occurredAt: Instant, host: String) :

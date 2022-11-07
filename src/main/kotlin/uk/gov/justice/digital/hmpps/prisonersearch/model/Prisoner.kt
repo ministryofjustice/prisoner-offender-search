@@ -167,7 +167,7 @@ open class Prisoner : Diffable<Prisoner> {
   var imprisonmentStatusDescription: String? = null
 
   @Schema(required = true, description = "Most serious offence for this sentence", example = "Robbery")
-  @DiffableProperty(DiffCategory.STATUS)
+  @DiffableProperty(DiffCategory.SENTENCE)
   var mostSeriousOffence: String? = null
 
   @Schema(description = "Indicates that the offender has been recalled", example = "false")
