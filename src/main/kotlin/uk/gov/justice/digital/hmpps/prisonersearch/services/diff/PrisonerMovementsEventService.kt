@@ -149,7 +149,7 @@ private fun Prisoner.isReadmission(previousPrisonerSnapshot: Prisoner?) =
 private fun Prisoner.isRelease(previousPrisonerSnapshot: Prisoner?) =
   this.lastMovementTypeCode == "REL" &&
     this.status == "INACTIVE OUT" &&
-    previousPrisonerSnapshot?.status == "ACTIVE IN"
+    previousPrisonerSnapshot?.active == true
 
 private fun Prisoner.isSomeOtherMovementIn(previousPrisonerSnapshot: Prisoner?) =
   this.inOutStatus == "IN" &&

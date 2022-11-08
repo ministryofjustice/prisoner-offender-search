@@ -315,6 +315,8 @@ open class Prisoner : Diffable<Prisoner> {
   var dischargeDetails: String? = null
 
   override fun diff(other: Prisoner): DiffResult<Prisoner> = getDiffResult(this, other)
+  val active: Boolean
+    get() = status?.contains("ACTIVE") ?: false
 }
 
 @Document(indexName = "prisoner-search-a")

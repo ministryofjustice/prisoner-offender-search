@@ -13,6 +13,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_RECEIVED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_RELEASED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.UPDATED_EVENT_TYPE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferences
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -91,26 +93,26 @@ class HmppsDomainEventEmitter(
     prisonId: String,
   ) {
     PrisonerReceivedDomainEvent(
-      PrisonerReceivedEvent(offenderNo, reason.name, prisonId),
+      PrisonerReceivedEvent(offenderNo, reason, prisonId),
       Instant.now(clock),
       diffProperties.host
     ).publish()
   }
 
-  enum class PrisonerReceiveReason {
-    NEW_ADMISSION,
-    READMISSION,
-    TRANSFERRED,
-    RETURN_FROM_COURT,
-    TEMPORARY_ABSENCE_RETURN,
+  enum class PrisonerReceiveReason(val description: String) {
+    NEW_ADMISSION("admission on new charges"),
+    READMISSION("re-admission on an existing booking"),
+    TRANSFERRED("transfer from another prison"),
+    RETURN_FROM_COURT("returned back to prison from court"),
+    TEMPORARY_ABSENCE_RETURN("returned after a temporary absence"),
   }
 
-  enum class PrisonerReleaseReason {
-    TEMPORARY_ABSENCE_RELEASE,
-    RELEASED_TO_HOSPITAL,
-    RELEASED,
-    SENT_TO_COURT,
-    TRANSFERRED,
+  enum class PrisonerReleaseReason(val description: String) {
+    TEMPORARY_ABSENCE_RELEASE("released on temporary absence"),
+    RELEASED_TO_HOSPITAL("released to a secure hospital"),
+    RELEASED("released from prison"),
+    SENT_TO_COURT("sent to court"),
+    TRANSFERRED("transfer to another prison"),
   }
 
   fun emitPrisonerReleaseEvent(
@@ -119,7 +121,7 @@ class HmppsDomainEventEmitter(
     prisonId: String,
   ) {
     PrisonerReleasedDomainEvent(
-      PrisonerReleasedEvent(offenderNo, reason.name, prisonId),
+      PrisonerReleasedEvent(offenderNo, reason, prisonId),
       Instant.now(clock),
       diffProperties.host
     ).publish()
@@ -191,7 +193,7 @@ class PrisonerCreatedDomainEvent(additionalInfo: PrisonerCreatedEvent, occurredA
 
 data class PrisonerReceivedEvent(
   override val nomsNumber: String,
-  val reason: String,
+  val reason: PrisonerReceiveReason,
   val prisonId: String,
 ) : PrisonerAdditionalInfo()
 
@@ -200,13 +202,13 @@ class PrisonerReceivedDomainEvent(additionalInfo: PrisonerReceivedEvent, occurre
     additionalInfo = additionalInfo,
     occurredAt = occurredAt,
     host = host,
-    description = "A prisoner has been received into a prison",
+    description = "A prisoner has been received into a prison with reason: ${additionalInfo.reason.description}",
     eventType = PRISONER_RECEIVED_EVENT_TYPE
   )
 
 data class PrisonerReleasedEvent(
   override val nomsNumber: String,
-  val reason: String,
+  val reason: PrisonerReleaseReason,
   val prisonId: String,
 ) : PrisonerAdditionalInfo()
 
@@ -215,7 +217,7 @@ class PrisonerReleasedDomainEvent(additionalInfo: PrisonerReleasedEvent, occurre
     additionalInfo = additionalInfo,
     occurredAt = occurredAt,
     host = host,
-    description = "A prisoner has been released, possibly temporarily, from a prison",
+    description = "A prisoner has been released from a prison with reason: ${additionalInfo.reason.description}",
     eventType = PRISONER_RELEASED_EVENT_TYPE
   )
 

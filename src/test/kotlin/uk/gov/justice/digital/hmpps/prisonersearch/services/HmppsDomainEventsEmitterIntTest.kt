@@ -82,6 +82,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.received")
     assertThatJson(message.Message).node("version").isEqualTo(1)
+    assertThatJson(message.Message).node("description").isEqualTo("A prisoner has been received into a prison with reason: transfer from another prison")
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
     assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
@@ -100,6 +101,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.released")
     assertThatJson(message.Message).node("version").isEqualTo(1)
+    assertThatJson(message.Message).node("description").isEqualTo("A prisoner has been released from a prison with reason: transfer to another prison")
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
     assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
