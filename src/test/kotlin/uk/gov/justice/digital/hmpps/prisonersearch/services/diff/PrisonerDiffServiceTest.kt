@@ -70,6 +70,17 @@ class PrisonerDiffServiceTest {
       verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any())
       verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
+
+    @Test
+    fun `should raise no-change telemetry if there are no changes using hash`() {
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
+      whenever(objectMapper.writeValueAsString(any())).thenReturn("a_string")
+      val prisoner = Prisoner().apply { pncNumber = "somePnc1" }
+
+      prisonerDifferenceService.handleDifferences(prisoner, someOffenderBooking(), prisoner)
+
+      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdatedNoChange"), anyMap(), isNull())
+    }
   }
 
   @Nested
