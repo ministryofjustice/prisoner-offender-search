@@ -8,9 +8,11 @@ import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilAsserted
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doThrow
@@ -39,17 +41,14 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
-    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
+    val message = readNextDomainEventMessage()
 
-    val message: MsgBody = objectMapper.readValue(result.body)
-
-    assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
-    assertThatJson(message.Message).node("version").isEqualTo(1)
-    assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
-    assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
-    assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
-    assertThatJson(message.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
+    assertThatJson(message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
+    assertThatJson(message).node("version").isEqualTo(1)
+    assertThatJson(message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
+    assertThatJson(message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
+    assertThatJson(message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
+    assertThatJson(message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
   }
 
   @Test
@@ -111,32 +110,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner updated event to the domain topic`() {
-    prisonerIndexService.delete("A1239DD")
-    prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD").toOffenderBooking())
-        )
-    )
-    val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
-
-    // create the prisoner in ES
-    search(SearchCriteria("A1239DD", null, null), "/results/empty.json")
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A1239DD") } matches { it == 1 }
-
-    // Should receive a prisoner created domain event
-    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
-    val createResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, createResult.receiptHandle)
-    val createMsgBody: MsgBody = objectMapper.readValue(createResult.body)
-
-    assertThatJson(createMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
-    assertThatJson(createMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
@@ -147,48 +121,74 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
         )
     )
+    val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
-    // The update should have triggered a prisoner updated domain event
-    val updateResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, updateResult.receiptHandle)
-
-    val updateMsgBody: MsgBody = objectMapper.readValue(updateResult.body)
-    assertThatJson(updateMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
-    assertThatJson(updateMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
-    assertThatJson(updateMsgBody.Message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
+    val updateMsgBody = readNextDomainEventMessage()
+    assertThatJson(updateMsgBody).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
+    assertThatJson(updateMsgBody).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
+    assertThatJson(updateMsgBody).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
   }
 
   @Test
-  fun `e2e - will send single prisoner updated event for 2 identical updates`() {
-    prisonerIndexService.delete("A1239DD")
+  fun `e2e - will send prisoner release event to the domain topic`() {
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+
+    // update the prisoner on ES
     prisonMockServer.stubFor(
       WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
           WireMock.aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD").toOffenderBooking())
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = true).toOffenderBooking())
         )
     )
+    eventQueueSqsClient.sendMessage(
+      eventQueueUrl,
+      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+    )
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.updated")
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.released")
+  }
+  @Test
+  fun `e2e - will send prisoner received event to the domain topic`() {
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", released = true))
+
+    // update the prisoner on ES
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = false).toOffenderBooking())
+        )
+    )
+    eventQueueSqsClient.sendMessage(
+      eventQueueUrl,
+      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+    )
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.updated")
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.received")
+  }
+
+  @Test
+  fun `e2e - will send single prisoner updated event for 2 identical updates`() {
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
-
-    // create the prisoner in ES
-    search(SearchCriteria("A1239DD", null, null), "/results/empty.json")
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A1239DD") } matches { it == 1 }
-
-    // Should receive a prisoner created domain event
-    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
-    val createResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, createResult.receiptHandle)
-
-    val createMsgBody: MsgBody = objectMapper.readValue(createResult.body)
-    assertThatJson(createMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
-    assertThatJson(createMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
 
     // update the prisoner on ES - TWICE
     prisonMockServer.stubFor(
@@ -204,20 +204,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
     // expecting 3 attempts at messages - the initial create then 2 updates
-    await untilCallTo { calledHandleDifferences(times = 3) } matches { it == true }
+    await untilAsserted { verify(prisonerDifferenceService, times(2)).handleDifferences(anyOrNull(), any(), any()) }
 
     // but there is only 1 message on the domain queue because the last update was ignored
     assertThat(getNumberOfMessagesCurrentlyOnDomainQueue()).isEqualTo(1)
-  }
-
-  fun calledHandleDifferences(times: Int): Boolean {
-    kotlin.runCatching {
-      verify(prisonerDifferenceService, times(times)).handleDifferences(anyOrNull(), any(), any())
-    }
-      .onFailure {
-        return false
-      }
-    return true
   }
 
   /*
@@ -236,32 +226,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
    */
   @Test
   fun `e2e - should not update prisoner hash if there is an exception when sending the event`() {
-    prisonerIndexService.delete("A1239DD")
-    prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD").toOffenderBooking())
-        )
-    )
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
-
-    // create the prisoner in ES
-    search(SearchCriteria("A1239DD", null, null), "/results/empty.json")
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    eventQueueSqsClient.sendMessage(eventQueueUrl, message)
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    await untilCallTo { prisonRequestCountFor("/api/offenders/A1239DD") } matches { it == 1 }
-
-    // Should receive a prisoner created domain event
-    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
-    val createResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, createResult.receiptHandle)
-
-    val createMsgBody: MsgBody = objectMapper.readValue(createResult.body)
-    assertThatJson(createMsgBody.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
-    assertThatJson(createMsgBody.Message).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
 
     // remember the prisoner event hash
     val insertedPrisonerEventHash = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
@@ -279,21 +246,45 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    await untilCallTo { attemptedToSendBothDomainEvents() } matches { it == true }
+    await untilAsserted { verify(hmppsEventTopicSnsClient).publish(any()) }
 
     // The prisoner hash update should have been rolled back
     val prisonerEventHashAfterAttemptedUpdate = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
     assertThat(prisonerEventHashAfterAttemptedUpdate).isEqualTo(insertedPrisonerEventHash)
   }
 
-  private fun attemptedToSendBothDomainEvents(): Boolean {
-    kotlin.runCatching {
-      verify(hmppsEventTopicSnsClient, times(2)).publish(any())
-    }
-      .onFailure {
-        return false
-      }
-    return true
+  fun recreatePrisoner(builder: PrisonerBuilder) {
+    val prisonerNumber: String = builder.prisonerNumber
+
+    prisonerIndexService.delete(prisonerNumber)
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(builder.toOffenderBooking())
+        )
+    )
+    eventQueueSqsClient.sendMessage(
+      eventQueueUrl,
+      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", prisonerNumber)
+    )
+
+    // create the prisoner in ES
+    await untilCallTo { prisonRequestCountFor("/api/offenders/$prisonerNumber") } matches { it == 1 }
+
+    // delete create events
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it != 0 }
+
+    purgeHmppsEventsQueue()
+
+    Mockito.reset(hmppsEventTopicSnsClient)
+    Mockito.reset(prisonerDifferenceService)
+  }
+  fun readNextDomainEventMessage(): String {
+    val updateResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, updateResult.receiptHandle)
+    return objectMapper.readValue<MsgBody>(updateResult.body).Message
   }
 }
 
