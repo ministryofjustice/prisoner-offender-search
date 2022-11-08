@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.v3.oas.annotations.media.Schema
 import org.apache.commons.lang3.builder.DiffResult
 import org.apache.commons.lang3.builder.Diffable
@@ -315,8 +316,10 @@ open class Prisoner : Diffable<Prisoner> {
   var dischargeDetails: String? = null
 
   override fun diff(other: Prisoner): DiffResult<Prisoner> = getDiffResult(this, other)
+
+  @get:JsonIgnore
   val active: Boolean
-    get() = status?.contains("ACTIVE") ?: false
+    get() = status?.startsWith("ACTIVE") ?: false
 }
 
 @Document(indexName = "prisoner-search-a")
