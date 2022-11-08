@@ -276,6 +276,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     // delete create events
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it != 0 }
 
+    await untilCallTo { prisonerEventHashRepository.findById(prisonerNumber) } matches { it != null }
+
     purgeHmppsEventsQueue()
 
     Mockito.reset(hmppsEventTopicSnsClient)
