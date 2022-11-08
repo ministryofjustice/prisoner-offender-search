@@ -118,7 +118,7 @@ class HmppsDomainEventsEmitterTest {
         check {
           assertThat(it["eventType"]).isEqualTo("prisoner-offender-search.prisoner.received")
           assertThat(it["version"]).isEqualTo("1")
-          assertThat(it["description"]).isEqualTo("A prisoner has been received into a prison")
+          assertThat(it["description"]).isEqualTo("A prisoner has been received into a prison with reason: re-admission on an existing booking")
           assertThat(it["additionalInfo.nomsNumber"]).isEqualTo("some_offender")
           assertThat(it["additionalInfo.reason"]).isEqualTo("READMISSION")
           assertThat(it["additionalInfo.prisonId"]).isEqualTo("MDI")
