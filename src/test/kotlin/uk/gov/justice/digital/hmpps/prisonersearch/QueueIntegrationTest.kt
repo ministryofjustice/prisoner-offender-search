@@ -399,7 +399,10 @@ abstract class QueueIntegrationTest : IntegrationTest() {
             agencyId = "OUT",
           )
         } else {
-          it
+          it.copy(
+            lastMovementTypeCode = "ADM",
+            lastMovementReasonCode = "I",
+          )
         }
       }
     )
