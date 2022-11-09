@@ -133,4 +133,13 @@
       </li>
     </ul>
   </div>
+  <p>
+    Since these events can only be derived from changes that this service detects these events can not be considered the source of truth
+    but a side effect of other services - NOMIS being the source of the vast majority of changes.
+    So this is a good source when it is important that the Elastic Search datastore has already been updated where otherwise a NOMIS prisoner event could cause a race condition.
+    However, since the majority of changes are sourced by NOMIS amendments the business events reflect what have been entered into NOMIS rather than real world;
+    for example occasionally there maybe a release and receive event in quick succession for the same prisoner simply because there has been some administrative changes in NOMIS rather than the prisoner
+    has actually been released and received within a few minutes. A client might wish to use `prisoner-offender-events` that are delivered slower but are more likely to reflect real world changes rather
+    than just NOMIS changes. If a client is more interested in when changes are made in NOMIS than these services events are more appropriate.
+  </p>
 </div>
