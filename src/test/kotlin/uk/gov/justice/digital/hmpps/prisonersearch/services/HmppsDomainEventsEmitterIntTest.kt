@@ -203,7 +203,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
 
-    // expecting 3 attempts at messages - the initial create then 2 updates
+    // expecting  2 updates
     await untilAsserted { verify(prisonerDifferenceService, times(2)).handleDifferences(anyOrNull(), any(), any()) }
 
     // but there is only 1 message on the domain queue because the last update was ignored
