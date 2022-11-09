@@ -93,6 +93,19 @@ internal class PrisonerMovementsEventServiceTest {
         prisonId = "BXI",
       )
     }
+
+    @Test
+    internal fun `will emit release event with reason of released when released from court`() {
+      val prisoner = releasedPrisoner()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReleaseEvent(
+        offenderNo = OFFENDER_NO,
+        reason = RELEASED,
+        prisonId = "WWI",
+      )
+    }
   }
   @Nested
   inner class OutOnTAP {
@@ -121,6 +134,19 @@ internal class PrisonerMovementsEventServiceTest {
         offenderNo = OFFENDER_NO,
         reason = HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED,
         prisonId = "BXI",
+      )
+    }
+
+    @Test
+    internal fun `will emit release event with reason of released when released from TAP`() {
+      val prisoner = releasedPrisoner()
+
+      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+
+      verify(domainEventsEmitter).emitPrisonerReleaseEvent(
+        offenderNo = OFFENDER_NO,
+        reason = RELEASED,
+        prisonId = "WWI",
       )
     }
   }
