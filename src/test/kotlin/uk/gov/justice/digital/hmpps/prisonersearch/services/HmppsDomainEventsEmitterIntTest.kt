@@ -47,8 +47,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message).node("version").isEqualTo(1)
     assertThatJson(message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
-    assertThatJson(message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
-    assertThatJson(message).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
+    assertThatJson(message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
+    assertThatJson(message).node("additionalInformation.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
   }
 
   @Test
@@ -66,7 +66,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message.Message).node("version").isEqualTo(1)
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
-    assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
+    assertThatJson(message.Message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
   }
 
   @Test
@@ -84,9 +84,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message.Message).node("description").isEqualTo("A prisoner has been received into a prison with reason: transfer from another prison")
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
-    assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
-    assertThatJson(message.Message).node("additionalInfo.prisonId").isEqualTo("MDI")
-    assertThatJson(message.Message).node("additionalInfo.reason").isEqualTo("TRANSFERRED")
+    assertThatJson(message.Message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
+    assertThatJson(message.Message).node("additionalInformation.prisonId").isEqualTo("MDI")
+    assertThatJson(message.Message).node("additionalInformation.reason").isEqualTo("TRANSFERRED")
   }
   @Test
   fun `sends prisoner released events to the domain topic`() {
@@ -103,9 +103,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message.Message).node("description").isEqualTo("A prisoner has been released from a prison with reason: transfer to another prison")
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
-    assertThatJson(message.Message).node("additionalInfo.nomsNumber").isEqualTo("some_offender")
-    assertThatJson(message.Message).node("additionalInfo.prisonId").isEqualTo("MDI")
-    assertThatJson(message.Message).node("additionalInfo.reason").isEqualTo("TRANSFERRED")
+    assertThatJson(message.Message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
+    assertThatJson(message.Message).node("additionalInformation.prisonId").isEqualTo("MDI")
+    assertThatJson(message.Message).node("additionalInformation.reason").isEqualTo("TRANSFERRED")
   }
 
   @Test
@@ -129,8 +129,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     val updateMsgBody = readNextDomainEventMessage()
     assertThatJson(updateMsgBody).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
-    assertThatJson(updateMsgBody).node("additionalInfo.nomsNumber").isEqualTo("A1239DD")
-    assertThatJson(updateMsgBody).node("additionalInfo.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
+    assertThatJson(updateMsgBody).node("additionalInformation.nomsNumber").isEqualTo("A1239DD")
+    assertThatJson(updateMsgBody).node("additionalInformation.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
   }
 
   @Test
