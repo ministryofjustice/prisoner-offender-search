@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.5.7"
-  kotlin("plugin.spring") version "1.7.20"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.6.0-beta"
+  kotlin("plugin.spring") version "1.7.21"
 }
 
 configurations {
@@ -41,8 +41,8 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10")
   implementation("com.google.guava:guava:31.1-jre")
 
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.12")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.333")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.13")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.342")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.5.0")
@@ -51,9 +51,9 @@ dependencies {
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.7")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
-  testImplementation("org.mockito:mockito-inline:4.8.1")
+  testImplementation("org.mockito:mockito-inline:4.9.0")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.0")
-  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
+  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 
 java {
