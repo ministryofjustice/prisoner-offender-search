@@ -87,6 +87,24 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .jsonPath("components.eventqueue-health.details.dlqStatus").isEqualTo("UP")
       .jsonPath("components.eventqueue-health.details.messagesOnDlq").isEqualTo(0)
   }
+  @Test
+  fun `HMPPS Domain queue health reports UP`() {
+    subPing(200)
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
+      .jsonPath("components.hmppsdomainqueue-health.details.queueName").isEqualTo(hmppsDomainQueueName)
+      .jsonPath("components.hmppsdomainqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.hmppsdomainqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.hmppsdomainqueue-health.details.dlqName").isEqualTo(hmppsDomainQueueDlqName)
+      .jsonPath("components.hmppsdomainqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.hmppsdomainqueue-health.details.messagesOnDlq").isEqualTo(0)
+  }
 
   @Test
   fun `Index queue health reports UP`() {

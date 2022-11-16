@@ -51,6 +51,10 @@ abstract class IntegrationTest {
   internal lateinit var eventQueueSqsClient: AmazonSQS
 
   @SpyBean
+  @Qualifier("hmppsdomainqueue-sqs-client")
+  internal lateinit var hmppsDomainQueueSqsClient: AmazonSQS
+
+  @SpyBean
   @Qualifier("hmppseventtopic-sns-client")
   internal lateinit var hmppsEventTopicSnsClient: AmazonSNS
 
@@ -61,6 +65,7 @@ abstract class IntegrationTest {
   lateinit var clock: Clock
 
   protected val eventQueue by lazy { hmppsQueueService.findByQueueId("eventqueue") ?: throw MissingQueueException("HmppsQueue eventqueue not found") }
+  protected val hmppsDomainQueue by lazy { hmppsQueueService.findByQueueId("hmppsdomainqueue") ?: throw MissingQueueException("HmppsQueue hmppsdomainqueue not found") }
   protected val indexQueue by lazy { hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found") }
 
   val eventQueueName by lazy { eventQueue.queueName }
@@ -71,6 +76,10 @@ abstract class IntegrationTest {
   val indexQueueUrl by lazy { indexQueue.queueUrl }
   val indexDlqName by lazy { indexQueue.dlqName as String }
   val indexDlqUrl by lazy { indexQueue.dlqUrl as String }
+  val hmppsDomainQueueName by lazy { hmppsDomainQueue.queueName }
+  val hmppsDomainQueueUrl by lazy { hmppsDomainQueue.queueUrl }
+  val hmppsDomainQueueDlqName by lazy { hmppsDomainQueue.dlqName as String }
+  val hmppsDomainQueueDlqUrl by lazy { hmppsDomainQueue.dlqUrl as String }
 
   @Autowired
   private lateinit var gson: Gson
@@ -197,6 +206,16 @@ abstract class IntegrationTest {
         val config = queues["eventqueue"]
           ?: throw MissingQueueException("HmppsSqsProperties config for eventqueue not found")
         hmppsQueueFactory.createSqsClient("eventqueue", config, hmppsSqsProperties, eventQueueSqsDlqClient)
+      }
+    @Bean("hmppsdomainqueue-sqs-client")
+    fun hmppsDomainQueueSqsClient(
+      hmppsSqsProperties: HmppsSqsProperties,
+      @Qualifier("hmppsdomainqueue-sqs-dlq-client") hmppsDomainQueueSqsDlqClient: AmazonSQS
+    ): AmazonSQS =
+      with(hmppsSqsProperties) {
+        val config = queues["hmppsdomainqueue"]
+          ?: throw MissingQueueException("HmppsSqsProperties config for hmppsdomainqueue not found")
+        hmppsQueueFactory.createSqsClient("hmppsdomainqueue", config, hmppsSqsProperties, hmppsDomainQueueSqsDlqClient)
       }
 
     @Bean("hmppseventtopic-sns-client")
