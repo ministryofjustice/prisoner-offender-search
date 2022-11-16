@@ -42,6 +42,9 @@ hmpps.sqs:
     eventqueue:
       queueName: event-queue
       dlqName: event-dlq
+    hmppsdomainqueue:
+      queueName: hmpps-domain-queue
+      dlqName: hmpps-domain-dlq
     indexqueue:
       queueName: index-queue
       dlqName: index-dlq

@@ -58,6 +58,11 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
+  @Qualifier("hmppsdomainqueue-sqs-dlq-client")
+  lateinit var hmppsDomainQueueSqsDlqClient: AmazonSQS
+
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
   @Qualifier("indexqueue-sqs-dlq-client")
   lateinit var indexQueueSqsDlqClient: AmazonSQS
 
