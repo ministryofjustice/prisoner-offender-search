@@ -23,6 +23,8 @@ generic-prometheus-alerts:
   sqsAlertsQueueNames:
     - "Digital-Prison-Services-dev-prisoner_offender_search_queue"
     - "Digital-Prison-Services-dev-prisoner_offender_search_queue_dl"
+    - "Digital-Prison-Services-dev-prisoner_offender_search_domain_queue"
+    - "Digital-Prison-Services-dev-prisoner_offender_search_domain_dlq"
     - "dps-dev-prisoner_offender_index_queue"
     - "dps-dev-prisoner_offender_index_queue_dl"
   sqsAlertsOldestThreshold: 10
