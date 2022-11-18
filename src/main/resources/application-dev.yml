@@ -25,6 +25,11 @@ restricted-patients:
     id: prisoner-search-to-restricted-patients-api
     secret: clientsecret
 
+incentives:
+  client:
+    id: incentives-api
+    secret: clientsecret
+
 spring:
   security:
     oauth2:
