@@ -39,6 +39,7 @@ api:
       oauth: http://localhost:8090/auth
       nomis: http://localhost:8093
       restricted-patients: http://localhost:8095
+      incentives: http://localhost:8096
 
 oauth:
   client:
@@ -48,6 +49,11 @@ oauth:
 restricted-patients:
   client:
     id: prisoner-search-to-restricted-patients-api
+    secret: clientsecret
+
+incentives:
+  client:
+    id: incentives-api
     secret: clientsecret
 
 management.endpoint:

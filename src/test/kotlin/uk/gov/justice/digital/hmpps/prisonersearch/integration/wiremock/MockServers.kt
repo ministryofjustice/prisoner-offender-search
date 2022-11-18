@@ -38,3 +38,5 @@ class RestrictedPatientMockServer : WireMockServer(8095) {
     )
   }
 }
+
+class IncentivesMockServer : WireMockServer(8096)

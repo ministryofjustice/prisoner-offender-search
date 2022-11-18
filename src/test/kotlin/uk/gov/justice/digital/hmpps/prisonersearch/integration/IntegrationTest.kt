@@ -21,6 +21,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.IncentivesMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.RestrictedPatientMockServer
@@ -109,6 +110,7 @@ abstract class IntegrationTest {
     internal val prisonMockServer = PrisonMockServer()
     internal val oauthMockServer = OAuthMockServer()
     internal val restrictedPatientMockServer = RestrictedPatientMockServer()
+    internal val incentivesMockServer = IncentivesMockServer()
 
     @BeforeAll
     @JvmStatic
@@ -116,6 +118,7 @@ abstract class IntegrationTest {
       prisonMockServer.start()
       oauthMockServer.start()
       restrictedPatientMockServer.start()
+      incentivesMockServer.start()
     }
 
     @AfterAll
@@ -124,6 +127,7 @@ abstract class IntegrationTest {
       prisonMockServer.stop()
       oauthMockServer.stop()
       restrictedPatientMockServer.stop()
+      incentivesMockServer.stop()
     }
   }
 
@@ -139,6 +143,7 @@ abstract class IntegrationTest {
     oauthMockServer.resetAll()
     oauthMockServer.stubGrantToken()
     restrictedPatientMockServer.resetAll()
+    incentivesMockServer.resetAll()
   }
 
   @BeforeEach
@@ -185,6 +190,14 @@ abstract class IntegrationTest {
     )
 
     restrictedPatientMockServer.stubFor(
+      WireMock.get("/health/ping").willReturn(
+        WireMock.aResponse()
+          .withHeader("Content-Type", "application/json")
+          .withBody(if (status == 200) "pong" else "some error")
+          .withStatus(status)
+      )
+    )
+    incentivesMockServer.stubFor(
       WireMock.get("/health/ping").willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
