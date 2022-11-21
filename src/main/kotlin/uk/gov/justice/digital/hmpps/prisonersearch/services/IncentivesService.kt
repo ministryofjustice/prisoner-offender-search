@@ -14,17 +14,17 @@ class IncentivesService(
   val incentivesWebClient: WebClient,
   @Value("\${api.incentives.timeout:20s}") val timeout: Duration
 ) {
-  fun getCurrentIncentive(bookingId: Long): CurrentIncentive? =
+  fun getCurrentIncentive(bookingId: Long): IncentiveLevel? =
     incentivesWebClient.get().uri("/iep/reviews/booking/{bookingId}?with-details=false", bookingId)
       .retrieve()
-      .bodyToMono(CurrentIncentive::class.java)
+      .bodyToMono(IncentiveLevel::class.java)
       .onErrorResume(WebClientResponseException.NotFound::class.java) {
         Mono.empty()
       }
       .block(timeout)
 }
 
-data class CurrentIncentive(
+data class IncentiveLevel(
   val iepLevel: String,
   val iepTime: LocalDateTime,
   val iepDate: LocalDate,

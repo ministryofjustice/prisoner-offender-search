@@ -45,6 +45,7 @@ class PrisonerIndexServiceTest {
   private val indexProperties = mock<IndexProperties>()
   private val restrictedPatientService = mock<RestrictedPatientService>()
   private val prisonerDifferenceService = mock<PrisonerDifferenceService>()
+  private val incentivesService = mock<IncentivesService>()
 
   private val prisonerIndexService = PrisonerIndexService(
     nomisService,
@@ -57,6 +58,7 @@ class PrisonerIndexServiceTest {
     indexProperties,
     restrictedPatientService,
     prisonerDifferenceService,
+    incentivesService,
   )
 
   @Nested
@@ -223,4 +225,75 @@ class PrisonerIndexServiceTest {
       latestLocationId = "MDI"
     )
   }
+
+  @Nested
+  inner class SyncPrisoner {
+    @BeforeEach
+    internal fun setUp() {
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false))
+      whenever(prisonerARepository.save(any())).thenAnswer { it.arguments[0] }
+    }
+
+    @Test
+    internal fun `will get incentive level if booking present`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+
+      verify(incentivesService).getCurrentIncentive(123456L)
+    }
+
+    @Test
+    internal fun `will not get incentive if there is no booking`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderWithNoBooking())
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+
+      verifyNoInteractions(incentivesService)
+    }
+  }
+  @Nested
+  inner class IndexPrisoner {
+    @BeforeEach
+    internal fun setUp() {
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false))
+      whenever(prisonerBRepository.save(any())).thenAnswer { it.arguments[0] }
+    }
+
+    @Test
+    internal fun `will get incentive level if booking present`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      prisonerIndexService.indexPrisoner(prisonerId = "A1234AA")
+
+      verify(incentivesService).getCurrentIncentive(123456L)
+    }
+
+    @Test
+    internal fun `will not get incentive if there is no booking`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderWithNoBooking())
+      prisonerIndexService.indexPrisoner(prisonerId = "A1234AA")
+
+      verifyNoInteractions(incentivesService)
+    }
+  }
 }
+private fun anOffenderBooking(bookingId: Long) = OffenderBooking(
+  offenderNo = "A1234AA",
+  firstName = "Fred",
+  lastName = "Bloggs",
+  dateOfBirth = LocalDate.of(1976, 5, 15),
+  bookingId = bookingId,
+  assignedLivingUnit = AssignedLivingUnit(
+    agencyId = "MDI",
+    locationId = 1,
+    description = "Moorland",
+    agencyName = "Moorland"
+  ),
+  latestLocationId = "MDI",
+  activeFlag = true
+)
+private fun anOffenderWithNoBooking() = OffenderBooking(
+  offenderNo = "A1234AA",
+  firstName = "Fred",
+  lastName = "Bloggs",
+  dateOfBirth = LocalDate.of(1976, 5, 15),
+  activeFlag = false
+)

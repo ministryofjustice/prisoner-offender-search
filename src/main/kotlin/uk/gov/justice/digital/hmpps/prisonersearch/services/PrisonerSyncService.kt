@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 class PrisonerSyncService(
   private val nomisService: NomisService,
   private val prisonerIndexService: PrisonerIndexService,
+  private val incentivesService: IncentivesService,
   private val telemetryClient: TelemetryClient
 ) {
   companion object {
@@ -51,7 +52,8 @@ class PrisonerSyncService(
 
   private fun syncByNomsNumber(offenderIdDisplay: String) {
     nomisService.getOffender(offenderIdDisplay)?.run {
-      prisonerIndexService.sync(this)
+      val incentiveLevel = this.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
+      prisonerIndexService.sync(this, incentiveLevel)
     }
   }
 
@@ -73,7 +75,8 @@ class PrisonerSyncService(
         prisonerIndexService.delete(prisonerId)
       } else {
         log.debug("Delete check: offender ID {} still exists, so assuming an alias deletion", prisonerId)
-        prisonerIndexService.sync(offender)
+        val incentiveLevel = offender.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
+        prisonerIndexService.sync(offender, incentiveLevel)
       }
     } else {
       customEventForMissingOffenderIdDisplay(message)

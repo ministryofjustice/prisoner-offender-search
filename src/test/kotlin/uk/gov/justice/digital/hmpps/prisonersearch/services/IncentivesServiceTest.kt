@@ -23,7 +23,7 @@ internal class IncentivesServiceTest {
 
   @Nested
   @DisplayName("currentIncentive")
-  inner class CurrentIncentive {
+  inner class IncentiveLevel {
     @BeforeEach
     internal fun setUp() {
       incentivesApi.stubCurrentIncentive()
