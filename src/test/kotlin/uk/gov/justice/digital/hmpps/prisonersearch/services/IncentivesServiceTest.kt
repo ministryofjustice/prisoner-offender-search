@@ -46,7 +46,8 @@ internal class IncentivesServiceTest {
         iepLevel = "Standard",
         iepDate = "2022-11-10",
         iepTime = "2022-11-10T15:47:24.682335",
-        nextReviewDate = "2023-11-18"
+        nextReviewDate = "2023-11-18",
+        daysSinceReview = 120,
       )
 
       val incentive = incentivesService.getCurrentIncentive(123456L)!!
@@ -56,6 +57,7 @@ internal class IncentivesServiceTest {
       assertThat(incentive.iepDate).isEqualTo(LocalDate.parse("2022-11-10"))
       assertThat(incentive.iepTime).isEqualTo(LocalDateTime.parse("2022-11-10T15:47:24.682335"))
       assertThat(incentive.nextReviewDate).isEqualTo(LocalDate.parse("2023-11-18"))
+      assertThat(incentive.daysSinceReview).isEqualTo(120)
     }
   }
 }

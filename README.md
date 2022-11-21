@@ -75,8 +75,6 @@ The docker-compose.yml file is provided as reference but the dependencies of dep
 To run against T3 dependencies the environment variables as shown in the helm_deploy/values-dev.yaml file for paths can be used.
 Personal client credentials for the T3 services can be obtained from the HMPPS Auth team with the appropriate roles.
 
-```shell
-
 
 To start up localstack and other dependencies with prisoner offender search running in Docker too:
 ```shell

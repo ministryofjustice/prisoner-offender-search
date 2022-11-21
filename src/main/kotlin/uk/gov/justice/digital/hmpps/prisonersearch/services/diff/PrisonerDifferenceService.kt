@@ -24,7 +24,7 @@ import kotlin.reflect.full.findAnnotations
 annotation class DiffableProperty(val type: DiffCategory)
 
 enum class DiffCategory {
-  IDENTIFIERS, PERSONAL_DETAILS, ALERTS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT
+  IDENTIFIERS, PERSONAL_DETAILS, ALERTS, STATUS, LOCATION, SENTENCE, RESTRICTED_PATIENT, INCENTIVE_LEVEL
 }
 
 data class Difference(val property: String, val categoryChanged: DiffCategory, val oldValue: Any?, val newValue: Any?)
