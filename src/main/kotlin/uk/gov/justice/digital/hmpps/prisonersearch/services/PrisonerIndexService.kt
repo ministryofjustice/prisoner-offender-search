@@ -40,6 +40,7 @@ class PrisonerIndexService(
   private val indexProperties: IndexProperties,
   private val restrictedPatientService: RestrictedPatientService,
   private val prisonerDifferenceService: PrisonerDifferenceService,
+  private val incentivesService: IncentivesService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -47,7 +48,8 @@ class PrisonerIndexService(
 
   fun indexPrisoner(prisonerId: String) {
     nomisService.getOffender(prisonerId)?.let {
-      reIndex(it)
+      val incentiveLevel = it.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
+      reIndex(offenderBooking = it, incentiveLevel = incentiveLevel)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -59,7 +61,8 @@ class PrisonerIndexService(
 
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
-      sync(it)
+      val incentiveLevel = it.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
+      sync(offenderBooking = it, incentiveLevel = incentiveLevel)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -86,13 +89,13 @@ class PrisonerIndexService(
     }.map { it }.orElse(null)
   }
 
-  fun sync(offenderBooking: OffenderBooking): Prisoner {
+  fun sync(offenderBooking: OffenderBooking, incentiveLevel: IncentiveLevel?): Prisoner {
     val existingPrisoner = get(offenderBooking.offenderNo)
 
-    val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
+    val prisoner = withRestrictedPatientIfOut(offenderBooking)
 
-    val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
-    val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
+    val prisonerA = translate(PrisonerA(), prisoner, incentiveLevel)
+    val prisonerB = translate(PrisonerB(), prisoner, incentiveLevel)
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
 
@@ -116,18 +119,15 @@ class PrisonerIndexService(
     return storedPrisoner
   }
 
-  fun reIndex(offenderBooking: OffenderBooking): Prisoner {
-    val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
-
-    val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
-    val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
+  fun reIndex(offenderBooking: OffenderBooking, incentiveLevel: IncentiveLevel?): Prisoner {
+    val prisoner = withRestrictedPatientIfOut(offenderBooking)
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
 
     val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      prisonerBRepository.save(prisonerB)
+      prisonerBRepository.save(translate(PrisonerB(), prisoner, incentiveLevel))
     } else {
-      prisonerARepository.save(prisonerA)
+      prisonerARepository.save(translate(PrisonerA(), prisoner, incentiveLevel))
     }
 
     log.trace("finished reIndex() {}", offenderBooking)

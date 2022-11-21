@@ -1,10 +1,11 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLong
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
-fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
+fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking, incentiveLevel: IncentiveLevel?): P {
   prisoner.prisonerNumber = ob.offenderNo
   prisoner.bookNumber = ob.bookingNo
   prisoner.bookingId = ob.bookingId?.toString()
@@ -87,5 +88,16 @@ fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking): P {
   prisoner.dischargeDate = ob.restrictivePatient?.dischargeDate
   prisoner.dischargeDetails = ob.restrictivePatient?.dischargeDetails
 
+  prisoner.currentIncentive = incentiveLevel.toCurrentIncentive()
+
   return prisoner
+}
+
+private fun IncentiveLevel?.toCurrentIncentive(): CurrentIncentive? = this?.let {
+  CurrentIncentive(
+    level = IncentiveLevel(it.iepLevel),
+    daysSinceReview = it.daysSinceReview,
+    nextReviewDate = it.nextReviewDate,
+    dateTime = it.iepTime
+  )
 }
