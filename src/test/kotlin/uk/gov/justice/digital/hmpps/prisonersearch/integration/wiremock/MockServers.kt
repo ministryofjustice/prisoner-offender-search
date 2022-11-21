@@ -50,7 +50,8 @@ class IncentivesMockServer : WireMockServer(8096) {
     iepLevel: String = "Standard",
     iepDate: String = "2022-11-10",
     iepTime: String = "2022-11-10T15:47:24.682335",
-    nextReviewDate: String = "2023-11-18"
+    nextReviewDate: String = "2023-11-18",
+    daysSinceReview: Long = 120,
   ) {
     stubFor(
       get(urlPathMatching("/iep/reviews/booking/\\d+"))
@@ -70,7 +71,7 @@ class IncentivesMockServer : WireMockServer(8096) {
                   "locationId": "RECP",
                   "iepDetails": [],
                   "nextReviewDate": "$nextReviewDate",
-                  "daysSinceReview": 11
+                  "daysSinceReview": $daysSinceReview
               }
               """.trimIndent()
             )

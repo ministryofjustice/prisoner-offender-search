@@ -20,6 +20,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
+import uk.gov.justice.digital.hmpps.prisonersearch.model.CurrentIncentive
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlert
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlias
@@ -298,6 +300,28 @@ class PrisonerDiffServiceTest {
         .containsExactlyInAnyOrder(
           (Tuple("alerts", DiffCategory.ALERTS, listOf(alert()), listOf(alert(active = false))))
         )
+    }
+    @Test
+    fun `should report incentive differences`() {
+      val prisoner1 = Prisoner().apply {
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel(description = "Standard"),
+          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
+          nextReviewDate = LocalDate.of(2020, 10, 1),
+          daysSinceReview = 23,
+        )
+      }
+      val prisoner2 = Prisoner().apply {
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel(description = "Enhanced"),
+          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
+          nextReviewDate = LocalDate.of(2020, 10, 1),
+          daysSinceReview = 23,
+        )
+      }
+      val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
+
+      assertThat(diffsByType.keys).containsExactlyInAnyOrder(DiffCategory.INCENTIVE_LEVEL)
     }
 
     private fun alert(alertType: String = "SOME_TYPE", alertCode: String = "SOME_CODE", active: Boolean = true, expired: Boolean = false) =

@@ -24,4 +24,10 @@ class IncentivesService(
       .block(timeout)
 }
 
-data class CurrentIncentive(val iepLevel: String, val iepTime: LocalDateTime, val iepDate: LocalDate, val nextReviewDate: LocalDate?)
+data class CurrentIncentive(
+  val iepLevel: String,
+  val iepTime: LocalDateTime,
+  val iepDate: LocalDate,
+  val nextReviewDate: LocalDate?,
+  val daysSinceReview: Long
+)

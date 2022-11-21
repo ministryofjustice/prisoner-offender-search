@@ -315,6 +315,11 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(description = "Any additional discharge details", example = "Psychiatric Hospital Discharge to Hazelwood House")
   var dischargeDetails: String? = null
 
+  @Field(type = FieldType.Nested, includeInParent = true)
+  @Schema(description = "Incentive level")
+  @DiffableProperty(DiffCategory.INCENTIVE_LEVEL)
+  var currentIncentive: CurrentIncentive? = null
+
   override fun diff(other: Prisoner): DiffResult<Prisoner> = getDiffResult(this, other)
 
   @get:JsonIgnore
