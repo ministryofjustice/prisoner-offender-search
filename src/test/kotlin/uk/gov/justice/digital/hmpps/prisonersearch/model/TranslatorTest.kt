@@ -192,16 +192,13 @@ class TranslatorTest {
       IncentiveLevel(
         iepLevel = "Standard",
         iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
-        iepDate = LocalDate.parse("2021-01-01"),
         nextReviewDate = LocalDate.parse("2022-02-02"),
-        daysSinceReview = 120,
       )
     )
 
     assertThat(prisoner.currentIncentive).isNotNull
     assertThat(prisoner.currentIncentive?.level).isNotNull
     assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
-    assertThat(prisoner.currentIncentive?.daysSinceReview).isEqualTo(120)
     assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
     assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))
   }

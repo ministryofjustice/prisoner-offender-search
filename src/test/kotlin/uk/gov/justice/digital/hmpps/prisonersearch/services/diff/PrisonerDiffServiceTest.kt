@@ -308,7 +308,6 @@ class PrisonerDiffServiceTest {
           level = IncentiveLevel(description = "Standard"),
           dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
           nextReviewDate = LocalDate.of(2020, 10, 1),
-          daysSinceReview = 23,
         )
       }
       val prisoner2 = Prisoner().apply {
@@ -316,7 +315,6 @@ class PrisonerDiffServiceTest {
           level = IncentiveLevel(description = "Enhanced"),
           dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
           nextReviewDate = LocalDate.of(2020, 10, 1),
-          daysSinceReview = 23,
         )
       }
       val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)

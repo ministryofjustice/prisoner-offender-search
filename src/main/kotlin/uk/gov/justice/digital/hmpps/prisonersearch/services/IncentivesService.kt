@@ -27,7 +27,5 @@ class IncentivesService(
 data class IncentiveLevel(
   val iepLevel: String,
   val iepTime: LocalDateTime,
-  val iepDate: LocalDate,
   val nextReviewDate: LocalDate?,
-  val daysSinceReview: Long
 )
