@@ -44,6 +44,16 @@ class PrisonerSyncService(
     }
   }
 
+  fun offenderIncentiveChange(message: IncentiveChangedMessage) {
+    log.info(
+      "Incentive change: {} for prisoner {} with incentive id {}",
+      message.description,
+      message.additionalInformation.nomsNumber,
+      message.additionalInformation.id
+    )
+    syncByNomsNumber(message.additionalInformation.nomsNumber)
+  }
+
   private fun syncWithBookingId(bookingId: Long) {
     nomisService.getNomsNumberForBooking(bookingId)?.run {
       syncByNomsNumber(this)

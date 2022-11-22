@@ -648,7 +648,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
       await untilCallTo { prisonRequestCountFor("/api/offenders/Z1234AA") } matches { it == 1 }
 
       webTestClient.get()
@@ -677,7 +677,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+      await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
       await untilCallTo { prisonRequestCountFor("/api/offenders/Z1235AB") } matches { it == 1 }
 
       webTestClient.get()

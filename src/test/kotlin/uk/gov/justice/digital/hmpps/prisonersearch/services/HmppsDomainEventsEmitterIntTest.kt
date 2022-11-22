@@ -124,7 +124,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
     val updateMsgBody = readNextDomainEventMessage()
@@ -201,7 +201,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     // expecting  2 updates
     await untilAsserted { verify(prisonerDifferenceService, times(2)).handleDifferences(anyOrNull(), any(), any()) }
@@ -245,7 +245,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         )
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     await untilAsserted { verify(hmppsEventTopicSnsClient).publish(any()) }
 
     // The prisoner hash update should have been rolled back
