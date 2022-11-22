@@ -87,7 +87,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   protected val hmppsEventsQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
 
-  fun getNumberOfMessagesCurrentlyOnQueue(): Int {
+  fun getNumberOfMessagesCurrentlyOnEventQueue(): Int {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
     val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
@@ -95,7 +95,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     log.trace("Messages on event queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
   }
-
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int {
     val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
     val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!

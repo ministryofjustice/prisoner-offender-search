@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class HMPPSDomainEventListener(
+  private val prisonerSyncService: PrisonerSyncService,
   @Qualifier("gson") private val gson: Gson,
   private val telemetryClient: TelemetryClient
 ) {
@@ -25,9 +26,8 @@ class HMPPSDomainEventListener(
       log.debug("Received message {} type {}", messageId, eventType)
 
       when (eventType) {
-        "incentives.iep-review.inserted" -> log.debug("Received message {} type {}", messageId, eventType)
-        "incentives.iep-review.updated" -> log.debug("Received message {} type {}", messageId, eventType)
-        "incentives.iep-review.deleted" -> log.debug("Received message {} type {}", messageId, eventType)
+        "incentives.iep-review.inserted", "incentives.iep-review.updated", "incentives.iep-review.deleted" ->
+          prisonerSyncService.offenderIncentiveChange(fromJson(message))
 
         else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
       }
@@ -43,4 +43,19 @@ class HMPPSDomainEventListener(
       throw e
     }
   }
+
+  private inline fun <reified T> fromJson(message: String): T {
+    return gson.fromJson(message, T::class.java)
+  }
 }
+
+data class IncentiveChangedMessage(
+  val additionalInformation: IncentiveChangeAdditionalInformation,
+  val eventType: String,
+  val description: String,
+)
+
+data class IncentiveChangeAdditionalInformation(
+  val nomsNumber: String,
+  val id: Long,
+)
