@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
@@ -194,14 +195,16 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun search(searchCriteria: SearchCriteria, fileAssert: String) {
+    search(searchCriteria).json(fileAssert.readResourceAsText())
+  }
+  fun search(searchCriteria: SearchCriteria): WebTestClient.BodyContentSpec =
     webTestClient.post().uri("/prisoner-search/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isOk
-      .expectBody().json(fileAssert.readResourceAsText())
-  }
+      .expectBody()
 
   fun singlePrisonSearch(prisonSearch: PrisonSearch, fileAssert: String) {
     webTestClient.post().uri("/prisoner-search/match")
