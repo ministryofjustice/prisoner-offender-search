@@ -56,10 +56,8 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   fun `will add current incentive to prisoner documents`() {
     incentivesMockServer.stubCurrentIncentive(
       iepLevel = "Enhanced",
-      iepDate = "2022-11-10",
       iepTime = "2022-11-10T15:47:24.682335",
       nextReviewDate = "2023-11-18",
-      daysSinceReview = 120,
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, "/messages/offenderDetailsChanged.json".readResourceAsText())
 
@@ -70,7 +68,6 @@ class MessageIntegrationTest : QueueIntegrationTest() {
       .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Enhanced")
       .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
       .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-18")
-      .jsonPath("$.[0].currentIncentive.daysSinceReview").isEqualTo(120)
   }
 
   @Test

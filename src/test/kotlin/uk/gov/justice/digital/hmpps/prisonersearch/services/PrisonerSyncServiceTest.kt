@@ -63,9 +63,7 @@ class PrisonerSyncServiceTest {
 
   private fun anIncentiveLevel() = IncentiveLevel(
     iepLevel = "Standard",
-    iepDate = LocalDate.now(),
     iepTime = LocalDateTime.now(),
-    daysSinceReview = 0,
     nextReviewDate = null,
   )
 }

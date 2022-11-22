@@ -10,8 +10,6 @@ import java.time.LocalDateTime
 data class CurrentIncentive(
   @Schema(description = "Incentive level")
   val level: IncentiveLevel,
-  @Schema(description = "Days since last review", example = "120")
-  val daysSinceReview: Long,
   @Field(type = FieldType.Date, format = [DateFormat.date_hour_minute_second])
   @Schema(required = true, description = "Date time of the incentive", example = "2022-11-10T15:47:24")
   val dateTime: LocalDateTime,
