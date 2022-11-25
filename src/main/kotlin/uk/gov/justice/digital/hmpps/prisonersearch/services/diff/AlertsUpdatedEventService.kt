@@ -12,13 +12,13 @@ class AlertsUpdatedEventService(
     previousPrisonerSnapshot: Prisoner?,
     prisoner: Prisoner
   ) {
-    val previousAlertList = previousPrisonerSnapshot?.alerts?.map { it.alertCode }?.toSet() ?: emptySet()
-    val alertList = prisoner.alerts?.map { it.alertCode }?.toSet() ?: emptySet()
-    val alertsAdded = alertList - previousAlertList
-    val alertsRemoved = previousAlertList - alertList
+    val previousAlerts = previousPrisonerSnapshot?.alerts?.map { it.alertCode }?.toSet() ?: emptySet()
+    val alerts = prisoner.alerts?.map { it.alertCode }?.toSet() ?: emptySet()
+    val alertsAdded = alerts - previousAlerts
+    val alertsRemoved = previousAlerts - alerts
 
     if (alertsAdded.isNotEmpty() || alertsRemoved.isNotEmpty()) {
-      domainEventEmitter.emitPrisonerAlertsUpdatedEvent(prisoner.prisonerNumber!!, alertsAdded, alertsRemoved)
+      domainEventEmitter.emitPrisonerAlertsUpdatedEvent(prisoner.prisonerNumber!!, prisoner.bookingId, alertsAdded, alertsRemoved)
     }
   }
 }

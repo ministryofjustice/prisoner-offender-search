@@ -9,6 +9,9 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 
+private const val BOOKING_ID = "1203208"
+private const val OFFENDER_NO = "A9460DY"
+
 internal class AlertsUpdatedEventServiceTest {
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
   private val objectMapper = JsonMapper.builder()
@@ -40,6 +43,7 @@ internal class AlertsUpdatedEventServiceTest {
 
     verify(domainEventsEmitter).emitPrisonerAlertsUpdatedEvent(
       offenderNo = OFFENDER_NO,
+      bookingId = BOOKING_ID,
       alertsAdded = setOf("XA"),
       alertsRemoved = setOf(),
     )
@@ -56,6 +60,7 @@ internal class AlertsUpdatedEventServiceTest {
 
     verify(domainEventsEmitter).emitPrisonerAlertsUpdatedEvent(
       offenderNo = OFFENDER_NO,
+      bookingId = BOOKING_ID,
       alertsAdded = setOf(),
       alertsRemoved = setOf("XA"),
     )
@@ -82,6 +87,7 @@ internal class AlertsUpdatedEventServiceTest {
 
     verify(domainEventsEmitter).emitPrisonerAlertsUpdatedEvent(
       offenderNo = OFFENDER_NO,
+      bookingId = BOOKING_ID,
       alertsAdded = setOf("XK", "BB"),
       alertsRemoved = setOf("XT", "AA"),
     )
