@@ -21,6 +21,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.LOCATION
@@ -37,7 +38,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `sends prisoner differences to the domain topic`() {
-    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(IDENTIFIERS to listOf(), LOCATION to listOf()))
+    hmppsDomainEventEmitter.emitPrisonerDifferenceEvent(
+      "some_offender",
+      mapOf(IDENTIFIERS to listOf(), LOCATION to listOf())
+    )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
@@ -48,7 +52,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
     assertThatJson(message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
-    assertThatJson(message).node("additionalInformation.categoriesChanged").isArray.containsExactlyInAnyOrder("IDENTIFIERS", "LOCATION")
+    assertThatJson(message).node("additionalInformation.categoriesChanged").isArray.containsExactlyInAnyOrder(
+      "IDENTIFIERS",
+      "LOCATION"
+    )
   }
 
   @Test
@@ -71,7 +78,11 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `sends prisoner received events to the domain topic`() {
-    hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED, "MDI")
+    hmppsDomainEventEmitter.emitPrisonerReceiveEvent(
+      "some_offender",
+      HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED,
+      "MDI"
+    )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
@@ -81,16 +92,22 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.received")
     assertThatJson(message.Message).node("version").isEqualTo(1)
-    assertThatJson(message.Message).node("description").isEqualTo("A prisoner has been received into a prison with reason: transfer from another prison")
+    assertThatJson(message.Message).node("description")
+      .isEqualTo("A prisoner has been received into a prison with reason: transfer from another prison")
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
     assertThatJson(message.Message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
     assertThatJson(message.Message).node("additionalInformation.prisonId").isEqualTo("MDI")
     assertThatJson(message.Message).node("additionalInformation.reason").isEqualTo("TRANSFERRED")
   }
+
   @Test
   fun `sends prisoner released events to the domain topic`() {
-    hmppsDomainEventEmitter.emitPrisonerReleaseEvent("some_offender", HmppsDomainEventEmitter.PrisonerReleaseReason.TRANSFERRED, "MDI")
+    hmppsDomainEventEmitter.emitPrisonerReleaseEvent(
+      "some_offender",
+      HmppsDomainEventEmitter.PrisonerReleaseReason.TRANSFERRED,
+      "MDI"
+    )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
@@ -100,7 +117,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.released")
     assertThatJson(message.Message).node("version").isEqualTo(1)
-    assertThatJson(message.Message).node("description").isEqualTo("A prisoner has been released from a prison with reason: transfer to another prison")
+    assertThatJson(message.Message).node("description")
+      .isEqualTo("A prisoner has been released from a prison with reason: transfer to another prison")
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
     assertThatJson(message.Message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
@@ -158,6 +176,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(readNextDomainEventMessage()).node("eventType")
       .isEqualTo("prisoner-offender-search.prisoner.released")
   }
+
   @Test
   fun `e2e - will send prisoner received event to the domain topic`() {
     recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", released = true))
@@ -182,6 +201,70 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
       .isEqualTo("prisoner-offender-search.prisoner.received")
+  }
+
+  @Test
+  fun `e2e - will send prisoner alerts change event to the domain topic when an alert is added`() {
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", alertCodes = listOf("X" to "XTACT")))
+
+    // update the prisoner on ES
+    prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              PrisonerBuilder(
+                prisonerNumber = "A1239DD",
+                alertCodes = listOf("X" to "XTACT", "W" to "WO")
+              ).toOffenderBooking()
+            )
+        )
+    )
+    eventQueueSqsClient.sendMessage(
+      eventQueueUrl,
+      "/messages/offenderAlertsChanged.json".readResourceAsText()
+    )
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.updated")
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
+  }
+
+  @Test
+  fun `e2e - will send prisoner alerts change event to the domain topic when an alert is removed`() {
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", alertCodes = listOf("X" to "XTACT", "W" to "WO")))
+
+    // update the prisoner on ES
+    prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
+    prisonMockServer.stubFor(
+      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              PrisonerBuilder(
+                prisonerNumber = "A1239DD",
+                alertCodes = listOf("W" to "WO")
+              ).toOffenderBooking()
+            ) // technically the alert should be end dated but this will work equally well
+        )
+    )
+    eventQueueSqsClient.sendMessage(
+      eventQueueUrl,
+      "/messages/offenderAlertsChanged.json".readResourceAsText()
+    )
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.updated")
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
   }
 
   @Test
@@ -249,7 +332,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilAsserted { verify(hmppsEventTopicSnsClient).publish(any()) }
 
     // The prisoner hash update should have been rolled back
-    val prisonerEventHashAfterAttemptedUpdate = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
+    val prisonerEventHashAfterAttemptedUpdate =
+      prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
     assertThat(prisonerEventHashAfterAttemptedUpdate).isEqualTo(insertedPrisonerEventHash)
   }
 
@@ -283,10 +367,22 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     Mockito.reset(hmppsEventTopicSnsClient)
     Mockito.reset(prisonerDifferenceService)
   }
+
   fun readNextDomainEventMessage(): String {
     val updateResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
     hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, updateResult.receiptHandle)
     return objectMapper.readValue<MsgBody>(updateResult.body).Message
+  }
+
+  private fun PrisonMockServer.stubOffenderNoFromBookingId(prisonerNumber: String) {
+    this.stubFor(
+      WireMock.get(WireMock.urlPathMatching("/api/bookings/\\d*"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber).toOffenderBooking())
+        )
+    )
   }
 }
 

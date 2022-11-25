@@ -28,7 +28,7 @@ class PrisonerMovementsEventService(
   private val domainEventEmitter: HmppsDomainEventEmitter,
   private val telemetryClient: TelemetryClient,
 ) {
-  fun generateAnyMovementEvents(
+  fun generateAnyEvents(
     previousPrisonerSnapshot: Prisoner?,
     prisoner: Prisoner
   ) {

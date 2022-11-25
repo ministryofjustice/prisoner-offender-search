@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.CREATED_EVENT_TYPE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_ALERTS_UPDATED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_RECEIVED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_RELEASED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.UPDATED_EVENT_TYPE
@@ -127,12 +128,25 @@ class HmppsDomainEventEmitter(
     ).publish()
   }
 
+  fun emitPrisonerAlertsUpdatedEvent(
+    offenderNo: String,
+    alertsAdded: Set<String>,
+    alertsRemoved: Set<String>,
+  ) {
+    PrisonerAlertsUpdatedDomainEvent(
+      PrisonerAlertsUpdatedEvent(offenderNo, alertsAdded, alertsRemoved),
+      Instant.now(clock),
+      diffProperties.host
+    ).publish()
+  }
+
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
     const val UPDATED_EVENT_TYPE = "prisoner-offender-search.prisoner.updated"
     const val CREATED_EVENT_TYPE = "prisoner-offender-search.prisoner.created"
     const val PRISONER_RECEIVED_EVENT_TYPE = "prisoner-offender-search.prisoner.received"
     const val PRISONER_RELEASED_EVENT_TYPE = "prisoner-offender-search.prisoner.released"
+    const val PRISONER_ALERTS_UPDATED_EVENT_TYPE = "prisoner-offender-search.prisoner.alerts-updated"
   }
 }
 
@@ -219,6 +233,21 @@ class PrisonerReleasedDomainEvent(additionalInformation: PrisonerReleasedEvent, 
     host = host,
     description = "A prisoner has been released from a prison with reason: ${additionalInformation.reason.description}",
     eventType = PRISONER_RELEASED_EVENT_TYPE
+  )
+
+data class PrisonerAlertsUpdatedEvent(
+  override val nomsNumber: String,
+  val alertsAdded: Set<String>,
+  val alertsRemoved: Set<String>,
+) : PrisonerAdditionalInformation()
+
+class PrisonerAlertsUpdatedDomainEvent(additionalInformation: PrisonerAlertsUpdatedEvent, occurredAt: Instant, host: String) :
+  PrisonerDomainEvent<PrisonerAlertsUpdatedEvent>(
+    additionalInformation = additionalInformation,
+    occurredAt = occurredAt,
+    host = host,
+    description = "A prisoner had their alerts updated, added: ${additionalInformation.alertsAdded.size}, removed: ${additionalInformation.alertsRemoved.size}",
+    eventType = PRISONER_ALERTS_UPDATED_EVENT_TYPE
   )
 
 fun <T : PrisonerAdditionalInformation> PrisonerDomainEvent<T>.asMap(): Map<String, String> {
