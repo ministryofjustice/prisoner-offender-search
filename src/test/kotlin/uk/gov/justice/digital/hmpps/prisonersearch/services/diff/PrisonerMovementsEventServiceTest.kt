@@ -32,7 +32,7 @@ internal class PrisonerMovementsEventServiceTest {
       this.firstName = "BOBBY"
     }
 
-    prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+    prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
     verifyNoInteractions(domainEventsEmitter)
   }
@@ -41,7 +41,7 @@ internal class PrisonerMovementsEventServiceTest {
   internal fun `will not emit anything for a new prisoner `() {
     val prisoner = newPrisoner()
 
-    prisonerMovementsEventService.generateAnyMovementEvents(null, prisoner)
+    prisonerMovementsEventService.generateAnyEvents(null, prisoner)
 
     verifyNoInteractions(domainEventsEmitter)
   }
@@ -54,7 +54,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of transfer`() {
       val prisoner = prisonerTransferredIn("WWI")
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -72,7 +72,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of court return for return to same prison`() {
       val prisoner = prisonerReturnFromCourtSamePrison()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -85,7 +85,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of transfer for return to different prison`() {
       val prisoner = prisonerReturnFromCourtDifferentPrison("BXI")
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -98,7 +98,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit release event with reason of released when released from court`() {
       val prisoner = releasedPrisoner()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReleaseEvent(
         offenderNo = OFFENDER_NO,
@@ -115,7 +115,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of TAP return for return to same prison`() {
       val prisoner = prisonerReturnFromTAPSamePrison()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -128,7 +128,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of transfer for return to different prison`() {
       val prisoner = prisonerReturnFromTAPDifferentPrison("BXI")
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -141,7 +141,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit release event with reason of released when released from TAP`() {
       val prisoner = releasedPrisoner()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReleaseEvent(
         offenderNo = OFFENDER_NO,
@@ -159,7 +159,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of new admission for new booking`() {
       val prisoner = prisonerInWithBooking("BXI")
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -176,7 +176,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of new admission for new booking`() {
       val prisoner = prisonerInWithNewBooking("BXI")
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -188,7 +188,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit receive event with reason of readmission for existing booking`() {
       val prisoner = recalledPrisoner("BXI")
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
@@ -206,7 +206,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit release event with reason of transferred when released to different prison`() {
       val prisoner = prisonerBeingTransferred()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReleaseEvent(
         offenderNo = OFFENDER_NO,
@@ -218,7 +218,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit release event with reason of sent to court when moved to court`() {
       val prisoner = prisonerOutAtCourt()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReleaseEvent(
         offenderNo = OFFENDER_NO,
@@ -230,7 +230,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit release event with reason of TAP when released on TAP`() {
       val prisoner = prisonerOutOnTAP()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReleaseEvent(
         offenderNo = OFFENDER_NO,
@@ -242,7 +242,7 @@ internal class PrisonerMovementsEventServiceTest {
     internal fun `will emit release event with reason of released when released from prison`() {
       val prisoner = releasedPrisoner()
 
-      prisonerMovementsEventService.generateAnyMovementEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
 
       verify(domainEventsEmitter).emitPrisonerReleaseEvent(
         offenderNo = OFFENDER_NO,
