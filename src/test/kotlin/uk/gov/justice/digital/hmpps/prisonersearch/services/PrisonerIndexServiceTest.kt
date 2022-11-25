@@ -186,7 +186,7 @@ class PrisonerIndexServiceTest {
           RestrictedPatientDto(
             id = 1,
             prisonerNumber = "A1234AA",
-            fromLocation = prison,
+            supportingPrison = prison,
             hospitalLocation = hospital,
             dischargeTime = now,
             commentText = "test"
