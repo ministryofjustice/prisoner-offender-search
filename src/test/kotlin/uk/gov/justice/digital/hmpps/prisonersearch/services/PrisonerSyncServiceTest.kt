@@ -57,7 +57,6 @@ class PrisonerSyncServiceTest {
     "Bloggs",
     LocalDate.of(1976, 5, 15),
     false,
-    latestLocationId = "MDI",
     bookingId = 123456L,
   )
 

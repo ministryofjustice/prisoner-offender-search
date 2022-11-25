@@ -178,6 +178,7 @@ class PrisonerIndexServiceTest {
     inner class Mapping {
       @Test
       fun `maps the restricted patient data`() {
+        val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
         val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true)
         val now = LocalDateTime.now()
 
@@ -185,6 +186,7 @@ class PrisonerIndexServiceTest {
           RestrictedPatientDto(
             id = 1,
             prisonerNumber = "A1234AA",
+            fromLocation = prison,
             hospitalLocation = hospital,
             dischargeTime = now,
             commentText = "test"
@@ -195,7 +197,7 @@ class PrisonerIndexServiceTest {
 
         assertThat(offenderBooking.restrictivePatient)
           .extracting("supportingPrisonId", "dischargedHospital", "dischargeDate", "dischargeDetails")
-          .contains("MDI", hospital, now.toLocalDate(), "test")
+          .contains(prison.agencyId, hospital, now.toLocalDate(), "test")
       }
 
       @Test
@@ -222,7 +224,6 @@ class PrisonerIndexServiceTest {
       LocalDate.of(1976, 5, 15),
       false,
       assignedLivingUnit = assignedLivingUnit,
-      latestLocationId = "MDI"
     )
   }
 
@@ -287,7 +288,6 @@ private fun anOffenderBooking(bookingId: Long) = OffenderBooking(
     description = "Moorland",
     agencyName = "Moorland"
   ),
-  latestLocationId = "MDI",
   activeFlag = true
 )
 private fun anOffenderWithNoBooking() = OffenderBooking(
