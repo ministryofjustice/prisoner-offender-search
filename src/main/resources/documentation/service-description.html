@@ -117,16 +117,34 @@
             <ul>
               <li><b>nomsNumber</b> string - NOMS number of the prisoner</li>
               <li><b>categoriesChanged</b> string - One of more category of change
-              <ul>
-                <li><b>IDENTIFIERS</b> key unique identifiers e.g PNC number</li>
-                <li><b>PERSONAL_DETAILS</b> personal details e.g. firstName</li>
-                <li><b>ALERTS</b> alert has changed</li>
-                <li><b>STATUS</b> in/out status or active/inactive status or legal and imprisonment status</li>
-                <li><b>LOCATION</b> prisoner location and last movement e.g. prisonName</li>
-                <li><b>SENTENCE</b> current sentence and sentence dates e.g conditionalReleaseDate</li>
-                <li><b>RESTRICTED_PATIENT</b> restricted hospital patient details have changed e.g. dischargedHospitalId</li>
-              </ul>
+                <ul>
+                  <li><b>IDENTIFIERS</b> key unique identifiers e.g PNC number</li>
+                  <li><b>PERSONAL_DETAILS</b> personal details e.g. firstName</li>
+                  <li><b>ALERTS</b> alert has changed</li>
+                  <li><b>STATUS</b> in/out status or active/inactive status or legal and imprisonment status</li>
+                  <li><b>LOCATION</b> prisoner location and last movement e.g. prisonName</li>
+                  <li><b>SENTENCE</b> current sentence and sentence dates e.g conditionalReleaseDate</li>
+                  <li><b>RESTRICTED_PATIENT</b> restricted hospital patient details have changed e.g. dischargedHospitalId</li>
+                </ul>
               </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <b>prisoner-offender-search.prisoner.alerts-updated</b> is raised when a prisoner's list of alerts have been amended by either adding or remove one or more.
+        <ul>
+          <li><b>eventType</b> string</li>
+          <li><b>occurredAt</b> ISO offset date time - when the alert change was detected e.g 2021-02-08T14:41:11.526762Z</li>
+          <li><b>publishedAt</b> ISO offset date time - when this event was first published e.g 2021-06-08T14:41:11.526762+01:00</li>
+          <li><b>version</b> number - version of this event message. Currently <b>1</b></li>
+          <li><b>description</b> string - human-readable description of event</li>
+          <li><b>additionalInformation</b> object - additional information
+            <ul>
+              <li><b>nomsNumber</b> string - NOMS number of the prisoner</li>
+              <li><b>bookingId</b> number - booking identifier for latest booking</li>
+              <li><b>alertsAdded</b> array of string - list of DPS alert codes added in this change, typically one or zero</li>
+              <li><b>alertsRemoved</b> array of string - list of DPS alert codes removed in this change, typically one or zero</li>
             </ul>
           </li>
         </ul>

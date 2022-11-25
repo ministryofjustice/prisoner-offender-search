@@ -130,11 +130,12 @@ class HmppsDomainEventEmitter(
 
   fun emitPrisonerAlertsUpdatedEvent(
     offenderNo: String,
+    bookingId: String?,
     alertsAdded: Set<String>,
     alertsRemoved: Set<String>,
   ) {
     PrisonerAlertsUpdatedDomainEvent(
-      PrisonerAlertsUpdatedEvent(offenderNo, alertsAdded, alertsRemoved),
+      PrisonerAlertsUpdatedEvent(offenderNo, bookingId, alertsAdded, alertsRemoved),
       Instant.now(clock),
       diffProperties.host
     ).publish()
@@ -237,6 +238,7 @@ class PrisonerReleasedDomainEvent(additionalInformation: PrisonerReleasedEvent, 
 
 data class PrisonerAlertsUpdatedEvent(
   override val nomsNumber: String,
+  val bookingId: String?,
   val alertsAdded: Set<String>,
   val alertsRemoved: Set<String>,
 ) : PrisonerAdditionalInformation()

@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.SENT_TO_COURT
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.TEMPORARY_ABSENCE_RELEASE
 
-const val OFFENDER_NO = "A9460DY"
+private const val OFFENDER_NO = "A9460DY"
 
 internal class PrisonerMovementsEventServiceTest {
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()

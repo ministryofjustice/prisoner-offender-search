@@ -148,7 +148,7 @@ class HmppsDomainEventsEmitterTest {
   inner class PrisonerAlertsUpdatedEvent {
     @Test
     fun `should include event type as a message attribute`() {
-      hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", setOf("XA"), setOf())
+      hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", "1234567", setOf("XA"), setOf())
 
       verify(topicSnsClient).publish(
         check {
@@ -159,7 +159,7 @@ class HmppsDomainEventsEmitterTest {
 
     @Test
     fun `should also log event`() {
-      hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", setOf("XA", "XT"), setOf("ZZ"))
+      hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", "1234567", setOf("XA", "XT"), setOf("ZZ"))
 
       verify(telemetryClient).trackEvent(
         eq("prisoner-offender-search.prisoner.alerts-updated"),
@@ -168,6 +168,7 @@ class HmppsDomainEventsEmitterTest {
           assertThat(it["version"]).isEqualTo("1")
           assertThat(it["description"]).isEqualTo("A prisoner had their alerts updated, added: 2, removed: 1")
           assertThat(it["additionalInformation.nomsNumber"]).isEqualTo("some_offender")
+          assertThat(it["additionalInformation.bookingId"]).isEqualTo("1234567")
           assertThat(it["additionalInformation.alertsAdded"]).isEqualTo("[XA, XT]")
           assertThat(it["additionalInformation.alertsRemoved"]).isEqualTo("[ZZ]")
         },
@@ -179,14 +180,14 @@ class HmppsDomainEventsEmitterTest {
     fun `should swallow exceptions and indicate a manual fix is required`() {
       whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
 
-      hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", setOf("XA"), setOf())
+      hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", "1234567", setOf("XA"), setOf())
 
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerDomainEventSendFailure"),
         check {
           assertThat(it["eventType"]).isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
           assertThat(it["additionalInformation.nomsNumber"]).isEqualTo("some_offender")
-          assertThat(it["additionalInformation.nomsNumber"]).isEqualTo("some_offender")
+          assertThat(it["additionalInformation.bookingId"]).isEqualTo("1234567")
           assertThat(it["additionalInformation.alertsAdded"]).isEqualTo("[XA]")
           assertThat(it["additionalInformation.alertsRemoved"]).isEqualTo("[]")
         },
