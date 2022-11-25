@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.6.0-beta"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.7.0-beta"
   kotlin("plugin.spring") version "1.7.21"
 }
 
@@ -30,10 +30,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
-  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.12")
-  implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
-  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
-  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.12")
+  implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.13")
+  implementation("org.springdoc:springdoc-openapi-ui:1.6.13")
+  implementation("org.springdoc:springdoc-openapi-kotlin:1.6.13")
+  implementation("org.springdoc:springdoc-openapi-data-rest:1.6.13")
 
   implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -42,13 +42,13 @@ dependencies {
   implementation("com.google.guava:guava:31.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.1.13")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.342")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.349")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  runtimeOnly("org.postgresql:postgresql:42.5.0")
+  runtimeOnly("org.postgresql:postgresql:42.5.1")
   runtimeOnly("org.flywaydb:flyway-core")
 
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.7")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.9")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:4.9.0")
