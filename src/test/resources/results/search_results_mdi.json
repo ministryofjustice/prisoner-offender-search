@@ -275,53 +275,6 @@
       "dischargedHospitalDescription":"Hazelwood House",
       "dischargeDate":"2020-02-03",
       "dischargeDetails":"Psychiatric Hospital Discharge to Hazelwood House"
-    },
-    {
-      "prisonerNumber":"A9999RB",
-      "pncNumber":"2014/009773W",
-      "pncNumberCanonicalShort":"14/9773W",
-      "pncNumberCanonicalLong":"2014/9773W",
-      "croNumber":"29913/12L",
-      "bookingId":"1999992",
-      "bookNumber":"V69687",
-      "firstName":"HOSP",
-      "lastName":"PATIENTONE",
-      "dateOfBirth":"1999-06-01",
-      "gender":"Male",
-      "ethnicity":"White: Eng./Welsh/Scot./N.Irish/British",
-      "youthOffender":false,
-      "status":"INACTIVE OUT",
-      "lastMovementTypeCode":"REL",
-      "lastMovementReasonCode":"HP",
-      "inOutStatus":"OUT",
-      "prisonId":"OUT",
-      "prisonName":"Outside",
-      "aliases":[
-        {
-          "firstName":"AN",
-          "lastName":"OTHERALIAS",
-          "dateOfBirth":"1990-08-15",
-          "gender":"Male",
-          "ethnicity":"White: Eng./Welsh/Scot./N.Irish/British"
-        }
-      ],
-      "legalStatus":"SENTENCED",
-      "recall":false,
-      "indeterminateSentence":false,
-      "licenceExpiryDate":"2020-02-03",
-      "receptionDate":"2015-10-01",
-      "paroleEligibilityDate":"2020-02-03",
-      "automaticReleaseDate":"2020-02-03",
-      "postRecallReleaseDate":"2020-02-03",
-      "conditionalReleaseDate":"2020-02-03",
-      "actualParoleDate":"2020-02-03",
-      "locationDescription":"Outside - Psychiatric Hospital Discharge to Yew Trees - discharged to Yew Trees",
-      "restrictedPatient":true,
-      "supportingPrisonId":"MDI",
-      "dischargedHospitalId":"YEWTHO",
-      "dischargedHospitalDescription":"Yew Trees",
-      "dischargeDate":"2020-02-05",
-      "dischargeDetails":"Hospital Discharge to Yew Trees"
     }
   ],
   "pageable":{
@@ -337,7 +290,7 @@
     "unpaged":false
   },
   "last":true,
-  "totalElements":9,
+  "totalElements":8,
   "totalPages":1,
   "size":10,
   "number":0,
@@ -346,7 +299,7 @@
     "unsorted":true,
     "empty":true
   },
-  "numberOfElements":9,
+  "numberOfElements":8,
   "first":true,
   "empty":false
 }

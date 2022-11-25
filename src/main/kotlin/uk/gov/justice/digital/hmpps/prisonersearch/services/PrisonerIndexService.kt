@@ -266,7 +266,7 @@ class PrisonerIndexService(
     return booking.copy(
       locationDescription = booking.locationDescription + " - discharged to " + restrictivePatient.hospitalLocation.description,
       restrictivePatient = RestrictivePatient(
-        supportingPrisonId = booking.latestLocationId,
+        supportingPrisonId = restrictivePatient.fromLocation.agencyId,
         dischargedHospital = restrictivePatient.hospitalLocation,
         dischargeDate = restrictivePatient.dischargeTime.toLocalDate(),
         dischargeDetails = restrictivePatient.commentText

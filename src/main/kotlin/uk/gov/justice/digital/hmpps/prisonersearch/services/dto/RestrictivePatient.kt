@@ -21,6 +21,7 @@ data class Agency(
 data class RestrictedPatientDto(
   val id: Long,
   val prisonerNumber: String,
+  val fromLocation: Agency,
   val hospitalLocation: Agency,
   val dischargeTime: LocalDateTime,
   val commentText: String? = null,
