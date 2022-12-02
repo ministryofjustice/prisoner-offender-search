@@ -20,7 +20,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
@@ -94,24 +93,10 @@ class PrisonerIndexService(
 
     val prisoner = withRestrictedPatientIfOut(offenderBooking)
 
-    val prisonerA = translate(PrisonerA(), prisoner, incentiveLevel)
-    val prisonerB = translate(PrisonerB(), prisoner, incentiveLevel)
+    val prisonerA = PrisonerA(prisoner, incentiveLevel)
+    val prisonerB = PrisonerB(prisoner, incentiveLevel)
 
-    val currentIndexStatus = indexStatusService.getCurrentIndex()
-
-    val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      prisonerARepository.save(prisonerA)
-    } else {
-      prisonerBRepository.save(prisonerB)
-    }
-
-    if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
-      if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-        prisonerBRepository.save(prisonerB)
-      } else {
-        prisonerARepository.save(prisonerA)
-      }
-    }
+    val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
 
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
 
@@ -125,9 +110,9 @@ class PrisonerIndexService(
     val currentIndexStatus = indexStatusService.getCurrentIndex()
 
     val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      prisonerBRepository.save(translate(PrisonerB(), prisoner, incentiveLevel))
+      prisonerBRepository.save(PrisonerB(prisoner, incentiveLevel))
     } else {
-      prisonerARepository.save(translate(PrisonerA(), prisoner, incentiveLevel))
+      prisonerARepository.save(PrisonerA(prisoner, incentiveLevel))
     }
 
     log.trace("finished reIndex() {}", offenderBooking)
@@ -272,6 +257,20 @@ class PrisonerIndexService(
         dischargeDetails = restrictivePatient.commentText
       )
     )
+  }
+
+  private fun saveToRepository(currentIndexStatus: IndexStatus, prisonerA: PrisonerA, prisonerB: PrisonerB): Prisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+    prisonerARepository.save(prisonerA)
+  } else {
+    prisonerBRepository.save(prisonerB)
+  }.also {
+    if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
+      if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+        prisonerBRepository.save(prisonerB)
+      } else {
+        prisonerARepository.save(prisonerA)
+      }
+    }
   }
 
   open class IndexBuildException(val error: String) :

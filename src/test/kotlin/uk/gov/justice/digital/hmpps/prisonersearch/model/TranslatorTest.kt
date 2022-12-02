@@ -15,7 +15,7 @@ class TranslatorTest {
   fun `when prisoner has no booking associated the booking information is missing`() {
 
     val dateOfBirth = LocalDate.now().minusYears(18)
-    val prisoner = translate(PrisonerA(), OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false), null)
+    val prisoner = PrisonerA(OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false), null)
 
     assertThat(prisoner.prisonerNumber).isEqualTo("A1234AA")
     assertThat(prisoner.firstName).isEqualTo("Fred")
@@ -28,8 +28,7 @@ class TranslatorTest {
   fun `topupSupervisionExpiryDate is present`() {
 
     val tseDate = LocalDate.of(2021, 5, 15)
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -47,8 +46,7 @@ class TranslatorTest {
   fun `topupSupervisionStartDate is present`() {
 
     val tssDate = LocalDate.of(2021, 5, 15)
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -66,8 +64,7 @@ class TranslatorTest {
   fun `homeDetentionCurfewEndDate is present`() {
 
     val hdcend = LocalDate.of(2021, 5, 15)
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -87,8 +84,7 @@ class TranslatorTest {
     val automaticReleaseOverrideDate = LocalDate.now().plusMonths(2)
     val postRecallReleaseOverrideDate = LocalDate.now().plusMonths(1)
     val releaseDate = LocalDate.now().plusMonths(5)
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -116,8 +112,7 @@ class TranslatorTest {
     val conditionalReleaseDate = LocalDate.now().plusMonths(5)
     val automaticReleaseDate = LocalDate.now().plusMonths(4)
     val postRecallReleaseDate = LocalDate.now().plusMonths(3)
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -139,8 +134,7 @@ class TranslatorTest {
 
   @Test
   fun `imprisonmentStatus and description are present`() {
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -158,8 +152,7 @@ class TranslatorTest {
 
   @Test
   fun `maps alerts correctly`() {
-    val prisoner = translate(
-      PrisonerA(),
+    val prisoner = PrisonerA(
       OffenderBooking(
         "A1234AA",
         "Fred",
@@ -187,8 +180,8 @@ class TranslatorTest {
 
   @Test
   internal fun `current incentive is mapped`() {
-    val prisoner = translate(
-      PrisonerA(), aBooking(),
+    val prisoner = PrisonerA(
+      aBooking(),
       IncentiveLevel(
         iepLevel = "Standard",
         iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),

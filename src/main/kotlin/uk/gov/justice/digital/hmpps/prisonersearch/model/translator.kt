@@ -5,92 +5,96 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLo
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 
-fun <P : Prisoner> translate(prisoner: P, ob: OffenderBooking, incentiveLevel: IncentiveLevel?): P {
-  prisoner.prisonerNumber = ob.offenderNo
-  prisoner.bookNumber = ob.bookingNo
-  prisoner.bookingId = ob.bookingId?.toString()
-  prisoner.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
-  prisoner.pncNumberCanonicalShort =
+fun PrisonerA(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) =
+  PrisonerA().apply { this.translate(ob, incentiveLevel) }
+
+fun PrisonerB(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) =
+  PrisonerB().apply { this.translate(ob, incentiveLevel) }
+
+fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) {
+  this.prisonerNumber = ob.offenderNo
+  this.bookNumber = ob.bookingNo
+  this.bookingId = ob.bookingId?.toString()
+  this.pncNumber = ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value
+  this.pncNumberCanonicalShort =
     ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value?.canonicalPNCNumberShort()
-  prisoner.pncNumberCanonicalLong =
+  this.pncNumberCanonicalLong =
     ob.identifiers?.firstOrNull { i -> i.type == "PNC" }?.value?.canonicalPNCNumberLong()
-  prisoner.croNumber = ob.identifiers?.firstOrNull { i -> i.type == "CRO" }?.value
+  this.croNumber = ob.identifiers?.firstOrNull { i -> i.type == "CRO" }?.value
 
-  prisoner.cellLocation = ob.assignedLivingUnit?.description
-  prisoner.prisonName = ob.assignedLivingUnit?.agencyName
-  prisoner.prisonId = ob.agencyId
-  prisoner.status = ob.status
-  prisoner.inOutStatus = ob.inOutStatus
-  prisoner.lastMovementTypeCode = ob.lastMovementTypeCode
-  prisoner.lastMovementReasonCode = ob.lastMovementReasonCode
+  this.cellLocation = ob.assignedLivingUnit?.description
+  this.prisonName = ob.assignedLivingUnit?.agencyName
+  this.prisonId = ob.agencyId
+  this.status = ob.status
+  this.inOutStatus = ob.inOutStatus
+  this.lastMovementTypeCode = ob.lastMovementTypeCode
+  this.lastMovementReasonCode = ob.lastMovementReasonCode
 
-  prisoner.category = ob.categoryCode
-  prisoner.csra = ob.csra
+  this.category = ob.categoryCode
+  this.csra = ob.csra
 
-  prisoner.dateOfBirth = ob.dateOfBirth
-  prisoner.firstName = ob.firstName
-  prisoner.middleNames = ob.middleName
-  prisoner.lastName = ob.lastName
+  this.dateOfBirth = ob.dateOfBirth
+  this.firstName = ob.firstName
+  this.middleNames = ob.middleName
+  this.lastName = ob.lastName
 
-  prisoner.aliases =
+  this.aliases =
     ob.aliases?.map { a -> PrisonerAlias(a.firstName, a.middleName, a.lastName, a.dob, a.gender, a.ethnicity) }
-  prisoner.alerts =
+  this.alerts =
     ob.alerts?.filter { a -> a.active }?.map { a -> PrisonerAlert(a.alertType, a.alertCode, a.active, a.expired) }
 
-  prisoner.gender = ob.physicalAttributes?.gender
-  prisoner.ethnicity = ob.physicalAttributes?.ethnicity
-  prisoner.nationality = ob.profileInformation?.firstOrNull { p -> p.type == "NAT" }?.resultValue
-  prisoner.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue
-  prisoner.maritalStatus = ob.profileInformation?.firstOrNull { p -> p.type == "MARITAL" }?.resultValue
-  prisoner.youthOffender =
+  this.gender = ob.physicalAttributes?.gender
+  this.ethnicity = ob.physicalAttributes?.ethnicity
+  this.nationality = ob.profileInformation?.firstOrNull { p -> p.type == "NAT" }?.resultValue
+  this.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue
+  this.maritalStatus = ob.profileInformation?.firstOrNull { p -> p.type == "MARITAL" }?.resultValue
+  this.youthOffender =
     ob.profileInformation?.firstOrNull { p -> p.type == "YOUTH" }?.resultValue?.uppercase() == "YES"
 
-  prisoner.sentenceStartDate = ob.sentenceDetail?.sentenceStartDate
-  prisoner.confirmedReleaseDate = ob.sentenceDetail?.confirmedReleaseDate
-  prisoner.releaseDate = ob.sentenceDetail?.releaseDate
-  prisoner.sentenceExpiryDate = ob.sentenceDetail?.sentenceExpiryDate
-  prisoner.licenceExpiryDate = ob.sentenceDetail?.licenceExpiryDate
-  prisoner.homeDetentionCurfewEligibilityDate = ob.sentenceDetail?.homeDetentionCurfewEligibilityDate
-  prisoner.homeDetentionCurfewActualDate = ob.sentenceDetail?.homeDetentionCurfewActualDate
-  prisoner.homeDetentionCurfewEndDate = ob.sentenceDetail?.homeDetentionCurfewEndDate
-  prisoner.topupSupervisionStartDate = ob.sentenceDetail?.topupSupervisionStartDate
-  prisoner.topupSupervisionExpiryDate = ob.sentenceDetail?.topupSupervisionExpiryDate
-  prisoner.additionalDaysAwarded = ob.sentenceDetail?.additionalDaysAwarded
-  prisoner.nonDtoReleaseDate = ob.sentenceDetail?.nonDtoReleaseDate
-  prisoner.nonDtoReleaseDateType = ob.sentenceDetail?.nonDtoReleaseDateType
-  prisoner.tariffDate = ob.sentenceDetail?.tariffDate
+  this.sentenceStartDate = ob.sentenceDetail?.sentenceStartDate
+  this.confirmedReleaseDate = ob.sentenceDetail?.confirmedReleaseDate
+  this.releaseDate = ob.sentenceDetail?.releaseDate
+  this.sentenceExpiryDate = ob.sentenceDetail?.sentenceExpiryDate
+  this.licenceExpiryDate = ob.sentenceDetail?.licenceExpiryDate
+  this.homeDetentionCurfewEligibilityDate = ob.sentenceDetail?.homeDetentionCurfewEligibilityDate
+  this.homeDetentionCurfewActualDate = ob.sentenceDetail?.homeDetentionCurfewActualDate
+  this.homeDetentionCurfewEndDate = ob.sentenceDetail?.homeDetentionCurfewEndDate
+  this.topupSupervisionStartDate = ob.sentenceDetail?.topupSupervisionStartDate
+  this.topupSupervisionExpiryDate = ob.sentenceDetail?.topupSupervisionExpiryDate
+  this.additionalDaysAwarded = ob.sentenceDetail?.additionalDaysAwarded
+  this.nonDtoReleaseDate = ob.sentenceDetail?.nonDtoReleaseDate
+  this.nonDtoReleaseDateType = ob.sentenceDetail?.nonDtoReleaseDateType
+  this.tariffDate = ob.sentenceDetail?.tariffDate
 
-  prisoner.receptionDate = ob.receptionDate
-  prisoner.paroleEligibilityDate = ob.sentenceDetail?.paroleEligibilityDate
-  prisoner.automaticReleaseDate =
+  this.receptionDate = ob.receptionDate
+  this.paroleEligibilityDate = ob.sentenceDetail?.paroleEligibilityDate
+  this.automaticReleaseDate =
     ob.sentenceDetail?.automaticReleaseOverrideDate ?: ob.sentenceDetail?.automaticReleaseDate
-  prisoner.postRecallReleaseDate =
+  this.postRecallReleaseDate =
     ob.sentenceDetail?.postRecallReleaseOverrideDate ?: ob.sentenceDetail?.postRecallReleaseDate
-  prisoner.conditionalReleaseDate =
+  this.conditionalReleaseDate =
     ob.sentenceDetail?.conditionalReleaseOverrideDate ?: ob.sentenceDetail?.conditionalReleaseDate
-  prisoner.actualParoleDate = ob.sentenceDetail?.actualParoleDate
+  this.actualParoleDate = ob.sentenceDetail?.actualParoleDate
 
-  prisoner.locationDescription = ob.locationDescription
+  this.locationDescription = ob.locationDescription
 
   // get the most serious offence for this booking
-  prisoner.mostSeriousOffence =
+  this.mostSeriousOffence =
     ob.offenceHistory?.firstOrNull { off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
-  prisoner.recall = ob.recall
-  prisoner.legalStatus = ob.legalStatus
-  prisoner.imprisonmentStatus = ob.imprisonmentStatus
-  prisoner.imprisonmentStatusDescription = ob.imprisonmentStatusDescription
-  prisoner.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
+  this.recall = ob.recall
+  this.legalStatus = ob.legalStatus
+  this.imprisonmentStatus = ob.imprisonmentStatus
+  this.imprisonmentStatusDescription = ob.imprisonmentStatusDescription
+  this.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
 
-  prisoner.restrictedPatient = ob.restrictivePatient != null
-  prisoner.supportingPrisonId = ob.restrictivePatient?.supportingPrisonId
-  prisoner.dischargedHospitalId = ob.restrictivePatient?.dischargedHospital?.agencyId
-  prisoner.dischargedHospitalDescription = ob.restrictivePatient?.dischargedHospital?.description
-  prisoner.dischargeDate = ob.restrictivePatient?.dischargeDate
-  prisoner.dischargeDetails = ob.restrictivePatient?.dischargeDetails
+  this.restrictedPatient = ob.restrictivePatient != null
+  this.supportingPrisonId = ob.restrictivePatient?.supportingPrisonId
+  this.dischargedHospitalId = ob.restrictivePatient?.dischargedHospital?.agencyId
+  this.dischargedHospitalDescription = ob.restrictivePatient?.dischargedHospital?.description
+  this.dischargeDate = ob.restrictivePatient?.dischargeDate
+  this.dischargeDetails = ob.restrictivePatient?.dischargeDetails
 
-  prisoner.currentIncentive = incentiveLevel.toCurrentIncentive()
-
-  return prisoner
+  this.currentIncentive = incentiveLevel.toCurrentIncentive()
 }
 
 private fun IncentiveLevel?.toCurrentIncentive(): CurrentIncentive? = this?.let {
