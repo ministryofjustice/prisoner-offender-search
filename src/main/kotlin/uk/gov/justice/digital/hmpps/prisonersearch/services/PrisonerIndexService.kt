@@ -47,8 +47,7 @@ class PrisonerIndexService(
 
   fun indexPrisoner(prisonerId: String) {
     nomisService.getOffender(prisonerId)?.let {
-      val incentiveLevel = it.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
-      reIndex(offenderBooking = it, incentiveLevel = incentiveLevel)
+      reIndex(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -60,8 +59,7 @@ class PrisonerIndexService(
 
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
-      val incentiveLevel = it.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
-      sync(offenderBooking = it, incentiveLevel = incentiveLevel)
+      sync(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -88,13 +86,14 @@ class PrisonerIndexService(
     }.map { it }.orElse(null)
   }
 
-  fun sync(offenderBooking: OffenderBooking, incentiveLevel: IncentiveLevel?): Prisoner {
+  fun sync(offenderBooking: OffenderBooking): Prisoner {
     val existingPrisoner = get(offenderBooking.offenderNo)
 
-    val restrictivePatient = offenderBooking.getRestrictedPatientData()
+    val restrictedPatientData = offenderBooking.getRestrictedPatientData()
+    val incentiveLevel = offenderBooking.getIncentiveLevel()
 
-    val prisonerA = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
-    val prisonerB = PrisonerB(offenderBooking, incentiveLevel, restrictivePatient)
+    val prisonerA = PrisonerA(offenderBooking, incentiveLevel, restrictedPatientData)
+    val prisonerB = PrisonerB(offenderBooking, incentiveLevel, restrictedPatientData)
 
     val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
 
@@ -104,8 +103,9 @@ class PrisonerIndexService(
     return storedPrisoner
   }
 
-  fun reIndex(offenderBooking: OffenderBooking, incentiveLevel: IncentiveLevel?): Prisoner {
+  fun reIndex(offenderBooking: OffenderBooking): Prisoner {
     val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
+    val incentiveLevel = offenderBooking.getIncentiveLevel()
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
 
@@ -255,6 +255,9 @@ class PrisonerIndexService(
         )
       }
     }
+
+  fun OffenderBooking.getIncentiveLevel(): IncentiveLevel? =
+    this.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
 
   private fun saveToRepository(currentIndexStatus: IndexStatus, prisonerA: PrisonerA, prisonerB: PrisonerB): Prisoner =
     if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {

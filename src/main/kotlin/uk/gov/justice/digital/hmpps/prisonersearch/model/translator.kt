@@ -6,13 +6,13 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberSh
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 
-fun PrisonerA(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictivePatient: RestrictivePatient?) =
-  PrisonerA().apply { this.translate(ob, incentiveLevel, restrictivePatient) }
+fun PrisonerA(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictedPatientData: RestrictivePatient?) =
+  PrisonerA().apply { this.translate(ob, incentiveLevel, restrictedPatientData) }
 
-fun PrisonerB(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictivePatient: RestrictivePatient?) =
-  PrisonerB().apply { this.translate(ob, incentiveLevel, restrictivePatient) }
+fun PrisonerB(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictedPatientData: RestrictivePatient?) =
+  PrisonerB().apply { this.translate(ob, incentiveLevel, restrictedPatientData) }
 
-fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictivePatient: RestrictivePatient?) {
+fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictedPatientData: RestrictivePatient?) {
   this.prisonerNumber = ob.offenderNo
   this.bookNumber = ob.bookingNo
   this.bookingId = ob.bookingId?.toString()
@@ -77,7 +77,7 @@ fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, res
     ob.sentenceDetail?.conditionalReleaseOverrideDate ?: ob.sentenceDetail?.conditionalReleaseDate
   this.actualParoleDate = ob.sentenceDetail?.actualParoleDate
 
-  this.locationDescription = restrictivePatient
+  this.locationDescription = restrictedPatientData
     ?.let { "${ob.locationDescription} - discharged to ${it.dischargedHospital?.description}" }
     ?: ob.locationDescription
   // get the most serious offence for this booking
@@ -89,12 +89,12 @@ fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, res
   this.imprisonmentStatusDescription = ob.imprisonmentStatusDescription
   this.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
 
-  this.restrictedPatient = restrictivePatient != null
-  this.supportingPrisonId = restrictivePatient?.supportingPrisonId
-  this.dischargedHospitalId = restrictivePatient?.dischargedHospital?.agencyId
-  this.dischargedHospitalDescription = restrictivePatient?.dischargedHospital?.description
-  this.dischargeDate = restrictivePatient?.dischargeDate
-  this.dischargeDetails = restrictivePatient?.dischargeDetails
+  this.restrictedPatient = restrictedPatientData != null
+  this.supportingPrisonId = restrictedPatientData?.supportingPrisonId
+  this.dischargedHospitalId = restrictedPatientData?.dischargedHospital?.agencyId
+  this.dischargedHospitalDescription = restrictedPatientData?.dischargedHospital?.description
+  this.dischargeDate = restrictedPatientData?.dischargeDate
+  this.dischargeDetails = restrictedPatientData?.dischargeDetails
 
   this.currentIncentive = incentiveLevel.toCurrentIncentive()
 }
