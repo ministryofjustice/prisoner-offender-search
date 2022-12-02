@@ -4,14 +4,15 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberLong
 import uk.gov.justice.digital.hmpps.prisonersearch.services.canonicalPNCNumberShort
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 
-fun PrisonerA(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) =
-  PrisonerA().apply { this.translate(ob, incentiveLevel) }
+fun PrisonerA(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictivePatient: RestrictivePatient?) =
+  PrisonerA().apply { this.translate(ob, incentiveLevel, restrictivePatient) }
 
-fun PrisonerB(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) =
-  PrisonerB().apply { this.translate(ob, incentiveLevel) }
+fun PrisonerB(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictivePatient: RestrictivePatient?) =
+  PrisonerB().apply { this.translate(ob, incentiveLevel, restrictivePatient) }
 
-fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) {
+fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictivePatient: RestrictivePatient?) {
   this.prisonerNumber = ob.offenderNo
   this.bookNumber = ob.bookingNo
   this.bookingId = ob.bookingId?.toString()
@@ -76,8 +77,9 @@ fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) {
     ob.sentenceDetail?.conditionalReleaseOverrideDate ?: ob.sentenceDetail?.conditionalReleaseDate
   this.actualParoleDate = ob.sentenceDetail?.actualParoleDate
 
-  this.locationDescription = ob.locationDescription
-
+  this.locationDescription = restrictivePatient
+    ?.let { "${ob.locationDescription} - discharged to ${it.dischargedHospital?.description}" }
+    ?: ob.locationDescription
   // get the most serious offence for this booking
   this.mostSeriousOffence =
     ob.offenceHistory?.firstOrNull { off -> off.mostSerious && off.bookingId == ob.bookingId }?.offenceDescription
@@ -87,12 +89,12 @@ fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?) {
   this.imprisonmentStatusDescription = ob.imprisonmentStatusDescription
   this.indeterminateSentence = ob.sentenceTerms?.any { st -> st.lifeSentence && st.bookingId == ob.bookingId }
 
-  this.restrictedPatient = ob.restrictivePatient != null
-  this.supportingPrisonId = ob.restrictivePatient?.supportingPrisonId
-  this.dischargedHospitalId = ob.restrictivePatient?.dischargedHospital?.agencyId
-  this.dischargedHospitalDescription = ob.restrictivePatient?.dischargedHospital?.description
-  this.dischargeDate = ob.restrictivePatient?.dischargeDate
-  this.dischargeDetails = ob.restrictivePatient?.dischargeDetails
+  this.restrictedPatient = restrictivePatient != null
+  this.supportingPrisonId = restrictivePatient?.supportingPrisonId
+  this.dischargedHospitalId = restrictivePatient?.dischargedHospital?.agencyId
+  this.dischargedHospitalDescription = restrictivePatient?.dischargedHospital?.description
+  this.dischargeDate = restrictivePatient?.dischargeDate
+  this.dischargeDetails = restrictivePatient?.dischargeDetails
 
   this.currentIncentive = incentiveLevel.toCurrentIncentive()
 }

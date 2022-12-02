@@ -9,7 +9,6 @@ import org.elasticsearch.client.RestClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -150,84 +149,6 @@ class PrisonerIndexServiceTest {
   }
 
   @Nested
-  inner class WithRestrictedPatient {
-    @Test
-    fun `calls restricted patient service when the offender is OUT`() {
-      prisonerIndexService.withRestrictedPatientIfOut(makeOffenderBooking())
-
-      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
-    }
-
-    @Test
-    fun `skip call to restricted patient service when the offender is not currently out`() {
-      prisonerIndexService.withRestrictedPatientIfOut(
-        makeOffenderBooking(
-          assignedLivingUnit = AssignedLivingUnit(
-            agencyName = "MDI",
-            agencyId = "MDI",
-            description = "Moorland",
-            locationId = 2
-          )
-        )
-      )
-
-      verify(restrictedPatientService, never()).getRestrictedPatient("A1234AA")
-    }
-
-    @Nested
-    inner class Mapping {
-      @Test
-      fun `maps the restricted patient data`() {
-        val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
-        val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true)
-        val now = LocalDateTime.now()
-
-        whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(
-          RestrictedPatientDto(
-            id = 1,
-            prisonerNumber = "A1234AA",
-            supportingPrison = prison,
-            hospitalLocation = hospital,
-            dischargeTime = now,
-            commentText = "test"
-          )
-        )
-
-        val offenderBooking = prisonerIndexService.withRestrictedPatientIfOut(makeOffenderBooking())
-
-        assertThat(offenderBooking.restrictivePatient)
-          .extracting("supportingPrisonId", "dischargedHospital", "dischargeDate", "dischargeDetails")
-          .contains(prison.agencyId, hospital, now.toLocalDate(), "test")
-      }
-
-      @Test
-      fun `handle no restricted patient`() {
-        whenever(restrictedPatientService.getRestrictedPatient(anyString())).thenReturn(null)
-
-        val offenderBooking = prisonerIndexService.withRestrictedPatientIfOut(makeOffenderBooking())
-
-        assertThat(offenderBooking.restrictivePatient).isNull()
-      }
-    }
-
-    private fun makeOffenderBooking(
-      assignedLivingUnit: AssignedLivingUnit = AssignedLivingUnit(
-        agencyId = "OUT",
-        locationId = 1,
-        description = "OUT",
-        agencyName = "OUT"
-      )
-    ) = OffenderBooking(
-      "A1234AA",
-      "Fred",
-      "Bloggs",
-      LocalDate.of(1976, 5, 15),
-      false,
-      assignedLivingUnit = assignedLivingUnit,
-    )
-  }
-
-  @Nested
   inner class SyncPrisoner {
     @BeforeEach
     internal fun setUp() {
@@ -249,6 +170,68 @@ class PrisonerIndexServiceTest {
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
 
       verifyNoInteractions(incentivesService)
+    }
+
+    @Test
+    internal fun `will get restrictive patients data is prisoner OUT`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+
+      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+    }
+
+    @Test
+    fun `skip call to restricted patient service when the offender is not currently out`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsIn())
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+
+      verify(restrictedPatientService, never()).getRestrictedPatient("A1234AA")
+    }
+
+    @Test
+    internal fun `OUT prisoners do not need to have restrictive patients data`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
+      whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(null)
+
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+
+      verify(prisonerARepository).save(
+        org.mockito.kotlin.check {
+          assertThat(it.restrictedPatient).isFalse()
+        }
+      )
+    }
+    @Test
+    internal fun `OUT prisoners might have restrictive patients data`() {
+      val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
+      val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true, description = "Hazelwood Hospital")
+      val now = LocalDateTime.now()
+
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
+      whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(
+        RestrictedPatientDto(
+          id = 1,
+          prisonerNumber = "A1234AA",
+          supportingPrison = prison,
+          hospitalLocation = hospital,
+          dischargeTime = now,
+          commentText = "Getting worse"
+        )
+      )
+
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+
+      verify(prisonerARepository).save(
+        org.mockito.kotlin.check {
+          assertThat(it.restrictedPatient).isTrue
+          assertThat(it.supportingPrisonId).isEqualTo("LEI")
+          assertThat(it.dischargedHospitalId).isEqualTo("HAZLWD")
+          assertThat(it.dischargedHospitalDescription).isEqualTo("Hazelwood Hospital")
+          assertThat(it.dischargeDate).isEqualTo(now.toLocalDate())
+          assertThat(it.dischargeDetails).isEqualTo("Getting worse")
+          assertThat(it.locationDescription).isEqualTo("OUT - discharged to Hazelwood Hospital")
+        }
+      )
     }
   }
   @Nested
@@ -296,4 +279,36 @@ private fun anOffenderWithNoBooking() = OffenderBooking(
   lastName = "Bloggs",
   dateOfBirth = LocalDate.of(1976, 5, 15),
   activeFlag = false
+)
+
+private fun anOffenderThatIsOut(
+  assignedLivingUnit: AssignedLivingUnit = AssignedLivingUnit(
+    agencyId = "OUT",
+    locationId = 1,
+    description = "OUT",
+    agencyName = "OUT"
+  )
+) = OffenderBooking(
+  "A1234AA",
+  "Fred",
+  "Bloggs",
+  LocalDate.of(1976, 5, 15),
+  false,
+  assignedLivingUnit = assignedLivingUnit,
+  locationDescription = "OUT"
+)
+private fun anOffenderThatIsIn(
+  assignedLivingUnit: AssignedLivingUnit = AssignedLivingUnit(
+    agencyName = "MDI",
+    agencyId = "MDI",
+    description = "Moorland",
+    locationId = 2
+  )
+) = OffenderBooking(
+  "A1234AA",
+  "Fred",
+  "Bloggs",
+  LocalDate.of(1976, 5, 15),
+  false,
+  assignedLivingUnit = assignedLivingUnit,
 )
