@@ -20,7 +20,7 @@ class TranslatorTest {
     val prisoner = PrisonerA(
       ob = OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
 
     assertThat(prisoner.prisonerNumber).isEqualTo("A1234AA")
@@ -44,7 +44,7 @@ class TranslatorTest {
         sentenceDetail = SentenceDetail(topupSupervisionExpiryDate = tseDate)
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
     assertThat(prisoner.topupSupervisionExpiryDate).isEqualTo(tseDate)
   }
@@ -63,7 +63,7 @@ class TranslatorTest {
         sentenceDetail = SentenceDetail(topupSupervisionStartDate = tssDate)
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
     assertThat(prisoner.topupSupervisionStartDate).isEqualTo(tssDate)
   }
@@ -82,7 +82,7 @@ class TranslatorTest {
         sentenceDetail = SentenceDetail(homeDetentionCurfewEndDate = hdcend)
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
     assertThat(prisoner.homeDetentionCurfewEndDate).isEqualTo(hdcend)
   }
@@ -110,7 +110,7 @@ class TranslatorTest {
         ),
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
     assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseOverrideDate)
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseOverrideDate)
@@ -136,7 +136,7 @@ class TranslatorTest {
         ),
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
     assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseDate)
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseDate)
@@ -156,7 +156,7 @@ class TranslatorTest {
         imprisonmentStatusDescription = "Serving Life Imprisonment"
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
     assertThat(prisoner.imprisonmentStatus).isEqualTo("LIFE")
     assertThat(prisoner.imprisonmentStatusDescription).isEqualTo("Serving Life Imprisonment")
@@ -183,7 +183,7 @@ class TranslatorTest {
         )
       ),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
 
     assertThat(prisoner.alerts?.first())
@@ -200,7 +200,7 @@ class TranslatorTest {
         iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
         nextReviewDate = LocalDate.parse("2022-02-02"),
       ),
-      restrictivePatient = null
+      restrictedPatientData = null
     )
 
     assertThat(prisoner.currentIncentive).isNotNull
@@ -215,7 +215,7 @@ class TranslatorTest {
     val prisoner = PrisonerA(
       aBooking().copy(locationDescription = "OUT"),
       incentiveLevel = null,
-      restrictivePatient = RestrictivePatient(
+      restrictedPatientData = RestrictivePatient(
         supportingPrisonId = "MDI",
         dischargedHospital = Agency(
           agencyId = "HAZLWD",
@@ -241,7 +241,7 @@ class TranslatorTest {
     val prisoner = PrisonerA(
       aBooking().copy(locationDescription = "OUT"),
       incentiveLevel = null,
-      restrictivePatient = null
+      restrictedPatientData = null
     )
 
     assertThat(prisoner.restrictedPatient).isFalse

@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import com.microsoft.applicationinsights.TelemetryClient
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -17,10 +16,9 @@ class PrisonerSyncServiceTest {
 
   private val nomisService = mock<NomisService>()
   private val prisonerIndexService = mock<PrisonerIndexService>()
-  private val incentivesService = mock<IncentivesService>()
   private val telemetryClient = mock<TelemetryClient>()
 
-  private val prisonerSyncService = PrisonerSyncService(nomisService, prisonerIndexService, incentivesService, telemetryClient)
+  private val prisonerSyncService = PrisonerSyncService(nomisService, prisonerIndexService, telemetryClient)
 
   @Nested
   inner class MaybeDeleteOffender {
@@ -28,15 +26,13 @@ class PrisonerSyncServiceTest {
     @Test
     fun `sync on delete event if prisoner exists`() {
       val offenderBooking = makeOffenderBooking()
-      val incentiveLevel = anIncentiveLevel()
       whenever(nomisService.getOffender(prisonerNumber)).thenReturn(offenderBooking)
-      whenever(incentivesService.getCurrentIncentive(any())).thenReturn(incentiveLevel)
 
       prisonerSyncService.maybeDeleteOffender(
         OffenderChangedMessage(eventType = "type", offenderId = 1, offenderIdDisplay = prisonerNumber)
       )
 
-      verify(prisonerIndexService).sync(offenderBooking, incentiveLevel)
+      verify(prisonerIndexService).sync(offenderBooking)
     }
 
     @Test
