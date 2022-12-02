@@ -91,10 +91,10 @@ class PrisonerIndexService(
   fun sync(offenderBooking: OffenderBooking, incentiveLevel: IncentiveLevel?): Prisoner {
     val existingPrisoner = get(offenderBooking.offenderNo)
 
-    val prisoner = withRestrictedPatientIfOut(offenderBooking)
+    val restrictivePatient = offenderBooking.getRestrictedPatientData()
 
-    val prisonerA = PrisonerA(prisoner, incentiveLevel)
-    val prisonerB = PrisonerB(prisoner, incentiveLevel)
+    val prisonerA = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
+    val prisonerB = PrisonerB(offenderBooking, incentiveLevel, restrictivePatient)
 
     val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
 
@@ -105,14 +105,14 @@ class PrisonerIndexService(
   }
 
   fun reIndex(offenderBooking: OffenderBooking, incentiveLevel: IncentiveLevel?): Prisoner {
-    val prisoner = withRestrictedPatientIfOut(offenderBooking)
+    val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
 
     val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      prisonerBRepository.save(PrisonerB(prisoner, incentiveLevel))
+      prisonerBRepository.save(PrisonerB(offenderBooking, incentiveLevel, restrictivePatient))
     } else {
-      prisonerARepository.save(PrisonerA(prisoner, incentiveLevel))
+      prisonerARepository.save(PrisonerA(offenderBooking, incentiveLevel, restrictivePatient))
     }
 
     log.trace("finished reIndex() {}", offenderBooking)
@@ -244,34 +244,32 @@ class PrisonerIndexService(
     return totalRows
   }
 
-  fun withRestrictedPatientIfOut(booking: OffenderBooking): OffenderBooking {
-    if (booking.assignedLivingUnit?.agencyId != "OUT") return booking
-    val restrictivePatient = restrictedPatientService.getRestrictedPatient(booking.offenderNo) ?: return booking
-
-    return booking.copy(
-      locationDescription = booking.locationDescription + " - discharged to " + restrictivePatient.hospitalLocation.description,
-      restrictivePatient = RestrictivePatient(
-        supportingPrisonId = restrictivePatient.supportingPrison.agencyId,
-        dischargedHospital = restrictivePatient.hospitalLocation,
-        dischargeDate = restrictivePatient.dischargeTime.toLocalDate(),
-        dischargeDetails = restrictivePatient.commentText
-      )
-    )
-  }
-
-  private fun saveToRepository(currentIndexStatus: IndexStatus, prisonerA: PrisonerA, prisonerB: PrisonerB): Prisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-    prisonerARepository.save(prisonerA)
-  } else {
-    prisonerBRepository.save(prisonerB)
-  }.also {
-    if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
-      if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-        prisonerBRepository.save(prisonerB)
-      } else {
-        prisonerARepository.save(prisonerA)
+  fun OffenderBooking.getRestrictedPatientData(): RestrictivePatient? =
+    this.takeUnless { this.assignedLivingUnit?.agencyId != "OUT" }?.let {
+      restrictedPatientService.getRestrictedPatient(this.offenderNo)?.let {
+        RestrictivePatient(
+          supportingPrisonId = it.supportingPrison.agencyId,
+          dischargedHospital = it.hospitalLocation,
+          dischargeDate = it.dischargeTime.toLocalDate(),
+          dischargeDetails = it.commentText
+        )
       }
     }
-  }
+
+  private fun saveToRepository(currentIndexStatus: IndexStatus, prisonerA: PrisonerA, prisonerB: PrisonerB): Prisoner =
+    if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerARepository.save(prisonerA)
+    } else {
+      prisonerBRepository.save(prisonerB)
+    }.also {
+      if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
+        if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+          prisonerBRepository.save(prisonerB)
+        } else {
+          prisonerARepository.save(prisonerA)
+        }
+      }
+    }
 
   open class IndexBuildException(val error: String) :
     Exception("Unable to build index reason: $error")

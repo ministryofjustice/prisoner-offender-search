@@ -3,8 +3,10 @@ package uk.gov.justice.digital.hmpps.prisonersearch.model
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Agency
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SentenceDetail
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -15,7 +17,11 @@ class TranslatorTest {
   fun `when prisoner has no booking associated the booking information is missing`() {
 
     val dateOfBirth = LocalDate.now().minusYears(18)
-    val prisoner = PrisonerA(OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false), null)
+    val prisoner = PrisonerA(
+      ob = OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false),
+      incentiveLevel = null,
+      restrictivePatient = null
+    )
 
     assertThat(prisoner.prisonerNumber).isEqualTo("A1234AA")
     assertThat(prisoner.firstName).isEqualTo("Fred")
@@ -37,7 +43,8 @@ class TranslatorTest {
         false,
         sentenceDetail = SentenceDetail(topupSupervisionExpiryDate = tseDate)
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
     assertThat(prisoner.topupSupervisionExpiryDate).isEqualTo(tseDate)
   }
@@ -55,7 +62,8 @@ class TranslatorTest {
         false,
         sentenceDetail = SentenceDetail(topupSupervisionStartDate = tssDate)
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
     assertThat(prisoner.topupSupervisionStartDate).isEqualTo(tssDate)
   }
@@ -73,7 +81,8 @@ class TranslatorTest {
         false,
         sentenceDetail = SentenceDetail(homeDetentionCurfewEndDate = hdcend)
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
     assertThat(prisoner.homeDetentionCurfewEndDate).isEqualTo(hdcend)
   }
@@ -100,7 +109,8 @@ class TranslatorTest {
           postRecallReleaseOverrideDate = postRecallReleaseOverrideDate
         ),
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
     assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseOverrideDate)
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseOverrideDate)
@@ -125,7 +135,8 @@ class TranslatorTest {
           postRecallReleaseDate = postRecallReleaseDate
         ),
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
     assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseDate)
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseDate)
@@ -144,7 +155,8 @@ class TranslatorTest {
         imprisonmentStatus = "LIFE",
         imprisonmentStatusDescription = "Serving Life Imprisonment"
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
     assertThat(prisoner.imprisonmentStatus).isEqualTo("LIFE")
     assertThat(prisoner.imprisonmentStatusDescription).isEqualTo("Serving Life Imprisonment")
@@ -170,7 +182,8 @@ class TranslatorTest {
           )
         )
       ),
-      incentiveLevel = null
+      incentiveLevel = null,
+      restrictivePatient = null
     )
 
     assertThat(prisoner.alerts?.first())
@@ -186,7 +199,8 @@ class TranslatorTest {
         iepLevel = "Standard",
         iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
         nextReviewDate = LocalDate.parse("2022-02-02"),
-      )
+      ),
+      restrictivePatient = null
     )
 
     assertThat(prisoner.currentIncentive).isNotNull
@@ -194,6 +208,49 @@ class TranslatorTest {
     assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
     assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
     assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))
+  }
+
+  @Test
+  internal fun `restrictive patient data is mapped`() {
+    val prisoner = PrisonerA(
+      aBooking().copy(locationDescription = "OUT"),
+      incentiveLevel = null,
+      restrictivePatient = RestrictivePatient(
+        supportingPrisonId = "MDI",
+        dischargedHospital = Agency(
+          agencyId = "HAZLWD",
+          agencyType = "HSHOSP",
+          active = true,
+          description = "Hazelwood Hospital"
+        ),
+        dischargeDate = LocalDate.now(),
+        dischargeDetails = "Getting worse"
+      )
+    )
+
+    assertThat(prisoner.restrictedPatient).isTrue
+    assertThat(prisoner.supportingPrisonId).isEqualTo("MDI")
+    assertThat(prisoner.dischargedHospitalId).isEqualTo("HAZLWD")
+    assertThat(prisoner.dischargedHospitalDescription).isEqualTo("Hazelwood Hospital")
+    assertThat(prisoner.dischargeDate).isEqualTo(LocalDate.now())
+    assertThat(prisoner.dischargeDetails).isEqualTo("Getting worse")
+    assertThat(prisoner.locationDescription).isEqualTo("OUT - discharged to Hazelwood Hospital")
+  }
+  @Test
+  internal fun `restrictive patient data can be null`() {
+    val prisoner = PrisonerA(
+      aBooking().copy(locationDescription = "OUT"),
+      incentiveLevel = null,
+      restrictivePatient = null
+    )
+
+    assertThat(prisoner.restrictedPatient).isFalse
+    assertThat(prisoner.supportingPrisonId).isNull()
+    assertThat(prisoner.dischargedHospitalId).isNull()
+    assertThat(prisoner.dischargedHospitalDescription).isNull()
+    assertThat(prisoner.dischargeDate).isNull()
+    assertThat(prisoner.dischargeDetails).isNull()
+    assertThat(prisoner.locationDescription).isEqualTo("OUT")
   }
 }
 
