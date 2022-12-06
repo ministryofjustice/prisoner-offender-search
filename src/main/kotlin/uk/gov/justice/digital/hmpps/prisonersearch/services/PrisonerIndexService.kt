@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDiffere
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
+import kotlin.runCatching
 
 @Service
 class PrisonerIndexService(
@@ -47,7 +48,7 @@ class PrisonerIndexService(
 
   fun indexPrisoner(prisonerId: String) {
     nomisService.getOffender(prisonerId)?.let {
-      reIndex(offenderBooking = it)
+      index(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -59,7 +60,7 @@ class PrisonerIndexService(
 
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
-      sync(offenderBooking = it)
+      reindex(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -86,24 +87,29 @@ class PrisonerIndexService(
     }.map { it }.orElse(null)
   }
 
-  fun sync(offenderBooking: OffenderBooking): Prisoner {
+  // called when prisoner record has changed
+  fun reindex(offenderBooking: OffenderBooking): Prisoner {
     val existingPrisoner = get(offenderBooking.offenderNo)
 
     val restrictedPatientData = offenderBooking.getRestrictedPatientData()
-    val incentiveLevel = offenderBooking.getIncentiveLevel()
+    val incentiveLevel = runCatching { offenderBooking.getIncentiveLevel() }
 
-    val prisonerA = PrisonerA(offenderBooking, incentiveLevel, restrictedPatientData)
-    val prisonerB = PrisonerB(offenderBooking, incentiveLevel, restrictedPatientData)
+    val prisonerA = PrisonerA(existingPrisoner, offenderBooking, incentiveLevel, restrictedPatientData)
+    val prisonerB = PrisonerB(existingPrisoner, offenderBooking, incentiveLevel, restrictedPatientData)
 
     val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
 
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
 
+    // return message to DLQ since we have only done a partial update
+    incentiveLevel.exceptionOrNull()?.run { throw this }
+
     log.trace("finished sync() {}", offenderBooking)
     return storedPrisoner
   }
 
-  fun reIndex(offenderBooking: OffenderBooking): Prisoner {
+  // called when rebuilding the index from scratch
+  fun index(offenderBooking: OffenderBooking): Prisoner {
     val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
     val incentiveLevel = offenderBooking.getIncentiveLevel()
 

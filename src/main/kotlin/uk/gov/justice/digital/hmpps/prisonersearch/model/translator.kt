@@ -7,12 +7,16 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 
 fun PrisonerA(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictedPatientData: RestrictivePatient?) =
-  PrisonerA().apply { this.translate(ob, incentiveLevel, restrictedPatientData) }
+  PrisonerA().apply { this.translate(null, ob, Result.success(incentiveLevel), restrictedPatientData) }
+fun PrisonerA(existingPrisoner: Prisoner?, ob: OffenderBooking, incentiveLevel: Result<IncentiveLevel?>, restrictedPatientData: RestrictivePatient?) =
+  PrisonerA().apply { this.translate(existingPrisoner, ob, incentiveLevel, restrictedPatientData) }
 
 fun PrisonerB(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictedPatientData: RestrictivePatient?) =
-  PrisonerB().apply { this.translate(ob, incentiveLevel, restrictedPatientData) }
+  PrisonerB().apply { this.translate(null, ob, Result.success(incentiveLevel), restrictedPatientData) }
+fun PrisonerB(existingPrisoner: Prisoner?, ob: OffenderBooking, incentiveLevel: Result<IncentiveLevel?>, restrictedPatientData: RestrictivePatient?) =
+  PrisonerB().apply { this.translate(existingPrisoner, ob, incentiveLevel, restrictedPatientData) }
 
-fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, restrictedPatientData: RestrictivePatient?) {
+fun Prisoner.translate(existingPrisoner: Prisoner?, ob: OffenderBooking, incentiveLevel: Result<IncentiveLevel?>, restrictedPatientData: RestrictivePatient?) {
   this.prisonerNumber = ob.offenderNo
   this.bookNumber = ob.bookingNo
   this.bookingId = ob.bookingId?.toString()
@@ -96,7 +100,7 @@ fun Prisoner.translate(ob: OffenderBooking, incentiveLevel: IncentiveLevel?, res
   this.dischargeDate = restrictedPatientData?.dischargeDate
   this.dischargeDetails = restrictedPatientData?.dischargeDetails
 
-  this.currentIncentive = incentiveLevel.toCurrentIncentive()
+  this.currentIncentive = incentiveLevel.map { it.toCurrentIncentive() }.getOrElse { existingPrisoner?.currentIncentive }
 }
 
 private fun IncentiveLevel?.toCurrentIncentive(): CurrentIncentive? = this?.let {

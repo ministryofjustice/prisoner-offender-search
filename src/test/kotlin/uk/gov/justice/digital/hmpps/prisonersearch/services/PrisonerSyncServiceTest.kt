@@ -32,7 +32,7 @@ class PrisonerSyncServiceTest {
         OffenderChangedMessage(eventType = "type", offenderId = 1, offenderIdDisplay = prisonerNumber)
       )
 
-      verify(prisonerIndexService).sync(offenderBooking)
+      verify(prisonerIndexService).reindex(offenderBooking)
     }
 
     @Test
