@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDiffere
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
+import kotlin.runCatching
 
 @Service
 class PrisonerIndexService(
@@ -90,14 +91,17 @@ class PrisonerIndexService(
     val existingPrisoner = get(offenderBooking.offenderNo)
 
     val restrictedPatientData = offenderBooking.getRestrictedPatientData()
-    val incentiveLevel = offenderBooking.getIncentiveLevel()
+    val incentiveLevel = runCatching { offenderBooking.getIncentiveLevel() }
 
-    val prisonerA = PrisonerA(offenderBooking, incentiveLevel, restrictedPatientData)
-    val prisonerB = PrisonerB(offenderBooking, incentiveLevel, restrictedPatientData)
+    val prisonerA = PrisonerA(existingPrisoner, offenderBooking, incentiveLevel, restrictedPatientData)
+    val prisonerB = PrisonerB(existingPrisoner, offenderBooking, incentiveLevel, restrictedPatientData)
 
     val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
 
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
+
+    // return message to DLQ since we have only done a partial update
+    incentiveLevel.exceptionOrNull()?.run { throw this }
 
     log.trace("finished sync() {}", offenderBooking)
     return storedPrisoner

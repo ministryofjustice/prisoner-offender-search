@@ -9,7 +9,9 @@ import org.elasticsearch.client.RestClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.check
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -29,6 +31,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Agency
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.AssignedLivingUnit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatientDto
+import java.lang.RuntimeException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -171,6 +174,36 @@ class PrisonerIndexServiceTest {
 
       verifyNoInteractions(incentivesService)
     }
+    @Test
+    internal fun `will update index with current incentive level`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      whenever(incentivesService.getCurrentIncentive(123456L)).thenReturn(
+        IncentiveLevel(
+          iepLevel = "Standard",
+          iepTime = LocalDateTime.parse("2021-01-01T10:00:00"),
+          nextReviewDate = LocalDate.parse("2021-03-01"),
+        )
+      )
+
+      prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+      verify(prisonerARepository).save(
+        check {
+          assertThat(it.currentIncentive?.level?.description).isEqualTo("Standard")
+          assertThat(it.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T10:00:00"))
+          assertThat(it.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2021-03-01"))
+        }
+      )
+    }
+    @Test
+    internal fun `will update index even if it can't get the current incentive level`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      whenever(incentivesService.getCurrentIncentive(123456L)).thenThrow(RuntimeException("oops"))
+
+      assertThrows<RuntimeException> {
+        prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
+        verify(prisonerARepository).save(any())
+      }
+    }
 
     @Test
     internal fun `will get restrictive patients data is prisoner OUT`() {
@@ -196,7 +229,7 @@ class PrisonerIndexServiceTest {
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
 
       verify(prisonerARepository).save(
-        org.mockito.kotlin.check {
+        check {
           assertThat(it.restrictedPatient).isFalse()
         }
       )
@@ -222,7 +255,7 @@ class PrisonerIndexServiceTest {
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
 
       verify(prisonerARepository).save(
-        org.mockito.kotlin.check {
+        check {
           assertThat(it.restrictedPatient).isTrue
           assertThat(it.supportingPrisonId).isEqualTo("LEI")
           assertThat(it.dischargedHospitalId).isEqualTo("HAZLWD")

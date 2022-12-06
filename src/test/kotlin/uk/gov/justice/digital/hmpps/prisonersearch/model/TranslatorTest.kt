@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.model
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Agency
@@ -211,6 +212,28 @@ class TranslatorTest {
   }
 
   @Test
+  internal fun `current incentive is mapped when there is no failure`() {
+    val prisoner = PrisonerA(
+      null,
+      aBooking(),
+      Result.success(
+        IncentiveLevel(
+          iepLevel = "Standard",
+          iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
+          nextReviewDate = LocalDate.parse("2022-02-02"),
+        )
+      ),
+      restrictedPatientData = null
+    )
+
+    assertThat(prisoner.currentIncentive).isNotNull
+    assertThat(prisoner.currentIncentive?.level).isNotNull
+    assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
+    assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
+    assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))
+  }
+
+  @Test
   internal fun `restrictive patient data is mapped`() {
     val prisoner = PrisonerA(
       aBooking().copy(locationDescription = "OUT"),
@@ -251,6 +274,65 @@ class TranslatorTest {
     assertThat(prisoner.dischargeDate).isNull()
     assertThat(prisoner.dischargeDetails).isNull()
     assertThat(prisoner.locationDescription).isEqualTo("OUT")
+  }
+
+  @Nested
+  inner class WithIncentiveLevelFailure {
+    @Test
+    internal fun `will fall back to old level when present`() {
+      val existingPrisoner = PrisonerA(
+        aBooking().copy(locationDescription = "OUT"),
+        incentiveLevel = IncentiveLevel(
+          iepLevel = "Standard",
+          iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
+          nextReviewDate = LocalDate.parse("2022-02-02"),
+        ),
+        restrictedPatientData = null
+      )
+
+      val prisoner = PrisonerA(
+        existingPrisoner,
+        aBooking(),
+        Result.failure(RuntimeException("It has gone badly wrong")),
+        restrictedPatientData = null
+      )
+
+      assertThat(prisoner.currentIncentive).isNotNull
+      assertThat(prisoner.currentIncentive?.level).isNotNull
+      assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
+      assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
+      assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))
+    }
+
+    @Test
+    internal fun `will fall back to null when previous record did not exist`() {
+      val prisoner = PrisonerA(
+        existingPrisoner = null,
+        aBooking(),
+        Result.failure(RuntimeException("It has gone badly wrong")),
+        restrictedPatientData = null
+      )
+
+      assertThat(prisoner.currentIncentive).isNull()
+    }
+
+    @Test
+    internal fun `will fall back to null when the previous record's incentive was null`() {
+      val existingPrisoner = PrisonerA(
+        aBooking().copy(locationDescription = "OUT"),
+        incentiveLevel = null,
+        restrictedPatientData = null
+      )
+
+      val prisoner = PrisonerA(
+        existingPrisoner,
+        aBooking(),
+        Result.failure(RuntimeException("It has gone badly wrong")),
+        restrictedPatientData = null
+      )
+
+      assertThat(prisoner.currentIncentive).isNull()
+    }
   }
 }
 
