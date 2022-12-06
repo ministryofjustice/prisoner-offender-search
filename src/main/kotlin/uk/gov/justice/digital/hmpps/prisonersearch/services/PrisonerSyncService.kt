@@ -61,7 +61,7 @@ class PrisonerSyncService(
 
   private fun syncByNomsNumber(offenderIdDisplay: String) {
     nomisService.getOffender(offenderIdDisplay)?.run {
-      prisonerIndexService.sync(this)
+      prisonerIndexService.reindex(this)
     }
   }
 
@@ -83,7 +83,7 @@ class PrisonerSyncService(
         prisonerIndexService.delete(prisonerId)
       } else {
         log.debug("Delete check: offender ID {} still exists, so assuming an alias deletion", prisonerId)
-        prisonerIndexService.sync(offender)
+        prisonerIndexService.reindex(offender)
       }
     } else {
       customEventForMissingOffenderIdDisplay(message)

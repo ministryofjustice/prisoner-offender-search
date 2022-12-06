@@ -48,7 +48,7 @@ class PrisonerIndexService(
 
   fun indexPrisoner(prisonerId: String) {
     nomisService.getOffender(prisonerId)?.let {
-      reIndex(offenderBooking = it)
+      index(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -60,7 +60,7 @@ class PrisonerIndexService(
 
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
-      sync(offenderBooking = it)
+      reindex(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
@@ -87,7 +87,8 @@ class PrisonerIndexService(
     }.map { it }.orElse(null)
   }
 
-  fun sync(offenderBooking: OffenderBooking): Prisoner {
+  // called when prisoner record has changed
+  fun reindex(offenderBooking: OffenderBooking): Prisoner {
     val existingPrisoner = get(offenderBooking.offenderNo)
 
     val restrictedPatientData = offenderBooking.getRestrictedPatientData()
@@ -107,7 +108,8 @@ class PrisonerIndexService(
     return storedPrisoner
   }
 
-  fun reIndex(offenderBooking: OffenderBooking): Prisoner {
+  // called when rebuilding the index from scratch
+  fun index(offenderBooking: OffenderBooking): Prisoner {
     val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
     val incentiveLevel = offenderBooking.getIncentiveLevel()
 
