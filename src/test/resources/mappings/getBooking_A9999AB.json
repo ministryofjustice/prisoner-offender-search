@@ -41,7 +41,8 @@
           "offenderNo": "A9999AB",
           "bookingId": 1808233,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         },
         {
           "type": "PNC",
@@ -49,7 +50,8 @@
           "offenderNo": "A9999AB",
           "bookingId": 1808233,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "status": "ACTIVE IN",

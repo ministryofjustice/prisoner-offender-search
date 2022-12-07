@@ -58,7 +58,8 @@
           "offenderNo": "A7089FC",
           "bookingId": 1902838,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         },
         {
           "type": "PNC",
@@ -66,7 +67,8 @@
           "offenderNo": "A7089FZ",
           "bookingId": 1902838,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "status": "ACTIVE IN",

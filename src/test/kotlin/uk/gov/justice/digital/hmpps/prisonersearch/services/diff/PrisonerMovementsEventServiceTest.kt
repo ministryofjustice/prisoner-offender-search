@@ -378,14 +378,14 @@ internal class PrisonerMovementsEventServiceTest {
   private fun prisoner(resource: String): Prisoner =
     objectMapper.readValue(resource.readResourceAsText(), Prisoner::class.java)
 
-  private fun offenderBooking(identifies: List<OffenderIdentifier>? = null) = OffenderBooking(
+  private fun offenderBooking(identifiers: List<OffenderIdentifier>? = null) = OffenderBooking(
     "A9460DY",
     "BOATENG",
     "AKUSEA",
     LocalDate.of(1976, 5, 15),
     false,
     bookingId = 123456L,
-    identifiers = identifies
+    identifiers = identifiers
   )
 }
 

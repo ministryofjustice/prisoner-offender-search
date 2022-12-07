@@ -393,7 +393,8 @@
           "offenderNo": "A7089EY",
           "bookingId": 1058711,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         },
         {
           "type": "PNC",
@@ -401,7 +402,8 @@
           "offenderNo": "A7089EY",
           "bookingId": 1058711,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "sentenceDetail": {

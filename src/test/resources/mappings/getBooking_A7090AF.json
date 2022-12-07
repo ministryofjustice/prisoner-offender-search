@@ -54,7 +54,8 @@
           "offenderNo": "A7090AF",
           "bookingId": 1903834,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         },
         {
           "type": "PNC",
@@ -62,7 +63,8 @@
           "offenderNo": "A7090AF",
           "bookingId": 1903834,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "aliases": [

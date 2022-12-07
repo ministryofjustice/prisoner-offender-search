@@ -53,7 +53,9 @@
           "offenderNo": "A7090AE",
           "bookingId": 1903835,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
+
         },
         {
           "type": "PNC",
@@ -61,7 +63,8 @@
           "offenderNo": "A7090AE",
           "bookingId": 1903835,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "status": "ACTIVE OUT",
