@@ -65,7 +65,7 @@ class PrisonerDifferenceService(
     if (prisonerHasChanged(offenderBooking.offenderNo, prisoner)) {
       generateDiffEvent(previousPrisonerSnapshot, offenderBooking, prisoner)
       generateDiffTelemetry(previousPrisonerSnapshot, offenderBooking, prisoner)
-      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking)
       alertsUpdatedEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
     } else {
       raiseNoDifferencesTelemetry(offenderBooking.offenderNo)
