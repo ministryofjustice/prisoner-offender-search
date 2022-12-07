@@ -220,7 +220,7 @@ internal class PrisonerMovementsEventServiceTest {
         ),
         OffenderIdentifier(
           whenCreated = LocalDateTime.now().minusMinutes(70),
-          type = "MERGE",
+          type = "MERGED",
           value = "1234",
           issuedAuthorityText = null,
           issuedDate = null
@@ -249,7 +249,7 @@ internal class PrisonerMovementsEventServiceTest {
         ),
         OffenderIdentifier(
           whenCreated = LocalDateTime.now().minusMinutes(95),
-          type = "MERGE",
+          type = "MERGED",
           value = "1234",
           issuedAuthorityText = null,
           issuedDate = null
@@ -278,7 +278,7 @@ internal class PrisonerMovementsEventServiceTest {
         ),
         OffenderIdentifier(
           whenCreated = LocalDateTime.now().minusMinutes(45),
-          type = "MERGE",
+          type = "MERGED",
           value = "1234",
           issuedAuthorityText = null,
           issuedDate = null

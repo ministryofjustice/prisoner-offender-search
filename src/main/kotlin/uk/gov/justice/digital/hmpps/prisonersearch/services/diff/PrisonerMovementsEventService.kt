@@ -182,7 +182,7 @@ private fun Prisoner.isSomeOtherMovementOut(previousPrisonerSnapshot: Prisoner?)
 
 private fun isAdmissionAssociatedWithAMerge(offenderBooking: OffenderBooking): Boolean {
   return offenderBooking.identifiers?.sortedByDescending { it.whenCreated }?.first()?.let {
-    (it.type == "MERGE") && (it.whenCreated > LocalDateTime.now().minusMinutes(90))
+    (it.type == "MERGED") && (it.whenCreated > LocalDateTime.now().minusMinutes(90))
   } ?: false
 }
 
