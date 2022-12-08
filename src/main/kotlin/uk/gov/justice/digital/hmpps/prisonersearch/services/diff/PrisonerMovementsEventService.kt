@@ -65,7 +65,7 @@ class PrisonerMovementsEventService(
         TransferIn(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isCourtReturn(previousPrisonerSnapshot)) {
         CourtReturn(prisonerNumber, prisoner.prisonId!!)
-      } else if (prisoner.isPostMergeAdmission(previousPrisonerSnapshot, offenderBooking)) {
+      } else if (prisoner.isNewAdmission(previousPrisonerSnapshot) && isAdmissionAssociatedWithAMerge(offenderBooking)) {
         MergeAdmission(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isNewAdmission(previousPrisonerSnapshot)) {
         NewAdmission(prisonerNumber, prisoner.prisonId!!)
@@ -152,15 +152,6 @@ private fun Prisoner.isNewAdmission(previousPrisonerSnapshot: Prisoner?) =
     this.status == "ACTIVE IN" &&
     this.bookingId != previousPrisonerSnapshot?.bookingId
 
-private fun Prisoner.isPostMergeAdmission(
-  previousPrisonerSnapshot: Prisoner?,
-  currentOffenderBooking: OffenderBooking
-) =
-  this.lastMovementTypeCode == "ADM" &&
-    this.status == "ACTIVE IN" &&
-    this.bookingId != previousPrisonerSnapshot?.bookingId &&
-    isAdmissionAssociatedWithAMerge(currentOffenderBooking)
-
 private fun Prisoner.isReadmission(previousPrisonerSnapshot: Prisoner?) =
   this.lastMovementTypeCode == "ADM" &&
     this.bookingId == previousPrisonerSnapshot?.bookingId &&
@@ -181,9 +172,10 @@ private fun Prisoner.isSomeOtherMovementOut(previousPrisonerSnapshot: Prisoner?)
     this.status != previousPrisonerSnapshot?.status
 
 private fun isAdmissionAssociatedWithAMerge(offenderBooking: OffenderBooking): Boolean {
-  return offenderBooking.identifiers?.sortedByDescending { it.whenCreated }?.first()?.let {
-    (it.type == "MERGED") && (it.whenCreated > LocalDateTime.now().minusMinutes(90))
-  } ?: false
+  return offenderBooking.identifiers?.filter { it.type == "MERGED" }?.sortedByDescending { it.whenCreated }?.first()
+    ?.let {
+      it.whenCreated > LocalDateTime.now().minusMinutes(90)
+    } ?: false
 }
 
 sealed class PossibleMovementChange {
@@ -199,7 +191,9 @@ sealed class PossibleMovementChange {
       MovementInChange(offenderNo, prisonId, TEMPORARY_ABSENCE_RETURN)
 
     class NewAdmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, NEW_ADMISSION)
-    class MergeAdmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, POST_MERGE_ADMISSION)
+    class MergeAdmission(offenderNo: String, prisonId: String) :
+      MovementInChange(offenderNo, prisonId, POST_MERGE_ADMISSION)
+
     class Readmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, READMISSION)
   }
 

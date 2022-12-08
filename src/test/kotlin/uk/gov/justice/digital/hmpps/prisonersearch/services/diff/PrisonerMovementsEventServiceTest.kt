@@ -237,11 +237,11 @@ internal class PrisonerMovementsEventServiceTest {
     }
 
     @Test
-    internal fun `will ignore merge if merge took place over 90mins ago`() {
+    internal fun `will ignore merge if merge took place over 90 mins ago`() {
       val prisoner = prisonerInWithBooking("BXI")
       val identifiers = listOf(
         OffenderIdentifier(
-          whenCreated = LocalDateTime.now().minusDays(2),
+          whenCreated = LocalDateTime.now().minusMinutes(2),
           type = "CRO",
           value = "1234",
           issuedAuthorityText = null,
@@ -266,7 +266,7 @@ internal class PrisonerMovementsEventServiceTest {
     }
 
     @Test
-    internal fun `will ignore merge if merge not the latest identifier type`() {
+    internal fun `will identify merge if merge not the latest identifier type`() {
       val prisoner = prisonerInWithBooking("BXI")
       val identifiers = listOf(
         OffenderIdentifier(
@@ -286,6 +286,19 @@ internal class PrisonerMovementsEventServiceTest {
       )
 
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking(identifiers))
+
+      verify(domainEventsEmitter).emitPrisonerReceiveEvent(
+        offenderNo = OFFENDER_NO,
+        reason = PrisonerReceiveReason.POST_MERGE_ADMISSION,
+        prisonId = "BXI",
+      )
+    }
+
+    @Test
+    internal fun `will handle no identifiers provided`() {
+      val prisoner = prisonerInWithBooking("BXI")
+
+      prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking())
 
       verify(domainEventsEmitter).emitPrisonerReceiveEvent(
         offenderNo = OFFENDER_NO,
