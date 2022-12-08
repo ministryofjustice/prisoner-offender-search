@@ -172,10 +172,9 @@ private fun Prisoner.isSomeOtherMovementOut(previousPrisonerSnapshot: Prisoner?)
     this.status != previousPrisonerSnapshot?.status
 
 private fun isAdmissionAssociatedWithAMerge(offenderBooking: OffenderBooking): Boolean {
-  return offenderBooking.identifiers?.filter { it.type == "MERGED" }?.sortedByDescending { it.whenCreated }?.first()
-    ?.let {
-      it.whenCreated > LocalDateTime.now().minusMinutes(90)
-    } ?: false
+  return offenderBooking.identifiers?.filter { it.type == "MERGED" }
+    ?.any { it.whenCreated > LocalDateTime.now().minusMinutes(90 )}
+    ?: false
 }
 
 sealed class PossibleMovementChange {
