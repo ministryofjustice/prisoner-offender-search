@@ -323,7 +323,8 @@
           "offenderNo": "G6123VU",
           "bookingId": 1900837,
           "issuedAuthorityText": "P/CONS",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         },
         {
           "type": "PNC",
@@ -331,7 +332,8 @@
           "offenderNo": "G6123VU",
           "bookingId": 1900837,
           "issuedAuthorityText": "P/CONS",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "sentenceDetail": {

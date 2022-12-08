@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.NEW_ADMISSION
+import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.POST_MERGE_ADMISSION
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.READMISSION
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.RETURN_FROM_COURT
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.TEMPORARY_ABSENCE_RETURN
@@ -13,7 +14,9 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.RELEASED
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.SENT_TO_COURT
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReleaseReason.TEMPORARY_ABSENCE_RELEASE
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.CourtReturn
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.MergeAdmission
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.NewAdmission
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.Readmission
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementInChange.TAPReturn
@@ -22,6 +25,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovemen
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.SentToCourt
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.TAPRelease
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PossibleMovementChange.MovementOutChange.TransferOut
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import java.time.LocalDateTime
 
 @Service
 class PrisonerMovementsEventService(
@@ -30,11 +35,12 @@ class PrisonerMovementsEventService(
 ) {
   fun generateAnyEvents(
     previousPrisonerSnapshot: Prisoner?,
-    prisoner: Prisoner
+    prisoner: Prisoner,
+    offenderBooking: OffenderBooking
   ) {
-    when (val movementChange = calculateMovementChange(previousPrisonerSnapshot, prisoner)) {
+    when (val movementChange = calculateMovementChange(previousPrisonerSnapshot, prisoner, offenderBooking)) {
       PossibleMovementChange.None -> {}
-      is PossibleMovementChange.MovementInChange -> domainEventEmitter.emitPrisonerReceiveEvent(
+      is MovementInChange -> domainEventEmitter.emitPrisonerReceiveEvent(
         offenderNo = movementChange.offenderNo,
         reason = movementChange.reason,
         prisonId = movementChange.prisonId,
@@ -48,13 +54,19 @@ class PrisonerMovementsEventService(
     }
   }
 
-  private fun calculateMovementChange(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): PossibleMovementChange {
+  private fun calculateMovementChange(
+    previousPrisonerSnapshot: Prisoner?,
+    prisoner: Prisoner,
+    offenderBooking: OffenderBooking
+  ): PossibleMovementChange {
     return previousPrisonerSnapshot.let {
       val prisonerNumber = prisoner.prisonerNumber!!
       if (prisoner.isTransferIn(previousPrisonerSnapshot)) {
         TransferIn(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isCourtReturn(previousPrisonerSnapshot)) {
         CourtReturn(prisonerNumber, prisoner.prisonId!!)
+      } else if (prisoner.isNewAdmission(previousPrisonerSnapshot) && isAdmissionAssociatedWithAMerge(offenderBooking)) {
+        MergeAdmission(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isNewAdmission(previousPrisonerSnapshot)) {
         NewAdmission(prisonerNumber, prisoner.prisonId!!)
       } else if (prisoner.isReadmission(previousPrisonerSnapshot)) {
@@ -159,6 +171,12 @@ private fun Prisoner.isSomeOtherMovementOut(previousPrisonerSnapshot: Prisoner?)
   this.inOutStatus == "OUT" &&
     this.status != previousPrisonerSnapshot?.status
 
+private fun isAdmissionAssociatedWithAMerge(offenderBooking: OffenderBooking): Boolean {
+  return offenderBooking.identifiers?.filter { it.type == "MERGED" }
+    ?.any { it.whenCreated > LocalDateTime.now().minusMinutes(90) }
+    ?: false
+}
+
 sealed class PossibleMovementChange {
   sealed class MovementInChange(
     val offenderNo: String,
@@ -172,6 +190,9 @@ sealed class PossibleMovementChange {
       MovementInChange(offenderNo, prisonId, TEMPORARY_ABSENCE_RETURN)
 
     class NewAdmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, NEW_ADMISSION)
+    class MergeAdmission(offenderNo: String, prisonId: String) :
+      MovementInChange(offenderNo, prisonId, POST_MERGE_ADMISSION)
+
     class Readmission(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, READMISSION)
   }
 
@@ -180,7 +201,9 @@ sealed class PossibleMovementChange {
     class TransferOut(offenderNo: String, prisonId: String) :
       MovementOutChange(offenderNo, prisonId, PrisonerReleaseReason.TRANSFERRED)
 
-    class TAPRelease(offenderNo: String, prisonId: String) : MovementOutChange(offenderNo, prisonId, TEMPORARY_ABSENCE_RELEASE)
+    class TAPRelease(offenderNo: String, prisonId: String) :
+      MovementOutChange(offenderNo, prisonId, TEMPORARY_ABSENCE_RELEASE)
+
     class Released(offenderNo: String, prisonId: String) : MovementOutChange(offenderNo, prisonId, RELEASED)
     class SentToCourt(offenderNo: String, prisonId: String) : MovementOutChange(offenderNo, prisonId, SENT_TO_COURT)
   }

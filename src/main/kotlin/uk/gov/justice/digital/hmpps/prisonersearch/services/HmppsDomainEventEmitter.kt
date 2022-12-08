@@ -106,6 +106,7 @@ class HmppsDomainEventEmitter(
     TRANSFERRED("transfer from another prison"),
     RETURN_FROM_COURT("returned back to prison from court"),
     TEMPORARY_ABSENCE_RETURN("returned after a temporary absence"),
+    POST_MERGE_ADMISSION("admission following an offender merge"),
   }
 
   enum class PrisonerReleaseReason(val description: String) {
