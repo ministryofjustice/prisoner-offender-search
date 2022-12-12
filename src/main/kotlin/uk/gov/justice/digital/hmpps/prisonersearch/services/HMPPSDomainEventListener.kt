@@ -26,7 +26,7 @@ class HMPPSDomainEventListener(
       log.debug("Received message {} type {}", messageId, eventType)
 
       when (eventType) {
-        "incentives.iep-review.inserted", "incentives.iep-review.updated", "incentives.iep-review.deleted" ->
+        "incentives.iep-review.inserted", "incentives.iep-review.updated", "incentives.iep-review.deleted", "incentives.prisoner.next-review-date-changed" ->
           prisonerSyncService.offenderIncentiveChange(fromJson(message))
 
         else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
