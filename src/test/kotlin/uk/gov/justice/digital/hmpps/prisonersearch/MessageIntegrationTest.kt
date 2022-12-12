@@ -87,6 +87,23 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `will sync offender when the next review date changes`() {
+    incentivesMockServer.stubCurrentIncentive(
+      iepLevel = "Standard",
+      iepTime = "2022-11-11T15:47:24.682335",
+      nextReviewDate = "2023-12-25",
+    )
+    hmppsDomainQueueSqsClient.sendMessage(hmppsDomainQueueUrl, "/messages/iepNextReviewDateUpdated.json".readResourceAsText())
+
+    await untilAsserted {
+      search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
+        .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-11T15:47:24")
+        .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-12-25")
+    }
+  }
+
+  @Test
   fun `will make a request for restricted patient data`() {
     val message = "/messages/offenderDetailsChangedForRP.json".readResourceAsText()
 
