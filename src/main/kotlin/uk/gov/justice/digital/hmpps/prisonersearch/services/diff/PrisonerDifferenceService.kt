@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.DiffBuilder
 import org.apache.commons.lang3.builder.DiffResult
 import org.apache.commons.lang3.builder.ToStringStyle
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.DigestUtils
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
@@ -68,12 +69,17 @@ class PrisonerDifferenceService(
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking)
       alertsUpdatedEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner)
     } else {
-      raiseNoDifferencesTelemetry(offenderBooking.offenderNo)
+      raiseNoDifferencesTelemetry(offenderBooking.offenderNo, previousPrisonerSnapshot, prisoner)
     }
   }
 
-  private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
-    prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, generatePrisonerHash(prisoner), Instant.now()) > 0
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+    prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
+      nomsNumber,
+      generatePrisonerHash(prisoner),
+      Instant.now()
+    ) > 0
 
   private fun generatePrisonerHash(prisoner: Prisoner) =
     objectMapper.writeValueAsString(prisoner)
@@ -93,7 +99,7 @@ class PrisonerDifferenceService(
       previousPrisonerSnapshot?.also {
         val differences = getDifferencesByCategory(it, prisoner)
         if (differences.isEmpty()) {
-          raiseNoDifferencesTelemetry(offenderBooking.offenderNo)
+          raiseNoDifferencesFoundTelemetry(offenderBooking.offenderNo)
         } else {
           raiseDifferencesTelemetry(offenderBooking.offenderNo, differences)
         }
@@ -140,9 +146,21 @@ class PrisonerDifferenceService(
       null
     )
 
-  private fun raiseNoDifferencesTelemetry(offenderNo: String) =
+  private fun raiseNoDifferencesTelemetry(offenderNo: String, previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) =
     telemetryClient.trackEvent(
       "POSPrisonerUpdatedNoChange",
+      mapOf(
+        "processedTime" to LocalDateTime.now().toString(),
+        "nomsNumber" to offenderNo,
+        "hasChanges" to (previousPrisonerSnapshot.asJson() != prisoner.asJson()).toString(),
+      ),
+      null
+    )
+
+  private fun Prisoner?.asJson(): String = this?.let { objectMapper.writeValueAsString(this) } ?: ""
+  private fun raiseNoDifferencesFoundTelemetry(offenderNo: String) =
+    telemetryClient.trackEvent(
+      "POSPrisonerUpdatedNoChangesFound",
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
