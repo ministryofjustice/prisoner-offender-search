@@ -423,13 +423,13 @@ class PrisonerDiffServiceTest {
     }
 
     @Test
-    fun `should raise no-change telemetry if there are no changes`() {
+    fun `should raise no-change found telemetry if there are no changes`() {
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc1" }
 
       prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdatedNoChange"), anyMap(), isNull())
+      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdatedNoChangesFound"), anyMap(), isNull())
     }
 
     @Test
