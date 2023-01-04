@@ -52,7 +52,6 @@ class PrisonerDiffServiceTest {
     @Test
     fun `should send event if prisoner hash has changed`() {
       whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(1)
-      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(PrisonerEventHash())
       whenever(objectMapper.writeValueAsString(any())).thenReturn("")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
@@ -60,7 +59,7 @@ class PrisonerDiffServiceTest {
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
       verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), any())
-      verify(prisonerEventHashRepository).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
+      verify(prisonerEventHashRepository, never()).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
       verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
     @Test
@@ -81,6 +80,7 @@ class PrisonerDiffServiceTest {
       verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), anyString())
       verify(prisonerEventHashRepository).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
       verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
+      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdatedButHashUpdatedCountWrong"), anyMap(), isNull())
     }
 
     @Test
