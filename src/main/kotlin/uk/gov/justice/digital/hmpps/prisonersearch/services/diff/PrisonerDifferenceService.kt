@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Instant
 import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -73,13 +74,23 @@ class PrisonerDifferenceService(
     }
   }
 
+  private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+    with(UUID.randomUUID().toString()) {
+      updateHash(nomsNumber, prisoner, this).run { didUpdateHash(nomsNumber, this@with) }
+    }
+
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+  fun updateHash(nomsNumber: String, prisoner: Prisoner, updatedIdentifier: String) =
     prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
       nomsNumber,
       generatePrisonerHash(prisoner),
-      Instant.now()
-    ) > 0
+      Instant.now(),
+      updatedIdentifier
+    )
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun didUpdateHash(nomsNumber: String, updatedIdentifier: String): Boolean =
+    prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(nomsNumber, updatedIdentifier) != null
 
   private fun generatePrisonerHash(prisoner: Prisoner) =
     objectMapper.writeValueAsString(prisoner)
