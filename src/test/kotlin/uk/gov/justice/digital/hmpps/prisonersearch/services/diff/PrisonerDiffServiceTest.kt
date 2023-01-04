@@ -51,33 +51,57 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should send event if prisoner hash has changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(1)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(1)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any())
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), any())
+      verify(prisonerEventHashRepository, never()).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
       verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
+    }
+    @Test
+    fun `should send event if prisoner hash is reported incorrectly as not changed but it really has `() {
+      // there appears to a bug in JDBC/Postgres where the hash row is correctly updated
+      // but the row count returned by JPA is zero, this does a secondary
+      // check to ensure the row was indeed updated
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
+      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(
+        PrisonerEventHash()
+      )
+      whenever(objectMapper.writeValueAsString(any())).thenReturn("")
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
+
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), anyString())
+      verify(prisonerEventHashRepository).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
+      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
+      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdatedButHashUpdatedCountWrong"), anyMap(), isNull())
     }
 
     @Test
     fun `should not send event if prisoner hash not changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
+      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(null)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any())
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), anyString())
+      verify(prisonerEventHashRepository).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
       verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
     }
 
     @Test
     fun `should raise no-change telemetry if there are no changes using hash`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
+      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(null)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("a_string")
       val prisoner = Prisoner().apply { pncNumber = "somePnc1" }
 

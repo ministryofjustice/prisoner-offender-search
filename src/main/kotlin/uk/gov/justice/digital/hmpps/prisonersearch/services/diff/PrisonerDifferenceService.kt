@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Instant
 import java.time.LocalDateTime
+import java.util.UUID
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -73,13 +74,28 @@ class PrisonerDifferenceService(
     }
   }
 
+  private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+    with(UUID.randomUUID().toString()) {
+      updateHash(nomsNumber, prisoner, this).let {
+        if (it > 0) true else didUpdateHash(
+          nomsNumber,
+          this@with
+        ).also { didUpdateHash -> if (didUpdateHash) raiseDifferencesFoundButHashUpdatedCountWrongTelemetry(nomsNumber) }
+      }
+    }
+
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+  fun updateHash(nomsNumber: String, prisoner: Prisoner, updatedIdentifier: String) =
     prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
       nomsNumber,
       generatePrisonerHash(prisoner),
-      Instant.now()
-    ) > 0
+      Instant.now(),
+      updatedIdentifier
+    )
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  fun didUpdateHash(nomsNumber: String, updatedIdentifier: String): Boolean =
+    prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(nomsNumber, updatedIdentifier) != null
 
   private fun generatePrisonerHash(prisoner: Prisoner) =
     objectMapper.writeValueAsString(prisoner)
@@ -161,6 +177,16 @@ class PrisonerDifferenceService(
   private fun raiseNoDifferencesFoundTelemetry(offenderNo: String) =
     telemetryClient.trackEvent(
       "POSPrisonerUpdatedNoChangesFound",
+      mapOf(
+        "processedTime" to LocalDateTime.now().toString(),
+        "nomsNumber" to offenderNo,
+      ),
+      null
+    )
+
+  private fun raiseDifferencesFoundButHashUpdatedCountWrongTelemetry(offenderNo: String) =
+    telemetryClient.trackEvent(
+      "POSPrisonerUpdatedButHashUpdatedCountWrong",
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
