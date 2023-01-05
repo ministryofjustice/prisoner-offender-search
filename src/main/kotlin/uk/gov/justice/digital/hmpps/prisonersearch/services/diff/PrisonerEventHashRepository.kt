@@ -32,6 +32,7 @@ interface PrisonerEventHashRepository : JpaRepository<PrisonerEventHash, String>
   )
   fun upsertPrisonerEventHashIfChanged(nomsNumber: String, prisonerHash: String, updatedDateTime: Instant, updatedIdentifier: String): Int
   fun findByNomsNumberAndUpdatedIdentifier(nomsNumber: String, updatedIdentifier: String): PrisonerEventHash?
+  fun findByNomsNumber(nomsNumber: String): PrisonerEventHash?
 }
 
 @Entity

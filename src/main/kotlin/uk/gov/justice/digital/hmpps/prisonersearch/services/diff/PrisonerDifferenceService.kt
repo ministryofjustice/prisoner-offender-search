@@ -7,7 +7,10 @@ import org.apache.commons.lang3.builder.Diff
 import org.apache.commons.lang3.builder.DiffBuilder
 import org.apache.commons.lang3.builder.DiffResult
 import org.apache.commons.lang3.builder.ToStringStyle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.DigestUtils
@@ -50,6 +53,9 @@ class PrisonerDifferenceService(
   private val prisonerMovementsEventService: PrisonerMovementsEventService,
   private val alertsUpdatedEventService: AlertsUpdatedEventService,
 ) {
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
     Prisoner::class.members
@@ -74,17 +80,26 @@ class PrisonerDifferenceService(
     }
   }
 
-  private fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
+  @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.SERIALIZABLE)
+  fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
     with(UUID.randomUUID().toString()) {
+      raiseDebugTelemetry(nomsNumber, "update to update hash", this)
       updateHash(nomsNumber, prisoner, this).let {
+        raiseDebugTelemetry(nomsNumber, "row count is $it", this)
+
         if (it > 0) true else didUpdateHash(
           nomsNumber,
           this@with
-        ).also { didUpdateHash -> if (didUpdateHash) raiseDifferencesFoundButHashUpdatedCountWrongTelemetry(nomsNumber) }
+        ).also { didUpdateHash ->
+          if (didUpdateHash) raiseDifferencesFoundButHashUpdatedCountWrongTelemetry(nomsNumber) else raiseDebugTelemetry(
+            nomsNumber,
+            "did not update",
+            this@with
+          )
+        }
       }
     }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun updateHash(nomsNumber: String, prisoner: Prisoner, updatedIdentifier: String) =
     prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
       nomsNumber,
@@ -93,9 +108,15 @@ class PrisonerDifferenceService(
       updatedIdentifier
     )
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   fun didUpdateHash(nomsNumber: String, updatedIdentifier: String): Boolean =
-    prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(nomsNumber, updatedIdentifier) != null
+    (prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(nomsNumber, updatedIdentifier) != null).also {
+      raiseDebugTelemetry(nomsNumber, "hash has been updated:  $it", updatedIdentifier)
+      raiseDebugTelemetry(
+        nomsNumber,
+        "current hash and identifier is ${prisonerEventHashRepository.findByNomsNumber(nomsNumber)}",
+        updatedIdentifier
+      )
+    }
 
   private fun generatePrisonerHash(prisoner: Prisoner) =
     objectMapper.writeValueAsString(prisoner)
@@ -190,6 +211,18 @@ class PrisonerDifferenceService(
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
+      ),
+      null
+    )
+
+  private fun raiseDebugTelemetry(offenderNo: String, message: String, id: String) =
+    telemetryClient.trackEvent(
+      "POSPrisonerUpdatedDebug",
+      mapOf(
+        "processedTime" to LocalDateTime.now().toString(),
+        "nomsNumber" to offenderNo,
+        "message" to message,
+        "id" to id,
       ),
       null
     )
