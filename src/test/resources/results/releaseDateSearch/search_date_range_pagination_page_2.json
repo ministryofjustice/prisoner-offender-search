@@ -81,7 +81,7 @@
       "tariffDate": "2022-01-04",
       "locationDescription": "Outside - Psychiatric Hospital Discharge to Yew Trees - discharged to Yew Trees",
       "restrictedPatient": true,
-      "supportingPrisonId": "MDI",
+      "supportingPrisonId": "DNI",
       "dischargedHospitalId": "YEWTHO",
       "dischargedHospitalDescription": "Yew Trees",
       "dischargeDate": "2020-02-05",

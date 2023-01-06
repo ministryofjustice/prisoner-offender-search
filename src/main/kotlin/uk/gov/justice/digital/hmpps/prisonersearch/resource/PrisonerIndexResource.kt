@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -21,13 +22,14 @@ import javax.validation.constraints.Pattern
 @RestController
 @Validated
 @RequestMapping("/prisoner-index", produces = [MediaType.APPLICATION_JSON_VALUE])
+@Tag(name = "Elastic Search index maintenance")
 class PrisonerIndexResource(
   private val prisonerIndexService: PrisonerIndexService,
 ) {
 
   @PutMapping("/build-index")
   @Operation(
-    summary = "Start building a new index.",
+    summary = "Start building a new index",
     description = "Old index is left untouched and will be maintained whilst new index is built, requires PRISONER_INDEX role"
   )
   @ApiResponses(
@@ -40,7 +42,7 @@ class PrisonerIndexResource(
 
   @PutMapping("/cancel-index")
   @Operation(
-    summary = "Cancels a building index.",
+    summary = "Cancels a building index",
     description = "Only cancels if indexing is in progress, requires PRISONER_INDEX role"
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
@@ -84,7 +86,7 @@ class PrisonerIndexResource(
       example = "A1234AA"
     ) @NotNull @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}") @PathVariable("prisonerNumber") prisonerNumber: String
   ): Prisoner {
-    val indexedPrisoner = prisonerIndexService.indexPrisoner(prisonerNumber)
+    val indexedPrisoner = prisonerIndexService.syncPrisoner(prisonerNumber)
     return indexedPrisoner.takeIf { it != null } ?: throw NotFoundException("$prisonerNumber not found")
   }
 

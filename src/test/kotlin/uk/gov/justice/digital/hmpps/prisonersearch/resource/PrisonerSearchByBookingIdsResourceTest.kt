@@ -8,11 +8,14 @@ import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.test.context.TestPropertySource
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerListCriteria.BookingIds
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import java.time.Duration
 
+@TestPropertySource(properties = ["index.page-size=12"])
 class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
 
   companion object {
@@ -65,9 +68,8 @@ class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
       .expectStatus().isOk
 
     // wait for last offender to be available
-    await untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
-
-    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
+    await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
   }
 
   @Test

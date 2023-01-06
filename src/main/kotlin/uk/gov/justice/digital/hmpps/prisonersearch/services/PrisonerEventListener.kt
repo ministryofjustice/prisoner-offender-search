@@ -31,11 +31,14 @@ class PrisonerEventListener(
         "BOOKING_NUMBER-CHANGED" -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
         "OFFENDER-INSERTED", "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED", "OFFENDER_ALIAS-CHANGED" -> prisonerSyncService.offenderChange(fromJson(message))
         "ALERT-INSERTED", "ALERT-UPDATED" -> prisonerSyncService.offenderBookingChange(fromJson(message))
-        "DATA_COMPLIANCE_DELETE-OFFENDER", "OFFENDER-DELETED" -> prisonerSyncService.deleteOffender(fromJson(message))
+        "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
+        "OFFENDER-DELETED" -> prisonerSyncService.maybeDeleteOffender(fromJson(message))
 
         else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
       }
+      log.trace("Finished event message request {}", message)
     } catch (e: Exception) {
+      log.error("processOffenderEvent() Unexpected error", e)
       telemetryClient.trackEvent(
         "POSProcessEventRequestError",
         mapOf("requestPayload" to requestJson, "message" to e.message),

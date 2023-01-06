@@ -1,16 +1,19 @@
 version: 2.1
 
 orbs:
-  hmpps: ministryofjustice/hmpps@5.1
+  hmpps: ministryofjustice/hmpps@6
 
 jobs:
   validate:
     executor:
-      name: hmpps/localstack
-      jdk_tag: "18.0"
-      localstack_tag: "0.14.0"
+      name: hmpps/java_localstack_postgres
+      jdk_tag: "19.0"
+      localstack_tag: "1.2.0"
       localstack_type: "localstack-full"
       services: "sqs,sns,es"
+      postgres_tag: "14"
+      postgres_username: "pos"
+      postgres_password: "pos"
     steps:
       - run:
           command: |
@@ -28,7 +31,7 @@ jobs:
           command: src/test/resources/localstack/setup-es.sh
       - hmpps/wait_till_ready:
           port: 4566
-          host: es1.eu-west-2.es.localhost.localstack.cloud
+          host: es01.eu-west-2.es.localhost.localstack.cloud
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
@@ -70,7 +73,7 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_dev
           env: "dev"
-          jira_update: true
+          jira_update: false
           context: hmpps-common-vars
           filters:
             branches:
@@ -87,7 +90,7 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
-          jira_update: true
+          jira_update: false
           jira_env_type: staging
           context:
             - hmpps-common-vars
@@ -101,7 +104,7 @@ workflows:
       - hmpps/deploy_env:
           name: deploy_prod
           env: "prod"
-          jira_update: true
+          jira_update: false
           jira_env_type: production
           slack_notification: true
           context:
@@ -131,8 +134,8 @@ workflows:
       - hmpps/veracode_pipeline_scan:
           slack_channel: syscon-alerts
           context:
-            - hmpps-common-vars
             - veracode-credentials
+            - hmpps-common-vars
   security-weekly:
     triggers:
       - schedule:

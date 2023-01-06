@@ -19,7 +19,8 @@ generic-service:
 
   ingress:
     enabled: true
-    contextColour: green
+    v1_2_enabled: true
+    v0_47_enabled: false
     annotations:
       nginx.ingress.kubernetes.io/configuration-snippet: |
         server_tokens off;
@@ -44,6 +45,7 @@ generic-service:
     INDEX_COMPLETE_THRESHOLD: 700000
     APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=$(APPINSIGHTS_INSTRUMENTATIONKEY);IngestionEndpoint=https://northeurope-0.in.applicationinsights.azure.com/;LiveEndpoint=https://northeurope.livediagnostics.monitor.azure.com/"
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
+    INDEX_INCENTIVES: true
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
@@ -57,6 +59,8 @@ generic-service:
       OAUTH_CLIENT_SECRET: "PRISONER_OFFENDER_SEARCH_SECRET"
       RESTRICTED_PATIENTS_CLIENT_ID: "RESTRICTED_PATIENTS_CLIENT_ID"
       RESTRICTED_PATIENTS_CLIENT_SECRET: "RESTRICTED_PATIENTS_CLIENT_SECRET"
+      INCENTIVES_CLIENT_ID: "INCENTIVES_CLIENT_ID"
+      INCENTIVES_CLIENT_SECRET: "INCENTIVES_CLIENT_SECRET"
     pos-sqs-instance-output:
       HMPPS_SQS_QUEUES_EVENTQUEUE_QUEUE_ACCESS_KEY_ID: "access_key_id"
       HMPPS_SQS_QUEUES_EVENTQUEUE_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
@@ -73,8 +77,25 @@ generic-service:
       HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_ACCESS_KEY_ID: "access_key_id"
       HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
       HMPPS_SQS_QUEUES_INDEXQUEUE_DLQ_NAME: "sqs_pos_name"
+    hmpps-domain-events-topic:
+      HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_TOPICS_HMPPSEVENTTOPIC_ARN: "topic_arn"
+    sqs-domain-event-secret:
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUE_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUE_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_QUEUE_NAME: "sqs_queue_name"
+    sqs-domain-event-dlq-secret:
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQ_ACCESS_KEY_ID: "access_key_id"
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQ_SECRET_ACCESS_KEY: "secret_access_key"
+      HMPPS_SQS_QUEUES_HMPPSDOMAINQUEUE_DLQ_NAME: "sqs_queue_name"
     elasticsearch:
       ELASTICSEARCH_PROXY_URL: "aws_es_proxy_url"
+    pos-rds-instance-output:
+      DB_SERVER: "rds_instance_address"
+      DB_NAME: "database_name"
+      DB_USER: "database_username"
+      DB_PASS: "database_password"
 
   allowlist:
     office: "217.33.148.210/32"

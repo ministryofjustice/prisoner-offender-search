@@ -41,14 +41,16 @@
           "value": "29901/12P",
           "bookingId": 1232123,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         },
         {
           "type": "PNC",
           "value": "14/394223I",
           "bookingId": 1232123,
           "issuedDate": "2013-12-02",
-          "caseloadType": "INST"
+          "caseloadType": "INST",
+          "whenCreated": "2013-12-02T20:00"
         }
       ],
       "status": "ACTIVE IN",

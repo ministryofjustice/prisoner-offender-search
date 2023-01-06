@@ -35,16 +35,39 @@ spring:
             client-secret: ${restricted.patients.client.secret}
             authorization-grant-type: client_credentials
             scope: read
+          incentives-api:
+            provider: hmpps-auth
+            client-id: ${incentives.client.id}
+            client-secret: ${incentives.client.secret}
+            authorization-grant-type: client_credentials
+            scope: read
         provider:
           hmpps-auth:
             token-uri: ${api.base.url.oauth}/oauth/token
 
   profiles:
-    groups:
+    group:
       dev:
         - "stdout"
+        - "postgres"
       test:
         - "stdout"
+        - "postgres"
+
+  datasource:
+    url: 'jdbc:postgresql://${DB_SERVER}/${DB_NAME}?sslmode=verify-full'
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    hikari:
+      pool-name: POS-DB-CP
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      validation-timeout: 5000
+
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
 
 server:
   port: 8080
@@ -104,3 +127,7 @@ index:
   page-size: 1000
   complete-threshold: 700000
 
+diff:
+  telemetry: false
+  events: false
+  host: http://localhost:8080

@@ -15,7 +15,10 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
-class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: String) {
+class WebClientConfiguration(
+  @Value("\${api.base.url.nomis}") val nomisBaseUri: String,
+  @Value("\${api.base.url.incentives}") val incentivesBaseUri: String
+) {
 
   @Bean
   fun prisonWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? {
@@ -27,7 +30,7 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
       .build()
 
     return WebClient.builder()
-      .baseUrl(baseUri)
+      .baseUrl(nomisBaseUri)
       .apply(oauth2Client.oauth2Configuration())
       .exchangeStrategies(exchangeStrategies)
       .build()
@@ -48,6 +51,22 @@ class WebClientConfiguration(@Value("\${api.base.url.nomis}") val baseUri: Strin
 
     return WebClient.builder()
       .baseUrl(restrictedPatientBaseUrl)
+      .apply(oauth2Client.oauth2Configuration())
+      .exchangeStrategies(exchangeStrategies)
+      .build()
+  }
+
+  @Bean
+  fun incentivesWebClient(authorizedClientManager: OAuth2AuthorizedClientManager?): WebClient? {
+    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+    oauth2Client.setDefaultClientRegistrationId("incentives-api")
+
+    val exchangeStrategies = ExchangeStrategies.builder()
+      .codecs { configurer: ClientCodecConfigurer -> configurer.defaultCodecs().maxInMemorySize(-1) }
+      .build()
+
+    return WebClient.builder()
+      .baseUrl(incentivesBaseUri)
       .apply(oauth2Client.oauth2Configuration())
       .exchangeStrategies(exchangeStrategies)
       .build()

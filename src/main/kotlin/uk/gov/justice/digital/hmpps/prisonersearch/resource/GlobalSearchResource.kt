@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 import com.microsoft.applicationinsights.TelemetryClient
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -35,6 +36,8 @@ class GlobalSearchResource(
   )
   @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
   @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role")
+  @Tag(name = "Global search")
+  @Tag(name = "Popular")
   fun globalFindByCriteria(
     @RequestBody globalSearchCriteria: GlobalSearchCriteria,
     @ParameterObject @PageableDefault pageable: Pageable
@@ -43,13 +46,15 @@ class GlobalSearchResource(
   @GetMapping("/prisoner/{id}")
   @PreAuthorize("hasAnyRole('ROLE_VIEW_PRISONER_DATA', 'ROLE_PRISONER_SEARCH')")
   @Operation(
-    summary = "Get prisoner by Id",
+    summary = "Get prisoner by prisoner number (AKA NOMS number)",
     description = "Requires ROLE_PRISONER_SEARCH or ROLE_VIEW_PRISONER_DATA role",
     security = [SecurityRequirement(name = "ROLE_VIEW_PRISONER_DATA"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
   )
-  fun findByPrison(@PathVariable id: String) = prisonerIndexService.get(id).takeIf { it != null } ?: throw NotFoundException("$id not found")
+  @Tag(name = "Popular")
+  fun findByPrisonNumber(@PathVariable id: String) = prisonerIndexService.get(id).takeIf { it != null } ?: throw NotFoundException("$id not found")
 
   @GetMapping("/synthetic-monitor")
+  @Tag(name = "Elastic Search index maintenance")
   fun syntheticMonitor() {
     val start = System.currentTimeMillis()
     val results = globalSearchService.findByGlobalSearchCriteria(

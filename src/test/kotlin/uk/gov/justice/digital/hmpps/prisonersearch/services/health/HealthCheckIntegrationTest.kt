@@ -51,6 +51,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
       .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
       .jsonPath("components.restrictedPatientsApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
+      .jsonPath("components.incentivesApiHealth.details.HttpStatus").isEqualTo("NOT_FOUND")
   }
 
   @Test
@@ -66,6 +67,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .jsonPath("components.oauthApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
       .jsonPath("components.nomisApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
       .jsonPath("components.restrictedPatientsApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
+      .jsonPath("components.incentivesApiHealth.details.HttpStatus").isEqualTo("I_AM_A_TEAPOT")
       .jsonPath("status").isEqualTo("DOWN")
   }
 
@@ -86,6 +88,24 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .jsonPath("components.eventqueue-health.details.dlqName").isEqualTo(eventDlqName)
       .jsonPath("components.eventqueue-health.details.dlqStatus").isEqualTo("UP")
       .jsonPath("components.eventqueue-health.details.messagesOnDlq").isEqualTo(0)
+  }
+  @Test
+  fun `HMPPS Domain queue health reports UP`() {
+    subPing(200)
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
+      .jsonPath("components.hmppsdomainqueue-health.details.queueName").isEqualTo(hmppsDomainQueueName)
+      .jsonPath("components.hmppsdomainqueue-health.details.messagesOnQueue").isEqualTo(0)
+      .jsonPath("components.hmppsdomainqueue-health.details.messagesInFlight").isEqualTo(0)
+      .jsonPath("components.hmppsdomainqueue-health.details.dlqName").isEqualTo(hmppsDomainQueueDlqName)
+      .jsonPath("components.hmppsdomainqueue-health.details.dlqStatus").isEqualTo("UP")
+      .jsonPath("components.hmppsdomainqueue-health.details.messagesOnDlq").isEqualTo(0)
   }
 
   @Test
@@ -121,5 +141,20 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .exchange()
       .expectStatus().isOk
       .expectBody().jsonPath("status").isEqualTo("UP")
+  }
+
+  @Test
+  fun `Database reports UP`() {
+    subPing(200)
+
+    webTestClient.get()
+      .uri("/health")
+      .exchange()
+      .expectStatus()
+      .isOk
+      .expectBody()
+      .jsonPath("status").isEqualTo("UP")
+      .jsonPath("components.db.status").isEqualTo("UP")
+      .jsonPath("components.db.details.database").isEqualTo("PostgreSQL")
   }
 }

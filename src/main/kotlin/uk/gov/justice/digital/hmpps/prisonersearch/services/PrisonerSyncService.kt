@@ -43,6 +43,16 @@ class PrisonerSyncService(
     }
   }
 
+  fun offenderIncentiveChange(message: IncentiveChangedMessage) {
+    log.info(
+      "Incentive change: {} for prisoner {} with incentive id {}",
+      message.description,
+      message.additionalInformation.nomsNumber,
+      message.additionalInformation.id
+    )
+    syncByNomsNumber(message.additionalInformation.nomsNumber)
+  }
+
   private fun syncWithBookingId(bookingId: Long) {
     nomisService.getNomsNumberForBooking(bookingId)?.run {
       syncByNomsNumber(this)
@@ -51,13 +61,30 @@ class PrisonerSyncService(
 
   private fun syncByNomsNumber(offenderIdDisplay: String) {
     nomisService.getOffender(offenderIdDisplay)?.run {
-      prisonerIndexService.sync(this)
+      prisonerIndexService.reindex(this)
     }
   }
 
   fun deleteOffender(message: OffenderChangedMessage) {
     if (message.offenderIdDisplay != null) {
       prisonerIndexService.delete(message.offenderIdDisplay)
+    } else {
+      customEventForMissingOffenderIdDisplay(message)
+    }
+  }
+
+  fun maybeDeleteOffender(message: OffenderChangedMessage) {
+    val prisonerId = message.offenderIdDisplay
+    if (prisonerId != null) {
+      // This event only means that one of potentially several aliases has been deleted
+      val offender = nomisService.getOffender(prisonerId)
+      if (offender == null) {
+        log.debug("Delete check: offender ID {} no longer exists, deleting", prisonerId)
+        prisonerIndexService.delete(prisonerId)
+      } else {
+        log.debug("Delete check: offender ID {} still exists, so assuming an alias deletion", prisonerId)
+        prisonerIndexService.reindex(offender)
+      }
     } else {
       customEventForMissingOffenderIdDisplay(message)
     }

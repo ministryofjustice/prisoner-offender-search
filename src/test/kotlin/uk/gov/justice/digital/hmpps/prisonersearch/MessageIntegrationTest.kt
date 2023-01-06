@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch
 
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilAsserted
 import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -42,14 +43,64 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText()
 
     // wait until our queue has been purged
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A7089FD") } matches { it == 1 }
 
     search(SearchCriteria("A7089FD", null, null), "/results/search_results_merge1.json")
+  }
+
+  @Test
+  fun `will add current incentive to prisoner documents`() {
+    incentivesMockServer.stubCurrentIncentive(
+      iepLevel = "Enhanced",
+      iepTime = "2022-11-10T15:47:24.682335",
+      nextReviewDate = "2023-11-19",
+    )
+    eventQueueSqsClient.sendMessage(eventQueueUrl, "/messages/offenderDetailsChanged.json".readResourceAsText())
+
+    await untilAsserted {
+      search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Enhanced")
+        .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
+        .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-19")
+    }
+  }
+  @Test
+  fun `will update incentive level when it changes`() {
+    incentivesMockServer.stubCurrentIncentive(
+      iepLevel = "Standard",
+      iepTime = "2022-11-10T15:47:24.682335",
+      nextReviewDate = "2023-11-20",
+    )
+    hmppsDomainQueueSqsClient.sendMessage(hmppsDomainQueueUrl, "/messages/iepUpdated.json".readResourceAsText())
+
+    await untilAsserted {
+      search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
+        .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
+        .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-20")
+    }
+  }
+
+  @Test
+  fun `will sync offender when the next review date changes`() {
+    incentivesMockServer.stubCurrentIncentive(
+      iepLevel = "Standard",
+      iepTime = "2022-11-11T15:47:24.682335",
+      nextReviewDate = "2023-12-25",
+    )
+    hmppsDomainQueueSqsClient.sendMessage(hmppsDomainQueueUrl, "/messages/iepNextReviewDateUpdated.json".readResourceAsText())
+
+    await untilAsserted {
+      search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
+        .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-11T15:47:24")
+        .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-12-25")
+    }
   }
 
   @Test
@@ -57,11 +108,11 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     val message = "/messages/offenderDetailsChangedForRP.json".readResourceAsText()
 
     // wait until our queue has been purged
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     await untilCallTo { prisonRequestCountFor("/api/offenders/A123ZZZ") } matches { it == 1 }
 
     restrictedPatientMockServer.verifyGetRestrictedPatientRequest("A123ZZZ")
@@ -72,11 +123,11 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     val message = "/messages/offenderUpdatedNoIdDisplay.json".readResourceAsText()
 
     // wait until our queue has been purged
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     verify(telemetryClient).trackEvent(eq("POSMissingOffenderDisplayId"), any(), isNull())
   }
@@ -88,12 +139,11 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     val message = "/messages/offenderDelete.json".readResourceAsText()
 
     // wait until our queue has been purged
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    Thread.sleep(500)
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     search(SearchCriteria("A7089FC", null, null), "/results/empty.json")
   }
 
@@ -104,12 +154,11 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     val message = "/messages/offenderMerge.json".readResourceAsText()
 
     // wait until our queue has been purged
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
-    Thread.sleep(500)
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     search(SearchCriteria("A7089FB", null, null), "/results/search_results_A7089FB.json")
     search(SearchCriteria("A7089FA", null, null), "/results/empty.json")
   }
@@ -144,13 +193,12 @@ class MessageIntegrationTest : QueueIntegrationTest() {
     val message = "/messages/offenderDetailsNew.json".readResourceAsText()
 
     // wait until our queue has been purged
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
 
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
 
-    await untilCallTo { getNumberOfMessagesCurrentlyOnQueue() } matches { it == 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
     await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
-    Thread.sleep(500)
 
     webTestClient.get()
       .uri("/info")
@@ -164,8 +212,4 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     search(SearchCriteria("A7089FE", null, null), "/results/search_results_A7089FE.json")
   }
-}
-
-private fun String.readResourceAsText(): String {
-  return MessageIntegrationTest::class.java.getResource(this).readText()
 }

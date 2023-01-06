@@ -6,7 +6,7 @@ aws:
 
 elasticsearch:
   proxy:
-    url: http://es1.eu-west-2.es.localhost.localstack.cloud:4566
+    url: http://es01.eu-west-2.es.localhost.localstack.cloud:4566
 
 api:
   base:
@@ -14,6 +14,7 @@ api:
       oauth: http://localhost:8090/auth
       nomis: http://localhost:8093
       restricted-patients: http://localhost:8095
+      incentives: http://localhost:8096
 
 oauth:
   client:
@@ -23,6 +24,11 @@ oauth:
 restricted-patients:
   client:
     id: prisoner-search-to-restricted-patients-api
+    secret: clientsecret
+
+incentives:
+  client:
+    id: incentives-api
     secret: clientsecret
 
 spring:
@@ -42,9 +48,14 @@ hmpps.sqs:
     eventqueue:
       queueName: event-queue
       dlqName: event-dlq
+    hmppsdomainqueue:
+      queueName: hmpps-domain-queue
+      dlqName: hmpps-domain-dlq
     indexqueue:
       queueName: index-queue
       dlqName: index-dlq
   topics:
     eventtopic:
       arn: arn:aws:sns:eu-west-2:000000000000:event-topic
+    hmppseventtopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:hmpps-event-topic

@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElastic
 import org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRestClientAutoConfiguration
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Bean
+import java.time.Clock
 
 @SpringBootApplication(
   exclude = [
@@ -13,7 +15,11 @@ import org.springframework.boot.runApplication
   ]
 )
 @ConfigurationPropertiesScan
-class PrisonerOffenderSearch
+class PrisonerOffenderSearch {
+
+  @Bean
+  fun clock(): Clock = Clock.systemUTC()
+}
 
 fun main(args: Array<String>) {
   runApplication<PrisonerOffenderSearch>(*args)

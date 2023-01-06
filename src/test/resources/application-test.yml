@@ -10,16 +10,28 @@ hmpps.sqs:
     eventqueue:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
+      dlqMaxReceiveCount: 1
+    hmppsdomainqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      dlqMaxReceiveCount: 1
     indexqueue:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
+      dlqMaxReceiveCount: 1
+    hmppseventtestqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: hmppseventtopic
   topics:
     eventtopic:
       topicArn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+    hmppseventtopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
 elasticsearch:
   proxy:
-    url: http://es1.eu-west-2.es.localhost.localstack.cloud:4566
+    url: http://es01.eu-west-2.es.localhost.localstack.cloud:4566
 
 api:
   base:
@@ -27,6 +39,7 @@ api:
       oauth: http://localhost:8090/auth
       nomis: http://localhost:8093
       restricted-patients: http://localhost:8095
+      incentives: http://localhost:8096
 
 oauth:
   client:
@@ -38,6 +51,11 @@ restricted-patients:
     id: prisoner-search-to-restricted-patients-api
     secret: clientsecret
 
+incentives:
+  client:
+    id: incentives-api
+    secret: clientsecret
+
 management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
@@ -47,3 +65,6 @@ token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnRlcm5hbFVzZXIiOnRydWUsInVzZXJf
 index:
   page-size: 3
   complete-threshold: 0
+
+diff:
+  events: true

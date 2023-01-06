@@ -20,12 +20,13 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.model.translate
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
+import kotlin.runCatching
 
 @Service
 class PrisonerIndexService(
@@ -38,20 +39,35 @@ class PrisonerIndexService(
   private val telemetryClient: TelemetryClient,
   private val indexProperties: IndexProperties,
   private val restrictedPatientService: RestrictedPatientService,
+  private val prisonerDifferenceService: PrisonerDifferenceService,
+  private val incentivesService: IncentivesService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun indexPrisoner(prisonerId: String): Prisoner? =
+  fun indexPrisoner(prisonerId: String) {
     nomisService.getOffender(prisonerId)?.let {
-      sync(it)
+      index(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
         mapOf("prisonerID" to prisonerId),
         null
       )
+    }
+  }
+
+  fun syncPrisoner(prisonerId: String): Prisoner? =
+    nomisService.getOffender(prisonerId)?.let {
+      reindex(offenderBooking = it)
+    } ?: run {
+      telemetryClient.trackEvent(
+        "POSOffenderNotFoundForIndexing",
+        mapOf("prisonerID" to prisonerId),
+        null
+      )
+      log.error("POSOffenderNotFoundForIndexing {}", prisonerId)
       return null
     }
 
@@ -71,28 +87,41 @@ class PrisonerIndexService(
     }.map { it }.orElse(null)
   }
 
-  fun sync(offenderBooking: OffenderBooking): Prisoner {
-    val withRestrictedPatientDataIApplicable = withRestrictedPatientIfOut(offenderBooking)
+  // called when prisoner record has changed
+  fun reindex(offenderBooking: OffenderBooking): Prisoner {
+    val existingPrisoner = get(offenderBooking.offenderNo)
 
-    val prisonerA = translate(PrisonerA(), withRestrictedPatientDataIApplicable)
-    val prisonerB = translate(PrisonerB(), withRestrictedPatientDataIApplicable)
-    val storedPrisoner: Prisoner
+    val restrictedPatientData = offenderBooking.getRestrictedPatientData()
+    val incentiveLevel = runCatching { offenderBooking.getIncentiveLevel() }
+
+    val prisonerA = PrisonerA(existingPrisoner, offenderBooking, incentiveLevel, restrictedPatientData)
+    val prisonerB = PrisonerB(existingPrisoner, offenderBooking, incentiveLevel, restrictedPatientData)
+
+    val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
+
+    prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
+
+    // return message to DLQ since we have only done a partial update
+    incentiveLevel.exceptionOrNull()?.run { throw this }
+
+    log.trace("finished sync() {}", offenderBooking)
+    return storedPrisoner
+  }
+
+  // called when rebuilding the index from scratch
+  fun index(offenderBooking: OffenderBooking): Prisoner {
+    val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
+    val incentiveLevel = offenderBooking.getIncentiveLevel()
 
     val currentIndexStatus = indexStatusService.getCurrentIndex()
-    if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-      storedPrisoner = prisonerARepository.save(prisonerA)
+
+    val storedPrisoner = if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerBRepository.save(PrisonerB(offenderBooking, incentiveLevel, restrictivePatient))
     } else {
-      storedPrisoner = prisonerBRepository.save(prisonerB)
+      prisonerARepository.save(PrisonerA(offenderBooking, incentiveLevel, restrictivePatient))
     }
 
-    if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
-      if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
-        prisonerBRepository.save(prisonerB)
-      } else {
-        prisonerARepository.save(prisonerA)
-      }
-    }
-
+    log.trace("finished reIndex() {}", offenderBooking)
     return storedPrisoner
   }
 
@@ -114,10 +143,8 @@ class PrisonerIndexService(
         val otherIndexCount = countIndex(currentIndex.otherIndex())
         log.info(
           "Current index is {} [{}], rebuilding index {} [{}]",
-          currentIndex,
-          countIndex(currentIndex),
-          currentIndex.otherIndex(),
-          otherIndexCount
+          currentIndex, countIndex(currentIndex),
+          currentIndex.otherIndex(), otherIndexCount
         )
         checkExistsAndReset(currentIndex.otherIndex())
 
@@ -223,20 +250,35 @@ class PrisonerIndexService(
     return totalRows
   }
 
-  fun withRestrictedPatientIfOut(booking: OffenderBooking): OffenderBooking {
-    if (booking.assignedLivingUnit?.agencyId != "OUT") return booking
-    val restrictivePatient = restrictedPatientService.getRestrictedPatient(booking.offenderNo) ?: return booking
+  fun OffenderBooking.getRestrictedPatientData(): RestrictivePatient? =
+    this.takeUnless { this.assignedLivingUnit?.agencyId != "OUT" }?.let {
+      restrictedPatientService.getRestrictedPatient(this.offenderNo)?.let {
+        RestrictivePatient(
+          supportingPrisonId = it.supportingPrison.agencyId,
+          dischargedHospital = it.hospitalLocation,
+          dischargeDate = it.dischargeTime.toLocalDate(),
+          dischargeDetails = it.commentText
+        )
+      }
+    }
 
-    return booking.copy(
-      locationDescription = booking.locationDescription + " - discharged to " + restrictivePatient.hospitalLocation.description,
-      restrictivePatient = RestrictivePatient(
-        supportingPrisonId = booking.latestLocationId,
-        dischargedHospital = restrictivePatient.hospitalLocation,
-        dischargeDate = restrictivePatient.dischargeTime.toLocalDate(),
-        dischargeDetails = restrictivePatient.commentText
-      )
-    )
-  }
+  fun OffenderBooking.getIncentiveLevel(): IncentiveLevel? =
+    this.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
+
+  private fun saveToRepository(currentIndexStatus: IndexStatus, prisonerA: PrisonerA, prisonerB: PrisonerB): Prisoner =
+    if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+      prisonerARepository.save(prisonerA)
+    } else {
+      prisonerBRepository.save(prisonerB)
+    }.also {
+      if (currentIndexStatus.inProgress) { // Keep changes in sync if rebuilding
+        if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
+          prisonerBRepository.save(prisonerB)
+        } else {
+          prisonerARepository.save(prisonerA)
+        }
+      }
+    }
 
   open class IndexBuildException(val error: String) :
     Exception("Unable to build index reason: $error")

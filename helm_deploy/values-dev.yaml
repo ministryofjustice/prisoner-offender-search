@@ -9,9 +9,24 @@ generic-service:
     API_BASE_URL_OAUTH: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
     API_BASE_URL_NOMIS: "https://api-dev.prison.service.justice.gov.uk"
     API_BASE_URL_RESTRICTED_PATIENTS: "https://restricted-patients-api-dev.hmpps.service.justice.gov.uk"
+    API_BASE_URL_INCENTIVES: "https://incentives-api-dev.hmpps.service.justice.gov.uk"
+    DIFF_HOST: "https://prisoner-offender-search-dev.prison.service.justice.gov.uk"
     INDEX_COMPLETE_THRESHOLD: 500000
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.dev.json
+    DIFF_TELEMETRY: true
+    DIFF_EVENTS: true
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: syscon
+  rdsAlertsDatabases:
+    cloud-platform-f87c215b217ed2b5: "prisoner search"
+  sqsAlertsQueueNames:
+    - "Digital-Prison-Services-dev-prisoner_offender_search_queue"
+    - "Digital-Prison-Services-dev-prisoner_offender_search_queue_dl"
+    - "Digital-Prison-Services-dev-prisoner_offender_search_domain_queue"
+    - "Digital-Prison-Services-dev-prisoner_offender_search_domain_dlq"
+    - "dps-dev-prisoner_offender_index_queue"
+    - "dps-dev-prisoner_offender_index_queue_dl"
+  sqsAlertsOldestThreshold: 10
+  sqsAlertsTotalMessagesThreshold: 1

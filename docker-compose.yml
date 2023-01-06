@@ -8,7 +8,7 @@ services:
     depends_on:
       - localstack
       - prisonapi
-      - oauth
+      - hmpps-auth
     ports:
       - "8080:8080"
     healthcheck:
@@ -22,13 +22,25 @@ services:
       - OAUTH_CLIENT_ID=prisoner-offender-search-client
       - OAUTH_CLIENT_SECRET=clientsecret
 
+  pos-db:
+    image: postgres:14
+    networks:
+      - hmpps
+    container_name: pos-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=pos
+      - POSTGRES_USER=pos
+      - POSTGRES_DB=pos
+
   prisonapi:
     image: quay.io/hmpps/prison-api:latest
     networks:
       - hmpps
     container_name: prisonapi
     depends_on:
-      - oauth
+      - hmpps-auth
     ports:
       - "8093:8080"
     healthcheck:
@@ -43,7 +55,7 @@ services:
       - hmpps
     container_name: restricted-patients
     depends_on:
-      - oauth
+      - hmpps-auth
       - prisonapi
     ports:
       - "8095:8080"
@@ -54,15 +66,30 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - PRISON_API_ENDPOINT_URL=http://prisonapi:8093
 
-  oauth:
+  hmpps-auth:
     image: quay.io/hmpps/hmpps-auth:latest
     networks:
       - hmpps
-    container_name: oauth
+    container_name: hmpps-auth
     ports:
       - "8090:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=dev
+
+  hmpps-incentives-api:
+    image: quay.io/hmpps/hmpps-incentives-api:latest
+    networks:
+      - hmpps
+    container_name: hmpps-incentives-api
+    depends_on:
+      - hmpps-auth
+    ports:
+      - "8096:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ping"]
     environment:
       - SERVER_PORT=8080
       - SPRING_PROFILES_ACTIVE=dev
@@ -81,7 +108,6 @@ services:
       - DATA_DIR=/tmp/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
       - DEFAULT_REGION=eu-west-2
-      - HOSTNAME_EXTERNAL=${ES_HOSTNAME:-localstack}
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
