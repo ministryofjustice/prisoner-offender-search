@@ -65,6 +65,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilAsserted {
       search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.code").isEqualTo("ENH")
         .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Enhanced")
         .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-19")
@@ -82,6 +83,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilAsserted {
       search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.code").isEqualTo("STD")
         .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
         .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-20")
@@ -100,6 +102,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilAsserted {
       search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.code").isEqualTo("STD")
         .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
         .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-11T15:47:24")
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-12-25")
