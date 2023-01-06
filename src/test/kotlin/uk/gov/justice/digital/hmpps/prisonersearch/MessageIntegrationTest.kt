@@ -56,6 +56,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   @Test
   fun `will add current incentive to prisoner documents`() {
     incentivesMockServer.stubCurrentIncentive(
+      iepCode = "ENH",
       iepLevel = "Enhanced",
       iepTime = "2022-11-10T15:47:24.682335",
       nextReviewDate = "2023-11-19",
@@ -72,6 +73,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   @Test
   fun `will update incentive level when it changes`() {
     incentivesMockServer.stubCurrentIncentive(
+      iepCode = "STD",
       iepLevel = "Standard",
       iepTime = "2022-11-10T15:47:24.682335",
       nextReviewDate = "2023-11-20",
@@ -89,6 +91,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   @Test
   fun `will sync offender when the next review date changes`() {
     incentivesMockServer.stubCurrentIncentive(
+      iepCode = "STD",
       iepLevel = "Standard",
       iepTime = "2022-11-11T15:47:24.682335",
       nextReviewDate = "2023-12-25",

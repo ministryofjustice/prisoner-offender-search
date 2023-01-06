@@ -331,14 +331,14 @@ class PrisonerDiffServiceTest {
     fun `should report incentive differences`() {
       val prisoner1 = Prisoner().apply {
         currentIncentive = CurrentIncentive(
-          level = IncentiveLevel(description = "Standard"),
+          level = IncentiveLevel(code = "STD", description = "Standard"),
           dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
           nextReviewDate = LocalDate.of(2020, 10, 1),
         )
       }
       val prisoner2 = Prisoner().apply {
         currentIncentive = CurrentIncentive(
-          level = IncentiveLevel(description = "Enhanced"),
+          level = IncentiveLevel(code = "ENH", description = "Enhanced"),
           dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
           nextReviewDate = LocalDate.of(2020, 10, 1),
         )

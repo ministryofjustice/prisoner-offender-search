@@ -105,7 +105,7 @@ fun Prisoner.translate(existingPrisoner: Prisoner?, ob: OffenderBooking, incenti
 
 private fun IncentiveLevel?.toCurrentIncentive(): CurrentIncentive? = this?.let {
   CurrentIncentive(
-    level = IncentiveLevel(it.iepLevel),
+    level = IncentiveLevel(it.iepCode, it.iepLevel),
     nextReviewDate = it.nextReviewDate,
     dateTime = it.iepTime
   )
