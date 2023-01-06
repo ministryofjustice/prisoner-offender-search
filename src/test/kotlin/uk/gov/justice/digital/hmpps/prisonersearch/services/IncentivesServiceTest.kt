@@ -45,6 +45,7 @@ internal class IncentivesServiceTest {
     @Test
     internal fun `will return current incentive`() {
       incentivesApi.stubCurrentIncentive(
+        iepCode = "STD",
         iepLevel = "Standard",
         iepTime = "2022-11-10T15:47:24.682335",
         nextReviewDate = "2023-11-18",
@@ -53,6 +54,7 @@ internal class IncentivesServiceTest {
       val incentive = incentivesService.getCurrentIncentive(123456L)!!
       incentivesApi.verifyGetCurrentIncentiveRequest(123456L)
 
+      assertThat(incentive.iepCode).isEqualTo("STD")
       assertThat(incentive.iepLevel).isEqualTo("Standard")
       assertThat(incentive.iepTime).isEqualTo(LocalDateTime.parse("2022-11-10T15:47:24.682335"))
       assertThat(incentive.nextReviewDate).isEqualTo(LocalDate.parse("2023-11-18"))
@@ -89,6 +91,7 @@ internal class IncentivesServiceFeatureOffTest {
     @Test
     internal fun `will always return null`() {
       incentivesApi.stubCurrentIncentive(
+        iepCode = "STD",
         iepLevel = "Standard",
         iepTime = "2022-11-10T15:47:24.682335",
         nextReviewDate = "2023-11-18",
