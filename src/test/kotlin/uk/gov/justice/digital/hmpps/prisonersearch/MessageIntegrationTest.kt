@@ -56,6 +56,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   @Test
   fun `will add current incentive to prisoner documents`() {
     incentivesMockServer.stubCurrentIncentive(
+      iepCode = "ENH",
       iepLevel = "Enhanced",
       iepTime = "2022-11-10T15:47:24.682335",
       nextReviewDate = "2023-11-19",
@@ -64,6 +65,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilAsserted {
       search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.code").isEqualTo("ENH")
         .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Enhanced")
         .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-19")
@@ -72,6 +74,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   @Test
   fun `will update incentive level when it changes`() {
     incentivesMockServer.stubCurrentIncentive(
+      iepCode = "STD",
       iepLevel = "Standard",
       iepTime = "2022-11-10T15:47:24.682335",
       nextReviewDate = "2023-11-20",
@@ -80,6 +83,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilAsserted {
       search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.code").isEqualTo("STD")
         .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
         .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-10T15:47:24")
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-20")
@@ -89,6 +93,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   @Test
   fun `will sync offender when the next review date changes`() {
     incentivesMockServer.stubCurrentIncentive(
+      iepCode = "STD",
       iepLevel = "Standard",
       iepTime = "2022-11-11T15:47:24.682335",
       nextReviewDate = "2023-12-25",
@@ -97,6 +102,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
     await untilAsserted {
       search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].currentIncentive.level.code").isEqualTo("STD")
         .jsonPath("$.[0].currentIncentive.level.description").isEqualTo("Standard")
         .jsonPath("$.[0].currentIncentive.dateTime").isEqualTo("2022-11-11T15:47:24")
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-12-25")

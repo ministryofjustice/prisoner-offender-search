@@ -197,6 +197,7 @@ class TranslatorTest {
     val prisoner = PrisonerA(
       aBooking(),
       IncentiveLevel(
+        iepCode = "STD",
         iepLevel = "Standard",
         iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
         nextReviewDate = LocalDate.parse("2022-02-02"),
@@ -206,6 +207,7 @@ class TranslatorTest {
 
     assertThat(prisoner.currentIncentive).isNotNull
     assertThat(prisoner.currentIncentive?.level).isNotNull
+    assertThat(prisoner.currentIncentive?.level?.code).isEqualTo("STD")
     assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
     assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
     assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))
@@ -218,6 +220,7 @@ class TranslatorTest {
       aBooking(),
       Result.success(
         IncentiveLevel(
+          iepCode = "STD",
           iepLevel = "Standard",
           iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
           nextReviewDate = LocalDate.parse("2022-02-02"),
@@ -228,6 +231,7 @@ class TranslatorTest {
 
     assertThat(prisoner.currentIncentive).isNotNull
     assertThat(prisoner.currentIncentive?.level).isNotNull
+    assertThat(prisoner.currentIncentive?.level?.code).isEqualTo("STD")
     assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
     assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
     assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))
@@ -283,6 +287,7 @@ class TranslatorTest {
       val existingPrisoner = PrisonerA(
         aBooking().copy(locationDescription = "OUT"),
         incentiveLevel = IncentiveLevel(
+          iepCode = "STD",
           iepLevel = "Standard",
           iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
           nextReviewDate = LocalDate.parse("2022-02-02"),
@@ -299,6 +304,7 @@ class TranslatorTest {
 
       assertThat(prisoner.currentIncentive).isNotNull
       assertThat(prisoner.currentIncentive?.level).isNotNull
+      assertThat(prisoner.currentIncentive?.level?.code).isEqualTo("STD")
       assertThat(prisoner.currentIncentive?.level?.description).isEqualTo("Standard")
       assertThat(prisoner.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T11:00:00"))
       assertThat(prisoner.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2022-02-02"))

@@ -47,6 +47,7 @@ class RestrictedPatientMockServer : WireMockServer(8095) {
 
 class IncentivesMockServer : WireMockServer(8096) {
   fun stubCurrentIncentive(
+    iepCode: String = "STD",
     iepLevel: String = "Standard",
     iepTime: String = "2022-11-10T15:47:24.682335",
     nextReviewDate: String = "2023-11-18",
@@ -61,6 +62,7 @@ class IncentivesMockServer : WireMockServer(8096) {
               """
               {
                   "id": 5850394,
+                  "iepCode": "$iepCode",
                   "iepLevel": "$iepLevel",
                   "prisonerNumber": "A9412DY",
                   "bookingId": 1203242,

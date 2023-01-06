@@ -179,6 +179,7 @@ class PrisonerIndexServiceTest {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
       whenever(incentivesService.getCurrentIncentive(123456L)).thenReturn(
         IncentiveLevel(
+          iepCode = "STD",
           iepLevel = "Standard",
           iepTime = LocalDateTime.parse("2021-01-01T10:00:00"),
           nextReviewDate = LocalDate.parse("2021-03-01"),
@@ -188,6 +189,7 @@ class PrisonerIndexServiceTest {
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
       verify(prisonerARepository).save(
         check {
+          assertThat(it.currentIncentive?.level?.code).isEqualTo("STD")
           assertThat(it.currentIncentive?.level?.description).isEqualTo("Standard")
           assertThat(it.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T10:00:00"))
           assertThat(it.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2021-03-01"))
