@@ -5,6 +5,7 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.google.gson.Gson
+import com.microsoft.applicationinsights.TelemetryClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -103,8 +104,11 @@ abstract class IntegrationTest {
   @SpyBean
   protected lateinit var prisonerDifferenceService: PrisonerDifferenceService
 
-  @Autowired
+  @SpyBean
   protected lateinit var prisonerEventHashRepository: PrisonerEventHashRepository
+
+  @SpyBean
+  protected lateinit var telemetryClient: TelemetryClient
 
   companion object {
     internal val prisonMockServer = PrisonMockServer()

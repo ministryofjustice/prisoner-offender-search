@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDiffere
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.ElasticSearchIndexingException
+import kotlin.random.Random
 import kotlin.runCatching
 
 @Service
@@ -89,6 +90,8 @@ class PrisonerIndexService(
 
   // called when prisoner record has changed
   fun reindex(offenderBooking: OffenderBooking): Prisoner {
+    Thread.sleep(Random.nextLong(1000))
+    log.info(">>>>>>>>>> reading offender on thread ${Thread.currentThread().id}")
     val existingPrisoner = get(offenderBooking.offenderNo)
 
     val restrictedPatientData = offenderBooking.getRestrictedPatientData()
@@ -99,6 +102,8 @@ class PrisonerIndexService(
 
     val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
 
+    Thread.sleep(Random.nextLong(1000))
+    log.info(">>>>>>>>>> updating hash on thread ${Thread.currentThread().id}")
     prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
 
     // return message to DLQ since we have only done a partial update
