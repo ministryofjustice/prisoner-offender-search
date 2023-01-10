@@ -18,6 +18,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.CurrentIncentive
@@ -52,7 +53,9 @@ class PrisonerDiffServiceTest {
     @Test
     fun `should send event if prisoner hash has changed`() {
       whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(1)
-      whenever(objectMapper.writeValueAsString(any())).thenReturn("")
+      whenever(objectMapper.writeValueAsString(any()))
+        .thenReturn("hash1")
+        .thenReturn("hash2")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
@@ -64,6 +67,7 @@ class PrisonerDiffServiceTest {
     }
     @Test
     fun `should send event if prisoner hash is reported incorrectly as not changed but it really has `() {
+      // TODO we're 95% sure there is not JDBC bug - when 100% sure we can remove this test
       // there appears to a bug in JDBC/Postgres where the hash row is correctly updated
       // but the row count returned by JPA is zero, this does a secondary
       // check to ensure the row was indeed updated
@@ -71,7 +75,9 @@ class PrisonerDiffServiceTest {
       whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(
         PrisonerEventHash()
       )
-      whenever(objectMapper.writeValueAsString(any())).thenReturn("")
+      whenever(objectMapper.writeValueAsString(any()))
+        .thenReturn("hash1")
+        .thenReturn("hash2")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
@@ -87,15 +93,14 @@ class PrisonerDiffServiceTest {
     fun `should not send event if prisoner hash not changed`() {
       whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
       whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(null)
-      whenever(objectMapper.writeValueAsString(any())).thenReturn("")
+      whenever(objectMapper.writeValueAsString(any())).thenReturn("hash1")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
-      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc1" }
 
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), anyString())
-      verify(prisonerEventHashRepository).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
-      verify(domainEventsEmitter, never()).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
+      verifyNoInteractions(prisonerEventHashRepository)
+      verifyNoInteractions(domainEventsEmitter)
     }
 
     @Test

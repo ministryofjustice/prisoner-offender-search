@@ -10,8 +10,6 @@ import org.apache.commons.lang3.builder.ToStringStyle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.DigestUtils
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
@@ -70,7 +68,7 @@ class PrisonerDifferenceService(
 
   @Transactional
   fun handleDifferences(previousPrisonerSnapshot: Prisoner?, offenderBooking: OffenderBooking, prisoner: Prisoner) {
-    if (prisonerHasChanged(offenderBooking.offenderNo, prisoner)) {
+    if (prisonerHasChanged(previousPrisonerSnapshot, offenderBooking.offenderNo, prisoner)) {
       generateDiffEvent(previousPrisonerSnapshot, offenderBooking, prisoner)
       generateDiffTelemetry(previousPrisonerSnapshot, offenderBooking, prisoner)
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking)
@@ -80,11 +78,15 @@ class PrisonerDifferenceService(
     }
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.SERIALIZABLE)
-  fun prisonerHasChanged(nomsNumber: String, prisoner: Prisoner): Boolean =
-    with(UUID.randomUUID().toString()) {
+  fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, nomsNumber: String, prisoner: Prisoner): Boolean {
+    val oldHash = previousPrisonerSnapshot?.hash() ?: ""
+    val newHash = prisoner.hash()
+    if (oldHash == newHash) return false
+
+    // TODO When we're 100% convinced there's no bug with the upsert (currently 95% sure) remove the uniqueId, didUpdateHash check and the debug telemetry.
+    return with(UUID.randomUUID().toString()) {
       raiseDebugTelemetry(nomsNumber, "update to update hash", this)
-      updateHash(nomsNumber, prisoner, this).let {
+      updateHash(nomsNumber, newHash, this).let {
         raiseDebugTelemetry(nomsNumber, "row count is $it", this)
 
         if (it > 0) true else didUpdateHash(
@@ -99,11 +101,12 @@ class PrisonerDifferenceService(
         }
       }
     }
+  }
 
-  fun updateHash(nomsNumber: String, prisoner: Prisoner, updatedIdentifier: String) =
+  fun updateHash(nomsNumber: String, prisonerHash: String, updatedIdentifier: String) =
     prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
       nomsNumber,
-      generatePrisonerHash(prisoner),
+      prisonerHash,
       Instant.now(),
       updatedIdentifier
     )
@@ -118,8 +121,8 @@ class PrisonerDifferenceService(
       )
     }
 
-  private fun generatePrisonerHash(prisoner: Prisoner) =
-    objectMapper.writeValueAsString(prisoner)
+  private fun Prisoner.hash() =
+    objectMapper.writeValueAsString(this)
       .toByteArray()
       .let {
         Base64.encodeAsString(*DigestUtils.md5Digest(it))
