@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.google.gson.Gson
+import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.commons.lang3.RandomStringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -80,6 +81,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   @SpyBean
   lateinit var indexProperties: IndexProperties
+
+  @SpyBean
+  lateinit var telemetryClient: TelemetryClient
 
   protected val hmppsEventsQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
 

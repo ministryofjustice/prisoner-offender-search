@@ -54,7 +54,6 @@ dependencies {
   testImplementation("org.mockito:mockito-inline:4.11.0")
   testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.36.0")
   testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 }
 
 java {
