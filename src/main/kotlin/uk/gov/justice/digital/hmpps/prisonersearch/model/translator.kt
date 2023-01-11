@@ -107,6 +107,6 @@ private fun IncentiveLevel?.toCurrentIncentive(): CurrentIncentive? = this?.let 
   CurrentIncentive(
     level = IncentiveLevel(it.iepCode, it.iepLevel),
     nextReviewDate = it.nextReviewDate,
-    dateTime = it.iepTime
+    dateTime = it.iepTime.withNano(0) // ES only stores to the second
   )
 }
