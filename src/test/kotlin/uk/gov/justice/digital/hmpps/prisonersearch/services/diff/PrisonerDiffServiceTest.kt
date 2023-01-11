@@ -317,9 +317,23 @@ class PrisonerDiffServiceTest {
     }
 
     @Test
-    fun `should report alerts differences`() {
-      val prisoner1 = Prisoner().apply { alerts = listOf(alert()) }
-      val prisoner2 = Prisoner().apply { alerts = listOf(alert(active = false)) }
+    fun `should report alerts differences only those differences`() {
+      val prisoner1 = Prisoner().apply {
+        alerts = listOf(alert())
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel(code = "STD", description = "Standard"),
+          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
+          nextReviewDate = LocalDate.of(2020, 10, 1),
+        )
+      }
+      val prisoner2 = Prisoner().apply {
+        alerts = listOf(alert(active = false))
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel(code = "STD", description = "Standard"),
+          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
+          nextReviewDate = LocalDate.of(2020, 10, 1),
+        )
+      }
 
       val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
@@ -366,8 +380,22 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should report identifiers`() {
-      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
-      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+      val prisoner1 = Prisoner().apply {
+        pncNumber = "somePnc1"
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel(code = "STD", description = "Standard"),
+          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
+          nextReviewDate = LocalDate.of(2020, 10, 1),
+        )
+      }
+      val prisoner2 = Prisoner().apply {
+        pncNumber = "somePnc2"
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel(code = "STD", description = "Standard"),
+          dateTime = LocalDateTime.of(2020, 1, 1, 0, 1),
+          nextReviewDate = LocalDate.of(2020, 10, 1),
+        )
+      }
 
       prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
@@ -376,6 +404,8 @@ class PrisonerDiffServiceTest {
         check<Map<String, String>> {
           assertThat(LocalDateTime.parse(it["processedTime"]).toLocalDate()).isEqualTo(LocalDate.now())
           assertThat(it["nomsNumber"]).isEqualTo("someOffenderNo")
+          assertThat(it["propertiesChanged"]).isEqualTo("[currentIncentive, pncNumber]")
+          assertThat(it["currentIncentiveChange"]).isEqualTo("[CurrentIncentive(level=IncentiveLevel(code=STD, description=Standard), dateTime=2020-01-01T00:00, nextReviewDate=2020-10-01):CurrentIncentive(level=IncentiveLevel(code=STD, description=Standard), dateTime=2020-01-01T00:01, nextReviewDate=2020-10-01)]")
         },
         isNull()
       )
@@ -392,6 +422,7 @@ class PrisonerDiffServiceTest {
         eq("POSPrisonerUpdated"),
         check<Map<String, String>> {
           assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
+          assertThat(it["currentIncentiveChange"]).isEqualTo("[]")
         },
         isNull()
       )

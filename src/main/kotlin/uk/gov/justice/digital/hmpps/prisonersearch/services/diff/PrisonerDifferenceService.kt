@@ -182,6 +182,10 @@ class PrisonerDifferenceService(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
         "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
+        "propertiesChanged" to differences.values.flatten().map { it.property }.toList().sorted().toString(),
+        "currentIncentiveChange" to differences.values.asSequence().flatten().filter { it.property == "currentIncentive" }.map { "${it.oldValue}:${it.newValue}" }.toList().sorted()
+          .toList()
+          .toString(),
       ),
       null
     )
