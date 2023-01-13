@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -51,11 +52,14 @@ class HmppsQueueResourceTest : QueueIntegrationTest() {
     }
 
     @Test
-    internal fun `purge - satisfies the correct role`() {
+    internal fun `purge - satisfies the correct role`(): Unit = runBlocking {
       val queueName = "any queue"
       val dlqName = "any dlq"
-      doReturn(PurgeQueueRequest(dlqName, eventQueueSqsClient, "any url")).whenever(hmppsQueueService).findQueueToPurge(any())
-      doReturn(HmppsQueue("any queue id", eventQueueSqsClient, queueName, eventQueueSqsDlqClient, dlqName)).whenever(hmppsQueueService).findByDlqName(dlqName)
+      doReturn(PurgeQueueRequest(dlqName, eventQueueSqsClient, "any url")).whenever(hmppsQueueService)
+        .findQueueToPurge(any())
+      doReturn(HmppsQueue("any queue id", eventQueueSqsClient, queueName, eventQueueSqsDlqClient, dlqName)).whenever(
+        hmppsQueueService
+      ).findByDlqName(dlqName)
       doReturn(PurgeQueueResult(0)).whenever(hmppsQueueService).purgeQueue(any())
 
       webTestClient.put()
@@ -71,26 +75,28 @@ class HmppsQueueResourceTest : QueueIntegrationTest() {
         }
       )
     }
+  }
 
-    @Test
-    internal fun `transfer - satisfies the correct role`() {
-      val queueName = "any queue"
-      val dlqName = "any dlq"
-      doReturn(HmppsQueue("any queue id", eventQueueSqsClient, queueName, eventQueueSqsDlqClient, dlqName)).whenever(hmppsQueueService).findByDlqName(dlqName)
-      doReturn(RetryDlqResult(0, listOf())).whenever(hmppsQueueService).retryDlqMessages(any())
+  @Test
+  internal fun `transfer - satisfies the correct role`(): Unit = runBlocking {
+    val queueName = "any queue"
+    val dlqName = "any dlq"
+    doReturn(HmppsQueue("any queue id", eventQueueSqsClient, queueName, eventQueueSqsDlqClient, dlqName)).whenever(
+      hmppsQueueService
+    ).findByDlqName(dlqName)
+    doReturn(RetryDlqResult(0, listOf())).whenever(hmppsQueueService).retryDlqMessages(any())
 
-      webTestClient.put()
-        .uri("/queue-admin/retry-dlq/$dlqName")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus().isOk
+    webTestClient.put()
+      .uri("/queue-admin/retry-dlq/$dlqName")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .accept(MediaType.APPLICATION_JSON)
+      .exchange()
+      .expectStatus().isOk
 
-      verify(hmppsQueueService).retryDlqMessages(
-        check {
-          assertThat(it.hmppsQueue.dlqName).isEqualTo(dlqName)
-        }
-      )
-    }
+    verify(hmppsQueueService).retryDlqMessages(
+      check {
+        assertThat(it.hmppsQueue.dlqName).isEqualTo(dlqName)
+      }
+    )
   }
 }

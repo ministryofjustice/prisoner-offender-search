@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.client.WireMock
+import kotlinx.coroutines.runBlocking
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -19,10 +20,14 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.deleteMessage
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.readResourceAsText
+import uk.gov.justice.digital.hmpps.prisonersearch.receiveMessage
+import uk.gov.justice.digital.hmpps.prisonersearch.sendMessage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.IDENTIFIERS
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory.LOCATION
 import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
@@ -30,7 +35,7 @@ import uk.gov.justice.hmpps.sqs.PurgeQueueRequest
 class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @BeforeEach
-  fun purgeHmppsEventsQueue() {
+  fun purgeHmppsEventsQueue(): Unit = runBlocking {
     with(hmppsEventsQueue) {
       hmppsQueueService.purgeQueue(PurgeQueueRequest(queueName, sqsClient, queueUrl))
     }
@@ -64,10 +69,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
-    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
+    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).get().messages().first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle())
 
-    val message: MsgBody = objectMapper.readValue(result.body)
+    val message: MsgBody = objectMapper.readValue(result.body())
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
     assertThatJson(message.Message).node("version").isEqualTo(1)
@@ -86,9 +91,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
-    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
-    val message: MsgBody = objectMapper.readValue(result.body)
+    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).get().messages().first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle())
+    val message: MsgBody = objectMapper.readValue(result.body())
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.received")
     assertThatJson(message.Message).node("version").isEqualTo(1)
@@ -111,9 +116,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
-    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
-    val message: MsgBody = objectMapper.readValue(result.body)
+    val result = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).get().messages().first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle())
+    val message: MsgBody = objectMapper.readValue(result.body())
 
     assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.released")
     assertThatJson(message.Message).node("version").isEqualTo(1)
@@ -318,7 +323,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThat(insertedPrisonerEventHash).isNotNull
 
     // update the prisoner on ES BUT fail to send an event
-    doThrow(RuntimeException("Failed to send event")).whenever(hmppsEventTopicSnsClient).publish(any())
+    doThrow(RuntimeException("Failed to send event")).whenever(hmppsEventTopicSnsClient).publish(any<PublishRequest>())
     prisonMockServer.stubFor(
       WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
@@ -329,7 +334,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
-    await untilAsserted { verify(hmppsEventTopicSnsClient).publish(any()) }
+    await untilAsserted { verify(hmppsEventTopicSnsClient).publish(any<PublishRequest>()) }
 
     // The prisoner hash update should have been rolled back
     val prisonerEventHashAfterAttemptedUpdate =
@@ -369,9 +374,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
   }
 
   fun readNextDomainEventMessage(): String {
-    val updateResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).messages.first()
-    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, updateResult.receiptHandle)
-    return objectMapper.readValue<MsgBody>(updateResult.body).Message
+    val updateResult = hmppsEventsQueue.sqsClient.receiveMessage(hmppsEventsQueue.queueUrl).get().messages().first()
+    hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, updateResult.receiptHandle())
+    return objectMapper.readValue<MsgBody>(updateResult.body()).Message
   }
 
   private fun PrisonMockServer.stubOffenderNoFromBookingId(prisonerNumber: String) {
@@ -387,4 +392,4 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 }
 
 @JsonNaming(value = PropertyNamingStrategies.UpperCamelCaseStrategy::class)
-data class MsgBody(val Message: String)
+data class MsgBody(@Suppress("PropertyName") val Message: String)

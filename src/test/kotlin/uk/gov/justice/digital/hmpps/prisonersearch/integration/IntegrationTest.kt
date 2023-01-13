@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.integration
 
-import com.amazonaws.services.sns.AmazonSNS
-import com.amazonaws.services.sqs.AmazonSQS
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.google.gson.Gson
@@ -12,15 +10,14 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.IncentivesMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.OAuthMockServer
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
@@ -30,12 +27,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.JwtAuthHelper
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerEventHashRepository
-import uk.gov.justice.hmpps.sqs.HmppsQueueFactory
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
-import uk.gov.justice.hmpps.sqs.HmppsTopicFactory
 import uk.gov.justice.hmpps.sqs.MissingQueueException
-import uk.gov.justice.hmpps.sqs.MissingTopicException
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -43,21 +36,20 @@ import java.time.ZoneId
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(IntegrationTest.SqsConfig::class)
 @ActiveProfiles(profiles = ["test"])
 abstract class IntegrationTest {
 
   @SpyBean
   @Qualifier("eventqueue-sqs-client")
-  internal lateinit var eventQueueSqsClient: AmazonSQS
+  internal lateinit var eventQueueSqsClient: SqsAsyncClient
 
   @SpyBean
   @Qualifier("hmppsdomainqueue-sqs-client")
-  internal lateinit var hmppsDomainQueueSqsClient: AmazonSQS
+  internal lateinit var hmppsDomainQueueSqsClient: SqsAsyncClient
 
   @SpyBean
   @Qualifier("hmppseventtopic-sns-client")
-  internal lateinit var hmppsEventTopicSnsClient: AmazonSNS
+  internal lateinit var hmppsEventTopicSnsClient: SnsAsyncClient
 
   @SpyBean
   lateinit var hmppsQueueService: HmppsQueueService
@@ -205,40 +197,5 @@ abstract class IntegrationTest {
           .withStatus(status)
       )
     )
-  }
-
-  @TestConfiguration
-  class SqsConfig(private val hmppsQueueFactory: HmppsQueueFactory, private val hmppsTopicFactory: HmppsTopicFactory) {
-
-    @Bean("eventqueue-sqs-client")
-    fun eventQueueSqsClient(
-      hmppsSqsProperties: HmppsSqsProperties,
-      @Qualifier("eventqueue-sqs-dlq-client") eventQueueSqsDlqClient: AmazonSQS
-    ): AmazonSQS =
-      with(hmppsSqsProperties) {
-        val config = queues["eventqueue"]
-          ?: throw MissingQueueException("HmppsSqsProperties config for eventqueue not found")
-        hmppsQueueFactory.createSqsClient("eventqueue", config, hmppsSqsProperties, eventQueueSqsDlqClient)
-      }
-    @Bean("hmppsdomainqueue-sqs-client")
-    fun hmppsDomainQueueSqsClient(
-      hmppsSqsProperties: HmppsSqsProperties,
-      @Qualifier("hmppsdomainqueue-sqs-dlq-client") hmppsDomainQueueSqsDlqClient: AmazonSQS
-    ): AmazonSQS =
-      with(hmppsSqsProperties) {
-        val config = queues["hmppsdomainqueue"]
-          ?: throw MissingQueueException("HmppsSqsProperties config for hmppsdomainqueue not found")
-        hmppsQueueFactory.createSqsClient("hmppsdomainqueue", config, hmppsSqsProperties, hmppsDomainQueueSqsDlqClient)
-      }
-
-    @Bean("hmppseventtopic-sns-client")
-    fun eventQueueSqsClient(
-      hmppsSqsProperties: HmppsSqsProperties,
-    ): AmazonSNS =
-      with(hmppsSqsProperties) {
-        val config = topics["hmppseventtopic"]
-          ?: throw MissingTopicException("HmppsSqsProperties config for hmppseventtopic not found")
-        hmppsTopicFactory.createSnsClient("hmppseventtopic", config, hmppsSqsProperties,)
-      }
   }
 }

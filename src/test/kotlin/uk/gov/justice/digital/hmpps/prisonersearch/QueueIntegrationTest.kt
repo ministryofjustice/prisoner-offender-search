@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch
 
-import com.amazonaws.services.sqs.AmazonSQS
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -23,6 +22,13 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
@@ -55,17 +61,17 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   @Qualifier("eventqueue-sqs-dlq-client")
-  lateinit var eventQueueSqsDlqClient: AmazonSQS
+  lateinit var eventQueueSqsDlqClient: SqsAsyncClient
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   @Qualifier("hmppsdomainqueue-sqs-dlq-client")
-  lateinit var hmppsDomainQueueSqsDlqClient: AmazonSQS
+  lateinit var hmppsDomainQueueSqsDlqClient: SqsAsyncClient
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   @Qualifier("indexqueue-sqs-dlq-client")
-  lateinit var indexQueueSqsDlqClient: AmazonSQS
+  lateinit var indexQueueSqsDlqClient: SqsAsyncClient
 
   @Autowired
   lateinit var gson: Gson
@@ -88,26 +94,35 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   protected val hmppsEventsQueue by lazy { hmppsQueueService.findByQueueId("hmppseventtestqueue") ?: throw MissingQueueException("hmppseventtestqueue queue not found") }
 
   fun getNumberOfMessagesCurrentlyOnEventQueue(): Int {
-    val queueAttributes = eventQueueSqsClient.getQueueAttributes(eventQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
-    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val queueAttributes = eventQueueSqsClient.getQueueAttributes(
+      GetQueueAttributesRequest.builder().queueUrl(eventQueueUrl).attributeNames(APPROXIMATE_NUMBER_OF_MESSAGES, APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE).build()
+    ).get()
+    val visible = queueAttributes.attributes()[APPROXIMATE_NUMBER_OF_MESSAGES]?.toInt()!!
+    val notVisible = queueAttributes.attributes()[APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE]?.toInt()!!
     val number = visible + notVisible
     log.trace("Messages on event queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
   }
   fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int {
-    val queueAttributes = eventQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
-    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val queueAttributes = eventQueueSqsClient.getQueueAttributes(
+      GetQueueAttributesRequest.builder().queueUrl(indexQueueUrl).attributeNames(APPROXIMATE_NUMBER_OF_MESSAGES, APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE).build()
+    ).get()
+    val visible = queueAttributes.attributes()[APPROXIMATE_NUMBER_OF_MESSAGES]?.toInt()!!
+    val notVisible = queueAttributes.attributes()[APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE]?.toInt()!!
     val number = visible + notVisible
     log.trace("Messages on index queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
   }
 
   fun getNumberOfMessagesCurrentlyOnDomainQueue(): Int {
-    val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(hmppsEventsQueue.queueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val visible = queueAttributes.attributes["ApproximateNumberOfMessages"]?.toInt()!!
-    val notVisible = queueAttributes.attributes["ApproximateNumberOfMessagesNotVisible"]?.toInt()!!
+    val queueAttributes = hmppsEventsQueue.sqsClient.getQueueAttributes(
+      GetQueueAttributesRequest.builder()
+        .queueUrl(hmppsEventsQueue.queueUrl)
+        .attributeNames(APPROXIMATE_NUMBER_OF_MESSAGES, APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE)
+        .build()
+    ).get()
+    val visible = queueAttributes.attributes()[APPROXIMATE_NUMBER_OF_MESSAGES]?.toInt()!!
+    val notVisible = queueAttributes.attributes()[APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE]?.toInt()!!
     val number = visible + notVisible
     log.trace("Messages on domain queue: visible = {} notVisible = {} ", visible, notVisible)
     return number
@@ -432,15 +447,19 @@ data class PrisonerBuilder(
 
 fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
 
-fun generatePrisonerNumber(): String {
+fun generatePrisonerNumber(): String =
   // generate random string starting with a letter, followed by 4 numbers and 2 letters
-  return "${letters(1)}${numbers(4)}${letters(2)}"
-}
+  "${letters(1)}${numbers(4)}${letters(2)}"
 
-fun letters(length: Int): String {
-  return RandomStringUtils.random(length, true, true)
-}
+fun letters(length: Int): String = RandomStringUtils.random(length, true, true)
 
-fun numbers(length: Int): String {
-  return RandomStringUtils.random(length, false, true)
-}
+fun numbers(length: Int): String = RandomStringUtils.random(length, false, true)
+
+internal fun SqsAsyncClient.sendMessage(eventQueueUrl: String, message: String) =
+  sendMessage(SendMessageRequest.builder().queueUrl(eventQueueUrl).messageBody(message).build())
+
+internal fun SqsAsyncClient.deleteMessage(queueUrl: String, receiptHandle: String?) =
+  deleteMessage(DeleteMessageRequest.builder().queueUrl(queueUrl).receiptHandle(receiptHandle).build())
+
+internal fun SqsAsyncClient.receiveMessage(queueUrl: String) =
+  receiveMessage(ReceiveMessageRequest.builder().queueUrl(queueUrl).build())

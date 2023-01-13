@@ -1,30 +1,46 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.amazonaws.services.sqs.AmazonSQSAsync
-import com.amazonaws.services.sqs.model.GetQueueAttributesResult
-import com.amazonaws.services.sqs.model.GetQueueUrlResult
 import com.google.gson.Gson
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import java.util.concurrent.CompletableFuture
 
 class IndexQueueStatusTest {
 
-  private val indexQueueSqsClient = mock<AmazonSQSAsync>()
-  private val indexQueueSqsDlqClient = mock<AmazonSQSAsync>()
+  private val indexQueueSqsClient = mock<SqsAsyncClient>()
+  private val indexQueueSqsDlqClient = mock<SqsAsyncClient>()
   private val hmppsQueueService = mock<HmppsQueueService>()
 
   init {
-    whenever(hmppsQueueService.findByQueueId("indexqueue")).thenReturn(HmppsQueue("indexqueue", indexQueueSqsClient, "index-queue", indexQueueSqsDlqClient, "index-dlq"))
-    whenever(indexQueueSqsClient.getQueueUrl("index-queue")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:index-queue"))
-    whenever(indexQueueSqsDlqClient.getQueueUrl("index-dlq")).thenReturn(GetQueueUrlResult().withQueueUrl("arn:eu-west-1:index-dlq"))
+    whenever(hmppsQueueService.findByQueueId("indexqueue")).thenReturn(
+      HmppsQueue(
+        "indexqueue",
+        indexQueueSqsClient,
+        "index-queue",
+        indexQueueSqsDlqClient,
+        "index-dlq"
+      )
+    )
+    whenever(indexQueueSqsClient.getQueueUrl(any<GetQueueUrlRequest>())).thenReturn(
+      CompletableFuture.completedFuture(GetQueueUrlResponse.builder().queueUrl("arn:eu-west-1:index-queue").build())
+    )
+    whenever(indexQueueSqsDlqClient.getQueueUrl(any<GetQueueUrlRequest>())).thenReturn(
+      CompletableFuture.completedFuture(GetQueueUrlResponse.builder().queueUrl("arn:eu-west-1:index-dlq").build())
+    )
   }
 
   private val indexQueueService = IndexQueueService(hmppsQueueService, Gson())
@@ -50,33 +66,31 @@ class IndexQueueStatusTest {
     messagesOnQueue: Int,
     messagesOnDlq: Int,
     messagesInFlight: Int,
-    expectedActive: Boolean
+    expectedActive: Boolean,
   ) {
     assertThat(IndexQueueStatus(messagesOnQueue, messagesOnDlq, messagesInFlight).active).isEqualTo(expectedActive)
   }
 
   @Test
   internal fun `async calls for queue status successfully complete`() {
-    val indexQueueResult = GetQueueAttributesResult()
-    indexQueueResult.attributes["ApproximateNumberOfMessages"] = "7"
-    indexQueueResult.attributes["ApproximateNumberOfMessagesNotVisible"] = "2"
+    val indexQueueResult = GetQueueAttributesResponse.builder().attributes(
+      mapOf(
+        QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES to "7",
+        QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE to "2",
+      )
+    ).build()
 
     val futureQueueAttributesResult = CompletableFuture.completedFuture(indexQueueResult)
     whenever(
-      indexQueueSqsClient.getQueueAttributesAsync(
-        "arn:eu-west-1:index-queue",
-        listOf(
-          "ApproximateNumberOfMessages",
-          "ApproximateNumberOfMessagesNotVisible"
-        )
-      )
+      indexQueueSqsClient.getQueueAttributes(any<GetQueueAttributesRequest>())
     ).thenReturn(futureQueueAttributesResult)
 
-    val indexDlqResult = GetQueueAttributesResult()
-    indexDlqResult.attributes["ApproximateNumberOfMessages"] = "5"
+    val indexDlqResult = GetQueueAttributesResponse.builder().attributes(
+      mapOf(QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES to "5")
+    ).build()
     val futureDlqAttributesResult = CompletableFuture.completedFuture(indexDlqResult)
 
-    whenever(indexQueueSqsDlqClient.getQueueAttributesAsync("arn:eu-west-1:index-dlq", listOf("ApproximateNumberOfMessages")))
+    whenever(indexQueueSqsDlqClient.getQueueAttributes(any<GetQueueAttributesRequest>()))
       .thenReturn(futureDlqAttributesResult)
 
     val queueStatus = indexQueueService.getIndexQueueStatus()

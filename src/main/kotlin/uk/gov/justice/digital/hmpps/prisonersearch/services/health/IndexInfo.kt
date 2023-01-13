@@ -1,10 +1,10 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.health
 
-import com.amazonaws.services.sqs.model.GetQueueAttributesRequest
-import com.amazonaws.services.sqs.model.QueueAttributeName
 import org.springframework.boot.actuate.info.Info
 import org.springframework.boot.actuate.info.InfoContributor
 import org.springframework.stereotype.Component
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexStatusService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
@@ -32,18 +32,16 @@ class IndexInfo(
     builder.withDetail("index-queue-backlog", safeQueueCount())
   }
 
-  private fun safeQueueCount(): String {
-    return try {
-      val queueAttributes = indexQueue.sqsClient.getQueueAttributes(
-        GetQueueAttributesRequest(indexQueue.queueUrl).withAttributeNames(
-          QueueAttributeName.ApproximateNumberOfMessages
-        )
-      )
-        .attributes
+  private fun safeQueueCount(): String = try {
+    val queueAttributes = indexQueue.sqsClient.getQueueAttributes(
+      GetQueueAttributesRequest.builder()
+        .queueUrl(indexQueue.queueUrl)
+        .attributeNames(APPROXIMATE_NUMBER_OF_MESSAGES)
+        .build()
+    ).get().attributes()
 
-      queueAttributes["ApproximateNumberOfMessages"] ?: "unknown"
-    } catch (ex: Exception) {
-      "error retrieving queue count: ${ex.message}"
-    }
+    queueAttributes[APPROXIMATE_NUMBER_OF_MESSAGES] ?: "unknown"
+  } catch (ex: Exception) {
+    "error retrieving queue count: ${ex.message}"
   }
 }

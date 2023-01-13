@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.amazonaws.services.sns.AmazonSNS
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
@@ -16,6 +15,8 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import software.amazon.awssdk.services.sns.SnsAsyncClient
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.PrisonerReceiveReason.READMISSION
 import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.DiffCategory
@@ -37,7 +38,7 @@ class HmppsDomainEventsEmitterTest {
   private val telemetryClient = mock<TelemetryClient>()
   private val hmppsDomainEventEmitter =
     HmppsDomainEventEmitter(objectMapper, hmppsQueueService, diffProperties, clock, telemetryClient)
-  private val topicSnsClient = mock<AmazonSNS>()
+  private val topicSnsClient = mock<SnsAsyncClient>()
   private val hmppsEventsTopic = HmppsTopic("hmppseventstopic", "some_arn", topicSnsClient)
 
   @BeforeEach
@@ -57,15 +58,15 @@ class HmppsDomainEventsEmitterTest {
       hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
 
       verify(topicSnsClient).publish(
-        check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.updated")
+        check<PublishRequest> {
+          assertThat(it.messageAttributes()["eventType"]?.stringValue()).isEqualTo("prisoner-offender-search.prisoner.updated")
         }
       )
     }
 
     @Test
     fun `should not swallow exceptions`() {
-      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+      whenever(topicSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException::class.java)
 
       assertThatThrownBy {
         hmppsDomainEventEmitter.emitPrisonerDifferenceEvent("some_offender", mapOf(DiffCategory.LOCATION to listOf()))
@@ -80,15 +81,15 @@ class HmppsDomainEventsEmitterTest {
       hmppsDomainEventEmitter.emitPrisonerCreatedEvent("some_offender")
 
       verify(topicSnsClient).publish(
-        check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.created")
+        check<PublishRequest> {
+          assertThat(it.messageAttributes()["eventType"]?.stringValue()).isEqualTo("prisoner-offender-search.prisoner.created")
         }
       )
     }
 
     @Test
     fun `should not swallow exceptions`() {
-      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+      whenever(topicSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException::class.java)
 
       assertThatThrownBy {
         hmppsDomainEventEmitter.emitPrisonerCreatedEvent("some_offender")
@@ -103,8 +104,8 @@ class HmppsDomainEventsEmitterTest {
       hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", READMISSION, "MDI")
 
       verify(topicSnsClient).publish(
-        check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.received")
+        check<PublishRequest> {
+          assertThat(it.messageAttributes()["eventType"]?.stringValue()).isEqualTo("prisoner-offender-search.prisoner.received")
         }
       )
     }
@@ -129,7 +130,7 @@ class HmppsDomainEventsEmitterTest {
 
     @Test
     fun `should swallow exceptions and indicate a manual fix is required`() {
-      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+      whenever(topicSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException::class.java)
 
       hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", READMISSION, "MDI")
       verify(telemetryClient).trackEvent(
@@ -151,8 +152,8 @@ class HmppsDomainEventsEmitterTest {
       hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", "1234567", setOf("XA"), setOf())
 
       verify(topicSnsClient).publish(
-        check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
+        check<PublishRequest> {
+          assertThat(it.messageAttributes()["eventType"]?.stringValue()).isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
         }
       )
     }
@@ -178,7 +179,7 @@ class HmppsDomainEventsEmitterTest {
 
     @Test
     fun `should swallow exceptions and indicate a manual fix is required`() {
-      whenever(topicSnsClient.publish(any())).thenThrow(RuntimeException::class.java)
+      whenever(topicSnsClient.publish(any<PublishRequest>())).thenThrow(RuntimeException::class.java)
 
       hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", "1234567", setOf("XA"), setOf())
 

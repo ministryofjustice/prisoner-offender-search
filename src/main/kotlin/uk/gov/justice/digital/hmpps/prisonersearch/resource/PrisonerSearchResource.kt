@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
@@ -22,7 +23,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerSearchServic
 import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
-import javax.validation.Valid
 
 @RestController
 @Validated

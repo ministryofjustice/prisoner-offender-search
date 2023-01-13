@@ -1,11 +1,13 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.amazonaws.services.sqs.AmazonSQSAsync
-import com.amazonaws.services.sqs.model.PurgeQueueRequest
-import com.amazonaws.services.sqs.model.SendMessageRequest
 import com.google.gson.Gson
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName.APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 
@@ -17,37 +19,33 @@ class IndexQueueService(
 
   private val indexQueue = hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found")
 
-  private val indexQueueSqsClient = indexQueue.sqsClient as AmazonSQSAsync
-  private val indexQueueSqsDlqClient = indexQueue.sqsDlqClient as AmazonSQSAsync
+  private val indexQueueSqsClient = indexQueue.sqsClient
+  private val indexQueueSqsDlqClient = indexQueue.sqsDlqClient
   private val indexQueueUrl = indexQueue.queueUrl
   private val indexDlqUrl = indexQueue.dlqUrl as String
 
   fun sendIndexRequestMessage(payload: PrisonerIndexRequest) {
-    indexQueueSqsClient.sendMessageAsync(SendMessageRequest(indexQueueUrl, gson.toJson(payload)))
+    indexQueueSqsClient.sendMessage(
+      SendMessageRequest.builder().queueUrl(indexQueueUrl).messageBody(gson.toJson(payload)).build()
+    )
   }
 
   fun clearAllMessages() {
-    indexQueueSqsClient.purgeQueueAsync(PurgeQueueRequest(indexQueueUrl))
-  }
-
-  fun getNumberOfMessagesCurrentlyOnIndexQueue(): Int {
-    val queueAttributes = indexQueueSqsClient.getQueueAttributes(indexQueueUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"].toIntOrZero()
-  }
-
-  fun getNumberOfMessagesCurrentlyOnIndexDLQ(): Int {
-    val queueAttributes = indexQueueSqsDlqClient.getQueueAttributes(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
-    return queueAttributes.attributes["ApproximateNumberOfMessages"].toIntOrZero()
+    indexQueueSqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(indexQueueUrl).build())
   }
 
   fun getIndexQueueStatus(): IndexQueueStatus {
-    val queueAttributesAsyncFuture = indexQueueSqsClient.getQueueAttributesAsync(indexQueueUrl, listOf("ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"))
-    val dlqAttributesAsyncFuture = indexQueueSqsDlqClient.getQueueAttributesAsync(indexDlqUrl, listOf("ApproximateNumberOfMessages"))
+    val queueAttributesAsyncFuture = indexQueueSqsClient.getQueueAttributes(
+      GetQueueAttributesRequest.builder().queueUrl(indexQueueUrl).attributeNames(APPROXIMATE_NUMBER_OF_MESSAGES, APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE).build()
+    )
+    val dlqAttributesAsyncFuture = indexQueueSqsDlqClient?.getQueueAttributes(
+      GetQueueAttributesRequest.builder().queueUrl(indexDlqUrl).attributeNames(APPROXIMATE_NUMBER_OF_MESSAGES).build()
+    )
 
     return IndexQueueStatus(
-      messagesOnQueue = queueAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessages"].toIntOrZero(),
-      messagesInFlight = queueAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessagesNotVisible"].toIntOrZero(),
-      messagesOnDlq = dlqAttributesAsyncFuture.get().attributes["ApproximateNumberOfMessages"].toIntOrZero(),
+      messagesOnQueue = queueAttributesAsyncFuture.get().attributes()[APPROXIMATE_NUMBER_OF_MESSAGES].toIntOrZero(),
+      messagesInFlight = queueAttributesAsyncFuture.get().attributes()[APPROXIMATE_NUMBER_OF_MESSAGES_NOT_VISIBLE].toIntOrZero(),
+      messagesOnDlq = dlqAttributesAsyncFuture?.get()?.attributes()?.get(APPROXIMATE_NUMBER_OF_MESSAGES).toIntOrZero(),
     )
   }
   private fun String?.toIntOrZero() =

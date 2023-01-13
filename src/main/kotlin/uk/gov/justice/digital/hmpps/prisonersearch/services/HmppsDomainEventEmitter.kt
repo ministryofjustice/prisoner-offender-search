@@ -1,13 +1,13 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.amazonaws.services.sns.model.MessageAttributeValue
-import com.amazonaws.services.sns.model.PublishRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue
+import software.amazon.awssdk.services.sns.model.PublishRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.CREATED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter.Companion.PRISONER_ALERTS_UPDATED_EVENT_TYPE
@@ -55,14 +55,16 @@ class HmppsDomainEventEmitter(
       defaultFailureHandler(this, it)
     }
   ) {
-    val request = PublishRequest(topicArn, objectMapper.writeValueAsString(this))
-      .addMessageAttributesEntry(
-        "eventType",
-        MessageAttributeValue().withDataType("String").withStringValue(this.eventType)
+    val request = PublishRequest.builder()
+      .topicArn(topicArn)
+      .message(objectMapper.writeValueAsString(this))
+      .messageAttributes(
+        mapOf("eventType" to MessageAttributeValue.builder().dataType("string").stringValue(this.eventType).build())
       )
+      .build()
 
     runCatching {
-      topicSnsClient.publish(request)
+      topicSnsClient.publish(request).get()
       telemetryClient.trackEvent(this.eventType, this.asMap(), null)
     }.onFailure(onFailure)
   }

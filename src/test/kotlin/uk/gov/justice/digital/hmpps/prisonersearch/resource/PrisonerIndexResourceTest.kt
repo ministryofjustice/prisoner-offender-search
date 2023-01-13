@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
+import uk.gov.justice.digital.hmpps.prisonersearch.sendMessage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
@@ -579,7 +581,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   inner class QueueAdminIndexDlq {
 
     @Test
-    fun `will add good DLQ messages to the index`() {
+    fun `will add good DLQ messages to the index`(): Unit = runBlocking {
       indexPrisoners()
 
       indexQueueSqsDlqClient.sendMessage(indexDlqUrl, populateOffenderMessage("Z1234AA"))

@@ -1,13 +1,13 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.config
 
 import ch.qos.logback.classic.Level
-import com.microsoft.applicationinsights.web.internal.RequestTelemetryContext
-import com.microsoft.applicationinsights.web.internal.ThreadContext
+import io.opentelemetry.api.common.AttributeKey
+import io.opentelemetry.api.trace.Tracer
+import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer
 import org.springframework.context.annotation.Import
@@ -33,15 +33,7 @@ class ClientTrackingConfigurationTest {
   @Autowired
   private lateinit var jwtAuthHelper: JwtAuthHelper
 
-  @BeforeEach
-  fun setup() {
-    ThreadContext.setRequestTelemetryContext(RequestTelemetryContext(1L))
-  }
-
-  @AfterEach
-  fun tearDown() {
-    ThreadContext.remove()
-  }
+  private val tracer: Tracer = otelTesting.openTelemetry.getTracer("test")
 
   private val req = MockHttpServletRequest()
   private val res = MockHttpServletResponse()
@@ -50,25 +42,40 @@ class ClientTrackingConfigurationTest {
   fun shouldAddClientIdAndUserNameToInsightTelemetry() {
     val token = jwtAuthHelper.createJwt("bob")
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).containsExactlyInAnyOrderEntriesOf(mapOf("username" to "bob", "clientId" to "prisoner-offender-search-client"))
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({ t ->
+      t.hasSpansSatisfyingExactly({
+        it.hasAttribute(AttributeKey.stringKey("username"), "bob")
+        it.hasAttribute(AttributeKey.stringKey("clientId"), "prisoner-offender-search-client")
+      })
+    })
   }
 
   @Test
   fun shouldAddOnlyClientIdIfUsernameNullToInsightTelemetry() {
     val token = jwtAuthHelper.createJwt()
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).containsExactlyInAnyOrderEntriesOf(mapOf("clientId" to "prisoner-offender-search-client"))
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({ t ->
+      t.hasSpansSatisfyingExactly({
+        it.hasAttribute(AttributeKey.stringKey("clientId"), "prisoner-offender-search-client")
+      })
+    })
   }
 
   @Test
   fun `should cope with no authorisation`() {
-    clientTrackingInterceptor.preHandle(req, res, "null")
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).isEmpty()
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({})
   }
 
   @Test
@@ -77,11 +84,19 @@ class ClientTrackingConfigurationTest {
     req.addHeader(HttpHeaders.AUTHORIZATION, "Bearer $token")
     val logAppender = findLogAppender(ClientTrackingInterceptor.Companion::class.java)
 
-    clientTrackingInterceptor.preHandle(req, res, "null")
-
+    tracer.spanBuilder("span").startSpan().run {
+      makeCurrent().use { clientTrackingInterceptor.preHandle(req, res, "null") }
+      end()
+    }
     // The lack of an exception here shows that a bad token does not prevent Telemetry
-    val insightTelemetry = ThreadContext.getRequestTelemetryContext().httpRequestTelemetry.properties
-    assertThat(insightTelemetry).isEmpty()
+    otelTesting.assertTraces().hasTracesSatisfyingExactly({})
+
     assertThat(logAppender.list).anyMatch { it.message.contains("problem decoding jwt") && it.level == Level.WARN }
+  }
+
+  private companion object {
+    @JvmStatic
+    @RegisterExtension
+    private val otelTesting: OpenTelemetryExtension = OpenTelemetryExtension.create()
   }
 }

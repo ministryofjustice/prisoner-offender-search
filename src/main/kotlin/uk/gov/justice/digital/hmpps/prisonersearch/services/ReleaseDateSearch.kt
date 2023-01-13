@@ -1,9 +1,9 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotNull
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadRequestException
 import java.time.LocalDate
-import javax.validation.constraints.NotNull
 
 @Schema(description = "Search Criteria for Release Date Search")
 data class ReleaseDateSearch(

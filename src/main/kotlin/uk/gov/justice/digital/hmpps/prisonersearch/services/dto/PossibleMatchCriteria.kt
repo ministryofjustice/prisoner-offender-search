@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.Past
 import java.time.LocalDate
-import javax.validation.constraints.Past
 
 @Schema(description = "Search Criteria for possible match")
 data class PossibleMatchCriteria(

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -20,7 +21,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonersearch.services.KeywordService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
-import javax.validation.Valid
 
 @RestController
 @Validated

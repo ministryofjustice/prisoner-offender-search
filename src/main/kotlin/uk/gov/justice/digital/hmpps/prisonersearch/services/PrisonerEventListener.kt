@@ -2,10 +2,10 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
+import io.awspring.cloud.sqs.annotation.SqsListener
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,7 +18,7 @@ class PrisonerEventListener(
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  @JmsListener(destination = "eventqueue", containerFactory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("eventqueue", factory = "hmppsQueueContainerFactoryProxy", maxMessagesPerPoll = "1", maxInflightMessagesPerQueue = "1")
   fun processOffenderEvent(requestJson: String?) {
     try {
       val (message, messageId, messageAttributes) = gson.fromJson(requestJson, Message::class.java)
