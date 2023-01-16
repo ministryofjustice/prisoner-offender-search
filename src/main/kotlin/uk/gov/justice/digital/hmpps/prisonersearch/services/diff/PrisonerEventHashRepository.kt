@@ -25,14 +25,12 @@ interface PrisonerEventHashRepository : JpaRepository<PrisonerEventHash, String>
    */
   @Modifying
   @Query(
-    value = "INSERT INTO prisoner_event_hashes (noms_number, prisoner_hash, updated_date_time, updated_identifier) VALUES (:nomsNumber, :prisonerHash, :updatedDateTime, :updatedIdentifier) " +
+    value = "INSERT INTO prisoner_event_hashes (noms_number, prisoner_hash, updated_date_time) VALUES (:nomsNumber, :prisonerHash, :updatedDateTime) " +
       "ON CONFLICT (noms_number) DO UPDATE " +
-      "SET prisoner_hash=:prisonerHash, updated_date_time=:updatedDateTime, updated_identifier=:updatedIdentifier WHERE prisoner_event_hashes.prisoner_hash<>:prisonerHash",
+      "SET prisoner_hash=:prisonerHash, updated_date_time=:updatedDateTime WHERE prisoner_event_hashes.prisoner_hash<>:prisonerHash",
     nativeQuery = true
   )
-  fun upsertPrisonerEventHashIfChanged(nomsNumber: String, prisonerHash: String, updatedDateTime: Instant, updatedIdentifier: String): Int
-  fun findByNomsNumberAndUpdatedIdentifier(nomsNumber: String, updatedIdentifier: String): PrisonerEventHash?
-  fun findByNomsNumber(nomsNumber: String): PrisonerEventHash?
+  fun upsertPrisonerEventHashIfChanged(nomsNumber: String, prisonerHash: String, updatedDateTime: Instant): Int
 }
 
 @Entity
@@ -43,8 +41,6 @@ data class PrisonerEventHash(
   @Column(name = "prisoner_hash")
   val prisonerHash: String = "",
   val updatedDateTime: Instant = Instant.now(),
-  @Column(name = "updated_identifier")
-  val updatedIdentifier: String = "",
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -57,6 +53,6 @@ data class PrisonerEventHash(
   override fun hashCode(): Int = nomsNumber.hashCode()
 
   override fun toString(): String {
-    return "PrisonerSentEvent(nomsNumber=$nomsNumber, prisonerHash='$prisonerHash', updatedDateTime=$updatedDateTime, updatedIdentifier='$updatedIdentifier')"
+    return "PrisonerSentEvent(nomsNumber=$nomsNumber, prisonerHash='$prisonerHash', updatedDateTime=$updatedDateTime)"
   }
 }

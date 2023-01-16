@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Instant
 import java.time.LocalDateTime
-import java.util.UUID
 import kotlin.reflect.full.findAnnotations
 
 @Target(AnnotationTarget.PROPERTY)
@@ -83,43 +82,15 @@ class PrisonerDifferenceService(
     val newHash = prisoner.hash()
     if (oldHash == newHash) return false
 
-    // TODO When we're 100% convinced there's no bug with the upsert (currently 95% sure) remove the uniqueId, didUpdateHash check and the debug telemetry.
-    return with(UUID.randomUUID().toString()) {
-      raiseDebugTelemetry(nomsNumber, "update to update hash", this)
-      updateHash(nomsNumber, newHash, this).let {
-        raiseDebugTelemetry(nomsNumber, "row count is $it", this)
-
-        if (it > 0) true else didUpdateHash(
-          nomsNumber,
-          this@with
-        ).also { didUpdateHash ->
-          if (didUpdateHash) raiseDifferencesFoundButHashUpdatedCountWrongTelemetry(nomsNumber) else raiseDebugTelemetry(
-            nomsNumber,
-            "did not update",
-            this@with
-          )
-        }
-      }
-    }
+    return updateHash(nomsNumber, newHash) > 0
   }
 
-  fun updateHash(nomsNumber: String, prisonerHash: String, updatedIdentifier: String) =
+  fun updateHash(nomsNumber: String, prisonerHash: String) =
     prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
       nomsNumber,
       prisonerHash,
       Instant.now(),
-      updatedIdentifier
     )
-
-  fun didUpdateHash(nomsNumber: String, updatedIdentifier: String): Boolean =
-    (prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(nomsNumber, updatedIdentifier) != null).also {
-      raiseDebugTelemetry(nomsNumber, "hash has been updated:  $it", updatedIdentifier)
-      raiseDebugTelemetry(
-        nomsNumber,
-        "current hash and identifier is ${prisonerEventHashRepository.findByNomsNumber(nomsNumber)}",
-        updatedIdentifier
-      )
-    }
 
   private fun Prisoner.hash() =
     objectMapper.writeValueAsString(this)
@@ -182,10 +153,6 @@ class PrisonerDifferenceService(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
         "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
-        "propertiesChanged" to differences.values.flatten().map { it.property }.toList().sorted().toString(),
-        "currentIncentiveChange" to differences.values.asSequence().flatten().filter { it.property == "currentIncentive" }.map { "${it.oldValue}:${it.newValue}" }.toList().sorted()
-          .toList()
-          .toString(),
       ),
       null
     )
@@ -208,28 +175,6 @@ class PrisonerDifferenceService(
       mapOf(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
-      ),
-      null
-    )
-
-  private fun raiseDifferencesFoundButHashUpdatedCountWrongTelemetry(offenderNo: String) =
-    telemetryClient.trackEvent(
-      "POSPrisonerUpdatedButHashUpdatedCountWrong",
-      mapOf(
-        "processedTime" to LocalDateTime.now().toString(),
-        "nomsNumber" to offenderNo,
-      ),
-      null
-    )
-
-  private fun raiseDebugTelemetry(offenderNo: String, message: String, id: String) =
-    telemetryClient.trackEvent(
-      "POSPrisonerUpdatedDebug",
-      mapOf(
-        "processedTime" to LocalDateTime.now().toString(),
-        "nomsNumber" to offenderNo,
-        "message" to message,
-        "id" to id,
       ),
       null
     )
