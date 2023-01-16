@@ -52,7 +52,7 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should send event if prisoner hash has changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(1)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(1)
       whenever(objectMapper.writeValueAsString(any()))
         .thenReturn("hash1")
         .thenReturn("hash2")
@@ -61,38 +61,13 @@ class PrisonerDiffServiceTest {
 
       prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
 
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), any())
-      verify(prisonerEventHashRepository, never()).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
+      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any())
       verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
-    }
-    @Test
-    fun `should send event if prisoner hash is reported incorrectly as not changed but it really has `() {
-      // TODO we're 95% sure there is not JDBC bug - when 100% sure we can remove this test
-      // there appears to a bug in JDBC/Postgres where the hash row is correctly updated
-      // but the row count returned by JPA is zero, this does a secondary
-      // check to ensure the row was indeed updated
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
-      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(
-        PrisonerEventHash()
-      )
-      whenever(objectMapper.writeValueAsString(any()))
-        .thenReturn("hash1")
-        .thenReturn("hash2")
-      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
-      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
-
-      prisonerDifferenceService.handleDifferences(prisoner1, someOffenderBooking(), prisoner2)
-
-      verify(prisonerEventHashRepository).upsertPrisonerEventHashIfChanged(eq("someOffenderNo"), anyString(), any(), anyString())
-      verify(prisonerEventHashRepository).findByNomsNumberAndUpdatedIdentifier(eq("someOffenderNo"), anyString())
-      verify(domainEventsEmitter).emitPrisonerDifferenceEvent(eq("someOffenderNo"), anyMap())
-      verify(telemetryClient).trackEvent(eq("POSPrisonerUpdatedButHashUpdatedCountWrong"), anyMap(), isNull())
     }
 
     @Test
     fun `should not send event if prisoner hash not changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
-      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(null)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("hash1")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc1" }
@@ -105,8 +80,7 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should raise no-change telemetry if there are no changes using hash`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any(), any())).thenReturn(0)
-      whenever(prisonerEventHashRepository.findByNomsNumberAndUpdatedIdentifier(anyString(), anyString())).thenReturn(null)
+      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("a_string")
       val prisoner = Prisoner().apply { pncNumber = "somePnc1" }
 
@@ -317,23 +291,9 @@ class PrisonerDiffServiceTest {
     }
 
     @Test
-    fun `should report alerts differences only those differences`() {
-      val prisoner1 = Prisoner().apply {
-        alerts = listOf(alert())
-        currentIncentive = CurrentIncentive(
-          level = IncentiveLevel(code = "STD", description = "Standard"),
-          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
-          nextReviewDate = LocalDate.of(2020, 10, 1),
-        )
-      }
-      val prisoner2 = Prisoner().apply {
-        alerts = listOf(alert(active = false))
-        currentIncentive = CurrentIncentive(
-          level = IncentiveLevel(code = "STD", description = "Standard"),
-          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
-          nextReviewDate = LocalDate.of(2020, 10, 1),
-        )
-      }
+    fun `should report alerts differences`() {
+      val prisoner1 = Prisoner().apply { alerts = listOf(alert()) }
+      val prisoner2 = Prisoner().apply { alerts = listOf(alert(active = false)) }
 
       val diffsByType = prisonerDifferenceService.getDifferencesByCategory(prisoner1, prisoner2)
 
@@ -380,22 +340,8 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should report identifiers`() {
-      val prisoner1 = Prisoner().apply {
-        pncNumber = "somePnc1"
-        currentIncentive = CurrentIncentive(
-          level = IncentiveLevel(code = "STD", description = "Standard"),
-          dateTime = LocalDateTime.of(2020, 1, 1, 0, 0),
-          nextReviewDate = LocalDate.of(2020, 10, 1),
-        )
-      }
-      val prisoner2 = Prisoner().apply {
-        pncNumber = "somePnc2"
-        currentIncentive = CurrentIncentive(
-          level = IncentiveLevel(code = "STD", description = "Standard"),
-          dateTime = LocalDateTime.of(2020, 1, 1, 0, 1),
-          nextReviewDate = LocalDate.of(2020, 10, 1),
-        )
-      }
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
 
       prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
 
@@ -404,8 +350,6 @@ class PrisonerDiffServiceTest {
         check<Map<String, String>> {
           assertThat(LocalDateTime.parse(it["processedTime"]).toLocalDate()).isEqualTo(LocalDate.now())
           assertThat(it["nomsNumber"]).isEqualTo("someOffenderNo")
-          assertThat(it["propertiesChanged"]).isEqualTo("[currentIncentive, pncNumber]")
-          assertThat(it["currentIncentiveChange"]).isEqualTo("[CurrentIncentive(level=IncentiveLevel(code=STD, description=Standard), dateTime=2020-01-01T00:00, nextReviewDate=2020-10-01):CurrentIncentive(level=IncentiveLevel(code=STD, description=Standard), dateTime=2020-01-01T00:01, nextReviewDate=2020-10-01)]")
         },
         isNull()
       )
@@ -422,7 +366,6 @@ class PrisonerDiffServiceTest {
         eq("POSPrisonerUpdated"),
         check<Map<String, String>> {
           assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
-          assertThat(it["currentIncentiveChange"]).isEqualTo("[]")
         },
         isNull()
       )
