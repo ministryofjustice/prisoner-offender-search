@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex.INDEX_A
@@ -114,14 +115,31 @@ class IndexStatusServiceTest {
   inner class CancelIndex {
     @Test
     fun `cancelling index resets index error state and inProgress flag to false`() {
-      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = true)))
+      val indexStatus = anIndexStatus(inProgress = true, inError = true)
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(indexStatus))
       whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
 
       assertThat(indexStatusService.getCurrentIndex().inProgress).isTrue
       assertThat(indexStatusService.getCurrentIndex().inError).isTrue
-      assertThat(indexStatusService.cancelIndexing()).isTrue
+
+      indexStatusService.cancelIndexing()
+
       assertThat(indexStatusService.getCurrentIndex().inProgress).isFalse
       assertThat(indexStatusService.getCurrentIndex().inError).isFalse
+      verify(indexStatusRepository).save(indexStatus)
+    }
+
+    @Test
+    fun `cancelling index does nothing if not in progress`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+
+      assertThat(indexStatusService.getCurrentIndex().inProgress).isFalse
+      assertThat(indexStatusService.getCurrentIndex().inError).isTrue
+
+      indexStatusService.cancelIndexing()
+      assertThat(indexStatusService.getCurrentIndex().inProgress).isFalse
+      assertThat(indexStatusService.getCurrentIndex().inError).isTrue
     }
   }
 }

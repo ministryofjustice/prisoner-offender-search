@@ -19,6 +19,7 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.wiremock.PrisonMockServer
@@ -314,7 +315,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
 
     // remember the prisoner event hash
-    val insertedPrisonerEventHash = prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
+    val insertedPrisonerEventHash = prisonerEventHashRepository.findByIdOrNull("A1239DD")?.prisonerHash
     assertThat(insertedPrisonerEventHash).isNotNull
 
     // update the prisoner on ES BUT fail to send an event
@@ -333,7 +334,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     // The prisoner hash update should have been rolled back
     val prisonerEventHashAfterAttemptedUpdate =
-      prisonerEventHashRepository.findById("A1239DD").toNullable()?.prisonerHash
+      prisonerEventHashRepository.findByIdOrNull("A1239DD")?.prisonerHash
     assertThat(prisonerEventHashAfterAttemptedUpdate).isEqualTo(insertedPrisonerEventHash)
   }
 
