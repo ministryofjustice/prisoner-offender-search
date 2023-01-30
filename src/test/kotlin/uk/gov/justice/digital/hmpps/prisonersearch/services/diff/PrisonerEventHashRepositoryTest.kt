@@ -2,16 +2,16 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services.diff
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
-import uk.gov.justice.digital.hmpps.prisonersearch.services.toNullable
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class PrisonerEventHashRepositoryTest : IntegrationTest() {
 
   private fun upsert(nomsNumber: String, hash: String, dateTime: Instant) = prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(nomsNumber, hash, dateTime)
-  private fun find(nomsNumber: String) = prisonerEventHashRepository.findById(nomsNumber).toNullable()
+  private fun find(nomsNumber: String) = prisonerEventHashRepository.findByIdOrNull(nomsNumber)
   private fun now() = Instant.now().truncatedTo(ChronoUnit.MICROS) // Postgres only handles microseconds, but some System clocks can go to nanoseconds.
 
   @Test

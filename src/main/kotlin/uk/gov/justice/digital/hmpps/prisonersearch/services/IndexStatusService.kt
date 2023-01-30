@@ -3,12 +3,12 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.IndexStatusRepository
 import java.time.LocalDateTime
-import java.util.Optional
 
 @Service
 class IndexStatusService(
@@ -22,7 +22,7 @@ class IndexStatusService(
   }
 
   fun getCurrentIndex(): IndexStatus {
-    var indexStatus = indexStatusRepository.findById("STATUS").toNullable()
+    var indexStatus = indexStatusRepository.findByIdOrNull("STATUS")
 
     if (indexStatus == null) {
       indexStatus = IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false)
@@ -52,17 +52,15 @@ class IndexStatusService(
     return true
   }
 
-  fun cancelIndexing(): Boolean {
-    val currentIndexStatus = getCurrentIndex()
-    if (currentIndexStatus.inProgress) {
-      currentIndexStatus.inProgress = false
-      currentIndexStatus.inError = false
-      indexStatusRepository.save(currentIndexStatus)
-      log.warn("Indexing cancelled")
-      return true
-    }
+  fun cancelIndexing(): Unit = with(getCurrentIndex()) {
+    if (!inProgress) return
 
-    return false
+    inProgress = false
+    inError = false
+    indexStatusRepository.save(this)
+    log.warn("Indexing cancelled")
+
+    telemetryClient.trackEvent("POSIndexRebuildCancelled", mapOf("indexName" to currentIndex.indexName), null)
   }
 
   fun switchIndex(): Boolean {
@@ -76,25 +74,24 @@ class IndexStatusService(
     return true
   }
 
-  fun markRebuildComplete(): Boolean {
-    val currentIndexStatus = getCurrentIndex()
-    val indexQueueStatus = indexQueueService.getIndexQueueStatus()
-    if (currentIndexStatus.inProgress && indexQueueStatus.active.not() && currentIndexStatus.inError.not()) {
-      currentIndexStatus.inProgress = false
-      currentIndexStatus.endIndexTime = LocalDateTime.now()
-      currentIndexStatus.toggleIndex()
-      indexStatusRepository.save(currentIndexStatus)
-      log.info("Index marked as complete, index {} is now current.", currentIndexStatus.currentIndex)
-      return true
-    }
+  fun markRebuildComplete(): Boolean =
+    with(getCurrentIndex()) {
+      val indexQueueStatus = indexQueueService.getIndexQueueStatus()
+      if (inProgress && indexQueueStatus.active.not() && inError.not()) {
+        inProgress = false
+        endIndexTime = LocalDateTime.now()
+        toggleIndex()
+        indexStatusRepository.save(this)
+        log.info("Index marked as complete, index {} is now current.", currentIndex)
+        telemetryClient.trackEvent("POSIndexRebuildComplete", mapOf("indexName" to currentIndex.indexName), null)
+        return true
+      }
 
-    log.info("Ignoring index build request with currentIndexStatus=${currentIndexStatus.currentIndex} and indexQueueStatus=$indexQueueStatus")
-    return false
-  }
+      log.info("Ignoring index build request with currentIndexStatus=$currentIndex and indexQueueStatus=$indexQueueStatus")
+      return false
+    }
 
   fun markIndexBuildFailure() {
     getCurrentIndex().inError = true
   }
 }
-
-fun <T : Any> Optional<T>.toNullable(): T? = this.orElse(null)
