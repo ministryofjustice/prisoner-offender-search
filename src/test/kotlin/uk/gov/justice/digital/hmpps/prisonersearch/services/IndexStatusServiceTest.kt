@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex.INDEX_A
@@ -28,6 +29,13 @@ class IndexStatusServiceTest {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
 
       assertThat(indexStatusService.markRebuildComplete()).isFalse
+    }
+    @Test
+    fun `doesn't generate a telemetry event if not in progress`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
+
+      assertThat(indexStatusService.markRebuildComplete()).isFalse
+      verifyNoInteractions(telemetryClient)
     }
 
     @Test
@@ -60,6 +68,15 @@ class IndexStatusServiceTest {
 
       assertThat(indexStatusService.markRebuildComplete()).isTrue
     }
+
+    @Test
+    fun `generates a telemetry event if OK`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = false)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+
+      assertThat(indexStatusService.markRebuildComplete()).isTrue
+      verify(telemetryClient).trackEvent("POSIndexRebuildComplete", mapOf("indexName" to "prisoner-search-b"), null)
+    }
   }
 
   @Nested
@@ -75,6 +92,12 @@ class IndexStatusServiceTest {
       assertThat(indexStatusService.markRebuildStarting()).isFalse
     }
     @Test
+    fun `start index doesn't generate telemetry if there is an error`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
+      assertThat(indexStatusService.markRebuildStarting()).isFalse
+      verifyNoInteractions(telemetryClient)
+    }
+    @Test
     fun `start index rebuild fails if indexing already in progress`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = false)))
       assertThat(indexStatusService.markRebuildStarting()).isFalse
@@ -83,6 +106,12 @@ class IndexStatusServiceTest {
     fun `start index rebuild successfully completes`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
       assertThat(indexStatusService.markRebuildStarting()).isTrue
+    }
+    @Test
+    fun `start index rebuild generates telemetry if successful`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
+      assertThat(indexStatusService.markRebuildStarting()).isTrue
+      verify(telemetryClient).trackEvent("POSIndexRebuildStarting", mapOf("indexName" to "prisoner-search-a"), null)
     }
   }
 
@@ -130,6 +159,17 @@ class IndexStatusServiceTest {
     }
 
     @Test
+    fun `cancelling index creates a telemetry event`() {
+      val indexStatus = anIndexStatus(inProgress = true, inError = true)
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(indexStatus))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+
+      indexStatusService.cancelIndexing()
+
+      verify(telemetryClient).trackEvent("POSIndexRebuildCancelled", mapOf("indexName" to "prisoner-search-a"), null)
+    }
+
+    @Test
     fun `cancelling index does nothing if not in progress`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
       whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
@@ -140,6 +180,16 @@ class IndexStatusServiceTest {
       indexStatusService.cancelIndexing()
       assertThat(indexStatusService.getCurrentIndex().inProgress).isFalse
       assertThat(indexStatusService.getCurrentIndex().inError).isTrue
+    }
+
+    @Test
+    fun `cancelling index doesn't generate a telemetry event if not in progress`() {
+      whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
+      whenever(indexQueueService.getIndexQueueStatus()).thenReturn(IndexQueueStatus(0, 0, 0))
+
+      indexStatusService.cancelIndexing()
+
+      verifyNoInteractions(telemetryClient)
     }
   }
 }
