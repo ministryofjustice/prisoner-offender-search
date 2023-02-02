@@ -7,8 +7,10 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Agency
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalAttributes
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SentenceDetail
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -263,6 +265,7 @@ class TranslatorTest {
     assertThat(prisoner.dischargeDetails).isEqualTo("Getting worse")
     assertThat(prisoner.locationDescription).isEqualTo("OUT - discharged to Hazelwood Hospital")
   }
+
   @Test
   internal fun `restrictive patient data can be null`() {
     val prisoner = PrisonerA(
@@ -339,6 +342,34 @@ class TranslatorTest {
 
       assertThat(prisoner.currentIncentive).isNull()
     }
+  }
+
+  @Test
+  internal fun `Physical Attributes are mapped`() {
+    val prisoner = PrisonerA(
+      ob = aBooking().copy(
+        physicalAttributes = PhysicalAttributes(
+          gender = "M",
+          raceCode = "F",
+          ethnicity = "W",
+          heightFeet = 6,
+          heightInches = 7,
+          heightCentimetres = 200,
+          weightKilograms = 100,
+          weightPounds = 224,
+          heightMetres = BigDecimal.TEN,
+        )
+      ),
+      incentiveLevel = null,
+      restrictedPatientData = null
+    )
+    assertThat(prisoner.gender).isEqualTo("M")
+    assertThat(prisoner.ethnicity).isEqualTo("W")
+    assertThat(prisoner.heightFeet).isEqualTo(6)
+    assertThat(prisoner.heightInches).isEqualTo(7)
+    assertThat(prisoner.heightCentimetres).isEqualTo(200)
+    assertThat(prisoner.weightKilograms).isEqualTo(100)
+    assertThat(prisoner.weightPounds).isEqualTo(224)
   }
 }
 
