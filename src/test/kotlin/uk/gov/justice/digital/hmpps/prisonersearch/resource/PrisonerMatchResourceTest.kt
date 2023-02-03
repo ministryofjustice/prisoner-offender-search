@@ -1,35 +1,12 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.AbstractSearchDataIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import java.time.LocalDate
 
-class PrisonerMatchResourceTest : QueueIntegrationTest() {
-
-  companion object {
-    var initialiseSearchData = true
-  }
-
-  @BeforeEach
-  fun setup() {
-
-    if (initialiseSearchData) {
-
-      setupIndexes()
-      indexPrisoners()
-
-      webTestClient.put().uri("/prisoner-index/mark-complete")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .exchange()
-        .expectStatus().isOk
-
-      initialiseSearchData = false
-    }
-  }
-
+class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
 
