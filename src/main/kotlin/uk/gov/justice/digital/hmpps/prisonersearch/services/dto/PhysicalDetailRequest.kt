@@ -12,7 +12,7 @@ data class PhysicalDetailRequest(
 
   @Schema(
     description = "Minimum height of the prisoner in centimetres",
-    example = "198",
+    example = "170",
   )
   val minHeight: Int? = null,
 
@@ -21,6 +21,18 @@ data class PhysicalDetailRequest(
     example = "198",
   )
   val maxHeight: Int? = null,
+
+  @Schema(
+    description = "Minimum weight of the prisoner in kilograms",
+    example = "80",
+  )
+  val minWeight: Int? = null,
+
+  @Schema(
+    description = "Maximum weight of the prisoner in kilograms",
+    example = "90",
+  )
+  val maxWeight: Int? = null,
 
   @Schema(
     description = "Pagination options. Will default to the first page if omitted.",

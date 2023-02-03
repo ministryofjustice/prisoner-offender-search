@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -28,6 +29,7 @@ class PhysicalDetailResource(private val physicalDetailService: PhysicalDetailSe
   // A hack to allow swagger to determine the response schema with a generic content
   abstract class PhysicalDetailResponse : Page<Prisoner>
 
+  @Hidden
   @Operation(
     summary = "Physical details search for prisoners within a prison / group of prisons - returns a paginated result set",
     description = """

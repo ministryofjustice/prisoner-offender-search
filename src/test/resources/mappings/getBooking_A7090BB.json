@@ -33,7 +33,9 @@
         "heightFeet": 6,
         "heightInches": 7,
         "heightMetres": 2.00,
-        "heightCentimetres": 200
+        "heightCentimetres": 200,
+        "weightPounds": 176,
+        "weightKilograms": 80
       },
       "physicalCharacteristics": [
         {
