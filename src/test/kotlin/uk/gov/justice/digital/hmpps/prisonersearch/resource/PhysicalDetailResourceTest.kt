@@ -1,35 +1,14 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.AbstractSearchDataIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalDetailRequest
 
-class PhysicalDetailResourceTest : QueueIntegrationTest() {
-  private companion object {
-    private var initialiseSearchData = true
-  }
-
-  @BeforeEach
-  fun setup() {
-    if (initialiseSearchData) {
-
-      setupIndexes()
-      indexPrisoners()
-
-      webTestClient.put().uri("/prisoner-index/mark-complete")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .exchange()
-        .expectStatus().isOk
-
-      initialiseSearchData = false
-    }
-  }
-
+class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
     webTestClient.post().uri("/physical-detail")
@@ -88,6 +67,26 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `bad request when weights inverted`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minWeight = 100, maxWeight = 50, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+  }
+
+  @Test
+  fun `bad request when weights less than 0`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minWeight = -100, maxWeight = -200, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+  }
+
+  @Test
   fun `can perform a detail search for ROLE_GLOBAL_SEARCH role`() {
     webTestClient.post().uri("/physical-detail")
       .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))))
@@ -102,16 +101,6 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     webTestClient.post().uri("/physical-detail")
       .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))))
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isOk
-  }
-
-  @Test
-  fun `can perform a detail search for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
-    webTestClient.post().uri("/physical-detail")
-      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))))
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isOk
@@ -153,6 +142,30 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   fun `find by height range`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(minHeight = 100, maxHeight = 200, prisonIds = listOf("MDI")),
     expectedPrisoners = listOf("A7089EY", "A7090BB"),
+  )
+
+  @Test
+  fun `find by minimum weight`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minWeight = 70, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A1090AA", "A7090BB"),
+  )
+
+  @Test
+  fun `find by maximum weight`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(maxWeight = 100, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A1090AA", "A7089EY", "A7090BB"),
+  )
+
+  @Test
+  fun `find by exact weight`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minWeight = 100, maxWeight = 100, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A1090AA"),
+  )
+
+  @Test
+  fun `find by weight range`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minWeight = 80, maxWeight = 150, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A1090AA", "A7090BB"),
   )
 
   private fun physicalDetailSearch(

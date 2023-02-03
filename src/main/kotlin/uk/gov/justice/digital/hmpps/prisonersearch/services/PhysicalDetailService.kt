@@ -7,6 +7,8 @@ import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.boolQuery
+import org.elasticsearch.index.query.QueryBuilders.rangeQuery
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -40,14 +42,15 @@ class PhysicalDetailService(
     if (prisonIds.isNullOrEmpty()) {
       throw BadRequestException("Invalid physical detail search  - please provide prison locations to filter by")
     }
-    if ((minHeight ?: 0) < 0) {
-      throw BadRequestException("Minimum height cannot be less than 0")
-    }
-    if ((maxHeight ?: 0) < 0) {
-      throw BadRequestException("Minimum height cannot be less than 0")
-    }
+    if ((minHeight ?: 0) < 0) throw BadRequestException("Minimum height cannot be less than 0")
+    if ((maxHeight ?: 0) < 0) throw BadRequestException("Maximum height cannot be less than 0")
     if ((minHeight ?: 0) > (maxHeight ?: Int.MAX_VALUE)) {
       throw BadRequestException("Maximum height cannot be less than the minimum height")
+    }
+    if ((minWeight ?: 0) < 0) throw BadRequestException("Minimum weight cannot be less than 0")
+    if ((maxWeight ?: 0) < 0) throw BadRequestException("Maximum weight cannot be less than 0")
+    if ((minWeight ?: 0) > (maxWeight ?: Int.MAX_VALUE)) {
+      throw BadRequestException("Maximum weight cannot be less than the minimum weight")
     }
   }
 
@@ -86,17 +89,16 @@ class PhysicalDetailService(
   }
 
   private fun buildDetailQuery(detailRequest: PhysicalDetailRequest): BoolQueryBuilder {
-    val detailQuery = QueryBuilders.boolQuery()
+    val detailQuery = boolQuery()
 
     detailQuery.should(QueryBuilders.matchAllQuery())
 
     with(detailRequest) {
-      minHeight?.let {
-        detailQuery.must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery("heightCentimetres").gte(it)))
-      }
-      maxHeight?.let {
-        detailQuery.must(QueryBuilders.boolQuery().should(QueryBuilders.rangeQuery("heightCentimetres").lte(it)))
-      }
+      minHeight?.let { detailQuery.must(boolQuery().should(rangeQuery("heightCentimetres").gte(it))) }
+      maxHeight?.let { detailQuery.must(boolQuery().should(rangeQuery("heightCentimetres").lte(it))) }
+
+      minWeight?.let { detailQuery.must(boolQuery().should(rangeQuery("weightKilograms").gte(it))) }
+      maxWeight?.let { detailQuery.must(boolQuery().should(rangeQuery("weightKilograms").lte(it))) }
 
       // Filter by prison establishments provided
       prisonIds.takeIf { !it.isNullOrEmpty() && it[0].isNotBlank() }?.let {
@@ -142,6 +144,8 @@ class PhysicalDetailService(
       "clientId" to authenticationHolder.currentClientId(),
       "minHeight" to detailRequest.minHeight?.toString(),
       "maxHeight" to detailRequest.maxHeight?.toString(),
+      "minWeight" to detailRequest.minWeight?.toString(),
+      "maxWeight" to detailRequest.maxWeight?.toString(),
       "prisonIds" to detailRequest.prisonIds.toString(),
     )
     val metricsMap = mapOf(
