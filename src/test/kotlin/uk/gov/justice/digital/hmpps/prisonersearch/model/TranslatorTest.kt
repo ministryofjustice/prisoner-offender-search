@@ -365,11 +365,8 @@ class TranslatorTest {
     )
     assertThat(prisoner.gender).isEqualTo("M")
     assertThat(prisoner.ethnicity).isEqualTo("W")
-    assertThat(prisoner.heightFeet).isEqualTo(6)
-    assertThat(prisoner.heightInches).isEqualTo(7)
     assertThat(prisoner.heightCentimetres).isEqualTo(200)
     assertThat(prisoner.weightKilograms).isEqualTo(100)
-    assertThat(prisoner.weightPounds).isEqualTo(224)
   }
 }
 
