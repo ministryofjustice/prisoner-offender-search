@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.withinPercentage
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -10,32 +9,10 @@ import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.springframework.web.reactive.function.BodyInserters
-import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.AbstractSearchDataIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
 
-class RestrictedPatientsSearchResourceTest : QueueIntegrationTest() {
-
-  companion object {
-    var initialiseSearchData = true
-  }
-
-  @BeforeEach
-  fun setup() {
-
-    if (initialiseSearchData) {
-
-      setupIndexes()
-      indexPrisoners()
-
-      webTestClient.put().uri("/prisoner-index/mark-complete")
-        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-        .exchange()
-        .expectStatus().isOk
-
-      initialiseSearchData = false
-    }
-  }
-
+class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest() {
   @Nested
   inner class Authorisation {
     @Test
