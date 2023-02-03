@@ -1,0 +1,176 @@
+package uk.gov.justice.digital.hmpps.prisonersearch.resource
+
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.web.reactive.function.BodyInserters
+import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalDetailRequest
+
+class PhysicalDetailResourceTest : QueueIntegrationTest() {
+  private companion object {
+    private var initialiseSearchData = true
+  }
+
+  @BeforeEach
+  fun setup() {
+    if (initialiseSearchData) {
+
+      setupIndexes()
+      indexPrisoners()
+
+      webTestClient.put().uri("/prisoner-index/mark-complete")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+        .exchange()
+        .expectStatus().isOk
+
+      initialiseSearchData = false
+    }
+  }
+
+  @Test
+  fun `access forbidden when no authority`() {
+    webTestClient.post().uri("/physical-detail")
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isUnauthorized
+  }
+
+  @Test
+  fun `access forbidden when no role`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(
+        BodyInserters.fromValue(
+          gson.toJson(
+            PhysicalDetailRequest(
+              minHeight = 100,
+              prisonIds = listOf("LEI", "MDI")
+            )
+          )
+        )
+      )
+      .headers(setAuthorisation())
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `bad request when no filtering prison IDs provided`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = emptyList()))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+  }
+
+  @Test
+  fun `bad request when heights less than 0`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = -100, maxHeight = -200, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+  }
+
+  @Test
+  fun `bad request when heights inverted`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, maxHeight = 50, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+  }
+
+  @Test
+  fun `can perform a detail search for ROLE_GLOBAL_SEARCH role`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a detail search for ROLE_PRISONER_SEARCH role`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `can perform a detail search for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+  }
+
+  @Test
+  fun `will page the results - first page limited to size`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI", "LEI"), pagination = PaginationRequest(0, 2)),
+    expectedPrisoners = listOf("A1090AA", "A7089EY"),
+    numberOfElements = 5,
+  )
+
+  @Test
+  fun `will page the results - second page shows remaining prisoners`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI", "LEI"), pagination = PaginationRequest(1, 2)),
+    expectedPrisoners = listOf("A7089EZ", "A7090BA"),
+    numberOfElements = 5,
+  )
+
+  @Test
+  fun `find by minimum height`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A1090AA", "A7089EY", "A7090BB"),
+  )
+
+  @Test
+  fun `find by maximum height`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(maxHeight = 200, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A7089EY", "A7090BB"),
+  )
+
+  @Test
+  fun `find by exact height`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 200, maxHeight = 200, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A7090BB"),
+  )
+
+  @Test
+  fun `find by height range`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, maxHeight = 200, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A7089EY", "A7090BB"),
+  )
+
+  private fun physicalDetailSearch(
+    detailRequest: PhysicalDetailRequest,
+    numberOfElements: Int = 0,
+    expectedPrisoners: List<String> = emptyList(),
+  ) {
+    val response = webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(detailRequest)))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isOk
+      .expectBody(RestResponsePage::class.java)
+      .returnResult().responseBody
+
+    assertThat(response.content).extracting("prisonerNumber").containsExactlyElementsOf(expectedPrisoners)
+    assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
+    assertThat(response.numberOfElements).isEqualTo(expectedPrisoners.size)
+  }
+}
