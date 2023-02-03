@@ -40,7 +40,10 @@ class PhysicalDetailService(
 
   private fun validateDetailRequest(detailRequest: PhysicalDetailRequest): Unit = with(detailRequest) {
     if (prisonIds.isNullOrEmpty()) {
-      throw BadRequestException("Invalid physical detail search  - please provide prison locations to filter by")
+      throw BadRequestException("Please provide prison locations to filter by")
+    }
+    if (!cellLocationPrefix.isNullOrEmpty() && prisonIds.size > 1) {
+      throw BadRequestException("Cell location prefix can only be used for when searching in one prison")
     }
     if ((minHeight ?: 0) < 0) throw BadRequestException("Minimum height cannot be less than 0")
     if ((maxHeight ?: 0) < 0) throw BadRequestException("Maximum height cannot be less than 0")
@@ -104,6 +107,11 @@ class PhysicalDetailService(
       prisonIds.takeIf { !it.isNullOrEmpty() && it[0].isNotBlank() }?.let {
         detailQuery.filterWhenPresent("prisonId", it)
       }
+
+      val singlePrisonId = prisonIds?.singleOrNull()
+      // if specified single prison then restrict to cell location
+      cellLocationPrefix.takeIf { singlePrisonId != null }?.removePrefix("$singlePrisonId-")
+        ?.let { detailQuery.filter(QueryBuilders.prefixQuery("cellLocation.keyword", it)) }
     }
 
     return detailQuery
@@ -142,6 +150,7 @@ class PhysicalDetailService(
     val propertiesMap = mapOf(
       "username" to authenticationHolder.currentUsername(),
       "clientId" to authenticationHolder.currentClientId(),
+      "cellLocationPrefix" to detailRequest.cellLocationPrefix,
       "minHeight" to detailRequest.minHeight?.toString(),
       "maxHeight" to detailRequest.maxHeight?.toString(),
       "minWeight" to detailRequest.minWeight?.toString(),

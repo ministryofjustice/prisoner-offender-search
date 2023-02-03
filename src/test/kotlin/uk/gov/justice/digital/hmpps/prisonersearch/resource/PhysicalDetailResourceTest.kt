@@ -47,6 +47,16 @@ class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
   }
 
   @Test
+  fun `bad request when multiple prisons and cell location prefix supplied`() {
+    webTestClient.post().uri("/physical-detail")
+      .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI", "LEI"), cellLocationPrefix = "ABC-1"))))
+      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+      .header("Content-Type", "application/json")
+      .exchange()
+      .expectStatus().isBadRequest
+  }
+
+  @Test
   fun `bad request when heights less than 0`() {
     webTestClient.post().uri("/physical-detail")
       .body(BodyInserters.fromValue(gson.toJson(PhysicalDetailRequest(minHeight = -100, maxHeight = -200, prisonIds = listOf("MDI")))))
@@ -141,6 +151,18 @@ class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `find by height range`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(minHeight = 100, maxHeight = 200, prisonIds = listOf("MDI")),
+    expectedPrisoners = listOf("A7089EY", "A7090BB"),
+  )
+
+  @Test
+  fun `find by cell location with prison prefix`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "MDI-A"),
+    expectedPrisoners = listOf("A7089EY", "A7090BB"),
+  )
+
+  @Test
+  fun `find by cell location without prison prefix`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "A"),
     expectedPrisoners = listOf("A7089EY", "A7090BB"),
   )
 
