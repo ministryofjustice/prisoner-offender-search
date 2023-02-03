@@ -1,0 +1,13 @@
+{
+  "priority": 2147483647,
+  "request": {
+    "method": "GET",
+    "urlPattern": "/api/offenders/.*"
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
