@@ -29,7 +29,11 @@
         "gender": "Male",
         "raceCode": "W1",
         "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
-        "sexCode": "M"
+        "sexCode": "M",
+        "heightFeet": 6,
+        "heightInches": 7,
+        "heightMetres": 2.00,
+        "heightCentimetres": 200
       },
       "physicalCharacteristics": [
         {

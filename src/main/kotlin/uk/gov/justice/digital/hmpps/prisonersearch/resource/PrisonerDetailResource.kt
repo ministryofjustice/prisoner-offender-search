@@ -6,8 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -27,10 +25,6 @@ import javax.validation.Valid
 @RequestMapping(value = ["/prisoner-detail"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
 class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailService) {
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
-  }
-
   // A hack to allow swagger to determine the response schema with a generic content
   abstract class PrisonerDetailResponse : Page<Prisoner>
 
@@ -52,7 +46,6 @@ class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailSe
         )
       ]
     ),
-
     responses = [
       ApiResponse(
         responseCode = "200",

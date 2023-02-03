@@ -33,12 +33,11 @@ class PrisonerDetailService(
   @Value("\${search.detailed.timeout-seconds}") private val searchTimeoutSeconds: Long = 10L,
 ) {
   companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
   private fun validateDetailRequest(detailRequest: PrisonerDetailRequest) {
     if (detailRequest.prisonIds.isNullOrEmpty()) {
-      log.warn("Invalid prisoner detail search  - no prisonIds specified to filter by")
       throw BadRequestException("Invalid prisoner detail search  - please provide prison locations to filter by")
     }
   }
@@ -58,7 +57,7 @@ class PrisonerDetailService(
       customEventForFindBySearchCriteria(detailRequest, searchResponse.hits.totalHits?.value ?: 0)
       createDetailResponse(detailRequest.pagination, searchResponse)
     } catch (e: Throwable) {
-      log.error("Elastic search exception: $e")
+      log.error("Elastic search exception", e)
       createEmptyDetailResponse(detailRequest.pagination)
     }
   }

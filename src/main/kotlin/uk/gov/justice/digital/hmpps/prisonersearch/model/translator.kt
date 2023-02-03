@@ -50,10 +50,7 @@ fun Prisoner.translate(existingPrisoner: Prisoner?, ob: OffenderBooking, incenti
 
   this.gender = ob.physicalAttributes?.gender
   this.ethnicity = ob.physicalAttributes?.ethnicity
-  this.heightFeet = ob.physicalAttributes?.heightFeet
-  this.heightInches = ob.physicalAttributes?.heightInches
   this.heightCentimetres = ob.physicalAttributes?.heightCentimetres
-  this.weightPounds = ob.physicalAttributes?.weightPounds
   this.weightKilograms = ob.physicalAttributes?.weightKilograms
   this.nationality = ob.profileInformation?.firstOrNull { p -> p.type == "NAT" }?.resultValue
   this.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue

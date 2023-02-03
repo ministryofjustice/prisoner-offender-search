@@ -43,7 +43,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
-import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.Duration
 import java.time.LocalDate
@@ -241,25 +240,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   ) {
     val response = webTestClient.post().uri("/keyword")
       .body(BodyInserters.fromValue(gson.toJson(keywordRequest)))
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isOk
-      .expectBody(RestResponsePage::class.java)
-      .returnResult().responseBody
-
-    assertThat(response.numberOfElements).isEqualTo(expectedCount)
-    assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
-    assertThat(response.content).extracting("prisonerNumber").containsAll(expectedPrisoners)
-  }
-
-  fun detailSearch(
-    detailRequest: PrisonerDetailRequest,
-    expectedCount: Int = 0,
-    expectedPrisoners: List<String> = emptyList(),
-  ) {
-    val response = webTestClient.post().uri("/prisoner-detail")
-      .body(BodyInserters.fromValue(gson.toJson(detailRequest)))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()

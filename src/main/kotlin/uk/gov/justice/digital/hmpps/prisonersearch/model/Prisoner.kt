@@ -320,21 +320,9 @@ open class Prisoner : Diffable<Prisoner> {
   @DiffableProperty(DiffCategory.INCENTIVE_LEVEL)
   var currentIncentive: CurrentIncentive? = null
 
-  @Schema(description = "Height in feet of the offender", example = "6")
-  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
-  var heightFeet: Int? = null
-
-  @Schema(description = "Height in inches of the offender", example = "7")
-  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
-  var heightInches: Int? = null
-
   @Schema(description = "Height in centimetres of the offender", example = "200")
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var heightCentimetres: Int? = null
-
-  @Schema(description = "Weight in pounds of the offender", example = "224")
-  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
-  var weightPounds: Int? = null
 
   @Schema(description = "Weight in kilograms of the offender", example = "102")
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
