@@ -11,6 +11,12 @@ data class PhysicalDetailRequest(
   val prisonIds: List<String>? = emptyList(),
 
   @Schema(
+    description = "Filter for the prisoners cell location. A block wing or cell can be specified. With prison id can be included or absent so HEI-3-1 and 3-1 are equivalent when the prison id is HEI",
+    example = "3-1",
+  )
+  val cellLocationPrefix: String? = null,
+
+  @Schema(
     description = "Minimum height of the prisoner in centimetres",
     example = "170",
   )
