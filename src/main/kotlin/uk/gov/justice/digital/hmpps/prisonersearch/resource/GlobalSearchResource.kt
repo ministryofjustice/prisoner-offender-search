@@ -81,8 +81,7 @@ class GlobalSearchResource(
         "timeMs" to (mid - start).toString(),
         "totalNomis" to totalNomisNumber.toString(),
         "totalIndex" to totalIndexNumber.toString(),
-        "totalNumbertimeMs" to (end - mid).toString(),
-        "matches" to (totalNomisNumber == totalIndexNumber).toString(),
+        "totalNumberTimeMs" to (end - mid).toString(),
       ),
       null
     )

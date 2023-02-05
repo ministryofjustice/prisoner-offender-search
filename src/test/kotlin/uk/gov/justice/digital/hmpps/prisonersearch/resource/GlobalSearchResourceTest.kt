@@ -508,7 +508,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
           assertThat(it["timeMs"]?.toInt()).isGreaterThan(0)
           assertThat(it["totalNomis"]?.toInt()).isEqualTo(25)
           assertThat(it["totalIndex"]?.toInt()).isEqualTo(25)
-          assertThat(it["totalNumbertimeMs"]?.toInt()).isGreaterThan(0)
+          assertThat(it["totalNumberTimeMs"]?.toInt()).isGreaterThan(0)
         },
         isNull()
       )
