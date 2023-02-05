@@ -265,6 +265,8 @@ class PrisonerIndexService(
   fun OffenderBooking.getIncentiveLevel(): IncentiveLevel? =
     this.bookingId?.let { bookingId -> incentivesService.getCurrentIncentive(bookingId) }
 
+  fun getTotalNomisNumber(): Int = nomisService.getOffendersIds(0, 1).totalRows.toInt()
+
   private fun saveToRepository(currentIndexStatus: IndexStatus, prisonerA: PrisonerA, prisonerB: PrisonerB): Prisoner =
     if (currentIndexStatus.currentIndex == SyncIndex.INDEX_A) {
       prisonerARepository.save(prisonerA)
