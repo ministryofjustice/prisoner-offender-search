@@ -175,7 +175,7 @@ open class Prisoner : Diffable<Prisoner> {
   @DiffableProperty(DiffCategory.STATUS)
   var recall: Boolean? = null
 
-  @Schema(description = "Indicates the the offender has an indeterminate sentence", example = "true")
+  @Schema(description = "Indicates that the offender has an indeterminate sentence", example = "true")
   @DiffableProperty(DiffCategory.SENTENCE)
   var indeterminateSentence: Boolean? = null
 

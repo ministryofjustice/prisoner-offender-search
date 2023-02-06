@@ -1,12 +1,12 @@
 version: "3"
 services:
   localstack:
-    image: localstack/localstack:1.2.0
+    image: localstack/localstack:1.3
     networks:
       - hmpps
-    container_name: localstack
+    container_name: pos-localstack
     ports:
-      - "4566-4597:4566-4597"
+      - "4566:4566"
       - "8999:8080"
     restart: unless-stopped
     environment:

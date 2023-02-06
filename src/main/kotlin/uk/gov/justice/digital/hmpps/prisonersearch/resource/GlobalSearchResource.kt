@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexStatusService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.NotFoundException
 
@@ -26,6 +27,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.NotFoundE
 class GlobalSearchResource(
   private val globalSearchService: GlobalSearchService,
   private val prisonerIndexService: PrisonerIndexService,
+  private val indexStatusService: IndexStatusService,
   private val telemetryClient: TelemetryClient
 ) {
 
@@ -67,6 +69,21 @@ class GlobalSearchResource(
       ),
       PageRequest.of(0, 10)
     )
-    telemetryClient.trackEvent("synthetic-monitor", mapOf("results" to "${results.totalElements}", "timeMs" to (System.currentTimeMillis() - start).toString()), null)
+    val mid = System.currentTimeMillis()
+    val totalNomisNumber = prisonerIndexService.getTotalNomisNumber()
+    val totalIndexNumber = prisonerIndexService.countIndex(indexStatusService.getCurrentIndex().currentIndex)
+    val end = System.currentTimeMillis()
+
+    telemetryClient.trackEvent(
+      "synthetic-monitor",
+      mapOf(
+        "results" to "${results.totalElements}",
+        "timeMs" to (mid - start).toString(),
+        "totalNomis" to totalNomisNumber.toString(),
+        "totalIndex" to totalIndexNumber.toString(),
+        "totalNumberTimeMs" to (end - mid).toString(),
+      ),
+      null
+    )
   }
 }

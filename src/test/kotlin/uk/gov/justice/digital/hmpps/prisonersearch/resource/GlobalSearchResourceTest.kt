@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -499,11 +501,41 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      verify(telemetryClient).trackEvent(
+      verify(telemetryClient, atLeastOnce()).trackEvent(
         eq("synthetic-monitor"),
         check<Map<String, String>> {
-          assertThat(it["results"]).containsOnlyDigits()
-          assertThat(it["timeMs"]).containsOnlyDigits()
+          assertThat(it["results"]?.toInt()).isEqualTo(1)
+          assertThat(it["timeMs"]?.toInt()).isGreaterThan(0)
+          assertThat(it["totalNomis"]?.toInt()).isEqualTo(25)
+          assertThat(it["totalIndex"]?.toInt()).isEqualTo(25)
+          assertThat(it["totalNumberTimeMs"]?.toInt()).isGreaterThan(0)
+        },
+        isNull()
+      )
+    }
+
+    @Test
+    fun `Index discrepancy is detected`() {
+      prisonMockServer.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/api/offenders/ids"))
+          .willReturn(
+            WireMock.aResponse()
+              .withHeader("Content-Type", "application/json")
+              .withHeader("Total-Records", "26") // Now there is another prisoner in Nomis but not the index
+              .withBody("[]")
+          )
+      )
+
+      webTestClient.get().uri("/synthetic-monitor")
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isOk
+
+      verify(telemetryClient, atLeastOnce()).trackEvent(
+        eq("synthetic-monitor"),
+        check<Map<String, String>> {
+          assertThat(it["totalNomis"]?.toInt()).isEqualTo(26)
+          assertThat(it["totalIndex"]?.toInt()).isEqualTo(25)
         },
         isNull()
       )
