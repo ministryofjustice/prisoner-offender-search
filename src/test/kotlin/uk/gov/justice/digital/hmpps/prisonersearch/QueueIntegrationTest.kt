@@ -38,10 +38,12 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alias
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.AssignedLivingUnit
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalAttributes
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.Duration
@@ -136,7 +138,8 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
   fun loadPrisoners(prisoner: List<PrisonerBuilder>) {
     setupIndexes()
-    val prisonerNumbers = prisoner.map { it.prisonerNumber }.toList()
+    val prisonerNumbers = prisoner.map { it.prisonerNumber }
+    assertThat(prisonerNumbers.groupingBy { it }.eachCount().filter { it.value != 1 }).hasSize(0)
     prisonMockServer.stubFor(
       WireMock.get(urlEqualTo("/api/offenders/ids"))
         .willReturn(
@@ -195,6 +198,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   fun search(searchCriteria: SearchCriteria, fileAssert: String) {
     search(searchCriteria).json(fileAssert.readResourceAsText())
   }
+
   fun search(searchCriteria: SearchCriteria): WebTestClient.BodyContentSpec =
     webTestClient.post().uri("/prisoner-search/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(searchCriteria)))
@@ -349,51 +353,74 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     return gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
   }
 
-  fun PrisonerBuilder.toOffenderBooking(): String {
-    return gson.toJson(
-      getOffenderBookingTemplate().copy(
-        offenderNo = this.prisonerNumber,
-        firstName = this.firstName,
-        lastName = this.lastName,
+  fun PrisonerBuilder.toOffenderBooking(): String = gson.toJson(
+    getOffenderBookingTemplate().copy(
+      offenderNo = this.prisonerNumber,
+      firstName = this.firstName,
+      lastName = this.lastName,
+      agencyId = this.agencyId,
+      dateOfBirth = LocalDate.parse(this.dateOfBirth),
+      physicalAttributes = PhysicalAttributes(
+        gender = this.gender,
+        raceCode = null,
+        ethnicity = this.ethnicity,
+        heightFeet = null,
+        heightInches = null,
+        heightMetres = null,
+        heightCentimetres = this.heightCentimetres,
+        weightPounds = null,
+        weightKilograms = this.weightKilograms,
+      ),
+      assignedLivingUnit = AssignedLivingUnit(
         agencyId = this.agencyId,
-        dateOfBirth = LocalDate.parse(this.dateOfBirth),
-        assignedLivingUnit = AssignedLivingUnit(
-          agencyId = this.agencyId,
-          locationId = Random.nextLong(),
-          description = this.cellLocation,
-          agencyName = "$agencyId (HMP)"
-        ),
-        alerts = this.alertCodes.map { (type, code) ->
-          Alert(
-            alertId = Random.nextLong(),
-            offenderNo = this.prisonerNumber,
-            alertCode = code,
-            alertCodeDescription = "Code description for $code",
-            alertType = type,
-            alertTypeDescription = "Type Description for $type",
-            expired = false, // In search all alerts are not expired and active
-            active = true,
-            dateCreated = LocalDate.now(),
-          )
-        },
-      ).let {
-        if (released) {
-          it.copy(
-            status = "INACTIVE OUT",
-            lastMovementTypeCode = "REL",
-            lastMovementReasonCode = "HP",
-            inOutStatus = "OUT",
-            agencyId = "OUT",
-          )
-        } else {
-          it.copy(
-            lastMovementTypeCode = "ADM",
-            lastMovementReasonCode = "I",
-          )
-        }
+        locationId = Random.nextLong(),
+        description = this.cellLocation,
+        agencyName = "$agencyId (HMP)"
+      ),
+      alerts = this.alertCodes.map { (type, code) ->
+        Alert(
+          alertId = Random.nextLong(),
+          offenderNo = this.prisonerNumber,
+          alertCode = code,
+          alertCodeDescription = "Code description for $code",
+          alertType = type,
+          alertTypeDescription = "Type Description for $type",
+          expired = false, // In search all alerts are not expired and active
+          active = true,
+          dateCreated = LocalDate.now(),
+        )
+      },
+      aliases = this.aliases.map { a ->
+        Alias(
+          gender = a.gender,
+          ethnicity = a.ethnicity,
+          firstName = this.firstName,
+          middleName = null,
+          lastName = this.lastName,
+          age = null,
+          dob = LocalDate.parse(this.dateOfBirth),
+          nameType = null,
+          createDate = LocalDate.now(),
+        )
       }
-    )
-  }
+    ).let {
+      if (released) {
+        it.copy(
+          status = "INACTIVE OUT",
+          lastMovementTypeCode = "REL",
+          lastMovementReasonCode = "HP",
+          inOutStatus = "OUT",
+          agencyId = "OUT",
+        )
+      } else {
+        it.copy(
+          lastMovementTypeCode = "ADM",
+          lastMovementReasonCode = "I",
+        )
+      }
+    }
+  )
+
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
@@ -408,9 +435,19 @@ data class PrisonerBuilder(
   val alertCodes: List<Pair<String, String>> = listOf(),
   val dateOfBirth: String = "1965-07-19",
   val cellLocation: String = "A-1-1",
+  val heightCentimetres: Int? = null,
+  val weightKilograms: Int? = null,
+  val gender: String? = null,
+  val ethnicity: String? = null,
+  val aliases: List<AliasBuilder> = listOf(),
 )
 
-fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this).readText()
+data class AliasBuilder(
+  val gender: String? = null,
+  val ethnicity: String? = null,
+)
+
+fun String.readResourceAsText(): String = QueueIntegrationTest::class.java.getResource(this)!!.readText()
 
 fun generatePrisonerNumber(): String {
   // generate random string starting with a letter, followed by 4 numbers and 2 letters

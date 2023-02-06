@@ -105,7 +105,7 @@
       "physicalAttributes": {
         "gender": "Male",
         "raceCode": "W1",
-        "ethnicity": "Prefer not to say",
+        "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
         "heightFeet": 6,
         "heightInches": 2,
         "heightMetres": 1.88,
@@ -456,7 +456,7 @@
           "age": 29,
           "dob": "1990-08-15",
           "gender": "Male",
-          "ethnicity": "White: Any other background",
+          "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
           "nameType": "Alias Name",
           "createDate": "2011-06-02"
         },

@@ -3,15 +3,64 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.prisonersearch.AbstractSearchDataIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.AliasBuilder
+import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
+import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalDetailRequest
 
-class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
-  // setup is done by the parent class, setting up the standard set of search data from wiremock mappings files
+class PhysicalDetailResourceTest : QueueIntegrationTest() {
+  private companion object {
+    private var initialiseSearchData = true
+  }
+
+  @BeforeEach
+  fun loadPrisoners() {
+    if (initialiseSearchData) {
+      listOf(
+        // height / weight test data
+        PrisonerBuilder(
+          prisonerNumber = "H1090AA", agencyId = "MDI", cellLocation = "H-1-004", heightCentimetres = 202, weightKilograms = 100,
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "H7089EY", agencyId = "MDI", cellLocation = "A-1-001", heightCentimetres = 165, weightKilograms = 57,
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "H7089EZ", agencyId = "LEI", cellLocation = "B-C1-010", heightCentimetres = 188, weightKilograms = 99,
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "H7090BA", agencyId = "LEI", cellLocation = "B-C1-010", heightCentimetres = 200, weightKilograms = 99,
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "H7090BB", agencyId = "MDI", cellLocation = "A-1-003", heightCentimetres = 200, weightKilograms = 80,
+        ),
+
+        // gender / ethnicity test data
+        PrisonerBuilder(
+          prisonerNumber = "G7089EZ", agencyId = "LEI", cellLocation = "B-C1-010", gender = "Male",
+          aliases = listOf(AliasBuilder(gender = "Not Known / Not Recorded"))
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "G7090AC", agencyId = "AGI", cellLocation = "H-1-004", gender = "Female", ethnicity = "White: Any other background",
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "G7090AD", agencyId = "AGI", cellLocation = "H-1-004", gender = "Not Known / Not Recorded",
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "G7090BA", agencyId = "LEI", cellLocation = "B-C1-010", ethnicity = "Prefer not to say",
+          aliases = listOf(AliasBuilder(ethnicity = "White: Any other background"))
+        ),
+        PrisonerBuilder(
+          prisonerNumber = "G7090BC", agencyId = "AGI", cellLocation = "H-1-004", gender = "Female", ethnicity = "Prefer not to say",
+        ),
+      ).apply { loadPrisoners(this) }
+      initialiseSearchData = false
+    }
+  }
 
   @Test
   fun `access forbidden when no authority`() {
@@ -128,7 +177,7 @@ class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
     detailRequest = PhysicalDetailRequest(
       minHeight = 100, prisonIds = listOf("MDI", "LEI"), pagination = PaginationRequest(0, 2)
     ),
-    expectedPrisoners = listOf("A1090AA", "A7089EY"),
+    expectedPrisoners = listOf("H1090AA", "H7089EY"),
   )
 
   @Test
@@ -138,100 +187,90 @@ class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
       prisonIds = listOf("MDI", "LEI"),
       pagination = PaginationRequest(1, 2)
     ),
-    expectedPrisoners = listOf("A7089EZ", "A7090BA"),
+    expectedPrisoners = listOf("H7089EZ", "H7090BA"),
   )
 
   @Nested
   inner class `height and weight tests`() {
-    // getBooking_A1090AA.json: location: MDI-H-1-004,  heightCentimetres: 202, weightKilograms: 100
-    // getBooking_A7089EY.json: location: MDI-A-1-001,  heightCentimetres: 165, weightKilograms: 57
-    // getBooking_A7089EZ.json: location: LEI-B-C1-010, heightCentimetres: 188, weightKilograms: 99
-    // getBooking_A7090BA.json: location: LEI-B-C1-010, heightCentimetres: 188, weightKilograms: 99
-    // getBooking_A7090BB.json: location: MDI-A-1-003,  heightCentimetres: 200, weightKilograms: 80
     @Test
     fun `find by minimum height`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(minHeight = 170, prisonIds = listOf("MDI")),
-      expectedPrisoners = listOf("A1090AA", "A7090BB"),
+      expectedPrisoners = listOf("H1090AA", "H7090BB"),
     )
 
     @Test
     fun `find by maximum height`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(maxHeight = 200, prisonIds = listOf("MDI")),
-      expectedPrisoners = listOf("A7089EY", "A7090BB"),
+      expectedPrisoners = listOf("H7089EY", "H7090BB"),
     )
 
     @Test
     fun `find by exact height`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(minHeight = 200, maxHeight = 200, prisonIds = listOf("MDI")),
-      expectedPrisoners = listOf("A7090BB"),
+      expectedPrisoners = listOf("H7090BB"),
     )
 
     @Test
     fun `find by height range`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(minHeight = 100, maxHeight = 200, prisonIds = listOf("MDI")),
-      expectedPrisoners = listOf("A7089EY", "A7090BB"),
+      expectedPrisoners = listOf("H7089EY", "H7090BB"),
     )
 
     @Test
     fun `find by cell location with prison prefix`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "MDI-A"),
-      expectedPrisoners = listOf("A7089EY", "A7090BB"),
+      expectedPrisoners = listOf("H7089EY", "H7090BB"),
     )
   }
 
   @Test
   fun `find by cell location without prison prefix`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "A"),
-    expectedPrisoners = listOf("A7089EY", "A7090BB"),
+    expectedPrisoners = listOf("H7089EY", "H7090BB"),
   )
 
   @Test
   fun `find by minimum weight`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(minWeight = 70, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("A1090AA", "A7090BB"),
+    expectedPrisoners = listOf("H1090AA", "H7090BB"),
   )
 
   @Test
   fun `find by maximum weight`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(maxWeight = 100, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("A1090AA", "A7089EY", "A7090BB"),
+    expectedPrisoners = listOf("H1090AA", "H7089EY", "H7090BB"),
   )
 
   @Test
   fun `find by exact weight`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(minWeight = 100, maxWeight = 100, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("A1090AA"),
+    expectedPrisoners = listOf("H1090AA"),
   )
 
   @Test
   fun `find by weight range`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(minWeight = 80, maxWeight = 150, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("A1090AA", "A7090BB"),
+    expectedPrisoners = listOf("H1090AA", "H7090BB"),
   )
 
   @Nested
-  inner class `gender and ethnicity tests`() {
-    // getBooking_A7089EZ.json: location: LEI-B-C1-010, alias gender: "Not Known / Not Recorded"
-    // getBooking_A7090AC.json: location: AGI-H-1-004,  ethnicity: "White: Any other background"
-    // getBooking_A7090AD.json: location: AGI-H-1-004,  gender: "Not Known / Not Recorded"
-    // getBooking_A7090BA.json: location: LEI-B-C1-010, ethnicity: "Prefer not to say", alias ethnicity: "White: Any other background"
-    // getBooking_A7090BC.json: location: AGI-H-1-004,  ethnicity: "Prefer not to say"
+  inner class `gender and ethnicity tests` {
     @Test
     fun `find by gender`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(gender = "Female", prisonIds = listOf("AGI")),
-      expectedPrisoners = listOf("A7090AC", "A7090BC"),
+      expectedPrisoners = listOf("G7090AC", "G7090BC"),
     )
 
     @Test
     fun `find by gender includes aliases`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(gender = "Not Known / Not Recorded", prisonIds = listOf("AGI", "LEI")),
-      expectedPrisoners = listOf("A7089EZ", "A7090AD"),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD"),
     )
 
     @Test
     fun `find by ethnicity`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(ethnicity = "Prefer not to say", prisonIds = listOf("AGI", "LEI")),
-      expectedPrisoners = listOf("A7090BA", "A7090BC"),
+      expectedPrisoners = listOf("G7090BA", "G7090BC"),
     )
 
     @Test
@@ -240,7 +279,7 @@ class PhysicalDetailResourceTest : AbstractSearchDataIntegrationTest() {
         ethnicity = "White: Any other background",
         prisonIds = listOf("AGI", "LEI")
       ),
-      expectedPrisoners = listOf("A7090AC", "A7090BA"),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
     )
   }
 
