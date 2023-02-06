@@ -92,26 +92,42 @@ class PhysicalDetailService(
   }
 
   private fun buildDetailQuery(detailRequest: PhysicalDetailRequest): BoolQueryBuilder {
-    val detailQuery = boolQuery()
-
-    detailQuery.should(QueryBuilders.matchAllQuery())
+    val detailQuery = boolQuery().also {
+      it.should(QueryBuilders.matchAllQuery())
+    }
 
     with(detailRequest) {
-      minHeight?.let { detailQuery.must(boolQuery().should(rangeQuery("heightCentimetres").gte(it))) }
-      maxHeight?.let { detailQuery.must(boolQuery().should(rangeQuery("heightCentimetres").lte(it))) }
-
-      minWeight?.let { detailQuery.must(boolQuery().should(rangeQuery("weightKilograms").gte(it))) }
-      maxWeight?.let { detailQuery.must(boolQuery().should(rangeQuery("weightKilograms").lte(it))) }
-
       // Filter by prison establishments provided
       prisonIds.takeIf { !it.isNullOrEmpty() && it[0].isNotBlank() }?.let {
         detailQuery.filterWhenPresent("prisonId", it)
       }
 
+      // and restrict to single cell location prefix
       val singlePrisonId = prisonIds?.singleOrNull()
       // if specified single prison then restrict to cell location
       cellLocationPrefix.takeIf { singlePrisonId != null }?.removePrefix("$singlePrisonId-")
         ?.let { detailQuery.filter(QueryBuilders.prefixQuery("cellLocation.keyword", it)) }
+
+      gender?.let {
+        detailQuery.filter(
+          boolQuery()
+            .should(QueryBuilders.matchQuery("gender", it))
+            .should(QueryBuilders.matchQuery("aliases.gender", it))
+        )
+      }
+      ethnicity?.let {
+        detailQuery.filter(
+          boolQuery()
+            .should(QueryBuilders.matchPhraseQuery("ethnicity", it))
+            .should(QueryBuilders.matchPhraseQuery("aliases.ethnicity", it))
+        )
+      }
+
+      minHeight?.let { detailQuery.filter(rangeQuery("heightCentimetres").gte(it)) }
+      maxHeight?.let { detailQuery.filter(rangeQuery("heightCentimetres").lte(it)) }
+
+      minWeight?.let { detailQuery.filter(rangeQuery("weightKilograms").gte(it)) }
+      maxWeight?.let { detailQuery.filter(rangeQuery("weightKilograms").lte(it)) }
     }
 
     return detailQuery
