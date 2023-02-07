@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.AliasBuilder
+import uk.gov.justice.digital.hmpps.prisonersearch.PhysicalCharacteristicBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
@@ -39,23 +40,72 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
           prisonerNumber = "H7090BB", agencyId = "MDI", cellLocation = "A-1-003", heightCentimetres = 200, weightKilograms = 80,
         ),
 
-        // gender / ethnicity test data
         PrisonerBuilder(
           prisonerNumber = "G7089EZ", agencyId = "LEI", cellLocation = "B-C1-010", gender = "Male",
-          aliases = listOf(AliasBuilder(gender = "Not Known / Not Recorded"))
+          aliases = listOf(AliasBuilder(gender = "Not Known / Not Recorded")),
+          physicalCharacteristics = PhysicalCharacteristicBuilder(
+            hairColour = "Red",
+            rightEyeColour = "Green",
+            leftEyeColour = "Hazel",
+            facialHair = "Clean Shaven",
+            shapeOfFace = "Round",
+            build = "Proportional"
+          ),
         ),
         PrisonerBuilder(
-          prisonerNumber = "G7090AC", agencyId = "AGI", cellLocation = "H-1-004", gender = "Female", ethnicity = "White: Any other background",
+          prisonerNumber = "G7090AC",
+          agencyId = "AGI",
+          cellLocation = "H-1-004",
+          gender = "Female",
+          ethnicity = "White: Any other background",
+          physicalCharacteristics = PhysicalCharacteristicBuilder(
+            hairColour = "Balding",
+            rightEyeColour = "Clouded",
+            leftEyeColour = "Brown",
+            facialHair = "Goatee Beard",
+            shapeOfFace = "Bullet",
+            build = "Obese"
+          ),
         ),
         PrisonerBuilder(
           prisonerNumber = "G7090AD", agencyId = "AGI", cellLocation = "H-1-004", gender = "Not Known / Not Recorded",
+          physicalCharacteristics = PhysicalCharacteristicBuilder(
+            hairColour = "Red",
+            rightEyeColour = "Green",
+            leftEyeColour = "Hazel",
+            facialHair = "Clean Shaven",
+            shapeOfFace = "Round",
+            build = "Proportional"
+          ),
         ),
         PrisonerBuilder(
-          prisonerNumber = "G7090BA", agencyId = "LEI", cellLocation = "B-C1-010", ethnicity = "Prefer not to say",
-          aliases = listOf(AliasBuilder(ethnicity = "White: Any other background"))
+          prisonerNumber = "G7090BA", agencyId = "LEI", cellLocation = "B-C1-010",
+          gender = "Male",
+          ethnicity = "Prefer not to say",
+          aliases = listOf(AliasBuilder(ethnicity = "White: Any other background")),
+          physicalCharacteristics = PhysicalCharacteristicBuilder(
+            hairColour = "Mouse",
+            rightEyeColour = "Missing",
+            leftEyeColour = "Missing",
+            facialHair = "Not Asked",
+            shapeOfFace = "Oval",
+            build = "Muscular"
+          ),
         ),
         PrisonerBuilder(
-          prisonerNumber = "G7090BC", agencyId = "AGI", cellLocation = "H-1-004", gender = "Female", ethnicity = "Prefer not to say",
+          prisonerNumber = "G7090BC",
+          agencyId = "AGI",
+          cellLocation = "H-1-004",
+          gender = "Female",
+          ethnicity = "Prefer not to say",
+          physicalCharacteristics = PhysicalCharacteristicBuilder(
+            hairColour = "Red",
+            rightEyeColour = "Green",
+            leftEyeColour = "Hazel",
+            facialHair = "Clean Shaven",
+            shapeOfFace = "Round",
+            build = "Proportional"
+          ),
         ),
       ).apply { loadPrisoners(this) }
       initialiseSearchData = false
@@ -191,7 +241,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   )
 
   @Nested
-  inner class `height and weight tests`() {
+  inner class `height and weight tests` {
     @Test
     fun `find by minimum height`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(minHeight = 170, prisonIds = listOf("MDI")),
@@ -217,41 +267,38 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     )
 
     @Test
-    fun `find by cell location with prison prefix`(): Unit = physicalDetailSearch(
-      detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "MDI-A"),
-      expectedPrisoners = listOf("H7089EY", "H7090BB"),
+    fun `find by minimum weight`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minWeight = 70, prisonIds = listOf("MDI")),
+      expectedPrisoners = listOf("H1090AA", "H7090BB"),
     )
+
+    @Test
+    fun `find by maximum weight`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(maxWeight = 100, prisonIds = listOf("MDI")),
+      expectedPrisoners = listOf("H1090AA", "H7089EY", "H7090BB"),
+    )
+
+    @Test
+    fun `find by exact weight`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minWeight = 100, maxWeight = 100, prisonIds = listOf("MDI")),
+      expectedPrisoners = listOf("H1090AA"),
+    )
+
+    @Test
+    fun `find by weight range`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minWeight = 80, maxWeight = 150, prisonIds = listOf("MDI")),
+      expectedPrisoners = listOf("H1090AA", "H7090BB"),
+    )
+
+    @Test
+    fun `height and weight are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minWeight = 80, maxWeight = 150, prisonIds = listOf("MDI")),
+      expectedPrisoners = listOf("H1090AA", "H7090BB"),
+    ) {
+      assertThat(it).extracting("heightCentimetres").containsExactly(202, 200)
+      assertThat(it).extracting("weightKilograms").containsExactly(100, 80)
+    }
   }
-
-  @Test
-  fun `find by cell location without prison prefix`(): Unit = physicalDetailSearch(
-    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "A"),
-    expectedPrisoners = listOf("H7089EY", "H7090BB"),
-  )
-
-  @Test
-  fun `find by minimum weight`(): Unit = physicalDetailSearch(
-    detailRequest = PhysicalDetailRequest(minWeight = 70, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("H1090AA", "H7090BB"),
-  )
-
-  @Test
-  fun `find by maximum weight`(): Unit = physicalDetailSearch(
-    detailRequest = PhysicalDetailRequest(maxWeight = 100, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("H1090AA", "H7089EY", "H7090BB"),
-  )
-
-  @Test
-  fun `find by exact weight`(): Unit = physicalDetailSearch(
-    detailRequest = PhysicalDetailRequest(minWeight = 100, maxWeight = 100, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("H1090AA"),
-  )
-
-  @Test
-  fun `find by weight range`(): Unit = physicalDetailSearch(
-    detailRequest = PhysicalDetailRequest(minWeight = 80, maxWeight = 150, prisonIds = listOf("MDI")),
-    expectedPrisoners = listOf("H1090AA", "H7090BB"),
-  )
 
   @Nested
   inner class `gender and ethnicity tests` {
@@ -281,11 +328,79 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       ),
       expectedPrisoners = listOf("G7090AC", "G7090BA"),
     )
+
+    @Test
+    fun `gender and ethnicity are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        prisonIds = listOf("AGI", "LEI")
+      ),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
+    ) {
+      assertThat(it).extracting("gender").containsExactly("Female", "Male")
+      assertThat(it).extracting("ethnicity").containsExactly("White: Any other background", "Prefer not to say")
+    }
+  }
+
+  @Nested
+  inner class `physical characteristics tests` {
+    @Test
+    fun `find by hair colour`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(hairColour = "Red", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AD", "G7090BC"),
+    )
+
+    @Test
+    fun `find by right eye colour`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(rightEyeColour = "Green", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AD", "G7090BC"),
+    )
+
+    @Test
+    fun `find by left eye colour`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(leftEyeColour = "Hazel", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AD", "G7090BC"),
+    )
+
+    @Test
+    fun `find by facial hair`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(facialHair = "Clean Shaven", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AD", "G7090BC"),
+    )
+
+    @Test
+    fun `find by shape of face`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(shapeOfFace = "Round", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AD", "G7090BC"),
+    )
+
+    @Test
+    fun `find by build`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(build = "Proportional", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AD", "G7090BC"),
+    )
+
+    @Test
+    fun `physical characteristics are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        prisonIds = listOf("AGI", "LEI")
+      ),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
+    ) {
+      assertThat(it).extracting("hairColour").containsExactly("Balding", "Mouse")
+      assertThat(it).extracting("rightEyeColour").containsExactly("Clouded", "Missing")
+      assertThat(it).extracting("leftEyeColour").containsExactly("Brown", "Missing")
+      assertThat(it).extracting("facialHair").containsExactly("Goatee Beard", "Not Asked")
+      assertThat(it).extracting("shapeOfFace").containsExactly("Bullet", "Oval")
+      assertThat(it).extracting("build").containsExactly("Obese", "Muscular")
+    }
   }
 
   private fun physicalDetailSearch(
     detailRequest: PhysicalDetailRequest,
     expectedPrisoners: List<String> = emptyList(),
+    extraContentAssertions: (param: MutableList<out Any?>?) -> Unit = {},
   ) {
     val response = webTestClient.post().uri("/physical-detail")
       .bodyValue(detailRequest)
@@ -299,5 +414,6 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     assertThat(response.content).extracting("prisonerNumber").containsExactlyElementsOf(expectedPrisoners)
     assertThat(response.content).size().isEqualTo(expectedPrisoners.size)
     assertThat(response.numberOfElements).isEqualTo(expectedPrisoners.size)
+    extraContentAssertions(response.content)
   }
 }

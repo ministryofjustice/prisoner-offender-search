@@ -63,6 +63,43 @@ data class PhysicalDetailRequest(
   val maxWeight: Int? = null,
 
   @Schema(
+    description = "Hair colour, searching on the description in the type HAIR in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
+    example = "Brunette",
+    allowableValues = ["Bald", "Balding", "Black", "Blonde", "Brown", "Brunette", "Dark", "Dyed", "Ginger", "Grey", "Light", "Mouse", "Multi-coloured", "Red", "White"]
+  )
+  val hairColour: String? = null,
+  @Schema(
+    description = "Right eye colour, searching on the description in the type R_EYE_C in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
+    example = "Green",
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White", ]
+  )
+  val rightEyeColour: String? = null,
+  @Schema(
+    description = "Left eye colour, searching on the description in the type L_EYE_C in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
+    example = "Hazel",
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White", ]
+  )
+  val leftEyeColour: String? = null,
+  @Schema(
+    description = "Facial hair, searching on the description in the type FACIAL_HAIR in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
+    example = "Goatee Beard",
+    allowableValues = ["Full Beard", "Clean Shaven", "Goatee Beard", "Moustache Only", "Not Applicable (Female Offender)", "No Facial Hair", "Sideburns", ]
+  )
+  val facialHair: String? = null,
+  @Schema(
+    description = "Shape of face, searching on the description in the type FACE in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
+    example = "Bullet",
+    allowableValues = ["Angular", "Bullet", "Oval", "Round", "Square", "Triangular"]
+  )
+  val shapeOfFace: String? = null,
+  @Schema(
+    description = "Physical build, searching on the description in the type BUILD in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
+    example = "Medium",
+    allowableValues = ["Fat", "Frail", "Heavy", "Medium", "Muscular", "Obese", "Proportional", "Slight", "Small", "Stocky", "Stooped", "Thin", ]
+  )
+  val build: String? = null,
+
+  @Schema(
     description = "Pagination options. Will default to the first page if omitted.",
     required = false,
   )
