@@ -24,6 +24,7 @@
     "prisonName": "Moorland Prison",
     "cellLocation": "A-1-002",
     "legalStatus": "REMAND",
-    "restrictedPatient": false
+    "restrictedPatient": false,
+    "shoeSize": 8
   }
 ]
