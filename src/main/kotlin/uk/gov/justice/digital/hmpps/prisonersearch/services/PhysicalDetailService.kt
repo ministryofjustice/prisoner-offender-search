@@ -135,6 +135,9 @@ class PhysicalDetailService(
       facialHair?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("facialHair", it)) }
       shapeOfFace?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("shapeOfFace", it)) }
       build?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("build", it)) }
+
+      minShoeSize?.let { detailQuery.filter(rangeQuery("shoeSize").gte(it)) }
+      maxShoeSize?.let { detailQuery.filter(rangeQuery("shoeSize").lte(it)) }
     }
 
     return detailQuery

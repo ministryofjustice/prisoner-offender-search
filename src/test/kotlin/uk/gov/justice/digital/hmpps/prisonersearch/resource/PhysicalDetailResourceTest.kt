@@ -49,7 +49,8 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             leftEyeColour = "Hazel",
             facialHair = "Clean Shaven",
             shapeOfFace = "Round",
-            build = "Proportional"
+            build = "Proportional",
+            shoeSize = 4,
           ),
         ),
         PrisonerBuilder(
@@ -64,7 +65,8 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             leftEyeColour = "Brown",
             facialHair = "Goatee Beard",
             shapeOfFace = "Bullet",
-            build = "Obese"
+            build = "Obese",
+            shoeSize = 6,
           ),
         ),
         PrisonerBuilder(
@@ -75,7 +77,8 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             leftEyeColour = "Hazel",
             facialHair = "Clean Shaven",
             shapeOfFace = "Round",
-            build = "Proportional"
+            build = "Proportional",
+            shoeSize = 9,
           ),
         ),
         PrisonerBuilder(
@@ -89,7 +92,8 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             leftEyeColour = "Missing",
             facialHair = "Not Asked",
             shapeOfFace = "Oval",
-            build = "Muscular"
+            build = "Muscular",
+            shoeSize = 13,
           ),
         ),
         PrisonerBuilder(
@@ -104,7 +108,8 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             leftEyeColour = "Hazel",
             facialHair = "Clean Shaven",
             shapeOfFace = "Round",
-            build = "Proportional"
+            build = "Proportional",
+            shoeSize = 1,
           ),
         ),
       ).apply { loadPrisoners(this) }
@@ -238,6 +243,18 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       pagination = PaginationRequest(1, 2)
     ),
     expectedPrisoners = listOf("H7089EZ", "H7090BA"),
+  )
+
+  @Test
+  fun `find by cell location with prison prefix`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "MDI-A"),
+    expectedPrisoners = listOf("H7089EY", "H7090BB"),
+  )
+
+  @Test
+  fun `find by cell location without prison prefix`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI"), cellLocationPrefix = "A"),
+    expectedPrisoners = listOf("H7089EY", "H7090BB"),
   )
 
   @Nested
@@ -381,6 +398,30 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     )
 
     @Test
+    fun `find by minimum shoe size`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minShoeSize = 6, prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AC", "G7090AD"),
+    )
+
+    @Test
+    fun `find by maximum shoe size`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(maxShoeSize = 7, prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf("G7090AC", "G7090BC"),
+    )
+
+    @Test
+    fun `find by exact shoe size`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minShoeSize = 13, maxShoeSize = 13, prisonIds = listOf("LEI")),
+      expectedPrisoners = listOf("G7090BA"),
+    )
+
+    @Test
+    fun `find by shoe size range`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minShoeSize = 5, maxShoeSize = 9, prisonIds = listOf("AGI", "LEI")),
+      expectedPrisoners = listOf("G7090AC", "G7090AD"),
+    )
+
+    @Test
     fun `physical characteristics are returned in search results`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
         ethnicity = "White: Any other background",
@@ -394,6 +435,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       assertThat(it).extracting("facialHair").containsExactly("Goatee Beard", "Not Asked")
       assertThat(it).extracting("shapeOfFace").containsExactly("Bullet", "Oval")
       assertThat(it).extracting("build").containsExactly("Obese", "Muscular")
+      assertThat(it).extracting("shoeSize").containsExactly(6, 13)
     }
   }
 
