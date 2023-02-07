@@ -328,6 +328,61 @@ open class Prisoner : Diffable<Prisoner> {
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var weightKilograms: Int? = null
 
+  @Schema(
+    description = "Hair colour. From PROFILE_CODES table where PROFILE_TYPE = HAIR. Allowable values extracted 07/02/2023.",
+    example = "Blonde",
+    allowableValues = ["Bald", "Balding", "Black", "Blonde", "Brown", "Brunette", "Dark", "Dyed", "Ginger", "Grey", "Light", "Mouse", "Multi-coloured", "Red", "White"]
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var hairColour: String? = null
+
+  @Schema(
+    description = "Right eye colour. From PROFILE_CODES table where PROFILE_TYPE = R_EYE_C. Allowable values extracted 07/02/2023.",
+    example = "Green",
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"]
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var rightEyeColour: String? = null
+
+  @Schema(
+    description = "Left eye colour. From PROFILE_CODES table where PROFILE_TYPE = L_EYE_C. Allowable values extracted 07/02/2023.",
+    example = "Hazel",
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"]
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var leftEyeColour: String? = null
+
+  @Schema(
+    description = "Facial hair. From PROFILE_CODES table where PROFILE_TYPE = FACIAL_HAIR. Allowable values extracted 07/02/2023.",
+    example = "Clean Shaven",
+    allowableValues = ["Full Beard", "Clean Shaven", "Goatee Beard", "Moustache Only", "Not Applicable (Female Offender)", "No Facial Hair", "Sideburns"]
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var facialHair: String? = null
+
+  @Schema(
+    description = "Shape of face. From PROFILE_CODES table where PROFILE_TYPE = FACE. Allowable values extracted 07/02/2023.",
+    example = "Round",
+    allowableValues = ["Angular", "Bullet", "Oval", "Round", "Square", "Triangular"]
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var shapeOfFace: String? = null
+
+  @Schema(
+    description = "Build. From PROFILE_CODES table where PROFILE_TYPE = BUILD. Allowable values extracted 07/02/2023.",
+    example = "Muscular",
+    allowableValues = ["Fat", "Frail", "Heavy", "Medium", "Muscular", "Obese", "Proportional", "Slight", "Small", "Stocky", "Stooped", "Thin"]
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var build: String? = null
+
+  @Schema(
+    description = "UK shoe size",
+    example = "10",
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var shoeSize: Int? = null
+
   override fun diff(other: Prisoner): DiffResult<Prisoner> = getDiffResult(this, other)
 
   @get:JsonIgnore

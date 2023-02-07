@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Agency
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalAttributes
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalCharacteristic
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SentenceDetail
 import java.math.BigDecimal
@@ -361,12 +362,38 @@ class TranslatorTest {
         )
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.gender).isEqualTo("M")
     assertThat(prisoner.ethnicity).isEqualTo("W")
     assertThat(prisoner.heightCentimetres).isEqualTo(200)
     assertThat(prisoner.weightKilograms).isEqualTo(100)
+  }
+
+  @Test
+  internal fun `Physical Characteristics are mapped`() {
+    val prisoner = PrisonerA(
+      ob = aBooking().copy(
+        physicalCharacteristics = listOf(
+          PhysicalCharacteristic("HAIR", "Hair Colour", "Red", null),
+          PhysicalCharacteristic("R_EYE_C", "Right Eye Colour", "Green", null),
+          PhysicalCharacteristic("L_EYE_C", "Left Eye Colour", "Hazel", null),
+          PhysicalCharacteristic("FACIAL_HAIR", "Facial Hair", "Clean Shaven", null),
+          PhysicalCharacteristic("FACE", "Shape of Face", "Bullet", null),
+          PhysicalCharacteristic("BUILD", "Build", "Proportional", null),
+          PhysicalCharacteristic("SHOESIZE", "Shoe Size", "10", null),
+        )
+      ),
+      incentiveLevel = null,
+      restrictedPatientData = null,
+    )
+    assertThat(prisoner.hairColour).isEqualTo("Red")
+    assertThat(prisoner.rightEyeColour).isEqualTo("Green")
+    assertThat(prisoner.leftEyeColour).isEqualTo("Hazel")
+    assertThat(prisoner.facialHair).isEqualTo("Clean Shaven")
+    assertThat(prisoner.shapeOfFace).isEqualTo("Bullet")
+    assertThat(prisoner.build).isEqualTo("Proportional")
+    assertThat(prisoner.shoeSize).isEqualTo(10)
   }
 }
 
