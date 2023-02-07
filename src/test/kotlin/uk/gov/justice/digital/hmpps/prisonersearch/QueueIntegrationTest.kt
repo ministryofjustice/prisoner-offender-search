@@ -44,6 +44,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.KeywordRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalAttributes
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalCharacteristic
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.Duration
@@ -402,7 +403,27 @@ abstract class QueueIntegrationTest : IntegrationTest() {
           nameType = null,
           createDate = LocalDate.now(),
         )
-      }
+      },
+      physicalCharacteristics = mutableListOf<PhysicalCharacteristic>().also { pcs ->
+        this.physicalCharacteristics?.hairColour?.let {
+          pcs.add(PhysicalCharacteristic("HAIR", "Hair Colour", it, null))
+        }
+        this.physicalCharacteristics?.rightEyeColour?.let {
+          pcs.add(PhysicalCharacteristic("R_EYE_C", "Right Eye Colour", it, null))
+        }
+        this.physicalCharacteristics?.leftEyeColour?.let {
+          pcs.add(PhysicalCharacteristic("L_EYE_C", "Left Eye Colour", it, null))
+        }
+        this.physicalCharacteristics?.facialHair?.let {
+          pcs.add(PhysicalCharacteristic("FACIAL_HAIR", "Facial Hair", it, null))
+        }
+        this.physicalCharacteristics?.shapeOfFace?.let {
+          pcs.add(PhysicalCharacteristic("FACE", "Shape of Face", it, null))
+        }
+        this.physicalCharacteristics?.build?.let {
+          pcs.add(PhysicalCharacteristic("BUILD", "Build", it, null))
+        }
+      },
     ).let {
       if (released) {
         it.copy(
@@ -440,6 +461,16 @@ data class PrisonerBuilder(
   val gender: String? = null,
   val ethnicity: String? = null,
   val aliases: List<AliasBuilder> = listOf(),
+  val physicalCharacteristics: PhysicalCharacteristicBuilder? = null,
+)
+
+data class PhysicalCharacteristicBuilder(
+  val hairColour: String? = null,
+  val rightEyeColour: String? = null,
+  val leftEyeColour: String? = null,
+  val facialHair: String? = null,
+  val shapeOfFace: String? = null,
+  val build: String? = null,
 )
 
 data class AliasBuilder(

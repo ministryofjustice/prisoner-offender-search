@@ -128,6 +128,13 @@ class PhysicalDetailService(
 
       minWeight?.let { detailQuery.filter(rangeQuery("weightKilograms").gte(it)) }
       maxWeight?.let { detailQuery.filter(rangeQuery("weightKilograms").lte(it)) }
+
+      hairColour?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("hairColour", it)) }
+      rightEyeColour?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("rightEyeColour", it)) }
+      leftEyeColour?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("leftEyeColour", it)) }
+      facialHair?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("facialHair", it)) }
+      shapeOfFace?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("shapeOfFace", it)) }
+      build?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("build", it)) }
     }
 
     return detailQuery
