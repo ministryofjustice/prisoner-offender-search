@@ -423,6 +423,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         this.physicalCharacteristics?.build?.let {
           pcs.add(PhysicalCharacteristic("BUILD", "Build", it, null))
         }
+        this.physicalCharacteristics?.shoeSize?.let {
+          pcs.add(PhysicalCharacteristic("SHOESIZE", "Shoe Size", it.toString(), null))
+        }
       },
     ).let {
       if (released) {
@@ -471,6 +474,7 @@ data class PhysicalCharacteristicBuilder(
   val facialHair: String? = null,
   val shapeOfFace: String? = null,
   val build: String? = null,
+  val shoeSize: Int? = null,
 )
 
 data class AliasBuilder(

@@ -100,6 +100,18 @@ data class PhysicalDetailRequest(
   val build: String? = null,
 
   @Schema(
+    description = "Minimum UK shoe size of the prisoner",
+    example = "5",
+  )
+  val minShoeSize: Int? = null,
+
+  @Schema(
+    description = "Maximum UK shoe size of the prisoner",
+    example = "10",
+  )
+  val maxShoeSize: Int? = null,
+
+  @Schema(
     description = "Pagination options. Will default to the first page if omitted.",
     required = false,
   )
