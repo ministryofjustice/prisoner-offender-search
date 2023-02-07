@@ -26,7 +26,8 @@
     "mostSeriousOffence": "Section 18 - wounding with intent",
     "recall": true,
     "indeterminateSentence": false,
-    "restrictedPatient": false
+    "restrictedPatient": false,
+    "shoeSize": 9
   },
   {
     "prisonerNumber": "A9999AA",
@@ -86,6 +87,7 @@
     "prisonName": "Moorland Prison",
     "cellLocation": "A-1-002",
     "legalStatus": "REMAND",
-    "restrictedPatient": false
+    "restrictedPatient": false,
+    "shoeSize": 8
   }
 ]

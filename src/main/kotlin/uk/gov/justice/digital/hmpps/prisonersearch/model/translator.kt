@@ -52,6 +52,19 @@ fun Prisoner.translate(existingPrisoner: Prisoner?, ob: OffenderBooking, incenti
   this.ethnicity = ob.physicalAttributes?.ethnicity
   this.heightCentimetres = ob.physicalAttributes?.heightCentimetres
   this.weightKilograms = ob.physicalAttributes?.weightKilograms
+
+  ob.physicalCharacteristics?.filterNot { it.detail.isNullOrBlank() }?.forEach {
+    when (it.type) {
+      "HAIR" -> this.hairColour = it.detail
+      "R_EYE_C" -> this.rightEyeColour = it.detail
+      "L_EYE_C" -> this.leftEyeColour = it.detail
+      "FACIAL_HAIR" -> this.facialHair = it.detail
+      "FACE" -> this.shapeOfFace = it.detail
+      "BUILD" -> this.build = it.detail
+      "SHOESIZE" -> this.shoeSize = it.detail?.toIntOrNull()
+    }
+  }
+
   this.nationality = ob.profileInformation?.firstOrNull { p -> p.type == "NAT" }?.resultValue
   this.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue
   this.maritalStatus = ob.profileInformation?.firstOrNull { p -> p.type == "MARITAL" }?.resultValue
