@@ -212,10 +212,7 @@ class PrisonerSearchService(
   }
 
   private fun fieldMatch(field: String, value: String): BoolQueryBuilder {
-    return QueryBuilders.boolQuery()
-      .must(
-        "$field", value
-      )
+    return QueryBuilders.boolQuery().must(field, value)
   }
 
   private fun pncMatch(pncNumber: String) = QueryBuilders.boolQuery()
@@ -401,7 +398,7 @@ sealed class Result {
   data class Match(val matches: List<Prisoner>) : Result()
 }
 
-inline fun Result.collect() =
+fun Result.collect() =
   when (this) {
     is Result.NoMatch -> emptyList<Prisoner>()
     is Result.Match -> matches

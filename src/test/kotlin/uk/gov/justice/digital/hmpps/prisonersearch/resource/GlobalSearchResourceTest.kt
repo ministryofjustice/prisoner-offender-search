@@ -541,4 +541,46 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
       )
     }
   }
+
+  @Nested
+  inner class CompareIndex {
+    @Test
+    fun `Diffs reported`() {
+      prisonMockServer.stubFor(
+        WireMock.get(WireMock.urlEqualTo("/api/offenders/ids"))
+          .willReturn(
+            WireMock.aResponse()
+              .withHeader("Content-Type", "application/json")
+              .withHeader("Total-Records", "10")
+              .withBody(
+                """[
+                { "offenderNumber": "A9999AA" },
+                { "offenderNumber": "A9999AB" },
+                { "offenderNumber": "A9999AC" },
+                { "offenderNumber": "A9999RA" },
+                { "offenderNumber": "A9999RB" },
+                { "offenderNumber": "A9999RC" },
+                { "offenderNumber": "A7089EY" },
+                { "offenderNumber": "A7089EZ" },
+                { "offenderNumber": "A1234SR" },
+                { "offenderNumber": "A7089FA" }]"""
+              )
+          )
+      )
+      webTestClient.get().uri("/compare-index")
+        .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
+        .exchange()
+        .expectStatus().isOk
+
+      verify(telemetryClient, atLeastOnce()).trackEvent(
+        eq("index-report"),
+        check<Map<String, String>> {
+          assertThat(it["onlyInIndex"]).isEqualTo("[A1090AA, A7089FB, A7089FC, A7089FX, A7090AA, A7090AB, A7090AC, A7090AD, A7090AE, A7090AF, A7090BA, A7090BB, A7090BC, A7090BD, A7090BE, A7090BF]")
+          assertThat(it["onlyInNomis"]).isEqualTo("[A1234SR]")
+          assertThat(it["timeMs"]?.toInt()).isGreaterThan(0)
+        },
+        isNull()
+      )
+    }
+  }
 }
