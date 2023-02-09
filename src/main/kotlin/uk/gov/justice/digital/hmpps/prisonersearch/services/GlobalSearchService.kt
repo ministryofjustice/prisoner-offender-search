@@ -66,7 +66,7 @@ class GlobalSearchService(
     }
   }
 
-  data class NomisContext(var nomisFinished: Boolean, var num: String?)
+  data class NomisContext(var nomisFinished: Boolean, var prisonerNumber: String?)
 
   fun compareIndex(): Pair<List<String>, List<String>> {
     val onlyInIndex = mutableListOf<String>()
@@ -79,7 +79,7 @@ class GlobalSearchService(
     val nomisContext =
       NomisContext(
         nomisFinished = !iter.hasNext(),
-        num = if (iter.hasNext()) iter.next().offenderNumber else null
+        prisonerNumber = if (iter.hasNext()) iter.next().offenderNumber else null
       )
 
     val scroll = Scroll(TimeValue.timeValueMinutes(1L))
@@ -128,18 +128,18 @@ class GlobalSearchService(
       if (nomisContext.nomisFinished) {
         onlyInIndex.add(index)
       } else {
-        while (index > nomisContext.num!!) {
-          onlyInNomis.add(nomisContext.num!!)
+        while (index > nomisContext.prisonerNumber!!) {
+          onlyInNomis.add(nomisContext.prisonerNumber!!)
           if (iter.hasNext()) {
-            nomisContext.num = iter.next().offenderNumber
+            nomisContext.prisonerNumber = iter.next().offenderNumber
           } else {
             nomisContext.nomisFinished = true
             return@forEach
           }
         }
-        if (index == nomisContext.num) {
+        if (index == nomisContext.prisonerNumber) {
           if (iter.hasNext()) {
-            nomisContext.num = iter.next().offenderNumber
+            nomisContext.prisonerNumber = iter.next().offenderNumber
           } else {
             nomisContext.nomisFinished = true
           }
@@ -156,7 +156,7 @@ class GlobalSearchService(
     iter: Iterator<OffenderId>
   ) {
     if (!nomisContext.nomisFinished) {
-      onlyInNomis.add(nomisContext.num!!)
+      onlyInNomis.add(nomisContext.prisonerNumber!!)
     }
     while (iter.hasNext()) {
       onlyInNomis.add(iter.next().offenderNumber)

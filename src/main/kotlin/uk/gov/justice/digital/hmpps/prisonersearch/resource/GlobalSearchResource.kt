@@ -100,13 +100,19 @@ class GlobalSearchResource(
     telemetryClient.trackEvent(
       "index-report",
       mapOf(
-        "onlyInIndex" to onlyInIndex.toString(),
-        "onlyInNomis" to onlyInNomis.toString(),
+        "onlyInIndex" to toLogMessage(onlyInIndex),
+        "onlyInNomis" to toLogMessage(onlyInNomis),
         "timeMs" to (end - start).toString(),
       ),
       null
     )
   }
 
-  fun getTotalNomisNumber(): Int = prisonerIndexService.getAllNomisOffenders(0, 1).totalRows.toInt()
+  private val cutoff = 50
+
+  private fun toLogMessage(onlyList: List<String>): String {
+    return if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
+  }
+
+  private fun getTotalNomisNumber(): Int = prisonerIndexService.getAllNomisOffenders(0, 1).totalRows.toInt()
 }

@@ -261,7 +261,7 @@ internal class MatchServiceTest {
     }
   }
 
-  fun resultsOf(vararg offenders: Prisoner): SearchResponse {
+  private fun resultsOf(vararg offenders: Prisoner): SearchResponse {
     val searchHits = offenders.map { SearchHit(it.bookingId!!.toInt()).apply { sourceRef(BytesArray(objectMapper.writeValueAsBytes(it))) } }
     val hits = SearchHits(searchHits.toTypedArray(), TotalHits(offenders.size.toLong(), EQUAL_TO), 10f)
     val searchResponseSections = SearchResponseSections(hits, null, null, false, null, null, 5)
