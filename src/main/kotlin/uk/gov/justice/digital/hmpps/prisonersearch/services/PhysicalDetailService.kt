@@ -55,6 +55,11 @@ class PhysicalDetailService(
     if ((minWeight ?: 0) > (maxWeight ?: Int.MAX_VALUE)) {
       throw BadRequestException("Maximum weight cannot be less than the minimum weight")
     }
+    if ((minShoeSize ?: 0) < 0) throw BadRequestException("Minimum shoe size cannot be less than 0")
+    if ((maxShoeSize ?: 0) < 0) throw BadRequestException("Maximum shoe size cannot be less than 0")
+    if ((minShoeSize ?: 0) > (maxShoeSize ?: Int.MAX_VALUE)) {
+      throw BadRequestException("Maximum shoe size cannot be less than the minimum shoe size")
+    }
   }
 
   fun findByPhysicalDetail(detailRequest: PhysicalDetailRequest): Page<Prisoner> {
