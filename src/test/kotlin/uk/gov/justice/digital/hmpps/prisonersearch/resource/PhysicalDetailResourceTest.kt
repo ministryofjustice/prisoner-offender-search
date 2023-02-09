@@ -7,10 +7,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.prisonersearch.AliasBuilder
+import uk.gov.justice.digital.hmpps.prisonersearch.BodyPartBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.PhysicalCharacteristicBuilder
+import uk.gov.justice.digital.hmpps.prisonersearch.PhysicalMarkBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.BodyPart
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalDetailRequest
 
@@ -25,21 +28,40 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       listOf(
         // height / weight test data
         PrisonerBuilder(
-          prisonerNumber = "H1090AA", agencyId = "MDI", cellLocation = "H-1-004", heightCentimetres = 202, weightKilograms = 100,
+          prisonerNumber = "H1090AA",
+          agencyId = "MDI",
+          cellLocation = "H-1-004",
+          heightCentimetres = 202,
+          weightKilograms = 100,
         ),
         PrisonerBuilder(
-          prisonerNumber = "H7089EY", agencyId = "MDI", cellLocation = "A-1-001", heightCentimetres = 165, weightKilograms = 57,
+          prisonerNumber = "H7089EY",
+          agencyId = "MDI",
+          cellLocation = "A-1-001",
+          heightCentimetres = 165,
+          weightKilograms = 57,
         ),
         PrisonerBuilder(
-          prisonerNumber = "H7089EZ", agencyId = "LEI", cellLocation = "B-C1-010", heightCentimetres = 188, weightKilograms = 99,
+          prisonerNumber = "H7089EZ",
+          agencyId = "LEI",
+          cellLocation = "B-C1-010",
+          heightCentimetres = 188,
+          weightKilograms = 99,
         ),
         PrisonerBuilder(
-          prisonerNumber = "H7090BA", agencyId = "LEI", cellLocation = "B-C1-010", heightCentimetres = 200, weightKilograms = 99,
+          prisonerNumber = "H7090BA",
+          agencyId = "LEI",
+          cellLocation = "B-C1-010",
+          heightCentimetres = 200,
+          weightKilograms = 99,
         ),
         PrisonerBuilder(
-          prisonerNumber = "H7090BB", agencyId = "MDI", cellLocation = "A-1-003", heightCentimetres = 200, weightKilograms = 80,
+          prisonerNumber = "H7090BB",
+          agencyId = "MDI",
+          cellLocation = "A-1-003",
+          heightCentimetres = 200,
+          weightKilograms = 80,
         ),
-
         PrisonerBuilder(
           prisonerNumber = "G7089EZ", agencyId = "LEI", cellLocation = "B-C1-010", gender = "Male",
           aliases = listOf(AliasBuilder(gender = "Not Known / Not Recorded")),
@@ -52,6 +74,12 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             build = "Proportional",
             shoeSize = 4,
           ),
+          physicalMarks = PhysicalMarkBuilder(
+            tattoo = listOf(BodyPartBuilder("Ankle", "rose"), BodyPartBuilder("Knee")),
+            scar = listOf(BodyPartBuilder("Finger"), BodyPartBuilder("Foot")),
+            other = listOf(BodyPartBuilder("Head", "left ear missing")),
+            mark = listOf(BodyPartBuilder("Lip", "too much")),
+          )
         ),
         PrisonerBuilder(
           prisonerNumber = "G7090AC",
@@ -68,6 +96,12 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             build = "Obese",
             shoeSize = 6,
           ),
+          physicalMarks = PhysicalMarkBuilder(
+            tattoo = listOf(BodyPartBuilder("Finger", "rose"), BodyPartBuilder("Foot")),
+            scar = listOf(BodyPartBuilder("Ankle", "nasty looking scar"), BodyPartBuilder("Knee")),
+            other = listOf(BodyPartBuilder("Nose", "bent to the right")),
+            mark = listOf(BodyPartBuilder("Torso", "birthmark on chest")),
+          )
         ),
         PrisonerBuilder(
           prisonerNumber = "G7090AD", agencyId = "AGI", cellLocation = "H-1-004", gender = "Not Known / Not Recorded",
@@ -79,6 +113,12 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             shapeOfFace = "Round",
             build = "Proportional",
             shoeSize = 9,
+          ),
+          physicalMarks = PhysicalMarkBuilder(
+            tattoo = listOf(BodyPartBuilder("Ankle", "rose"), BodyPartBuilder("Knee")),
+            scar = listOf(BodyPartBuilder("Finger"), BodyPartBuilder("Foot")),
+            other = listOf(BodyPartBuilder("Head", "left ear missing")),
+            mark = listOf(BodyPartBuilder("Lip", "too much")),
           ),
         ),
         PrisonerBuilder(
@@ -95,6 +135,12 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             build = "Muscular",
             shoeSize = 13,
           ),
+          physicalMarks = PhysicalMarkBuilder(
+            tattoo = listOf(BodyPartBuilder("Ankle", "dragon"), BodyPartBuilder("Knee")),
+            scar = listOf(BodyPartBuilder("Finger"), BodyPartBuilder("Foot")),
+            other = listOf(BodyPartBuilder("Head", "left ear missing")),
+            mark = listOf(BodyPartBuilder("Lip", "too much")),
+          ),
         ),
         PrisonerBuilder(
           prisonerNumber = "G7090BC",
@@ -110,6 +156,12 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             shapeOfFace = "Round",
             build = "Proportional",
             shoeSize = 1,
+          ),
+          physicalMarks = PhysicalMarkBuilder(
+            tattoo = listOf(BodyPartBuilder("Knee", "dragon"), BodyPartBuilder("Knee")),
+            scar = listOf(BodyPartBuilder("Finger"), BodyPartBuilder("Foot")),
+            other = listOf(BodyPartBuilder("Head", "left ear missing")),
+            mark = listOf(BodyPartBuilder("Lip", "too much")),
           ),
         ),
       ).apply { loadPrisoners(this) }
@@ -436,6 +488,170 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       assertThat(it).extracting("shapeOfFace").containsExactly("Bullet", "Oval")
       assertThat(it).extracting("build").containsExactly("Obese", "Muscular")
       assertThat(it).extracting("shoeSize").containsExactly(6, 13)
+    }
+  }
+
+  @Nested
+  inner class `physical marks tests` {
+    @Test
+    fun `searching by tattoos with a body part`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        tattoos = listOf(BodyPart("Ankle")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD", "G7090BA"),
+    )
+
+    @Test
+    fun `searching by tattoos with a body part and a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        tattoos = listOf(BodyPart(bodyPart = "Ankle", comment = "rose")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD"),
+    )
+
+    @Test
+    fun `searching by tattoos with a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        tattoos = listOf(BodyPart(comment = "rose")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AC", "G7090AD"),
+    )
+
+    @Test
+    fun `tattoos are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
+    ) {
+      assertThat(it).extracting("tattoos").containsExactly(
+        listOf(mapOf("bodyPart" to "Finger", "comment" to "rose"), mapOf("bodyPart" to "Foot")),
+        listOf(mapOf("bodyPart" to "Ankle", "comment" to "dragon"), mapOf("bodyPart" to "Knee"))
+      )
+    }
+    @Test
+    fun `searching by scars with a body part`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        scars = listOf(BodyPart("Finger")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD", "G7090BA", "G7090BC"),
+    )
+
+    @Test
+    fun `searching by scars with a body part and a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        scars = listOf(BodyPart(bodyPart = "Ankle", comment = "nasty")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC"),
+    )
+
+    @Test
+    fun `searching by scars with a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        scars = listOf(BodyPart(comment = "nasty")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC"),
+    )
+
+    @Test
+    fun `scars are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
+    ) {
+      assertThat(it).extracting("scars").containsExactly(
+        listOf(mapOf("bodyPart" to "Ankle", "comment" to "nasty looking scar"), mapOf("bodyPart" to "Knee")),
+        listOf(mapOf("bodyPart" to "Finger"), mapOf("bodyPart" to "Foot"))
+      )
+    }
+    @Test
+    fun `searching by marks with a body part`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        marks = listOf(BodyPart("Torso")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC"),
+    )
+
+    @Test
+    fun `searching by marks with a body part and a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        marks = listOf(BodyPart(bodyPart = "Torso", comment = "birthmark")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC"),
+    )
+
+    @Test
+    fun `searching by marks with a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        marks = listOf(BodyPart(comment = "birthmark")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC"),
+    )
+
+    @Test
+    fun `marks are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
+    ) {
+      assertThat(it).extracting("marks").containsExactly(
+        listOf(mapOf("bodyPart" to "Torso", "comment" to "birthmark on chest")),
+        listOf(mapOf("bodyPart" to "Lip", "comment" to "too much"))
+      )
+    }
+    @Test
+    fun `searching by otherMarks with a body part`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        otherMarks = listOf(BodyPart("Head")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD", "G7090BA", "G7090BC"),
+    )
+
+    @Test
+    fun `searching by otherMarks with a body part and a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        otherMarks = listOf(BodyPart(bodyPart = "Head", comment = "left ear")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD", "G7090BA", "G7090BC"),
+    )
+
+    @Test
+    fun `searching by otherMarks with a comment`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        otherMarks = listOf(BodyPart(comment = "left ear")),
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7089EZ", "G7090AD", "G7090BA", "G7090BC"),
+    )
+
+    @Test
+    fun `otherMarks are returned in search results`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        prisonIds = listOf("AGI", "LEI"),
+      ),
+      expectedPrisoners = listOf("G7090AC", "G7090BA"),
+    ) {
+      assertThat(it).extracting("otherMarks").containsExactly(
+        listOf(mapOf("bodyPart" to "Nose", "comment" to "bent to the right")),
+        listOf(mapOf("bodyPart" to "Head", "comment" to "left ear missing"))
+      )
     }
   }
 

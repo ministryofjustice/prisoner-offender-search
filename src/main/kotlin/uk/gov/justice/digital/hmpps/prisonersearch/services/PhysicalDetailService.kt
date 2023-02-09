@@ -138,6 +138,63 @@ class PhysicalDetailService(
 
       minShoeSize?.let { detailQuery.filter(rangeQuery("shoeSize").gte(it)) }
       maxShoeSize?.let { detailQuery.filter(rangeQuery("shoeSize").lte(it)) }
+
+      tattoos?.forEach { tattoo ->
+        detailQuery.filter(
+          boolQuery().mustAll(
+            buildList {
+              tattoo.bodyPart?.let {
+                add(QueryBuilders.matchQuery("tattoos.bodyPart", tattoo.bodyPart))
+              }
+              tattoo.comment?.let {
+                add(QueryBuilders.matchQuery("tattoos.comment", tattoo.comment))
+              }
+            }
+          )
+        )
+      }
+      scars?.forEach { scar ->
+        detailQuery.filter(
+          boolQuery().mustAll(
+            buildList {
+              scar.bodyPart?.let {
+                add(QueryBuilders.matchQuery("scars.bodyPart", scar.bodyPart))
+              }
+              scar.comment?.let {
+                add(QueryBuilders.matchQuery("scars.comment", scar.comment))
+              }
+            }
+          )
+        )
+      }
+      marks?.forEach { mark ->
+        detailQuery.filter(
+          boolQuery().mustAll(
+            buildList {
+              mark.bodyPart?.let {
+                add(QueryBuilders.matchQuery("marks.bodyPart", mark.bodyPart))
+              }
+              mark.comment?.let {
+                add(QueryBuilders.matchQuery("marks.comment", mark.comment))
+              }
+            }
+          )
+        )
+      }
+      otherMarks?.forEach { other ->
+        detailQuery.filter(
+          boolQuery().mustAll(
+            buildList {
+              other.bodyPart?.let {
+                add(QueryBuilders.matchQuery("otherMarks.bodyPart", other.bodyPart))
+              }
+              other.comment?.let {
+                add(QueryBuilders.matchQuery("otherMarks.comment", other.comment))
+              }
+            }
+          )
+        )
+      }
     }
 
     return detailQuery
@@ -154,10 +211,9 @@ class PhysicalDetailService(
       PageImpl(emptyList(), pageable, 0L)
     } else {
       log.info("Physical detail search: Matches found. Page ${pageable.pageNumber} with ${prisoners.size} prisoners, totalHits ${searchResponse.hits.totalHits?.value}")
-      val response = PageImpl(prisoners, pageable, searchResponse.hits.totalHits!!.value)
+      return PageImpl(prisoners, pageable, searchResponse.hits.totalHits!!.value)
       // Useful when checking the content of test results
       // log.info("Response content = ${gson.toJson(response)}")
-      response
     }
   }
 
