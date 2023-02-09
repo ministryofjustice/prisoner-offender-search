@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.2-beta"
-  kotlin("plugin.spring") version "1.8.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.3"
+  kotlin("plugin.spring") version "1.8.10"
 }
 
 configurations {
@@ -42,10 +42,10 @@ dependencies {
   implementation("com.google.guava:guava:31.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.2.0")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.398")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.403")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  runtimeOnly("org.postgresql:postgresql:42.5.2")
+  runtimeOnly("org.postgresql:postgresql:42.5.3")
   runtimeOnly("org.flywaydb:flyway-core")
 
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.11")
