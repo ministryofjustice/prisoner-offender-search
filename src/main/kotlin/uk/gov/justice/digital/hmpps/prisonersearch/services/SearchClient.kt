@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
+import org.apache.http.client.config.RequestConfig
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
@@ -11,7 +12,6 @@ import org.elasticsearch.client.core.CountResponse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.stereotype.Service
-import org.apache.http.client.config.RequestConfig
 
 private const val ONE_MINUTE = 60000
 
