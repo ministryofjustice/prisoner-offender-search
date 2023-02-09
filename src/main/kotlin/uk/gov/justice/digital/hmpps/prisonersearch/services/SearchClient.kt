@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
@@ -20,4 +21,5 @@ class SearchClient(
   fun count(countRequest: CountRequest): CountResponse = elasticsearchClient.count(countRequest, RequestOptions.DEFAULT)
   fun lowLevelClient(): RestClient = elasticsearchClient.lowLevelClient
   fun elasticsearchOperations(): ElasticsearchOperations = elasticsearchOperations
+  fun scroll(searchScrollRequest: SearchScrollRequest): SearchResponse = elasticsearchClient.scroll(searchScrollRequest, RequestOptions.DEFAULT)
 }

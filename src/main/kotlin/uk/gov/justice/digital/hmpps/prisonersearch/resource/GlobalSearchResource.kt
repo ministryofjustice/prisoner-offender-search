@@ -37,7 +37,10 @@ class GlobalSearchResource(
     consumes = [MediaType.APPLICATION_JSON_VALUE]
   )
   @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
-  @Operation(summary = "Match prisoners by criteria", description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role")
+  @Operation(
+    summary = "Match prisoners by criteria",
+    description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role"
+  )
   @Tag(name = "Global search")
   @Tag(name = "Popular")
   fun globalFindByCriteria(
@@ -53,7 +56,8 @@ class GlobalSearchResource(
     security = [SecurityRequirement(name = "ROLE_VIEW_PRISONER_DATA"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
   )
   @Tag(name = "Popular")
-  fun findByPrisonNumber(@PathVariable id: String) = prisonerIndexService.get(id).takeIf { it != null } ?: throw NotFoundException("$id not found")
+  fun findByPrisonNumber(@PathVariable id: String) =
+    prisonerIndexService.get(id).takeIf { it != null } ?: throw NotFoundException("$id not found")
 
   @GetMapping("/synthetic-monitor")
   @Tag(name = "Elastic Search index maintenance")
@@ -70,7 +74,7 @@ class GlobalSearchResource(
       PageRequest.of(0, 10)
     )
     val mid = System.currentTimeMillis()
-    val totalNomisNumber = prisonerIndexService.getTotalNomisNumber()
+    val totalNomisNumber = getTotalNomisNumber()
     val totalIndexNumber = prisonerIndexService.countIndex(indexStatusService.getCurrentIndex().currentIndex)
     val end = System.currentTimeMillis()
 
@@ -86,4 +90,29 @@ class GlobalSearchResource(
       null
     )
   }
+
+  @GetMapping("/compare-index")
+  @PreAuthorize("hasRole('ROLE_PRISONER_SEARCH')")
+  fun compareIndex() {
+    val start = System.currentTimeMillis()
+    val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+    val end = System.currentTimeMillis()
+    telemetryClient.trackEvent(
+      "index-report",
+      mapOf(
+        "onlyInIndex" to toLogMessage(onlyInIndex),
+        "onlyInNomis" to toLogMessage(onlyInNomis),
+        "timeMs" to (end - start).toString(),
+      ),
+      null
+    )
+  }
+
+  private val cutoff = 50
+
+  private fun toLogMessage(onlyList: List<String>): String {
+    return if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
+  }
+
+  private fun getTotalNomisNumber(): Int = prisonerIndexService.getAllNomisOffenders(0, 1).totalRows.toInt()
 }

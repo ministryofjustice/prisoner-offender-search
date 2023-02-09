@@ -24,7 +24,7 @@ class NomisService(
       .header("Page-Offset", offset.toString())
       .header("Page-Limit", size.toString())
       .exchange()
-      .block(offenderTimeout.multipliedBy(6))?.let {
+      .block(Duration.ofMinutes(10))?.let {
         OffenderResponse(
           it.bodyToMono(ids).block(),
           it.headers().header("Total-Records").first().toLongOrNull() ?: 0
