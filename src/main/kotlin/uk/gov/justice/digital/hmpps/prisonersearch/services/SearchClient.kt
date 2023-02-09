@@ -12,7 +12,6 @@ import org.elasticsearch.client.core.CountResponse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.stereotype.Service
-import org.apache.http.client.config.RequestConfig
 
 private const val ONE_MINUTE = 60000
 
