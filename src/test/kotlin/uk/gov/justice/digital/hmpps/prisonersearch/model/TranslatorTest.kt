@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.Alert
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalAttributes
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalCharacteristic
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalMark
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictivePatient
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.SentenceDetail
 import java.math.BigDecimal
@@ -394,6 +395,27 @@ class TranslatorTest {
     assertThat(prisoner.shapeOfFace).isEqualTo("Bullet")
     assertThat(prisoner.build).isEqualTo("Proportional")
     assertThat(prisoner.shoeSize).isEqualTo(10)
+  }
+
+  @Test
+  internal fun `Physical Marks are mapped`() {
+    val prisoner = PrisonerA(
+      ob = aBooking().copy(
+        physicalMarks = listOf(
+          PhysicalMark("TAT", "Left", "Elbow", "Upper", "Comment here", null),
+          PhysicalMark("TAT", "Right", "Foot", "Lower", null, null),
+          PhysicalMark("MARK", null, "Ear", null, "Some comment", null),
+          PhysicalMark("OTH", "Centre", "Arm", null, null, null),
+          PhysicalMark("SCAR", null, "Torso", null, null, null),
+        )
+      ),
+      incentiveLevel = null,
+      restrictedPatientData = null,
+    )
+    assertThat(prisoner.tattoos).containsExactly(BodyPartDetail("Elbow", "Comment here"), BodyPartDetail("Foot", null))
+    assertThat(prisoner.marks).containsExactly(BodyPartDetail("Ear", "Some comment"))
+    assertThat(prisoner.scars).containsExactly(BodyPartDetail("Torso", null))
+    assertThat(prisoner.otherMarks).containsExactly(BodyPartDetail("Arm", null))
   }
 }
 

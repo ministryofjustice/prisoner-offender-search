@@ -64,6 +64,16 @@ fun Prisoner.translate(existingPrisoner: Prisoner?, ob: OffenderBooking, incenti
       "SHOESIZE" -> this.shoeSize = it.detail?.toIntOrNull()
     }
   }
+  ob.physicalMarks?.forEach { pm ->
+    pm.bodyPart?.let { BodyPartDetail(it, pm.comment) }?.let { bodyPart ->
+      when (pm.type) {
+        "TAT" -> this.tattoos = this.tattoos?.plus(bodyPart) ?: listOf(bodyPart)
+        "SCAR" -> this.scars = this.scars?.plus(bodyPart) ?: listOf(bodyPart)
+        "MARK" -> this.marks = this.marks?.plus(bodyPart) ?: listOf(bodyPart)
+        "OTH" -> this.otherMarks = this.otherMarks?.plus(bodyPart) ?: listOf(bodyPart)
+      }
+    }
+  }
 
   this.nationality = ob.profileInformation?.firstOrNull { p -> p.type == "NAT" }?.resultValue
   this.religion = ob.profileInformation?.firstOrNull { p -> p.type == "RELF" }?.resultValue

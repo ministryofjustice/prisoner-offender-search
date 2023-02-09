@@ -54,7 +54,7 @@ open class Prisoner : Diffable<Prisoner> {
     mainField = Field(type = FieldType.Text),
     otherFields = [
       InnerField(type = FieldType.Keyword, suffix = "keyword")
-    ]
+    ],
   )
   @Schema(required = true, description = "First Name", example = "Robert")
   @DiffableProperty(DiffCategory.PERSONAL_DETAILS)
@@ -68,7 +68,7 @@ open class Prisoner : Diffable<Prisoner> {
     mainField = Field(type = FieldType.Text),
     otherFields = [
       InnerField(type = FieldType.Keyword, suffix = "keyword")
-    ]
+    ],
   )
   @Schema(required = true, description = "Last name", example = "Larsen")
   @DiffableProperty(DiffCategory.PERSONAL_DETAILS)
@@ -154,7 +154,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Legal Status",
     example = "SENTENCED",
-    allowableValues = ["RECALL", "DEAD", "INDETERMINATE_SENTENCE", "SENTENCED", "CONVICTED_UNSENTENCED", "CIVIL_PRISONER", "IMMIGRATION_DETAINEE", "REMAND", "UNKNOWN", "OTHER"]
+    allowableValues = ["RECALL", "DEAD", "INDETERMINATE_SENTENCE", "SENTENCED", "CONVICTED_UNSENTENCED", "CIVIL_PRISONER", "IMMIGRATION_DETAINEE", "REMAND", "UNKNOWN", "OTHER"],
   )
   @DiffableProperty(DiffCategory.STATUS)
   var legalStatus: String? = null
@@ -244,7 +244,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Indicates which type of non-DTO release date is the effective release date. One of 'ARD’, 'CRD’, ‘NPD’ or 'PRRD’.",
     example = "ARD",
-    allowableValues = ["ARD", "CRD", "NPD", "PRRD"]
+    allowableValues = ["ARD", "CRD", "NPD", "PRRD"],
   )
   @DiffableProperty(DiffCategory.SENTENCE)
   var nonDtoReleaseDateType: String? = null
@@ -331,7 +331,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Hair colour. From PROFILE_CODES table where PROFILE_TYPE = HAIR. Allowable values extracted 07/02/2023.",
     example = "Blonde",
-    allowableValues = ["Bald", "Balding", "Black", "Blonde", "Brown", "Brunette", "Dark", "Dyed", "Ginger", "Grey", "Light", "Mouse", "Multi-coloured", "Red", "White"]
+    allowableValues = ["Bald", "Balding", "Black", "Blonde", "Brown", "Brunette", "Dark", "Dyed", "Ginger", "Grey", "Light", "Mouse", "Multi-coloured", "Red", "White"],
   )
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var hairColour: String? = null
@@ -339,7 +339,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Right eye colour. From PROFILE_CODES table where PROFILE_TYPE = R_EYE_C. Allowable values extracted 07/02/2023.",
     example = "Green",
-    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"]
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"],
   )
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var rightEyeColour: String? = null
@@ -347,7 +347,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Left eye colour. From PROFILE_CODES table where PROFILE_TYPE = L_EYE_C. Allowable values extracted 07/02/2023.",
     example = "Hazel",
-    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"]
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"],
   )
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var leftEyeColour: String? = null
@@ -355,7 +355,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Facial hair. From PROFILE_CODES table where PROFILE_TYPE = FACIAL_HAIR. Allowable values extracted 07/02/2023.",
     example = "Clean Shaven",
-    allowableValues = ["Full Beard", "Clean Shaven", "Goatee Beard", "Moustache Only", "Not Applicable (Female Offender)", "No Facial Hair", "Sideburns"]
+    allowableValues = ["Full Beard", "Clean Shaven", "Goatee Beard", "Moustache Only", "Not Applicable (Female Offender)", "No Facial Hair", "Sideburns"],
   )
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var facialHair: String? = null
@@ -363,7 +363,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Shape of face. From PROFILE_CODES table where PROFILE_TYPE = FACE. Allowable values extracted 07/02/2023.",
     example = "Round",
-    allowableValues = ["Angular", "Bullet", "Oval", "Round", "Square", "Triangular"]
+    allowableValues = ["Angular", "Bullet", "Oval", "Round", "Square", "Triangular"],
   )
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var shapeOfFace: String? = null
@@ -371,7 +371,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Schema(
     description = "Build. From PROFILE_CODES table where PROFILE_TYPE = BUILD. Allowable values extracted 07/02/2023.",
     example = "Muscular",
-    allowableValues = ["Fat", "Frail", "Heavy", "Medium", "Muscular", "Obese", "Proportional", "Slight", "Small", "Stocky", "Stooped", "Thin"]
+    allowableValues = ["Fat", "Frail", "Heavy", "Medium", "Muscular", "Obese", "Proportional", "Slight", "Small", "Stocky", "Stooped", "Thin"],
   )
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var build: String? = null
@@ -383,12 +383,49 @@ open class Prisoner : Diffable<Prisoner> {
   @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
   var shoeSize: Int? = null
 
+  @Schema(
+    description = "List of parts of the body that have tattoos. From REFERENCE_CODES table where DOMAIN = BODY_PART. Allowable values extracted 08/02/2023.",
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var tattoos: List<BodyPartDetail>? = null
+
+  @Schema(
+    description = "List of parts of the body that have scars. From REFERENCE_CODES table where DOMAIN = BODY_PART. Allowable values extracted 08/02/2023.",
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var scars: List<BodyPartDetail>? = null
+
+  @Schema(
+    description = "List of parts of the body that have marks. From REFERENCE_CODES table where DOMAIN = BODY_PART. Allowable values extracted 08/02/2023.",
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var marks: List<BodyPartDetail>? = null
+
+  @Schema(
+    description = "List of parts of the body that have other marks. From REFERENCE_CODES table where DOMAIN = BODY_PART. Allowable values extracted 08/02/2023.",
+  )
+  @DiffableProperty(DiffCategory.PHYSICAL_DETAILS)
+  var otherMarks: List<BodyPartDetail>? = null
+
   override fun diff(other: Prisoner): DiffResult<Prisoner> = getDiffResult(this, other)
 
   @get:JsonIgnore
   val active: Boolean
     get() = status?.startsWith("ACTIVE") ?: false
 }
+
+data class BodyPartDetail(
+  @Schema(
+    description = "Part of the body that has the mark. From REFERENCE_CODES table where DOMAIN = BODY_PART. Allowable values extracted 08/02/2023.",
+    example = "Head",
+    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+  )
+  var bodyPart: String? = null,
+  @Schema(
+    description = "Optional free text comment describing the mark",
+    example = "Skull and crossbones covering chest",
+  ) var comment: String? = null,
+)
 
 @Document(indexName = "prisoner-search-a")
 class PrisonerA : Prisoner()
