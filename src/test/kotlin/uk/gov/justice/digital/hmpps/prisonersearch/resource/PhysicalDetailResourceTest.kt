@@ -212,54 +212,6 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `bad request when heights less than 0`() {
-    webTestClient.post().uri("/physical-detail")
-      .bodyValue(
-        PhysicalDetailRequest(minHeight = -100, maxHeight = -200, prisonIds = listOf("MDI"))
-      )
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isBadRequest
-  }
-
-  @Test
-  fun `bad request when heights inverted`() {
-    webTestClient.post().uri("/physical-detail")
-      .bodyValue(
-        PhysicalDetailRequest(minHeight = 100, maxHeight = 50, prisonIds = listOf("MDI"))
-      )
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isBadRequest
-  }
-
-  @Test
-  fun `bad request when weights inverted`() {
-    webTestClient.post().uri("/physical-detail")
-      .bodyValue(
-        PhysicalDetailRequest(minWeight = 100, maxWeight = 50, prisonIds = listOf("MDI"))
-      )
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isBadRequest
-  }
-
-  @Test
-  fun `bad request when weights less than 0`() {
-    webTestClient.post().uri("/physical-detail")
-      .bodyValue(
-        PhysicalDetailRequest(minWeight = -100, maxWeight = -200, prisonIds = listOf("MDI"))
-      )
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isBadRequest
-  }
-
-  @Test
   fun `can perform a detail search for ROLE_GLOBAL_SEARCH role`() {
     webTestClient.post().uri("/physical-detail")
       .bodyValue(PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI")))
@@ -311,6 +263,78 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
 
   @Nested
   inner class `height and weight tests` {
+    @Test
+    fun `bad request when min height less than 0`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(minHeight = -100, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when max height less than 0`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(maxHeight = -100, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when heights inverted`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(minHeight = 100, maxHeight = 50, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when weights inverted`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(minWeight = 100, maxWeight = 50, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when min weight less than 0`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(minWeight = -100, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when max weight less than 0`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(maxWeight = -200, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
     @Test
     fun `find by minimum height`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(minHeight = 170, prisonIds = listOf("MDI")),
@@ -448,6 +472,42 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       detailRequest = PhysicalDetailRequest(build = "Proportional", prisonIds = listOf("AGI")),
       expectedPrisoners = listOf("G7090AD", "G7090BC"),
     )
+
+    @Test
+    fun `bad request when shoe size inverted`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(minShoeSize = 100, maxShoeSize = 50, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when min shoe size less than 0`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(minShoeSize = -100, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `bad request when max shoe size less than 0`() {
+      webTestClient.post().uri("/physical-detail")
+        .bodyValue(
+          PhysicalDetailRequest(maxShoeSize = -200, prisonIds = listOf("MDI"))
+        )
+        .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
+        .header("Content-Type", "application/json")
+        .exchange()
+        .expectStatus().isBadRequest
+    }
 
     @Test
     fun `find by minimum shoe size`(): Unit = physicalDetailSearch(
