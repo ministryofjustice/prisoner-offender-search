@@ -11,15 +11,21 @@ import org.elasticsearch.client.core.CountResponse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.stereotype.Service
+import org.apache.http.client.config.RequestConfig
+
+private const val ONE_MINUTE = 60000
 
 @Service
 class SearchClient(
   private val elasticsearchClient: RestHighLevelClient,
   @param:Qualifier("elasticsearchOperations") private val elasticsearchOperations: ElasticsearchOperations
 ) {
+  private val requestOptions =
+    RequestOptions.DEFAULT.toBuilder().setRequestConfig(RequestConfig.custom().setSocketTimeout(ONE_MINUTE).build()).build()
+
   fun search(searchRequest: SearchRequest): SearchResponse = elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT)
   fun count(countRequest: CountRequest): CountResponse = elasticsearchClient.count(countRequest, RequestOptions.DEFAULT)
   fun lowLevelClient(): RestClient = elasticsearchClient.lowLevelClient
   fun elasticsearchOperations(): ElasticsearchOperations = elasticsearchOperations
-  fun scroll(searchScrollRequest: SearchScrollRequest): SearchResponse = elasticsearchClient.scroll(searchScrollRequest, RequestOptions.DEFAULT)
+  fun scroll(searchScrollRequest: SearchScrollRequest): SearchResponse = elasticsearchClient.scroll(searchScrollRequest, requestOptions)
 }
