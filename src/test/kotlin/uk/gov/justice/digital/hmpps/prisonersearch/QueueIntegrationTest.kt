@@ -45,6 +45,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.MatchRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalAttributes
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalCharacteristic
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PhysicalMark
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PossibleMatchCriteria
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import java.time.Duration
@@ -427,6 +428,20 @@ abstract class QueueIntegrationTest : IntegrationTest() {
           pcs.add(PhysicalCharacteristic("SHOESIZE", "Shoe Size", it.toString(), null))
         }
       },
+      physicalMarks = mutableListOf<PhysicalMark>().also { pms ->
+        this.physicalMarks?.tattoo?.forEach {
+          pms.add(PhysicalMark("TAT", null, it.bodyPart, null, it.comment, null))
+        }
+        this.physicalMarks?.mark?.forEach {
+          pms.add(PhysicalMark("MARK", null, it.bodyPart, null, it.comment, null))
+        }
+        this.physicalMarks?.other?.forEach {
+          pms.add(PhysicalMark("OTH", null, it.bodyPart, null, it.comment, null))
+        }
+        this.physicalMarks?.scar?.forEach {
+          pms.add(PhysicalMark("SCAR", null, it.bodyPart, null, it.comment, null))
+        }
+      }
     ).let {
       if (released) {
         it.copy(
@@ -465,6 +480,7 @@ data class PrisonerBuilder(
   val ethnicity: String? = null,
   val aliases: List<AliasBuilder> = listOf(),
   val physicalCharacteristics: PhysicalCharacteristicBuilder? = null,
+  val physicalMarks: PhysicalMarkBuilder? = null,
 )
 
 data class PhysicalCharacteristicBuilder(
@@ -475,6 +491,17 @@ data class PhysicalCharacteristicBuilder(
   val shapeOfFace: String? = null,
   val build: String? = null,
   val shoeSize: Int? = null,
+)
+data class PhysicalMarkBuilder(
+  val mark: List<BodyPartBuilder>? = null,
+  val other: List<BodyPartBuilder>? = null,
+  val scar: List<BodyPartBuilder>? = null,
+  val tattoo: List<BodyPartBuilder>? = null,
+)
+
+data class BodyPartBuilder(
+  val bodyPart: String,
+  val comment: String? = null,
 )
 
 data class AliasBuilder(

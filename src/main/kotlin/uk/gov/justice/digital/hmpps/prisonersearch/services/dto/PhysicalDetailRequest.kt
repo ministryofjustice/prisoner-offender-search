@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class PhysicalDetailRequest(
   @Schema(
     description = "List of prison codes to filter results by",
-    example = "['LEI', 'MDI']",
+    example = "['LEI', 'MDI'],",
     required = true,
   )
   val prisonIds: List<String>? = emptyList(),
@@ -19,7 +19,7 @@ data class PhysicalDetailRequest(
   @Schema(
     description = "Gender, searching on the description in the domain SEX in the REFERENCE_CODES table.",
     example = "Male",
-    allowableValues = ["Female", "Male", "Not Known / Not Recorded", "Not Specified (Indeterminate)", "Refused"]
+    allowableValues = ["Female", "Male", "Not Known / Not Recorded", "Not Specified (Indeterminate)", "Refused"],
   )
   val gender: String? = null,
 
@@ -34,7 +34,7 @@ data class PhysicalDetailRequest(
       "Needs to be confirmed following Merge", "Prefer not to say", "Chinese", "Other: Arab",
       "Other: Any other background", "White: Eng./Welsh/Scot./N.Irish/British", "White : Irish",
       "White: Gypsy or Irish Traveller", "White : Irish Traveller/Gypsy", "White: Any other background",
-    ]
+    ],
   )
   val ethnicity: String? = null,
 
@@ -65,37 +65,37 @@ data class PhysicalDetailRequest(
   @Schema(
     description = "Hair colour, searching on the description in the type HAIR in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
     example = "Brunette",
-    allowableValues = ["Bald", "Balding", "Black", "Blonde", "Brown", "Brunette", "Dark", "Dyed", "Ginger", "Grey", "Light", "Mouse", "Multi-coloured", "Red", "White"]
+    allowableValues = ["Bald", "Balding", "Black", "Blonde", "Brown", "Brunette", "Dark", "Dyed", "Ginger", "Grey", "Light", "Mouse", "Multi-coloured", "Red", "White"],
   )
   val hairColour: String? = null,
   @Schema(
     description = "Right eye colour, searching on the description in the type R_EYE_C in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
     example = "Green",
-    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White", ]
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"],
   )
   val rightEyeColour: String? = null,
   @Schema(
     description = "Left eye colour, searching on the description in the type L_EYE_C in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
     example = "Hazel",
-    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White", ]
+    allowableValues = ["Blue", "Brown", "Clouded", "Green", "Grey", "Hazel", "Missing", "Pink", "White"],
   )
   val leftEyeColour: String? = null,
   @Schema(
     description = "Facial hair, searching on the description in the type FACIAL_HAIR in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
     example = "Goatee Beard",
-    allowableValues = ["Full Beard", "Clean Shaven", "Goatee Beard", "Moustache Only", "Not Applicable (Female Offender)", "No Facial Hair", "Sideburns", ]
+    allowableValues = ["Full Beard", "Clean Shaven", "Goatee Beard", "Moustache Only", "Not Applicable (Female Offender)", "No Facial Hair", "Sideburns"],
   )
   val facialHair: String? = null,
   @Schema(
     description = "Shape of face, searching on the description in the type FACE in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
     example = "Bullet",
-    allowableValues = ["Angular", "Bullet", "Oval", "Round", "Square", "Triangular"]
+    allowableValues = ["Angular", "Bullet", "Oval", "Round", "Square", "Triangular"],
   )
   val shapeOfFace: String? = null,
   @Schema(
     description = "Physical build, searching on the description in the type BUILD in the PROFILE_CODES table. Allowable values extracted 07/02/2023.",
     example = "Medium",
-    allowableValues = ["Fat", "Frail", "Heavy", "Medium", "Muscular", "Obese", "Proportional", "Slight", "Small", "Stocky", "Stooped", "Thin", ]
+    allowableValues = ["Fat", "Frail", "Heavy", "Medium", "Muscular", "Obese", "Proportional", "Slight", "Small", "Stocky", "Stooped", "Thin"],
   )
   val build: String? = null,
 
@@ -112,8 +112,41 @@ data class PhysicalDetailRequest(
   val maxShoeSize: Int? = null,
 
   @Schema(
+    description = "List of body parts that have tattoos, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
+    example = "Finger",
+    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+  )
+  val tattoos: List<BodyPart>? = null,
+
+  @Schema(
+    description = "List of body parts that have marks, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
+    example = "Elbow",
+    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+  )
+  val marks: List<BodyPart>? = null,
+
+  @Schema(
+    description = "List of body parts that have scars, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
+    example = "Ankle",
+    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+  )
+  val scars: List<BodyPart>? = null,
+
+  @Schema(
+    description = "List of body parts that have a different mark from a tattoo, scar or mark, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
+    example = "Arm",
+    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+  )
+  val otherMarks: List<BodyPart>? = null,
+
+  @Schema(
     description = "Pagination options. Will default to the first page if omitted.",
     required = false,
   )
   val pagination: PaginationRequest = PaginationRequest(0, 10),
+)
+
+data class BodyPart(
+  val bodyPart: String? = null,
+  val comment: String? = null,
 )
