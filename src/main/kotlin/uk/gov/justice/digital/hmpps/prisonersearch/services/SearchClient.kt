@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import org.apache.http.client.config.RequestConfig
+import org.elasticsearch.action.search.ClearScrollRequest
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
@@ -28,4 +29,5 @@ class SearchClient(
   fun lowLevelClient(): RestClient = elasticsearchClient.lowLevelClient
   fun elasticsearchOperations(): ElasticsearchOperations = elasticsearchOperations
   fun scroll(searchScrollRequest: SearchScrollRequest): SearchResponse = elasticsearchClient.scroll(searchScrollRequest, requestOptions)
+  fun clearScroll(clearScrollRequest: ClearScrollRequest) = elasticsearchClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
 }

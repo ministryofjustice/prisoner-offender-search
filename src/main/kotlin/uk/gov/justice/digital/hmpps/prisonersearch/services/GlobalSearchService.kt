@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.commons.lang3.ArrayUtils
 import org.apache.lucene.search.join.ScoreMode
+import org.elasticsearch.action.search.ClearScrollRequest
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchScrollRequest
@@ -69,19 +70,23 @@ class GlobalSearchService(
 
   @Async
   fun doCompare() {
-    val start = System.currentTimeMillis()
-    val (onlyInIndex, onlyInNomis) = compareIndex()
-    val end = System.currentTimeMillis()
-    telemetryClient.trackEvent(
-      "index-report",
-      mapOf(
-        "onlyInIndex" to toLogMessage(onlyInIndex),
-        "onlyInNomis" to toLogMessage(onlyInNomis),
-        "timeMs" to (end - start).toString(),
-      ),
-      null
-    )
-    log.info("End of doCompare()")
+    try {
+      val start = System.currentTimeMillis()
+      val (onlyInIndex, onlyInNomis) = compareIndex()
+      val end = System.currentTimeMillis()
+      telemetryClient.trackEvent(
+        "index-report",
+        mapOf(
+          "onlyInIndex" to toLogMessage(onlyInIndex),
+          "onlyInNomis" to toLogMessage(onlyInNomis),
+          "timeMs" to (end - start).toString(),
+        ),
+        null
+      )
+      log.info("End of doCompare()")
+    } catch (e: Exception) {
+      log.error("compare failed", e)
+    }
   }
 
   private val cutoff = 50
@@ -106,7 +111,8 @@ class GlobalSearchService(
       )
 
     val scroll = Scroll(TimeValue.timeValueMinutes(1L))
-    var searchResponse = setupIndexSearch(scroll)
+    val searchResponse = setupIndexSearch(scroll)
+    log.info(searchResponse.toString())
 
     var scrollId = searchResponse.scrollId
     var searchHits = searchResponse.hits.hits
@@ -118,11 +124,17 @@ class GlobalSearchService(
 
       val scrollRequest = SearchScrollRequest(scrollId)
       scrollRequest.scroll(scroll)
-      searchResponse = searchClient.scroll(scrollRequest)
-
-      scrollId = searchResponse.scrollId
-      searchHits = searchResponse.hits.hits
+      val scrollResponse = searchClient.scroll(scrollRequest)
+      log.info(scrollResponse.toString())
+      scrollId = scrollResponse.scrollId
+      searchHits = scrollResponse.hits.hits
     }
+
+    val clearScrollRequest = ClearScrollRequest()
+    clearScrollRequest.addScrollId(scrollId)
+    val clearScrollResponse = searchClient.clearScroll(clearScrollRequest)
+    log.info("clearScroll isSucceeded=${clearScrollResponse.isSucceeded}, numFreed=${clearScrollResponse.numFreed}")
+
     processIndexEnd(nomisContext, onlyInNomis, iter)
 
     return Pair(onlyInIndex, onlyInNomis)
@@ -133,7 +145,7 @@ class GlobalSearchService(
     val searchSourceBuilder = SearchSourceBuilder().apply {
       docValueField("prisonerNumber")
       sort("prisonerNumber")
-      size(10000)
+      size(1000)
     }
     val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
     searchRequest.scroll(scroll)

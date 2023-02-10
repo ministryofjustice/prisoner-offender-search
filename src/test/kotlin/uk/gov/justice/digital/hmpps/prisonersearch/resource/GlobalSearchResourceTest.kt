@@ -571,7 +571,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
       webTestClient.get().uri("/compare-index")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
         .exchange()
-        .expectStatus().isOk
+        .expectStatus().isAccepted
 
       verify(telemetryClient, timeout(2000).atLeastOnce()).trackEvent(
         eq("index-report"),
