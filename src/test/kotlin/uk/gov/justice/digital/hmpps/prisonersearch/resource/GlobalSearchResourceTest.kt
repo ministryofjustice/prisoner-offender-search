@@ -8,6 +8,7 @@ import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
+import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.AbstractSearchDataIntegrationTest
@@ -572,7 +573,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
         .exchange()
         .expectStatus().isOk
 
-      verify(telemetryClient, atLeastOnce()).trackEvent(
+      verify(telemetryClient, timeout(2000).atLeastOnce()).trackEvent(
         eq("index-report"),
         check<Map<String, String>> {
           assertThat(it["onlyInIndex"]).isEqualTo("[A1090AA, A7089FB, A7089FC, A7089FX, A7090AA, A7090AB, A7090AC, A7090AD, A7090AE, A7090AF, A7090BA, A7090BB, A7090BC, A7090BD, A7090BE, A7090BF]")

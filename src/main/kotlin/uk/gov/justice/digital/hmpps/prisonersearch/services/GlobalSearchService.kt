@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
@@ -65,6 +66,28 @@ class GlobalSearchService(
       throw BadRequestException("Invalid search  - please provide at least 1 search parameter")
     }
   }
+
+  @Async
+  fun doCompare() {
+    val start = System.currentTimeMillis()
+    val (onlyInIndex, onlyInNomis) = compareIndex()
+    val end = System.currentTimeMillis()
+    telemetryClient.trackEvent(
+      "index-report",
+      mapOf(
+        "onlyInIndex" to toLogMessage(onlyInIndex),
+        "onlyInNomis" to toLogMessage(onlyInNomis),
+        "timeMs" to (end - start).toString(),
+      ),
+      null
+    )
+    log.info("End of doCompare()")
+  }
+
+  private val cutoff = 50
+
+  private fun toLogMessage(onlyList: List<String>): String =
+    if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
 
   data class NomisContext(var nomisFinished: Boolean, var prisonerNumber: String?)
 
@@ -181,7 +204,10 @@ class GlobalSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(prisonerMatches, searchResults.hits.totalHits?.value ?: 0)
+      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(
+        prisonerMatches,
+        searchResults.hits.totalHits?.value ?: 0
+      )
     } ?: GlobalResult.NoMatch
   }
 
@@ -286,6 +312,7 @@ inline infix fun GlobalResult.onMatch(block: (GlobalResult.Match) -> Nothing): U
   return when (this) {
     is GlobalResult.NoMatch -> {
     }
+
     is GlobalResult.Match -> block(this)
   }
 }
