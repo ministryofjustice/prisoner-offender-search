@@ -112,30 +112,22 @@ data class PhysicalDetailRequest(
   val maxShoeSize: Int? = null,
 
   @Schema(
-    description = "List of body parts that have tattoos, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
-    example = "Finger",
-    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+    description = "List of body parts that have tattoos",
   )
   val tattoos: List<BodyPart>? = null,
 
   @Schema(
-    description = "List of body parts that have marks, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
-    example = "Elbow",
-    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+    description = "List of body parts that have marks",
   )
   val marks: List<BodyPart>? = null,
 
   @Schema(
-    description = "List of body parts that have scars, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
-    example = "Ankle",
-    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+    description = "List of body parts that have scars",
   )
   val scars: List<BodyPart>? = null,
 
   @Schema(
-    description = "List of body parts that have a different mark from a tattoo, scar or mark, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
-    example = "Arm",
-    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+    description = "List of body parts that have a different mark",
   )
   val otherMarks: List<BodyPart>? = null,
 
@@ -156,6 +148,15 @@ data class PhysicalDetailRequest(
 )
 
 data class BodyPart(
+  @Schema(
+    description = "Body part that has the physical mark, searching on the description in the type BODY_PART in the REFERENCE_CODES table. Allowable values extracted 08/02/2023.",
+    example = "Arm",
+    allowableValues = ["Ankle", "Arm", "Ear", "Elbow", "Face", "Finger", "Foot", "Hand", "Head", "Knee", "Leg", "Lip", "Neck", "Nose", "Shoulder", "Thigh", "Toe", "Torso"],
+  )
   val bodyPart: String? = null,
+  @Schema(
+    description = "Comment on the physical mark.",
+    example = "dragon",
+  )
   val comment: String? = null,
 )

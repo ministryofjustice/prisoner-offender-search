@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
-import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -25,15 +24,23 @@ import javax.validation.Valid
 @Validated
 @RequestMapping(value = ["/physical-detail"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
+@Tag(name = "Experimental")
 class PhysicalDetailResource(private val physicalDetailService: PhysicalDetailService) {
   // A hack to allow swagger to determine the response schema with a generic content
   abstract class PhysicalDetailResponse : Page<Prisoner>
 
-  @Hidden
   @Operation(
-    summary = "Physical details search for prisoners within a prison / group of prisons - returns a paginated result set",
+    summary = "*** BETA *** Physical details search for prisoners within a prison / group of prisons - returns a paginated result set",
     description = """
+      BETA endpoint - physical details are not currently re-indexed if they change so results will be out of date / incorrect.
       Search by physical details.
+      If a cell location is provided then only one prison can be supplied, otherwise multiple prisons are allowed.
+      If lenient is set to false (default) then all supplied physical details must match in order for results to be returned.
+      If lenient is set to true then at least one physical detail must match.
+      Searches will return results for partial string matches, so searching for an ethnicity of white will return all
+      prisoners with ethnicity of White: Eng./Welsh/Scot./N.Irish/British, White: Irish etc.
+      Results are ordered so that prisoners that match the most criteria are returned first, then secondary order is by
+      prisoner number.
       Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
       """,
     security = [SecurityRequirement(name = "ROLE_GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
