@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class PhysicalDetailRequest(
   @Schema(
     description = "List of prison codes to filter results by",
-    example = "['LEI', 'MDI'],",
+    example = "['LEI', 'MDI']",
     required = true,
   )
   val prisonIds: List<String>? = emptyList(),
