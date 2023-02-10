@@ -94,24 +94,7 @@ class GlobalSearchResource(
   @GetMapping("/compare-index")
   @PreAuthorize("hasRole('ROLE_PRISONER_SEARCH')")
   fun compareIndex() {
-    val start = System.currentTimeMillis()
-    val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
-    val end = System.currentTimeMillis()
-    telemetryClient.trackEvent(
-      "index-report",
-      mapOf(
-        "onlyInIndex" to toLogMessage(onlyInIndex),
-        "onlyInNomis" to toLogMessage(onlyInNomis),
-        "timeMs" to (end - start).toString(),
-      ),
-      null
-    )
-  }
-
-  private val cutoff = 50
-
-  private fun toLogMessage(onlyList: List<String>): String {
-    return if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
+    globalSearchService.doCompare()
   }
 
   private fun getTotalNomisNumber(): Int = prisonerIndexService.getAllNomisOffenders(0, 1).totalRows.toInt()

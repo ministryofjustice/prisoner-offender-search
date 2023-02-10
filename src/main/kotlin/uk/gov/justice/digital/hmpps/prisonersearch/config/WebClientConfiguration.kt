@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.codec.ClientCodecConfigurer
+import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
@@ -15,6 +16,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
+@EnableAsync
 class WebClientConfiguration(
   @Value("\${api.base.url.nomis}") val nomisBaseUri: String,
   @Value("\${api.base.url.incentives}") val incentivesBaseUri: String
