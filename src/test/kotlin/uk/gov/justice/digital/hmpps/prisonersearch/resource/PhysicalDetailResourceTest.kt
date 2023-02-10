@@ -104,7 +104,10 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
           )
         ),
         PrisonerBuilder(
-          prisonerNumber = "G7090AD", agencyId = "AGI", cellLocation = "H-1-004", gender = "Not Known / Not Recorded",
+          prisonerNumber = "G7090AD",
+          agencyId = "AGI",
+          cellLocation = "H-1-004",
+          gender = "Not Known / Not Recorded",
           physicalCharacteristics = PhysicalCharacteristicBuilder(
             hairColour = "Red",
             rightEyeColour = "Green",
@@ -391,6 +394,16 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       assertThat(it).extracting("heightCentimetres").containsExactly(202, 200)
       assertThat(it).extracting("weightKilograms").containsExactly(100, 80)
     }
+
+    @Test
+    fun `lenient find by height and weight`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(minWeight = 80, maxWeight = 150, maxHeight = 200, lenient = true, prisonIds = listOf("MDI")),
+      expectedPrisoners = listOf(
+        "H7090BB", // matches on height and weight so appears first
+        "H1090AA", // matches only on weight
+        "H7089EY", // matches only on weight
+      ),
+    )
   }
 
   @Nested
@@ -402,9 +415,15 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     )
 
     @Test
+    fun `find by gender ignores female when searching for male`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(gender = "Male", prisonIds = listOf("AGI")),
+      expectedPrisoners = listOf(),
+    )
+
+    @Test
     fun `find by gender includes aliases`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(gender = "Not Known / Not Recorded", prisonIds = listOf("AGI", "LEI")),
-      expectedPrisoners = listOf("G7089EZ", "G7090AD"),
+      expectedPrisoners = listOf("G7090AD", "G7089EZ"),
     )
 
     @Test
@@ -433,6 +452,33 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       assertThat(it).extracting("gender").containsExactly("Female", "Male")
       assertThat(it).extracting("ethnicity").containsExactly("White: Any other background", "Prefer not to say")
     }
+
+    @Test
+    fun `no lenient search returns no matches for gender and ethnicity`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White: Any other background",
+        gender = "Not Known / Not Recorded",
+        prisonIds = listOf("AGI", "LEI"),
+        lenient = false,
+      ),
+      expectedPrisoners = listOf(),
+    )
+
+    @Test
+    fun `lenient search returns partial matches for gender and ethnicity`(): Unit = physicalDetailSearch(
+      detailRequest = PhysicalDetailRequest(
+        ethnicity = "White",
+        gender = "Not Known / Not Recorded",
+        prisonIds = listOf("AGI", "LEI"),
+        lenient = true,
+      ),
+      expectedPrisoners = listOf(
+        "G7090AD", // gender not known
+        "G7090AC", // ethnicity white: any other
+        "G7089EZ", // alias gender not known
+        "G7090BA", // alias ethnicity white: any other
+      ),
+    )
   }
 
   @Nested
@@ -714,6 +760,33 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
       )
     }
   }
+
+  @Test
+  fun `lenient search doesn't have any mandatory fields`(): Unit = physicalDetailSearch(
+    detailRequest = PhysicalDetailRequest(
+      prisonIds = listOf("AGI", "LEI", "MDI"),
+      lenient = true,
+      ethnicity = "february",
+      gender = "february",
+      minHeight = 10,
+      maxHeight = 200,
+      minWeight = 10,
+      maxWeight = 210,
+      minShoeSize = 1,
+      maxShoeSize = 2,
+      hairColour = "february",
+      rightEyeColour = "february",
+      leftEyeColour = "february",
+      facialHair = "february",
+      shapeOfFace = "february",
+      build = "february",
+      tattoos = listOf(BodyPart(bodyPart = "february")),
+      scars = listOf(BodyPart(bodyPart = "february")),
+      otherMarks = listOf(BodyPart(bodyPart = "february")),
+      marks = listOf(BodyPart(bodyPart = "february")),
+    ),
+    expectedPrisoners = listOf("H7089EY", "H7089EZ", "H7090BA", "H7090BB", "H1090AA", "G7090BC", "G7089EZ", "G7090AC", "G7090AD", "G7090BA"),
+  )
 
   private fun physicalDetailSearch(
     detailRequest: PhysicalDetailRequest,
