@@ -402,11 +402,11 @@ class TranslatorTest {
     val prisoner = PrisonerA(
       ob = aBooking().copy(
         physicalMarks = listOf(
-          PhysicalMark("TAT", "Left", "Elbow", "Upper", "Comment here", null),
-          PhysicalMark("TAT", "Right", "Foot", "Lower", null, null),
-          PhysicalMark("MARK", null, "Ear", null, "Some comment", null),
-          PhysicalMark("OTH", "Centre", "Arm", null, null, null),
-          PhysicalMark("SCAR", null, "Torso", null, null, null),
+          PhysicalMark("Tattoo", "Left", "Elbow", "Upper", "Comment here", null),
+          PhysicalMark("Tattoo", "Right", "Foot", "Lower", null, null),
+          PhysicalMark("Mark", null, "Ear", null, "Some comment", null),
+          PhysicalMark("Other", "Centre", "Arm", null, null, null),
+          PhysicalMark("Scar", null, "Torso", null, null, null),
         )
       ),
       incentiveLevel = null,

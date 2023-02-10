@@ -430,16 +430,16 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       },
       physicalMarks = mutableListOf<PhysicalMark>().also { pms ->
         this.physicalMarks?.tattoo?.forEach {
-          pms.add(PhysicalMark("TAT", null, it.bodyPart, null, it.comment, null))
+          pms.add(PhysicalMark("Tattoo", null, it.bodyPart, null, it.comment, null))
         }
         this.physicalMarks?.mark?.forEach {
-          pms.add(PhysicalMark("MARK", null, it.bodyPart, null, it.comment, null))
+          pms.add(PhysicalMark("Mark", null, it.bodyPart, null, it.comment, null))
         }
         this.physicalMarks?.other?.forEach {
-          pms.add(PhysicalMark("OTH", null, it.bodyPart, null, it.comment, null))
+          pms.add(PhysicalMark("Other", null, it.bodyPart, null, it.comment, null))
         }
         this.physicalMarks?.scar?.forEach {
-          pms.add(PhysicalMark("SCAR", null, it.bodyPart, null, it.comment, null))
+          pms.add(PhysicalMark("Scar", null, it.bodyPart, null, it.comment, null))
         }
       }
     ).let {
