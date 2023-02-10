@@ -67,10 +67,10 @@ fun Prisoner.translate(existingPrisoner: Prisoner?, ob: OffenderBooking, incenti
   ob.physicalMarks?.forEach { pm ->
     pm.bodyPart?.let { BodyPartDetail(it, pm.comment) }?.let { bodyPart ->
       when (pm.type) {
-        "TAT" -> this.tattoos = this.tattoos?.plus(bodyPart) ?: listOf(bodyPart)
-        "SCAR" -> this.scars = this.scars?.plus(bodyPart) ?: listOf(bodyPart)
-        "MARK" -> this.marks = this.marks?.plus(bodyPart) ?: listOf(bodyPart)
-        "OTH" -> this.otherMarks = this.otherMarks?.plus(bodyPart) ?: listOf(bodyPart)
+        "Tattoo" -> this.tattoos = this.tattoos?.plus(bodyPart) ?: listOf(bodyPart)
+        "Scar" -> this.scars = this.scars?.plus(bodyPart) ?: listOf(bodyPart)
+        "Mark" -> this.marks = this.marks?.plus(bodyPart) ?: listOf(bodyPart)
+        "Other" -> this.otherMarks = this.otherMarks?.plus(bodyPart) ?: listOf(bodyPart)
       }
     }
   }
