@@ -112,7 +112,6 @@ class GlobalSearchService(
 
     val scroll = Scroll(TimeValue.timeValueMinutes(1L))
     val searchResponse = setupIndexSearch(scroll)
-    log.info(searchResponse.toString())
 
     var scrollId = searchResponse.scrollId
     var searchHits = searchResponse.hits.hits
@@ -125,7 +124,6 @@ class GlobalSearchService(
       val scrollRequest = SearchScrollRequest(scrollId)
       scrollRequest.scroll(scroll)
       val scrollResponse = searchClient.scroll(scrollRequest)
-      log.info(scrollResponse.toString())
       scrollId = scrollResponse.scrollId
       searchHits = scrollResponse.hits.hits
     }
@@ -145,7 +143,7 @@ class GlobalSearchService(
     val searchSourceBuilder = SearchSourceBuilder().apply {
       docValueField("prisonerNumber")
       sort("prisonerNumber")
-      size(1000)
+      size(2000)
     }
     val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
     searchRequest.scroll(scroll)
