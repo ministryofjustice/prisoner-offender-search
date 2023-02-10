@@ -140,6 +140,15 @@ data class PhysicalDetailRequest(
   val otherMarks: List<BodyPart>? = null,
 
   @Schema(
+    description = """
+        Whether all terms are required to match. If set to true then only matches on all fields will return a result.
+        If set to false then matches will return a higher score than non matches, but all will be returned.
+        Prison and cell location will always be required to match.""",
+    example = "false",
+  )
+  val lenient: Boolean = false,
+
+  @Schema(
     description = "Pagination options. Will default to the first page if omitted.",
     required = false,
   )

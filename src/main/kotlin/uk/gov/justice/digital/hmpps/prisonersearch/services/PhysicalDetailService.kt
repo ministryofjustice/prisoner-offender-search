@@ -6,6 +6,7 @@ import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.index.query.QueryBuilders.boolQuery
 import org.elasticsearch.index.query.QueryBuilders.rangeQuery
@@ -91,114 +92,93 @@ class PhysicalDetailService(
       from(pageable.offset.toInt())
       sort("_score")
       sort("prisonerNumber")
+      minScore(0.01f) // needed so we exclude prisoners who are just matched by prison / cell location
       trackTotalHits(true)
       query(buildDetailQuery(detailRequest))
     }
   }
 
   private fun buildDetailQuery(detailRequest: PhysicalDetailRequest): BoolQueryBuilder {
-    val detailQuery = boolQuery().also {
-      it.should(QueryBuilders.matchAllQuery())
-    }
+    val detailQuery = boolQuery()
 
     with(detailRequest) {
-      // Filter by prison establishments provided
+      // Filter by prison establishments provided - must match
       prisonIds.takeIf { !it.isNullOrEmpty() && it[0].isNotBlank() }?.let {
+        // note that we use filter here as we don't want to influence the score
         detailQuery.filterWhenPresent("prisonId", it)
       }
 
-      // and restrict to single cell location prefix
+      // and restrict to single cell location prefix - must match
       val singlePrisonId = prisonIds?.singleOrNull()
       // if specified single prison then restrict to cell location
       cellLocationPrefix.takeIf { singlePrisonId != null }?.removePrefix("$singlePrisonId-")
+        // note that we use filter here as we don't want to influence the score
         ?.let { detailQuery.filter(QueryBuilders.prefixQuery("cellLocation.keyword", it)) }
 
       gender?.let {
-        detailQuery.filter(
+        detailQuery.shouldOrMust(
+          lenient,
           boolQuery()
-            .should(QueryBuilders.matchQuery("gender", it))
-            .should(QueryBuilders.matchQuery("aliases.gender", it))
+            .should(QueryBuilders.matchPhraseQuery("gender", it))
+            .should(QueryBuilders.matchPhraseQuery("aliases.gender", it))
         )
       }
       ethnicity?.let {
-        detailQuery.filter(
+        detailQuery.shouldOrMust(
+          lenient,
           boolQuery()
             .should(QueryBuilders.matchPhraseQuery("ethnicity", it))
             .should(QueryBuilders.matchPhraseQuery("aliases.ethnicity", it))
         )
       }
 
-      minHeight?.let { detailQuery.filter(rangeQuery("heightCentimetres").gte(it)) }
-      maxHeight?.let { detailQuery.filter(rangeQuery("heightCentimetres").lte(it)) }
+      minHeight?.let { detailQuery.shouldOrMust(lenient, rangeQuery("heightCentimetres").gte(it)) }
+      maxHeight?.let { detailQuery.shouldOrMust(lenient, rangeQuery("heightCentimetres").lte(it)) }
 
-      minWeight?.let { detailQuery.filter(rangeQuery("weightKilograms").gte(it)) }
-      maxWeight?.let { detailQuery.filter(rangeQuery("weightKilograms").lte(it)) }
+      minWeight?.let { detailQuery.shouldOrMust(lenient, rangeQuery("weightKilograms").gte(it)) }
+      maxWeight?.let { detailQuery.shouldOrMust(lenient, rangeQuery("weightKilograms").lte(it)) }
 
-      hairColour?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("hairColour", it)) }
-      rightEyeColour?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("rightEyeColour", it)) }
-      leftEyeColour?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("leftEyeColour", it)) }
-      facialHair?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("facialHair", it)) }
-      shapeOfFace?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("shapeOfFace", it)) }
-      build?.let { detailQuery.filter(QueryBuilders.matchPhraseQuery("build", it)) }
+      hairColour?.let { detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("hairColour", it)) }
+      rightEyeColour?.let { detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("rightEyeColour", it)) }
+      leftEyeColour?.let { detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("leftEyeColour", it)) }
+      facialHair?.let { detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("facialHair", it)) }
+      shapeOfFace?.let { detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("shapeOfFace", it)) }
+      build?.let { detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("build", it)) }
 
-      minShoeSize?.let { detailQuery.filter(rangeQuery("shoeSize").gte(it)) }
-      maxShoeSize?.let { detailQuery.filter(rangeQuery("shoeSize").lte(it)) }
+      minShoeSize?.let { detailQuery.shouldOrMust(lenient, rangeQuery("shoeSize").gte(it)) }
+      maxShoeSize?.let { detailQuery.shouldOrMust(lenient, rangeQuery("shoeSize").lte(it)) }
 
       tattoos?.forEach { tattoo ->
-        detailQuery.filter(
-          boolQuery().mustAll(
-            buildList {
-              tattoo.bodyPart?.let {
-                add(QueryBuilders.matchQuery("tattoos.bodyPart", tattoo.bodyPart))
-              }
-              tattoo.comment?.let {
-                add(QueryBuilders.matchQuery("tattoos.comment", tattoo.comment))
-              }
-            }
-          )
-        )
+        tattoo.bodyPart?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("tattoos.bodyPart", tattoo.bodyPart))
+        }
+        tattoo.comment?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("tattoos.comment", tattoo.comment))
+        }
       }
       scars?.forEach { scar ->
-        detailQuery.filter(
-          boolQuery().mustAll(
-            buildList {
-              scar.bodyPart?.let {
-                add(QueryBuilders.matchQuery("scars.bodyPart", scar.bodyPart))
-              }
-              scar.comment?.let {
-                add(QueryBuilders.matchQuery("scars.comment", scar.comment))
-              }
-            }
-          )
-        )
+        scar.bodyPart?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("scars.bodyPart", scar.bodyPart))
+        }
+        scar.comment?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("scars.comment", scar.comment))
+        }
       }
       marks?.forEach { mark ->
-        detailQuery.filter(
-          boolQuery().mustAll(
-            buildList {
-              mark.bodyPart?.let {
-                add(QueryBuilders.matchQuery("marks.bodyPart", mark.bodyPart))
-              }
-              mark.comment?.let {
-                add(QueryBuilders.matchQuery("marks.comment", mark.comment))
-              }
-            }
-          )
-        )
+        mark.bodyPart?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("marks.bodyPart", mark.bodyPart))
+        }
+        mark.comment?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("marks.comment", mark.comment))
+        }
       }
       otherMarks?.forEach { other ->
-        detailQuery.filter(
-          boolQuery().mustAll(
-            buildList {
-              other.bodyPart?.let {
-                add(QueryBuilders.matchQuery("otherMarks.bodyPart", other.bodyPart))
-              }
-              other.comment?.let {
-                add(QueryBuilders.matchQuery("otherMarks.comment", other.comment))
-              }
-            }
-          )
-        )
+        other.bodyPart?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("otherMarks.bodyPart", other.bodyPart))
+        }
+        other.comment?.let {
+          detailQuery.shouldOrMust(lenient, QueryBuilders.matchPhraseQuery("otherMarks.comment", other.comment))
+        }
       }
     }
 
@@ -225,6 +205,8 @@ class PhysicalDetailService(
   private fun getSearchResult(response: SearchResponse): List<Prisoner> {
     val searchHits = response.hits.hits.asList()
     log.debug("Physical detail search: found {} hits", searchHits.size)
+    // Useful to find out what the score of each result is
+    // searchHits.forEach { log.debug("{} has score {}", it.id, it.score) }
     return searchHits.map { gson.fromJson(it.sourceAsString, Prisoner::class.java) }
   }
 
@@ -250,3 +232,6 @@ class PhysicalDetailService(
     telemetryClient.trackEvent("POSFindByPhysicalDetails", propertiesMap, metricsMap)
   }
 }
+
+private fun BoolQueryBuilder.shouldOrMust(lenient: Boolean, query: QueryBuilder) =
+  if (lenient) this.should(query) else this.must(query)
