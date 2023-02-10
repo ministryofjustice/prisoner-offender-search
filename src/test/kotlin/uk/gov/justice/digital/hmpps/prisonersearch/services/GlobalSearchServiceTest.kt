@@ -5,7 +5,9 @@ import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.lucene.search.TotalHits
 import org.assertj.core.api.Assertions.assertThat
+import org.elasticsearch.action.search.ClearScrollResponse
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.SearchResponse.Clusters
 import org.elasticsearch.action.search.SearchResponseSections
 import org.elasticsearch.common.bytes.BytesArray
 import org.elasticsearch.search.SearchHit
@@ -53,7 +55,7 @@ class GlobalSearchServiceTest {
     val hits =
       SearchHits(searchHits.toTypedArray(), TotalHits(offenders.size.toLong(), TotalHits.Relation.EQUAL_TO), 10f)
     val searchResponseSections = SearchResponseSections(hits, null, null, false, null, null, 5)
-    return SearchResponse(searchResponseSections, "myScroll", 8, 8, 0, 8, arrayOf(), null)
+    return SearchResponse(searchResponseSections, "myScroll", 8, 8, 0, 8, arrayOf(), Clusters.EMPTY)
   }
 
   @Nested
@@ -65,6 +67,7 @@ class GlobalSearchServiceTest {
       )
       whenever(searchClient.search(any())).thenReturn(resultsOf(prisonerNumbers.map { createPrisoner(it) }))
       whenever(searchClient.scroll(any())).thenReturn(resultsOf(emptyList()))
+      whenever(searchClient.clearScroll(any())).thenReturn(ClearScrollResponse(true, 1))
     }
 
     private fun setupNomis(vararg prisonerNumbers: String) {

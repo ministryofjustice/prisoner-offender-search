@@ -6,6 +6,7 @@ import org.apache.lucene.search.TotalHits.Relation.EQUAL_TO
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.SearchResponse.Clusters
 import org.elasticsearch.action.search.SearchResponseSections
 import org.elasticsearch.common.bytes.BytesArray
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -265,7 +266,7 @@ internal class MatchServiceTest {
     val searchHits = offenders.map { SearchHit(it.bookingId!!.toInt()).apply { sourceRef(BytesArray(objectMapper.writeValueAsBytes(it))) } }
     val hits = SearchHits(searchHits.toTypedArray(), TotalHits(offenders.size.toLong(), EQUAL_TO), 10f)
     val searchResponseSections = SearchResponseSections(hits, null, null, false, null, null, 5)
-    return SearchResponse(searchResponseSections, null, 8, 8, 0, 8, arrayOf(), null)
+    return SearchResponse(searchResponseSections, null, 8, 8, 0, 8, arrayOf(), Clusters.EMPTY)
   }
 
   private fun createPrisoner(lastName: String, bookingId: String): Prisoner {
