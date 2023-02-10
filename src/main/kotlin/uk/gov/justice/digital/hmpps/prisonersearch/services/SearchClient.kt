@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service
 
 private const val ONE_MINUTE = 60000
 
-private const val ONE_MINUTE = 60000
-
 @Service
 class SearchClient(
   private val elasticsearchClient: RestHighLevelClient,
