@@ -38,6 +38,12 @@ generic-service:
         }
     tlsSecretName: prisoner-offender-search-cert
 
+  resources:
+    limits:
+      memory: 856Mi
+    requests:
+      memory: 2Gi
+     
   env:
     SERVER_PORT: "8080"
     JAVA_OPTS: "-Xmx512m"
