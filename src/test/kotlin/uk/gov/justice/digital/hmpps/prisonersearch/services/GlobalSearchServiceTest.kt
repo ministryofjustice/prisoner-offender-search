@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.lucene.search.TotalHits
@@ -9,7 +8,6 @@ import org.elasticsearch.action.search.ClearScrollResponse
 import org.elasticsearch.action.search.SearchResponse
 import org.elasticsearch.action.search.SearchResponse.Clusters
 import org.elasticsearch.action.search.SearchResponseSections
-import org.elasticsearch.common.bytes.BytesArray
 import org.elasticsearch.search.SearchHit
 import org.elasticsearch.search.SearchHits
 import org.junit.jupiter.api.Nested
@@ -18,9 +16,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
-import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
+
+private const val dummyDocId = 100
 
 class GlobalSearchServiceTest {
 
@@ -29,8 +28,6 @@ class GlobalSearchServiceTest {
   private val searchClient = mock<SearchClient>()
   private val telemetryClient = mock<TelemetryClient>()
   private val authenticationHolder = mock<AuthenticationHolder>()
-
-  private val objectMapper = ObjectMapper()
 
   private val globalSearchService = GlobalSearchService(
     searchClient,
@@ -41,17 +38,8 @@ class GlobalSearchServiceTest {
     authenticationHolder,
   )
 
-  private fun createPrisoner(prisonerNumber: String): Prisoner =
-    Prisoner().also {
-      it.prisonerNumber = prisonerNumber
-    }
-
-  private val dummyDocId = 100
-
-  private fun resultsOf(offenders: List<Prisoner>): SearchResponse {
-
-    val searchHits =
-      offenders.map { SearchHit(dummyDocId).apply { sourceRef(BytesArray(objectMapper.writeValueAsBytes(it))) } }
+  private fun resultsOf(offenders: List<String>): SearchResponse {
+    val searchHits = offenders.map { SearchHit(dummyDocId, it, null, null, null) }
     val hits =
       SearchHits(searchHits.toTypedArray(), TotalHits(offenders.size.toLong(), TotalHits.Relation.EQUAL_TO), 10f)
     val searchResponseSections = SearchResponseSections(hits, null, null, false, null, null, 5)
@@ -65,7 +53,7 @@ class GlobalSearchServiceTest {
       whenever(indexStatusService.getCurrentIndex()).thenReturn(
         IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false)
       )
-      whenever(searchClient.search(any())).thenReturn(resultsOf(prisonerNumbers.map { createPrisoner(it) }))
+      whenever(searchClient.search(any())).thenReturn(resultsOf(prisonerNumbers.asList()))
       whenever(searchClient.scroll(any())).thenReturn(resultsOf(emptyList()))
       whenever(searchClient.clearScroll(any())).thenReturn(ClearScrollResponse(true, 1))
     }
