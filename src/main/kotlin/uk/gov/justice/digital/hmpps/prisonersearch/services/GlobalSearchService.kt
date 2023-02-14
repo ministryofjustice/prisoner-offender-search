@@ -13,6 +13,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -116,10 +117,10 @@ class GlobalSearchService(
     var scrollId = searchResponse.scrollId
     var searchHits = searchResponse.hits.hits
 
-    while (ArrayUtils.isNotEmpty(searchHits)) {
-      val allIndex = searchHits.map { it.sourceAsMap["prisonerNumber"] as String }
+    val allIndex = mutableListOf<String>()
 
-      processIndexScroll(allIndex, nomisContext, onlyInIndex, onlyInNomis, iter)
+    while (ArrayUtils.isNotEmpty(searchHits)) {
+      allIndex.addAll(searchHits.map { it.id })
 
       val scrollRequest = SearchScrollRequest(scrollId)
       scrollRequest.scroll(scroll)
@@ -127,12 +128,14 @@ class GlobalSearchService(
       scrollId = scrollResponse.scrollId
       searchHits = scrollResponse.hits.hits
     }
-
     val clearScrollRequest = ClearScrollRequest()
     clearScrollRequest.addScrollId(scrollId)
     val clearScrollResponse = searchClient.clearScroll(clearScrollRequest)
     log.info("clearScroll isSucceeded=${clearScrollResponse.isSucceeded}, numFreed=${clearScrollResponse.numFreed}")
 
+    allIndex.sort()
+
+    processIndexScroll(allIndex, nomisContext, onlyInIndex, onlyInNomis, iter)
     processIndexEnd(nomisContext, onlyInNomis, iter)
 
     return Pair(onlyInIndex, onlyInNomis)
@@ -141,8 +144,7 @@ class GlobalSearchService(
   private fun setupIndexSearch(scroll: Scroll): SearchResponse {
 
     val searchSourceBuilder = SearchSourceBuilder().apply {
-      docValueField("prisonerNumber")
-      sort("prisonerNumber")
+      fetchSource(FetchSourceContext.DO_NOT_FETCH_SOURCE)
       size(2000)
     }
     val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)

@@ -76,8 +76,8 @@ class GlobalSearchResource(
       PageRequest.of(0, 10)
     )
     val mid = System.currentTimeMillis()
-    val totalNomisNumber = getTotalNomisNumber()
     val totalIndexNumber = prisonerIndexService.countIndex(indexStatusService.getCurrentIndex().currentIndex)
+    val totalNomisNumber = getTotalNomisNumber()
     val end = System.currentTimeMillis()
 
     telemetryClient.trackEvent(
