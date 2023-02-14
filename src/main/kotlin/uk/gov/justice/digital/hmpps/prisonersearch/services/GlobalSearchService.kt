@@ -95,21 +95,13 @@ class GlobalSearchService(
   private fun toLogMessage(onlyList: List<String>): String =
     if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
 
-  data class NomisContext(var nomisFinished: Boolean, var prisonerNumber: String?)
-
   fun compareIndex(): Pair<List<String>, List<String>> {
-    val onlyInIndex = mutableListOf<String>()
-    val onlyInNomis = mutableListOf<String>()
 
     val allNomis =
-      prisonerIndexService.getAllNomisOffenders(0, Int.MAX_VALUE).offenderIds!!.sortedBy { it.offenderNumber }
-    val iter = allNomis.iterator()
-
-    val nomisContext =
-      NomisContext(
-        nomisFinished = !iter.hasNext(),
-        prisonerNumber = if (iter.hasNext()) iter.next().offenderNumber else null
-      )
+      prisonerIndexService.getAllNomisOffenders(0, Int.MAX_VALUE)
+        .offenderIds!!
+        .map { it.offenderNumber }
+        .sorted()
 
     val scroll = Scroll(TimeValue.timeValueMinutes(1L))
     val searchResponse = setupIndexSearch(scroll)
@@ -135,8 +127,8 @@ class GlobalSearchService(
 
     allIndex.sort()
 
-    processIndexScroll(allIndex, nomisContext, onlyInIndex, onlyInNomis, iter)
-    processIndexEnd(nomisContext, onlyInNomis, iter)
+    val onlyInIndex = allIndex - allNomis.toSet()
+    val onlyInNomis = allNomis - allIndex.toSet()
 
     return Pair(onlyInIndex, onlyInNomis)
   }
@@ -150,52 +142,6 @@ class GlobalSearchService(
     val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
     searchRequest.scroll(scroll)
     return searchClient.search(searchRequest)
-  }
-
-  private fun processIndexScroll(
-    allIndex: List<String>,
-    nomisContext: NomisContext,
-    onlyInIndex: MutableList<String>,
-    onlyInNomis: MutableList<String>,
-    iter: Iterator<OffenderId>
-  ) {
-    allIndex.forEach { index: String ->
-      if (nomisContext.nomisFinished) {
-        onlyInIndex.add(index)
-      } else {
-        while (index > nomisContext.prisonerNumber!!) {
-          onlyInNomis.add(nomisContext.prisonerNumber!!)
-          if (iter.hasNext()) {
-            nomisContext.prisonerNumber = iter.next().offenderNumber
-          } else {
-            nomisContext.nomisFinished = true
-            return@forEach
-          }
-        }
-        if (index == nomisContext.prisonerNumber) {
-          if (iter.hasNext()) {
-            nomisContext.prisonerNumber = iter.next().offenderNumber
-          } else {
-            nomisContext.nomisFinished = true
-          }
-        } else { // index < num
-          onlyInIndex.add(index)
-        }
-      }
-    }
-  }
-
-  private fun processIndexEnd(
-    nomisContext: NomisContext,
-    onlyInNomis: MutableList<String>,
-    iter: Iterator<OffenderId>
-  ) {
-    if (!nomisContext.nomisFinished) {
-      onlyInNomis.add(nomisContext.prisonerNumber!!)
-    }
-    while (iter.hasNext()) {
-      onlyInNomis.add(iter.next().offenderNumber)
-    }
   }
 
   private fun queryBy(
