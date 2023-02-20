@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
@@ -133,9 +136,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
         )
@@ -158,9 +161,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = true).toOffenderBooking())
         )
@@ -184,9 +187,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = false).toOffenderBooking())
         )
@@ -211,9 +214,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     // update the prisoner on ES
     prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(
               PrisonerBuilder(
@@ -237,15 +240,40 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `e2e - will send prisoner physical details change event to the domain topic when changes are made`() {
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", heightCentimetres = 200))
+
+    // update the prisoner on ES
+    prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
+    prisonMockServer.stubFor(
+      get(urlEqualTo("/api/offenders/A1239DD"))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+              PrisonerBuilder(
+                prisonerNumber = "A1239DD", heightCentimetres = 190
+              ).toOffenderBooking()
+            )
+        )
+    )
+    eventQueueSqsClient.sendMessage(eventQueueUrl, offenderPhysicalDetailsChanged("A1239DD"))
+    await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
+
+    assertThatJson(readNextDomainEventMessage()).node("eventType")
+      .isEqualTo("prisoner-offender-search.prisoner.updated")
+  }
+
+  @Test
   fun `e2e - will send prisoner alerts change event to the domain topic when an alert is removed`() {
     recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", alertCodes = listOf("X" to "XTACT", "W" to "WO")))
 
     // update the prisoner on ES
     prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(
               PrisonerBuilder(
@@ -276,9 +304,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     // update the prisoner on ES - TWICE
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
         )
@@ -321,9 +349,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     // update the prisoner on ES BUT fail to send an event
     doThrow(RuntimeException("Failed to send event")).whenever(hmppsEventTopicSnsClient).publish(any())
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
         )
@@ -343,9 +371,9 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     prisonerIndexService.delete(prisonerNumber)
     prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/A1239DD"))
+      get(urlEqualTo("/api/offenders/A1239DD"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(builder.toOffenderBooking())
         )
@@ -377,14 +405,47 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   private fun PrisonMockServer.stubOffenderNoFromBookingId(prisonerNumber: String) {
     this.stubFor(
-      WireMock.get(WireMock.urlPathMatching("/api/bookings/\\d*"))
+      get(WireMock.urlPathMatching("/api/bookings/\\d*"))
         .willReturn(
-          WireMock.aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber).toOffenderBooking())
         )
     )
   }
+
+  private fun offenderPhysicalDetailsChanged(offenderNumber: String) =
+    """
+    {
+  "Type": "Notification",
+  "MessageId": "20e13002-d1be-56e7-be8c-66cdd7e23341",
+  "TopicArn": "arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-f221e27fcfcf78f6ab4f4c3cc165eee7",
+  "Message": "{\"eventType\":\"OFFENDER_PHYSICAL_DETAILS-CHANGED\",\"eventDatetime\":\"2020-02-25T11:24:32.935401\",\"offenderIdDisplay\":\"$offenderNumber\",\"nomisEventType\":\"OFFENDER_PHYSICAL_DETAILS-CHANGED\"}",
+  "Timestamp": "2020-02-25T11:25:16.169Z",
+  "SignatureVersion": "1",
+  "Signature": "h5p3FnnbsSHxj53RFePh8HR40cbVvgEZa6XUVTlYs/yuqfDsi17MPA+bX4ijKmmTT2l6xG2xYhcmRAbJWQ4wrwncTBm2azgiwSO5keRNWYVdiC0rI484KLZboP1SDsE+Y7hOU/R0dz49q7+0yd+QIocPteKB/8xG7/6kjGStAZKf3cEdlxOwLhN+7RU1Yk2ENuwAJjVRtvlAa76yKB3xvL2hId7P7ZLmHGlzZDNZNYxbg9C8HGxteOzZ9ZeeQsWDf9jmZ+5+7dKXQoW9LeqwHxEAq2vuwSZ8uwM5JljXbtS5w1P0psXPYNoin2gU1F5MDK8RPzjUtIvjINx08rmEOA==",
+  "SigningCertURL": "https://sns.eu-west-2.amazonaws.com/SimpleNotificationService-a86cb10b4e1f29c941702d737128f7b6.pem",
+  "UnsubscribeURL": "https://sns.eu-west-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-2:754256621582:cloud-platform-Digital-Prison-Services-f221e27fcfcf78f6ab4f4c3cc165eee7:92545cfe-de5d-43e1-8339-c366bf0172aa",
+  "MessageAttributes": {
+    "eventType": {
+      "Type": "String",
+      "Value": "OFFENDER_PHYSICAL_DETAILS-CHANGED"
+    },
+    "id": {
+      "Type": "String",
+      "Value": "cb4645f2-d0c1-4677-806a-8036ed54bf69"
+    },
+    "contentType": {
+      "Type": "String",
+      "Value": "text/plain;charset=UTF-8"
+    },
+    "timestamp": {
+      "Type": "Number.java.lang.Long",
+      "Value": "1582629916147"
+    }
+  }
+}
+    """.trimIndent()
 }
 
 @JsonNaming(value = PropertyNamingStrategies.UpperCamelCaseStrategy::class)
