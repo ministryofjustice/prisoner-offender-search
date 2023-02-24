@@ -397,16 +397,34 @@ At 2.30am we have a scheduled job that takes the snapshot of the whole cluster w
    ```shell
    kubectl -n <NAMESPACE> port-forward $(kubectl -n <NAMESPACE> get pods | grep aws-es-proxy-cloud-platform | grep Running | head -1 | awk '{print $1}') 9200:9200
    ```
-2. Delete the current indexes
+2. If the indexes are broken then it is likely that the snapshot repository information has all been removed too.  Running
+   ```shell
+   http http://localhost:9200/_snapshot
+   ```
+   will show the available snapshots.  If the snapshots aren't available then running
+   ```shell
+   http POST http://localhost:9200/_snapshot/$NAMESPACE type="s3" settings:="{
+             \"bucket\": \"${secret bucket_name within es-snapshot-bucket}\",
+             \"region\": \"eu-west-2\",
+             \"role_arn\": \"${secret snapshot_role_arn within es-snapshot-role}\",
+             \"base_path\": \"$NAMESPACE\",
+             \"readonly\": \"true\"
+             }"
+   ```
+   will add all the available snapshots in read only mode.
+
+3. Delete the current indexes
    ```shell
    http DELETE http://localhost:9200/_all
    ```
-3. Check that the indices have all been removed
+4. Check that the indices have all been removed
    ```shell
    http http://localhost:9200/_cat/indices
    ```
-   If you wait to long between the delete and restore then the `.kibana` ones might get recreated, you'll need to delete them again otherwise the restore will fail.
-4. Then we can start the restore (SNAPSHOT_NAME for the overnight snapshot is `latest`)
+   If you wait any length of time between the delete and restore then the `.kibana` ones might get recreated, 
+   you'll need to delete them again otherwise the restore will fail.
+   If necessary you might need to do steps 2 and 4 at the same time so that it doesn't get recreated inbetween.
+5. Then we can start the restore (SNAPSHOT_NAME for the overnight snapshot is `latest`)
    ```shell
    http POST 'http://localhost:9200/_snapshot/<NAMESPACE>/<SNAPSHOT_NAME>/_restore' include_global_state=true
    ```
@@ -415,7 +433,7 @@ At 2.30am we have a scheduled job that takes the snapshot of the whole cluster w
    however, is `include_global_state: false`. If only restoring a single index, it could be bad to overwrite the global state but as we are
    restoring the full cluster we set it to true.
 
-5. The indices will be yellow until they are all restored - again check they are completed with
+6. The indices will be yellow until they are all restored - again check they are completed with
    ```shell
    http http://localhost:9200/_cat/indices
    ```
