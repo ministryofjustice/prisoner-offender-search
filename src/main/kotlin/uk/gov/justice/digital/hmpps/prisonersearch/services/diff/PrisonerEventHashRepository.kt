@@ -29,6 +29,8 @@ interface PrisonerEventHashRepository : JpaRepository<PrisonerEventHash, String>
       "ON CONFLICT (noms_number) DO UPDATE " +
       "SET prisoner_hash=:prisonerHash, updated_date_time=:updatedDateTime WHERE prisoner_event_hashes.prisoner_hash<>:prisonerHash",
     nativeQuery = true,
+    // see https://github.com/spring-projects/spring-data-jpa/issues/2812. Remove after upgrade past 2.7.9. Not used.
+    countQuery = "select 1",
   )
   fun upsertPrisonerEventHashIfChanged(nomsNumber: String, prisonerHash: String, updatedDateTime: Instant): Int
 }
