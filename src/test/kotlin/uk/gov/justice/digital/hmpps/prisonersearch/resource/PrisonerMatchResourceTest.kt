@@ -9,7 +9,6 @@ import java.time.LocalDate
 class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
-
     webTestClient.post().uri("/match-prisoners")
       .header("Content-Type", "application/json")
       .exchange()
@@ -18,7 +17,6 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `access forbidden when no role`() {
-
     webTestClient.post().uri("/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(MatchRequest("john", "smith", null, null, null, "A7089EY"))))
       .headers(setAuthorisation())
@@ -29,7 +27,6 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `bad request when no criteria provided`() {
-
     webTestClient.post().uri("/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(MatchRequest(null, null, null, null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -50,7 +47,6 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a match for ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.post().uri("/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(MatchRequest(null, "SMITHEEE"))))
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
@@ -61,7 +57,6 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a match for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.post().uri("/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(MatchRequest(null, "SMITHEEE"))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
@@ -74,7 +69,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on prisoner number`() {
     prisonerMatch(
       MatchRequest(null, "SMITHEEE", null, null, null, "A7089EY"),
-      "/results/prisonerMatch/search_results_noms.json"
+      "/results/prisonerMatch/search_results_noms.json",
     )
   }
 
@@ -82,7 +77,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number`() {
     prisonerMatch(
       MatchRequest(null, "SMITH", LocalDate.of(1971, 2, 12), "12/394773H", null, null),
-      "/results/prisonerMatch/search_results_pnc.json"
+      "/results/prisonerMatch/search_results_pnc.json",
     )
   }
 
@@ -90,7 +85,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number short year 19 century`() {
     prisonerMatch(
       MatchRequest(null, "TIMS", LocalDate.of(1971, 2, 12), "89/4444S", null, null),
-      "/results/prisonerMatch/search_results_pnc2.json"
+      "/results/prisonerMatch/search_results_pnc2.json",
     )
   }
 
@@ -98,7 +93,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number long year 19 century`() {
     prisonerMatch(
       MatchRequest(null, "TIMS", LocalDate.of(1971, 2, 12), "1989/4444S", null, null),
-      "/results/prisonerMatch/search_results_pnc2.json"
+      "/results/prisonerMatch/search_results_pnc2.json",
     )
   }
 
@@ -106,7 +101,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number long year 19 century extra zeros`() {
     prisonerMatch(
       MatchRequest(null, "TIMS", LocalDate.of(1971, 2, 12), "1989/0004444S", null, null),
-      "/results/prisonerMatch/search_results_pnc2.json"
+      "/results/prisonerMatch/search_results_pnc2.json",
     )
   }
 
@@ -114,7 +109,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on CRO number`() {
     prisonerMatch(
       MatchRequest(null, "SMITH", LocalDate.of(1990, 8, 17), null, "29906/12J", null),
-      "/results/prisonerMatch/search_results_cro.json"
+      "/results/prisonerMatch/search_results_cro.json",
     )
   }
 
@@ -122,7 +117,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a last name only`() {
     prisonerMatch(
       MatchRequest(null, "smith", null, null, null, null),
-      "/results/prisonerMatch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json",
     )
   }
 
@@ -130,7 +125,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name only single hit`() {
     prisonerMatch(
       MatchRequest("john", "smith", null, null, null, null),
-      "/results/prisonerMatch/search_results_smith.json"
+      "/results/prisonerMatch/search_results_smith.json",
     )
   }
 
@@ -138,7 +133,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first and last name only multiple hits include aliases`() {
     prisonerMatch(
       MatchRequest("sam", "jones", null, null, null, null),
-      "/results/prisonerMatch/search_results_sams_aliases.json"
+      "/results/prisonerMatch/search_results_sams_aliases.json",
     )
   }
 }

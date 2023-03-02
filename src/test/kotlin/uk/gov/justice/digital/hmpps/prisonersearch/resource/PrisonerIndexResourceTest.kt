@@ -27,11 +27,11 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   fun init() {
     elasticsearchClient.deleteByQuery(
       DeleteByQueryRequest(SyncIndex.INDEX_A.indexName).setQuery(QueryBuilders.matchAllQuery()),
-      RequestOptions.DEFAULT
+      RequestOptions.DEFAULT,
     )
     elasticsearchClient.deleteByQuery(
       DeleteByQueryRequest(SyncIndex.INDEX_B.indexName).setQuery(QueryBuilders.matchAllQuery()),
-      RequestOptions.DEFAULT
+      RequestOptions.DEFAULT,
     )
     resetStubs()
     setupIndexes()
@@ -44,21 +44,20 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   private fun StubOffendersIds() {
     prisonMockServer.stubFor(
       WireMock.get(
-        WireMock.urlEqualTo("/api/offenders/ids")
+        WireMock.urlEqualTo("/api/offenders/ids"),
       )
         .withHeader("Page-Limit", WireMock.equalTo("100"))
         .willReturn(
           WireMock.aResponse()
             .withHeader("Content-Type", "application/json")
             .withHeader("Total-Records", indexCount.toString())
-            .withBody("""[{"offenderNumber": "A7089EY"}, {"offenderNumber": "A7089EZ"}]""")
-        )
+            .withBody("""[{"offenderNumber": "A7089EY"}, {"offenderNumber": "A7089EZ"}]"""),
+        ),
     )
   }
 
   @Test
   fun `access forbidden when no authority`() {
-
     webTestClient.put().uri("/prisoner-index/build-index")
       .exchange()
       .expectStatus().isUnauthorized
@@ -66,7 +65,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `access forbidden when no role`() {
-
     webTestClient.put().uri("/prisoner-index/build-index")
       .headers(setAuthorisation())
       .exchange()
@@ -75,7 +73,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can index a prison with correct role`() {
-
     webTestClient.get()
       .uri("/info")
       .exchange()
@@ -121,7 +118,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `can cancel and re-index`() {
-
     webTestClient.get()
       .uri("/info")
       .exchange()
@@ -187,7 +183,6 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `both indexes are maintained whilst indexing but not once completed`() {
-
     // index B
     indexPrisoners()
 

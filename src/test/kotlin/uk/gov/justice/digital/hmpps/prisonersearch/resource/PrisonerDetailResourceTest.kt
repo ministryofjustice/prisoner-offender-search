@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRe
 class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
-
     webTestClient.post().uri("/prisoner-detail")
       .header("Content-Type", "application/json")
       .exchange()
@@ -20,7 +19,6 @@ class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `access forbidden when no role`() {
-
     webTestClient.post().uri("/prisoner-detail")
       .body(BodyInserters.fromValue(gson.toJson(KeywordRequest(orWords = "smith jones", prisonIds = listOf("LEI", "MDI")))))
       .headers(setAuthorisation())
@@ -31,7 +29,6 @@ class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `bad request when no filtering prison IDs provided`() {
-
     webTestClient.post().uri("/prisoner-detail")
       .body(BodyInserters.fromValue(gson.toJson(KeywordRequest(orWords = "smith jones", prisonIds = emptyList()))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -42,7 +39,6 @@ class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a detail search for ROLE_GLOBAL_SEARCH role`() {
-
     webTestClient.post().uri("/prisoner-detail")
       .body(BodyInserters.fromValue(gson.toJson(PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -53,7 +49,6 @@ class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a detail search for ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.post().uri("/prisoner-detail")
       .body(BodyInserters.fromValue(gson.toJson(PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")))))
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
@@ -64,7 +59,6 @@ class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a detail search for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.post().uri("/prisoner-detail")
       .body(BodyInserters.fromValue(gson.toJson(PrisonerDetailRequest(nomsNumber = "A7089EY", prisonIds = listOf("MDI")))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
@@ -173,7 +167,7 @@ class PrisonerDetailResourceTest : AbstractSearchDataIntegrationTest() {
   fun `find by CRO number with wildcard single letter`() {
     detailSearch(
       detailRequest = PrisonerDetailRequest(croNumber = "29906/1?J", prisonIds = listOf("MDI")),
-      expectedPrisoners = listOf("A7089EY")
+      expectedPrisoners = listOf("A7089EY"),
     )
   }
 

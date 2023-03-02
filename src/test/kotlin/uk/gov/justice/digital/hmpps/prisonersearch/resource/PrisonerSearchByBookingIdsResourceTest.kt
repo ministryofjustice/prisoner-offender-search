@@ -26,7 +26,6 @@ class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
 
   @BeforeEach
   fun setup() {
-
     if (initialiseSearchData) {
       val prisonerNumbers = List(12) { i -> "AN$i" }
       prisonMockServer.stubFor(
@@ -35,8 +34,8 @@ class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
             aResponse()
               .withHeader("Content-Type", "application/json")
               .withHeader("Total-Records", prisonerNumbers.size.toString())
-              .withBody(gson.toJson(prisonerNumbers.map { IDs(it) }))
-          )
+              .withBody(gson.toJson(prisonerNumbers.map { IDs(it) })),
+          ),
       )
       prisonerNumbers.forEachIndexed { bookingId: Int, prisonNumber: String ->
         prisonMockServer.stubFor(
@@ -44,8 +43,8 @@ class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
             .willReturn(
               aResponse()
                 .withHeader("Content-Type", "application/json")
-                .withBody(getOffenderBookingJson(prisonNumber, bookingId.toLong()))
-            )
+                .withBody(getOffenderBookingJson(prisonNumber, bookingId.toLong())),
+            ),
         )
       }
 

@@ -10,7 +10,7 @@ import java.time.Duration
 abstract class HealthCheck(
   private val webClient: WebClient,
   private val baseUri: String,
-  private val timeout: Duration
+  private val timeout: Duration,
 ) : HealthIndicator {
 
   override fun health(): Health? {

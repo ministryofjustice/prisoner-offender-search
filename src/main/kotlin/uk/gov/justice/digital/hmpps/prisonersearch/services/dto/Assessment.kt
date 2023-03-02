@@ -16,5 +16,5 @@ data class Assessment(
   val approvalDate: LocalDate?,
   val assessmentAgencyId: String?,
   val assessmentStatus: String?,
-  val assessmentSeq: Int?
+  val assessmentSeq: Int?,
 )

@@ -59,7 +59,7 @@ class HmppsDomainEventsEmitterTest {
       verify(topicSnsClient).publish(
         check {
           assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.updated")
-        }
+        },
       )
     }
 
@@ -82,7 +82,7 @@ class HmppsDomainEventsEmitterTest {
       verify(topicSnsClient).publish(
         check {
           assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.created")
-        }
+        },
       )
     }
 
@@ -105,7 +105,7 @@ class HmppsDomainEventsEmitterTest {
       verify(topicSnsClient).publish(
         check {
           assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.received")
-        }
+        },
       )
     }
 
@@ -123,7 +123,7 @@ class HmppsDomainEventsEmitterTest {
           assertThat(it["additionalInformation.reason"]).isEqualTo("READMISSION")
           assertThat(it["additionalInformation.prisonId"]).isEqualTo("MDI")
         },
-        isNull()
+        isNull(),
       )
     }
 
@@ -140,10 +140,11 @@ class HmppsDomainEventsEmitterTest {
           assertThat(it["additionalInformation.reason"]).isEqualTo("READMISSION")
           assertThat(it["additionalInformation.prisonId"]).isEqualTo("MDI")
         },
-        isNull()
+        isNull(),
       )
     }
   }
+
   @Nested
   inner class PrisonerAlertsUpdatedEvent {
     @Test
@@ -153,7 +154,7 @@ class HmppsDomainEventsEmitterTest {
       verify(topicSnsClient).publish(
         check {
           assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
-        }
+        },
       )
     }
 
@@ -172,7 +173,7 @@ class HmppsDomainEventsEmitterTest {
           assertThat(it["additionalInformation.alertsAdded"]).isEqualTo("[XA, XT]")
           assertThat(it["additionalInformation.alertsRemoved"]).isEqualTo("[ZZ]")
         },
-        isNull()
+        isNull(),
       )
     }
 
@@ -191,7 +192,7 @@ class HmppsDomainEventsEmitterTest {
           assertThat(it["additionalInformation.alertsAdded"]).isEqualTo("[XA]")
           assertThat(it["additionalInformation.alertsRemoved"]).isEqualTo("[]")
         },
-        isNull()
+        isNull(),
       )
     }
   }

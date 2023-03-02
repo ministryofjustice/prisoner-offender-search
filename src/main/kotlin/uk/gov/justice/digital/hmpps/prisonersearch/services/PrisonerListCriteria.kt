@@ -8,8 +8,10 @@ import javax.validation.constraints.Size
 sealed class PrisonerListCriteria<out T>() {
   @Schema(hidden = true)
   abstract fun isValid(): Boolean
+
   @Schema(hidden = true)
   abstract fun values(): List<T>
+
   @JsonIgnore
   @Schema(hidden = true)
   val type = this::class.simpleName!!
@@ -18,7 +20,7 @@ sealed class PrisonerListCriteria<out T>() {
     @Schema(description = "List of prisoner numbers to search by", example = "[\"A1234AA\"]")
     @NotEmpty
     @Size(min = 1, max = 1000)
-    val prisonerNumbers: List<String>
+    val prisonerNumbers: List<String>,
   ) : PrisonerListCriteria<String>() {
 
     override fun isValid() = prisonerNumbers.isNotEmpty() && prisonerNumbers.size <= 1000
@@ -30,7 +32,7 @@ sealed class PrisonerListCriteria<out T>() {
     @Schema(description = "List of bookingIds to search by", example = "[1, 2, 3]")
     @NotEmpty
     @Size(min = 1, max = 1000)
-    val bookingIds: List<Long>
+    val bookingIds: List<Long>,
   ) : PrisonerListCriteria<Long>() {
 
     override fun isValid() = bookingIds.isNotEmpty() && bookingIds.size <= 1000

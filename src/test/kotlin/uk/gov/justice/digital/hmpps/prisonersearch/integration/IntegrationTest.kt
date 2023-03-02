@@ -165,7 +165,7 @@ abstract class IntegrationTest {
       subject = user,
       scope = listOf("read"),
       expiryTime = Duration.ofHours(1L),
-      roles = roles
+      roles = roles,
     )
     return { it.set(HttpHeaders.AUTHORIZATION, "Bearer $token") }
   }
@@ -176,8 +176,8 @@ abstract class IntegrationTest {
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "pong" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
 
     prisonMockServer.stubFor(
@@ -185,8 +185,8 @@ abstract class IntegrationTest {
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "pong" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
 
     restrictedPatientMockServer.stubFor(
@@ -194,16 +194,16 @@ abstract class IntegrationTest {
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "pong" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
     incentivesMockServer.stubFor(
       WireMock.get("/health/ping").willReturn(
         WireMock.aResponse()
           .withHeader("Content-Type", "application/json")
           .withBody(if (status == 200) "pong" else "some error")
-          .withStatus(status)
-      )
+          .withStatus(status),
+      ),
     )
   }
 
@@ -213,17 +213,18 @@ abstract class IntegrationTest {
     @Bean("eventqueue-sqs-client")
     fun eventQueueSqsClient(
       hmppsSqsProperties: HmppsSqsProperties,
-      @Qualifier("eventqueue-sqs-dlq-client") eventQueueSqsDlqClient: AmazonSQS
+      @Qualifier("eventqueue-sqs-dlq-client") eventQueueSqsDlqClient: AmazonSQS,
     ): AmazonSQS =
       with(hmppsSqsProperties) {
         val config = queues["eventqueue"]
           ?: throw MissingQueueException("HmppsSqsProperties config for eventqueue not found")
         hmppsQueueFactory.createSqsClient("eventqueue", config, hmppsSqsProperties, eventQueueSqsDlqClient)
       }
+
     @Bean("hmppsdomainqueue-sqs-client")
     fun hmppsDomainQueueSqsClient(
       hmppsSqsProperties: HmppsSqsProperties,
-      @Qualifier("hmppsdomainqueue-sqs-dlq-client") hmppsDomainQueueSqsDlqClient: AmazonSQS
+      @Qualifier("hmppsdomainqueue-sqs-dlq-client") hmppsDomainQueueSqsDlqClient: AmazonSQS,
     ): AmazonSQS =
       with(hmppsSqsProperties) {
         val config = queues["hmppsdomainqueue"]
@@ -238,7 +239,7 @@ abstract class IntegrationTest {
       with(hmppsSqsProperties) {
         val config = topics["hmppseventtopic"]
           ?: throw MissingTopicException("HmppsSqsProperties config for hmppseventtopic not found")
-        hmppsTopicFactory.createSnsClient("hmppseventtopic", config, hmppsSqsProperties,)
+        hmppsTopicFactory.createSnsClient("hmppseventtopic", config, hmppsSqsProperties)
       }
   }
 }

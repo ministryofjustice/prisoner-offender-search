@@ -63,7 +63,10 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
           weightKilograms = 80,
         ),
         PrisonerBuilder(
-          prisonerNumber = "G7089EZ", agencyId = "LEI", cellLocation = "B-C1-010", gender = "Male",
+          prisonerNumber = "G7089EZ",
+          agencyId = "LEI",
+          cellLocation = "B-C1-010",
+          gender = "Male",
           aliases = listOf(AliasBuilder(gender = "Not Known / Not Recorded")),
           physicalCharacteristics = PhysicalCharacteristicBuilder(
             hairColour = "Red",
@@ -79,7 +82,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             scar = listOf(BodyPartBuilder("Finger"), BodyPartBuilder("Foot")),
             other = listOf(BodyPartBuilder("Head", "left ear missing")),
             mark = listOf(BodyPartBuilder("Lip", "too much")),
-          )
+          ),
         ),
         PrisonerBuilder(
           prisonerNumber = "G7090AC",
@@ -101,7 +104,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
             scar = listOf(BodyPartBuilder("Ankle", "nasty looking scar"), BodyPartBuilder("Knee")),
             other = listOf(BodyPartBuilder("Nose", "bent to the right")),
             mark = listOf(BodyPartBuilder("Torso", "birthmark on chest")),
-          )
+          ),
         ),
         PrisonerBuilder(
           prisonerNumber = "G7090AD",
@@ -125,7 +128,9 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
           ),
         ),
         PrisonerBuilder(
-          prisonerNumber = "G7090BA", agencyId = "LEI", cellLocation = "B-C1-010",
+          prisonerNumber = "G7090BA",
+          agencyId = "LEI",
+          cellLocation = "B-C1-010",
           gender = "Male",
           ethnicity = "Prefer not to say",
           aliases = listOf(AliasBuilder(ethnicity = "White: Any other background")),
@@ -184,7 +189,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   fun `access forbidden when no role`() {
     webTestClient.post().uri("/physical-detail")
       .bodyValue(
-        PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("LEI", "MDI"))
+        PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("LEI", "MDI")),
       )
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
@@ -206,7 +211,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   fun `bad request when multiple prisons and cell location prefix supplied`() {
     webTestClient.post().uri("/physical-detail")
       .bodyValue(
-        PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI", "LEI"), cellLocationPrefix = "ABC-1")
+        PhysicalDetailRequest(minHeight = 100, prisonIds = listOf("MDI", "LEI"), cellLocationPrefix = "ABC-1"),
       )
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -237,7 +242,9 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
   @Test
   fun `will page the results - first page limited to size`(): Unit = physicalDetailSearch(
     detailRequest = PhysicalDetailRequest(
-      minHeight = 100, prisonIds = listOf("MDI", "LEI"), pagination = PaginationRequest(0, 2)
+      minHeight = 100,
+      prisonIds = listOf("MDI", "LEI"),
+      pagination = PaginationRequest(0, 2),
     ),
     expectedPrisoners = listOf("H1090AA", "H7089EY"),
   )
@@ -247,7 +254,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     detailRequest = PhysicalDetailRequest(
       minHeight = 100,
       prisonIds = listOf("MDI", "LEI"),
-      pagination = PaginationRequest(1, 2)
+      pagination = PaginationRequest(1, 2),
     ),
     expectedPrisoners = listOf("H7089EZ", "H7090BA"),
   )
@@ -270,7 +277,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when min height less than 0`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(minHeight = -100, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(minHeight = -100, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -282,7 +289,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when max height less than 0`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(maxHeight = -100, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(maxHeight = -100, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -294,7 +301,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when heights inverted`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(minHeight = 100, maxHeight = 50, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(minHeight = 100, maxHeight = 50, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -306,7 +313,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when weights inverted`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(minWeight = 100, maxWeight = 50, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(minWeight = 100, maxWeight = 50, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -318,7 +325,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when min weight less than 0`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(minWeight = -100, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(minWeight = -100, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -330,7 +337,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when max weight less than 0`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(maxWeight = -200, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(maxWeight = -200, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -436,7 +443,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `find by ethnicity includes aliases`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
         ethnicity = "White: Any other background",
-        prisonIds = listOf("AGI", "LEI")
+        prisonIds = listOf("AGI", "LEI"),
       ),
       expectedPrisoners = listOf("G7090AC", "G7090BA"),
     )
@@ -445,7 +452,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `gender and ethnicity are returned in search results`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
         ethnicity = "White: Any other background",
-        prisonIds = listOf("AGI", "LEI")
+        prisonIds = listOf("AGI", "LEI"),
       ),
       expectedPrisoners = listOf("G7090AC", "G7090BA"),
     ) {
@@ -523,7 +530,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when shoe size inverted`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(minShoeSize = 100, maxShoeSize = 50, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(minShoeSize = 100, maxShoeSize = 50, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -535,7 +542,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when min shoe size less than 0`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(minShoeSize = -100, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(minShoeSize = -100, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -547,7 +554,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `bad request when max shoe size less than 0`() {
       webTestClient.post().uri("/physical-detail")
         .bodyValue(
-          PhysicalDetailRequest(maxShoeSize = -200, prisonIds = listOf("MDI"))
+          PhysicalDetailRequest(maxShoeSize = -200, prisonIds = listOf("MDI")),
         )
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
         .header("Content-Type", "application/json")
@@ -583,7 +590,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     fun `physical characteristics are returned in search results`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
         ethnicity = "White: Any other background",
-        prisonIds = listOf("AGI", "LEI")
+        prisonIds = listOf("AGI", "LEI"),
       ),
       expectedPrisoners = listOf("G7090AC", "G7090BA"),
     ) {
@@ -636,9 +643,10 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     ) {
       assertThat(it).extracting("tattoos").containsExactly(
         listOf(mapOf("bodyPart" to "Finger", "comment" to "rose"), mapOf("bodyPart" to "Foot")),
-        listOf(mapOf("bodyPart" to "Ankle", "comment" to "dragon"), mapOf("bodyPart" to "Knee"))
+        listOf(mapOf("bodyPart" to "Ankle", "comment" to "dragon"), mapOf("bodyPart" to "Knee")),
       )
     }
+
     @Test
     fun `searching by scars with a body part`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
@@ -676,9 +684,10 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     ) {
       assertThat(it).extracting("scars").containsExactly(
         listOf(mapOf("bodyPart" to "Ankle", "comment" to "nasty looking scar"), mapOf("bodyPart" to "Knee")),
-        listOf(mapOf("bodyPart" to "Finger"), mapOf("bodyPart" to "Foot"))
+        listOf(mapOf("bodyPart" to "Finger"), mapOf("bodyPart" to "Foot")),
       )
     }
+
     @Test
     fun `searching by marks with a body part`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
@@ -716,9 +725,10 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     ) {
       assertThat(it).extracting("marks").containsExactly(
         listOf(mapOf("bodyPart" to "Torso", "comment" to "birthmark on chest")),
-        listOf(mapOf("bodyPart" to "Lip", "comment" to "too much"))
+        listOf(mapOf("bodyPart" to "Lip", "comment" to "too much")),
       )
     }
+
     @Test
     fun `searching by otherMarks with a body part`(): Unit = physicalDetailSearch(
       detailRequest = PhysicalDetailRequest(
@@ -756,7 +766,7 @@ class PhysicalDetailResourceTest : QueueIntegrationTest() {
     ) {
       assertThat(it).extracting("otherMarks").containsExactly(
         listOf(mapOf("bodyPart" to "Nose", "comment" to "bent to the right")),
-        listOf(mapOf("bodyPart" to "Head", "comment" to "left ear missing"))
+        listOf(mapOf("bodyPart" to "Head", "comment" to "left ear missing")),
       )
     }
   }

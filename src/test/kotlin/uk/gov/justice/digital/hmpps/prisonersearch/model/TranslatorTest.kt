@@ -20,12 +20,11 @@ class TranslatorTest {
 
   @Test
   fun `when prisoner has no booking associated the booking information is missing`() {
-
     val dateOfBirth = LocalDate.now().minusYears(18)
     val prisoner = PrisonerA(
       ob = OffenderBooking("A1234AA", "Fred", "Bloggs", dateOfBirth, false),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
 
     assertThat(prisoner.prisonerNumber).isEqualTo("A1234AA")
@@ -37,7 +36,6 @@ class TranslatorTest {
 
   @Test
   fun `topupSupervisionExpiryDate is present`() {
-
     val tseDate = LocalDate.of(2021, 5, 15)
     val prisoner = PrisonerA(
       OffenderBooking(
@@ -46,17 +44,16 @@ class TranslatorTest {
         "Bloggs",
         LocalDate.of(1976, 5, 15),
         false,
-        sentenceDetail = SentenceDetail(topupSupervisionExpiryDate = tseDate)
+        sentenceDetail = SentenceDetail(topupSupervisionExpiryDate = tseDate),
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.topupSupervisionExpiryDate).isEqualTo(tseDate)
   }
 
   @Test
   fun `topupSupervisionStartDate is present`() {
-
     val tssDate = LocalDate.of(2021, 5, 15)
     val prisoner = PrisonerA(
       OffenderBooking(
@@ -65,17 +62,16 @@ class TranslatorTest {
         "Bloggs",
         LocalDate.of(1976, 5, 15),
         false,
-        sentenceDetail = SentenceDetail(topupSupervisionStartDate = tssDate)
+        sentenceDetail = SentenceDetail(topupSupervisionStartDate = tssDate),
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.topupSupervisionStartDate).isEqualTo(tssDate)
   }
 
   @Test
   fun `homeDetentionCurfewEndDate is present`() {
-
     val hdcend = LocalDate.of(2021, 5, 15)
     val prisoner = PrisonerA(
       OffenderBooking(
@@ -84,10 +80,10 @@ class TranslatorTest {
         "Bloggs",
         LocalDate.of(1976, 5, 15),
         false,
-        sentenceDetail = SentenceDetail(homeDetentionCurfewEndDate = hdcend)
+        sentenceDetail = SentenceDetail(homeDetentionCurfewEndDate = hdcend),
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.homeDetentionCurfewEndDate).isEqualTo(hdcend)
   }
@@ -111,11 +107,11 @@ class TranslatorTest {
           automaticReleaseDate = releaseDate,
           automaticReleaseOverrideDate = automaticReleaseOverrideDate,
           postRecallReleaseDate = releaseDate,
-          postRecallReleaseOverrideDate = postRecallReleaseOverrideDate
+          postRecallReleaseOverrideDate = postRecallReleaseOverrideDate,
         ),
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseOverrideDate)
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseOverrideDate)
@@ -137,11 +133,11 @@ class TranslatorTest {
         sentenceDetail = SentenceDetail(
           conditionalReleaseDate = conditionalReleaseDate,
           automaticReleaseDate = automaticReleaseDate,
-          postRecallReleaseDate = postRecallReleaseDate
+          postRecallReleaseDate = postRecallReleaseDate,
         ),
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.conditionalReleaseDate).isEqualTo(conditionalReleaseDate)
     assertThat(prisoner.automaticReleaseDate).isEqualTo(automaticReleaseDate)
@@ -158,10 +154,10 @@ class TranslatorTest {
         LocalDate.of(1976, 5, 15),
         false,
         imprisonmentStatus = "LIFE",
-        imprisonmentStatusDescription = "Serving Life Imprisonment"
+        imprisonmentStatusDescription = "Serving Life Imprisonment",
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
     assertThat(prisoner.imprisonmentStatus).isEqualTo("LIFE")
     assertThat(prisoner.imprisonmentStatusDescription).isEqualTo("Serving Life Imprisonment")
@@ -183,12 +179,12 @@ class TranslatorTest {
             expired = false,
             alertCode = "x-code",
             alertType = "x-type",
-            dateCreated = LocalDate.now()
-          )
-        )
+            dateCreated = LocalDate.now(),
+          ),
+        ),
       ),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
 
     assertThat(prisoner.alerts?.first())
@@ -206,7 +202,7 @@ class TranslatorTest {
         iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
         nextReviewDate = LocalDate.parse("2022-02-02"),
       ),
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
 
     assertThat(prisoner.currentIncentive).isNotNull
@@ -228,9 +224,9 @@ class TranslatorTest {
           iepLevel = "Standard",
           iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
           nextReviewDate = LocalDate.parse("2022-02-02"),
-        )
+        ),
       ),
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
 
     assertThat(prisoner.currentIncentive).isNotNull
@@ -252,11 +248,11 @@ class TranslatorTest {
           agencyId = "HAZLWD",
           agencyType = "HSHOSP",
           active = true,
-          description = "Hazelwood Hospital"
+          description = "Hazelwood Hospital",
         ),
         dischargeDate = LocalDate.now(),
-        dischargeDetails = "Getting worse"
-      )
+        dischargeDetails = "Getting worse",
+      ),
     )
 
     assertThat(prisoner.restrictedPatient).isTrue
@@ -273,7 +269,7 @@ class TranslatorTest {
     val prisoner = PrisonerA(
       aBooking().copy(locationDescription = "OUT"),
       incentiveLevel = null,
-      restrictedPatientData = null
+      restrictedPatientData = null,
     )
 
     assertThat(prisoner.restrictedPatient).isFalse
@@ -297,14 +293,14 @@ class TranslatorTest {
           iepTime = LocalDateTime.parse("2021-01-01T11:00:00"),
           nextReviewDate = LocalDate.parse("2022-02-02"),
         ),
-        restrictedPatientData = null
+        restrictedPatientData = null,
       )
 
       val prisoner = PrisonerA(
         existingPrisoner,
         aBooking(),
         Result.failure(RuntimeException("It has gone badly wrong")),
-        restrictedPatientData = null
+        restrictedPatientData = null,
       )
 
       assertThat(prisoner.currentIncentive).isNotNull
@@ -321,7 +317,7 @@ class TranslatorTest {
         existingPrisoner = null,
         aBooking(),
         Result.failure(RuntimeException("It has gone badly wrong")),
-        restrictedPatientData = null
+        restrictedPatientData = null,
       )
 
       assertThat(prisoner.currentIncentive).isNull()
@@ -332,14 +328,14 @@ class TranslatorTest {
       val existingPrisoner = PrisonerA(
         aBooking().copy(locationDescription = "OUT"),
         incentiveLevel = null,
-        restrictedPatientData = null
+        restrictedPatientData = null,
       )
 
       val prisoner = PrisonerA(
         existingPrisoner,
         aBooking(),
         Result.failure(RuntimeException("It has gone badly wrong")),
-        restrictedPatientData = null
+        restrictedPatientData = null,
       )
 
       assertThat(prisoner.currentIncentive).isNull()
@@ -360,7 +356,7 @@ class TranslatorTest {
           weightKilograms = 100,
           weightPounds = 224,
           heightMetres = BigDecimal.TEN,
-        )
+        ),
       ),
       incentiveLevel = null,
       restrictedPatientData = null,
@@ -383,7 +379,7 @@ class TranslatorTest {
           PhysicalCharacteristic("FACE", "Shape of Face", "Bullet", null),
           PhysicalCharacteristic("BUILD", "Build", "Proportional", null),
           PhysicalCharacteristic("SHOESIZE", "Shoe Size", "10", null),
-        )
+        ),
       ),
       incentiveLevel = null,
       restrictedPatientData = null,
@@ -407,7 +403,7 @@ class TranslatorTest {
           PhysicalMark("Mark", null, "Ear", null, "Some comment", null),
           PhysicalMark("Other", "Centre", "Arm", null, null, null),
           PhysicalMark("Scar", null, "Torso", null, null, null),
-        )
+        ),
       ),
       incentiveLevel = null,
       restrictedPatientData = null,

@@ -120,7 +120,7 @@ class PhysicalDetailService(
           lenient,
           boolQuery()
             .should(QueryBuilders.matchPhraseQuery("gender", it))
-            .should(QueryBuilders.matchPhraseQuery("aliases.gender", it))
+            .should(QueryBuilders.matchPhraseQuery("aliases.gender", it)),
         )
       }
       ethnicity?.let {
@@ -128,7 +128,7 @@ class PhysicalDetailService(
           lenient,
           boolQuery()
             .should(QueryBuilders.matchPhraseQuery("ethnicity", it))
-            .should(QueryBuilders.matchPhraseQuery("aliases.ethnicity", it))
+            .should(QueryBuilders.matchPhraseQuery("aliases.ethnicity", it)),
         )
       }
 

@@ -28,7 +28,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
         Server().url("https://prisoner-offender-search-preprod.prison.service.justice.gov.uk").description("PreProd"),
         Server().url("https://prisoner-offender-search.prison.service.justice.gov.uk").description("Prod"),
         Server().url("http://localhost:8080").description("Local"),
-      )
+      ),
     )
     .tags(
       listOf(
@@ -48,12 +48,12 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
         Tag().name("Elastic Search index maintenance").description("Endpoints that are to be used by administrators only for maintaining Elasticsearch indices"),
         Tag().name("hmpps-queue-resource").description("""Endpoints that are to be used by administrators only for managing SQS queues. All endpoints require the <b>QUEUE_ADMIN</b> role further information can be found in the <a href="https://github.com/ministryofjustice/hmpps-spring-boot-sqs">hmpps-spring-boot-sqs</a> project"""),
         Tag().name("hmpps-queue-resource-async").description("""Endpoints that are to be used by administrators only for managing SQS queues. All endpoints require the <b>QUEUE_ADMIN</b> role further information can be found in the <a href="https://github.com/ministryofjustice/hmpps-spring-boot-sqs">hmpps-spring-boot-sqs</a> project"""),
-      )
+      ),
     )
     .info(
       Info().title("Prisoner Search").version(version)
         .description(this.javaClass.getResource("/documentation/service-description.html").readText())
-        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk"))
+        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
     )
     .components(
       Components().addSecuritySchemes(
@@ -63,8 +63,8 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
           .scheme("bearer")
           .bearerFormat("JWT")
           .`in`(SecurityScheme.In.HEADER)
-          .name("Authorization")
-      )
+          .name("Authorization"),
+      ),
     )
     .addSecurityItem(SecurityRequirement().addList("bearer-jwt", listOf("read", "write")))
 
@@ -81,7 +81,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
               .example("2021-07-05T10:35:17")
               .pattern("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")
               .description(propertySchema.description)
-              .required(propertySchema.required)
+              .required(propertySchema.required),
           )
         }
       }

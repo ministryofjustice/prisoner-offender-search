@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.SearchCriteria
 class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
-
     webTestClient.post().uri("/prisoner-search/match-prisoners")
       .header("Content-Type", "application/json")
       .exchange()
@@ -17,7 +16,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `access forbidden when no role`() {
-
     webTestClient.post().uri("/prisoner-search/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(SearchCriteria("A7089EY", "john", "smith", listOf("MDI")))))
       .headers(setAuthorisation())
@@ -28,7 +26,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `bad request when no criteria provided`() {
-
     webTestClient.post().uri("/prisoner-search/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(SearchCriteria(null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -39,7 +36,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `search by prisonId access forbidden when no authority`() {
-
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .header("Content-Type", "application/json")
       .exchange()
@@ -48,7 +44,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `search by prisonId access forbidden when no role`() {
-
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
@@ -58,7 +53,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `search by prisonId not found when no criteria provided`() {
-
     webTestClient.get().uri("/prisoner-search/prison/")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -68,7 +62,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `search by prisonId success for ROLE_GLOBAL_SEARCH role`() {
-
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
@@ -78,7 +71,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `search by prisonId success for ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
       .header("Content-Type", "application/json")
@@ -88,7 +80,6 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `search by prisonId success for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
       .header("Content-Type", "application/json")

@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.REB
 class PrisonerIndexListener(
   private val prisonerIndexService: PrisonerIndexService,
   @Qualifier("gson") private val gson: Gson,
-  private val telemetryClient: TelemetryClient
+  private val telemetryClient: TelemetryClient,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -43,7 +43,7 @@ class PrisonerIndexListener(
       telemetryClient.trackEvent(
         "POSProcessIndexRequestError",
         mapOf("requestPayload" to requestJson, "message" to e.message),
-        null
+        null,
       )
       throw e
     }

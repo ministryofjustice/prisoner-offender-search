@@ -24,5 +24,5 @@ data class PrisonerAlias(
   val gender: String?,
 
   @Schema(description = "Ethnicity", example = "White : Irish")
-  val ethnicity: String?
+  val ethnicity: String?,
 )

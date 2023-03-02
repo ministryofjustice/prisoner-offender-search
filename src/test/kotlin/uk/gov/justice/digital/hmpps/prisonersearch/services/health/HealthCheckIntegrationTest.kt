@@ -89,6 +89,7 @@ class HealthCheckIntegrationTest : IntegrationTest() {
       .jsonPath("components.eventqueue-health.details.dlqStatus").isEqualTo("UP")
       .jsonPath("components.eventqueue-health.details.messagesOnDlq").isEqualTo(0)
   }
+
   @Test
   fun `HMPPS Domain queue health reports UP`() {
     subPing(200)

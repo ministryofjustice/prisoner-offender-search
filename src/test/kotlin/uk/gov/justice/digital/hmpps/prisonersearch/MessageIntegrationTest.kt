@@ -21,9 +21,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
 
   @BeforeEach
   fun setup() {
-
     if (initialiseSearchData) {
-
       setupIndexes()
       indexPrisoners()
 
@@ -71,6 +69,7 @@ class MessageIntegrationTest : QueueIntegrationTest() {
         .jsonPath("$.[0].currentIncentive.nextReviewDate").isEqualTo("2023-11-19")
     }
   }
+
   @Test
   fun `will update incentive level when it changes`() {
     incentivesMockServer.stubCurrentIncentive(

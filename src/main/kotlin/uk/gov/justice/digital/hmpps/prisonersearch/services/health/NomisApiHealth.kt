@@ -9,6 +9,6 @@ import java.time.Duration
 class NomisApiHealth(
   webClient: WebClient,
   @Value("\${api.base.url.nomis}") baseUri: String,
-  @Value("\${api.health-timeout:2s}") timeout: Duration
+  @Value("\${api.health-timeout:2s}") timeout: Duration,
 ) :
   HealthCheck(webClient, baseUri, timeout)

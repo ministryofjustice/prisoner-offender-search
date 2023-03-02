@@ -17,5 +17,5 @@ data class Alert(
   val addedByFirstName: String? = null,
   val addedByLastName: String? = null,
   val expiredByFirstName: String? = null,
-  val expiredByLastName: String? = null
+  val expiredByLastName: String? = null,
 )

@@ -53,7 +53,7 @@ class PrisonerIndexService(
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
         mapOf("prisonerID" to prisonerId),
-        null
+        null,
       )
     }
   }
@@ -65,7 +65,7 @@ class PrisonerIndexService(
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForIndexing",
         mapOf("prisonerID" to prisonerId),
-        null
+        null,
       )
       log.error("POSOffenderNotFoundForIndexing {}", prisonerId)
       return null
@@ -143,8 +143,10 @@ class PrisonerIndexService(
         val otherIndexCount = countIndex(currentIndex.otherIndex())
         log.info(
           "Current index is {} [{}], rebuilding index {} [{}]",
-          currentIndex, countIndex(currentIndex),
-          currentIndex.otherIndex(), otherIndexCount
+          currentIndex,
+          countIndex(currentIndex),
+          currentIndex.otherIndex(),
+          otherIndexCount,
         )
         checkExistsAndReset(currentIndex.otherIndex())
 
@@ -200,7 +202,7 @@ class PrisonerIndexService(
     log.debug(
       "Sending offender indexing requests row {} --> {}",
       pageRequest.offset + 1,
-      pageRequest.offset + pageRequest.pageSize
+      pageRequest.offset + pageRequest.pageSize,
     )
     nomisService.getOffendersIds(pageRequest.offset, pageRequest.pageSize).offenderIds?.forEach {
       indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.OFFENDER, it.offenderNumber))
@@ -240,8 +242,8 @@ class PrisonerIndexService(
           PrisonerIndexRequest(
             IndexRequestType.OFFENDER_LIST,
             null,
-            PageRequest.of(page, indexProperties.pageSize)
-          )
+            PageRequest.of(page, indexProperties.pageSize),
+          ),
         )
         page += 1
       } while ((page) * indexProperties.pageSize < totalRows && indexStatusService.getCurrentIndex().inProgress && indexStatusService.getCurrentIndex().inError.not())
@@ -257,7 +259,7 @@ class PrisonerIndexService(
           supportingPrisonId = it.supportingPrison.agencyId,
           dischargedHospital = it.hospitalLocation,
           dischargeDate = it.dischargeTime.toLocalDate(),
-          dischargeDetails = it.commentText
+          dischargeDetails = it.commentText,
         )
       }
     }

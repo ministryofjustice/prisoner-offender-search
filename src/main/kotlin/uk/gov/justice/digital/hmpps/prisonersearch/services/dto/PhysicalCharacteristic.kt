@@ -4,5 +4,5 @@ data class PhysicalCharacteristic(
   val type: String,
   val characteristic: String,
   val detail: String?,
-  val imageId: Long?
+  val imageId: Long?,
 )

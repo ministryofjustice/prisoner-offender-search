@@ -68,7 +68,7 @@ class HmppsQueueResourceTest : QueueIntegrationTest() {
       verify(hmppsQueueService).purgeQueue(
         check {
           assertThat(it.queueName).isEqualTo(dlqName)
-        }
+        },
       )
     }
 
@@ -89,7 +89,7 @@ class HmppsQueueResourceTest : QueueIntegrationTest() {
       verify(hmppsQueueService).retryDlqMessages(
         check {
           assertThat(it.hmppsQueue.dlqName).isEqualTo(dlqName)
-        }
+        },
       )
     }
   }

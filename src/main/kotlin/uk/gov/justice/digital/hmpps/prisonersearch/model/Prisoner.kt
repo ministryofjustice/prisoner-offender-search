@@ -53,7 +53,7 @@ open class Prisoner : Diffable<Prisoner> {
   @MultiField(
     mainField = Field(type = FieldType.Text),
     otherFields = [
-      InnerField(type = FieldType.Keyword, suffix = "keyword")
+      InnerField(type = FieldType.Keyword, suffix = "keyword"),
     ],
   )
   @Schema(required = true, description = "First Name", example = "Robert")
@@ -67,7 +67,7 @@ open class Prisoner : Diffable<Prisoner> {
   @MultiField(
     mainField = Field(type = FieldType.Text),
     otherFields = [
-      InnerField(type = FieldType.Keyword, suffix = "keyword")
+      InnerField(type = FieldType.Keyword, suffix = "keyword"),
     ],
   )
   @Schema(required = true, description = "Last name", example = "Larsen")
@@ -236,7 +236,7 @@ open class Prisoner : Diffable<Prisoner> {
   @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(
     description = "Release date for Non determinant sentence (if applicable). This will be based on one of ARD, CRD, NPD or PRRD.",
-    example = "2023-05-01"
+    example = "2023-05-01",
   )
   @DiffableProperty(DiffCategory.SENTENCE)
   var nonDtoReleaseDate: LocalDate? = null
@@ -286,7 +286,7 @@ open class Prisoner : Diffable<Prisoner> {
 
   @Schema(
     description = "current prison or outside with last movement information.",
-    example = "Outside - released from Leeds"
+    example = "Outside - released from Leeds",
   )
   @DiffableProperty(DiffCategory.LOCATION)
   var locationDescription: String? = null

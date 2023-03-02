@@ -7,7 +7,7 @@ data class RestrictivePatient(
   var supportingPrisonId: String?,
   val dischargedHospital: Agency?,
   val dischargeDate: LocalDate,
-  val dischargeDetails: String?
+  val dischargeDetails: String?,
 )
 
 data class Agency(
@@ -15,7 +15,7 @@ data class Agency(
   val description: String? = null,
   val longDescription: String? = null,
   val agencyType: String,
-  val active: Boolean
+  val active: Boolean,
 )
 
 data class RestrictedPatientDto(

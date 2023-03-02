@@ -29,7 +29,7 @@ class PrisonerSyncServiceTest {
       whenever(nomisService.getOffender(prisonerNumber)).thenReturn(offenderBooking)
 
       prisonerSyncService.maybeDeleteOffender(
-        OffenderChangedMessage(eventType = "type", offenderId = 1, offenderIdDisplay = prisonerNumber)
+        OffenderChangedMessage(eventType = "type", offenderId = 1, offenderIdDisplay = prisonerNumber),
       )
 
       verify(prisonerIndexService).reindex(offenderBooking)
@@ -40,7 +40,7 @@ class PrisonerSyncServiceTest {
       whenever(nomisService.getOffender(prisonerNumber)).thenReturn(null)
 
       prisonerSyncService.maybeDeleteOffender(
-        OffenderChangedMessage(eventType = "type", offenderId = 1, offenderIdDisplay = prisonerNumber)
+        OffenderChangedMessage(eventType = "type", offenderId = 1, offenderIdDisplay = prisonerNumber),
       )
 
       verify(prisonerIndexService).delete(prisonerNumber)

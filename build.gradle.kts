@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.3"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.8.4-beta-2"
   kotlin("plugin.spring") version "1.8.10"
 }
 
@@ -42,13 +42,13 @@ dependencies {
   implementation("com.google.guava:guava:31.1-jre")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:1.2.0")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.403")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.418")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
-  runtimeOnly("org.postgresql:postgresql:42.5.3")
+  runtimeOnly("org.postgresql:postgresql:42.5.4")
   runtimeOnly("org.flywaydb:flyway-core")
 
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.11")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.12")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:5.1.1")
@@ -57,13 +57,13 @@ dependencies {
 }
 
 java {
-  toolchain.languageVersion.set(JavaLanguageVersion.of(18))
+  toolchain.languageVersion.set(JavaLanguageVersion.of(19))
 }
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-      jvmTarget = "18"
+      jvmTarget = "19"
     }
   }
 }

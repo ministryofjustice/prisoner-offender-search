@@ -11,6 +11,6 @@ import java.time.Duration
 class RestrictedPatientsApiHealth(
   webClient: WebClient,
   @Value("\${api.base.url.restricted-patients}") baseUri: String,
-  @Value("\${api.health-timeout:2s}") timeout: Duration
+  @Value("\${api.health-timeout:2s}") timeout: Duration,
 ) :
   HealthCheck(webClient, baseUri, timeout)

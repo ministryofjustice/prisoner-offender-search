@@ -26,8 +26,8 @@ class IndexInfo(
       "index-size",
       mapOf(
         indexStatus.currentIndex.name to prisonerIndexService.countIndex(indexStatus.currentIndex),
-        indexStatus.currentIndex.otherIndex().name to prisonerIndexService.countIndex(indexStatus.currentIndex.otherIndex())
-      )
+        indexStatus.currentIndex.otherIndex().name to prisonerIndexService.countIndex(indexStatus.currentIndex.otherIndex()),
+      ),
     )
     builder.withDetail("index-queue-backlog", safeQueueCount())
   }
@@ -36,8 +36,8 @@ class IndexInfo(
     return try {
       val queueAttributes = indexQueue.sqsClient.getQueueAttributes(
         GetQueueAttributesRequest(indexQueue.queueUrl).withAttributeNames(
-          QueueAttributeName.ApproximateNumberOfMessages
-        )
+          QueueAttributeName.ApproximateNumberOfMessages,
+        ),
       )
         .attributes
 

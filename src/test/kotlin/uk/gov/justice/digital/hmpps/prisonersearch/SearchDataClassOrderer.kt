@@ -12,6 +12,7 @@ class SearchDataClassOrderer : ClassOrderer {
   private fun getOrder(classDescriptor: ClassDescriptor): Int =
     if (AbstractSearchDataIntegrationTest::class.java.isAssignableFrom(classDescriptor.testClass)) {
       1
-    } else
+    } else {
       2
+    }
 }

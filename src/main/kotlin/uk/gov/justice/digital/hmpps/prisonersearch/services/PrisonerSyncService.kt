@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 class PrisonerSyncService(
   private val nomisService: NomisService,
   private val prisonerIndexService: PrisonerIndexService,
-  private val telemetryClient: TelemetryClient
+  private val telemetryClient: TelemetryClient,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -48,7 +48,7 @@ class PrisonerSyncService(
       "Incentive change: {} for prisoner {} with incentive id {}",
       message.description,
       message.additionalInformation.nomsNumber,
-      message.additionalInformation.id
+      message.additionalInformation.id,
     )
     syncByNomsNumber(message.additionalInformation.nomsNumber)
   }
@@ -91,11 +91,11 @@ class PrisonerSyncService(
   }
 
   private fun customEventForMissingOffenderIdDisplay(
-    message: OffenderChangedMessage
+    message: OffenderChangedMessage,
   ) {
     val propertiesMap = mapOf(
       "eventType" to message.eventType,
-      "offenderId" to message.offenderId.toString()
+      "offenderId" to message.offenderId.toString(),
     )
 
     telemetryClient.trackEvent("POSMissingOffenderDisplayId", propertiesMap, null)

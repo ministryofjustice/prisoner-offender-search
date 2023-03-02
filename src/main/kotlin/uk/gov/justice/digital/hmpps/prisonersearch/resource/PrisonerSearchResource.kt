@@ -29,7 +29,7 @@ import javax.validation.Valid
 @RequestMapping(
   "/prisoner-search",
   produces = [MediaType.APPLICATION_JSON_VALUE],
-  consumes = [MediaType.APPLICATION_JSON_VALUE]
+  consumes = [MediaType.APPLICATION_JSON_VALUE],
 )
 class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchService) {
 
@@ -37,7 +37,7 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @PostMapping("/match")
   @Operation(
     summary = "Match prisoners by criteria, to search across a list of specific prisons use /match-prisoners",
-    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role"
+    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role",
   )
   @Tag(name = "Deprecated")
   fun findByCriteria(@Parameter(required = true) @RequestBody prisonSearch: PrisonSearch) =
@@ -72,13 +72,14 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @PostMapping("/release-date-by-prison")
   @Operation(
     summary = "Match prisoners who have a release date within a range, and optionally by prison",
-    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role"
+    description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role",
   )
   @Tag(name = "Batch")
   @Tag(name = "Specific use case")
   fun findByReleaseDateAndPrison(
     @Parameter(required = true) @Valid @RequestBody criteria: ReleaseDateSearch,
-    @ParameterObject @PageableDefault pageable: Pageable
+    @ParameterObject @PageableDefault
+    pageable: Pageable,
   ) = prisonerSearchService.findByReleaseDate(criteria, pageable)
 
   @GetMapping("/prison/{prisonId}")
@@ -86,8 +87,10 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
   @Tag(name = "Batch")
   @Tag(name = "Popular")
   fun findByPrison(
-    @Valid @PathVariable prisonId: String,
+    @Valid @PathVariable
+    prisonId: String,
     @RequestParam("include-restricted-patients", required = false, defaultValue = "false") includeRestrictedPatients: Boolean,
-    @ParameterObject @PageableDefault pageable: Pageable
+    @ParameterObject @PageableDefault
+    pageable: Pageable,
   ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable, includeRestrictedPatients)
 }

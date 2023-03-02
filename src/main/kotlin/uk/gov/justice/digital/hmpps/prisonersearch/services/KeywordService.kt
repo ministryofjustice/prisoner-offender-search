@@ -107,18 +107,17 @@ class KeywordService(
     )
 
     with(sanitisedKeywordRequest) {
-
       andWords.takeIf { !it.isNullOrBlank() }?.let {
         // Will include the prisoner document if all of the words specified match in any of the fields
         keywordQuery.must().add(
-          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.CROSS_FIELDS, keywordRequest.type)
+          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.CROSS_FIELDS, keywordRequest.type),
         )
       }
 
       orWords.takeIf { !it.isNullOrBlank() }?.let {
         // Will include the prisoner document if any of the words specified match in any of the fields
         keywordQuery.must().add(
-          generateMatchQuery(it, fuzzyMatch!!, Operator.OR, MultiMatchQueryBuilder.Type.BEST_FIELDS, keywordRequest.type)
+          generateMatchQuery(it, fuzzyMatch!!, Operator.OR, MultiMatchQueryBuilder.Type.BEST_FIELDS, keywordRequest.type),
         )
       }
 
@@ -128,14 +127,14 @@ class KeywordService(
           QueryBuilders.multiMatchQuery(it, "*", "aliases.*", "alerts.*")
             .lenient(true)
             .fuzzyTranspositions(false)
-            .operator(Operator.OR)
+            .operator(Operator.OR),
         )
       }
 
       exactPhrase.takeIf { !it.isNullOrBlank() }?.let {
         // Will include prisoner where this exact phrase appears anywhere in the document
         keywordQuery.must().add(
-          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.PHRASE, keywordRequest.type)
+          generateMatchQuery(it, fuzzyMatch!!, Operator.AND, MultiMatchQueryBuilder.Type.PHRASE, keywordRequest.type),
         )
       }
 
@@ -153,7 +152,7 @@ class KeywordService(
     fuzzyMatch: Boolean,
     operator: Operator,
     multiMatchType: MultiMatchQueryBuilder.Type,
-    searchType: SearchType
+    searchType: SearchType,
   ): QueryBuilder {
     val fields = if (searchType == SearchType.ESTABLISHMENT) {
       // user research will probably show we really only need names and prisonNumber
@@ -237,7 +236,7 @@ class KeywordService(
       "fuzzyMatch" to keywordRequest.fuzzyMatch.toString(),
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }

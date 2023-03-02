@@ -148,8 +148,8 @@ abstract class QueueIntegrationTest : IntegrationTest() {
           WireMock.aResponse()
             .withHeader("Content-Type", "application/json")
             .withHeader("Total-Records", prisonerNumbers.size.toString())
-            .withBody(gson.toJson(prisonerNumbers.map { PrisonerSearchByPrisonerNumbersResourceTest.IDs(it) }))
-        )
+            .withBody(gson.toJson(prisonerNumbers.map { PrisonerSearchByPrisonerNumbersResourceTest.IDs(it) })),
+        ),
     )
     prisoner.forEach {
       prisonMockServer.stubFor(
@@ -157,8 +157,8 @@ abstract class QueueIntegrationTest : IntegrationTest() {
           .willReturn(
             WireMock.aResponse()
               .withHeader("Content-Type", "application/json")
-              .withBody(it.toOffenderBooking())
-          )
+              .withBody(it.toOffenderBooking()),
+          ),
       )
     }
 
@@ -302,7 +302,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     restrictedPatientSearchCriteria: RestrictedPatientSearchCriteria,
     size: Long,
     page: Long,
-    fileAssert: String
+    fileAssert: String,
   ) {
     webTestClient.post().uri("/restricted-patient-search/match-restricted-patients?size=$size&page=$page")
       .body(BodyInserters.fromValue(gson.toJson(restrictedPatientSearchCriteria)))
@@ -377,7 +377,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         agencyId = this.agencyId,
         locationId = Random.nextLong(),
         description = this.cellLocation,
-        agencyName = "$agencyId (HMP)"
+        agencyName = "$agencyId (HMP)",
       ),
       alerts = this.alertCodes.map { (type, code) ->
         Alert(
@@ -441,7 +441,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         this.physicalMarks?.scar?.forEach {
           pms.add(PhysicalMark("Scar", null, it.bodyPart, null, it.comment, null))
         }
-      }
+      },
     ).let {
       if (released) {
         it.copy(
@@ -457,7 +457,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
           lastMovementReasonCode = "I",
         )
       }
-    }
+    },
   )
 
   companion object {

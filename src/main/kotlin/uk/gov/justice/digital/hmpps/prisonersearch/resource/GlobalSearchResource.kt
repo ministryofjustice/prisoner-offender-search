@@ -30,24 +30,25 @@ class GlobalSearchResource(
   private val globalSearchService: GlobalSearchService,
   private val prisonerIndexService: PrisonerIndexService,
   private val indexStatusService: IndexStatusService,
-  private val telemetryClient: TelemetryClient
+  private val telemetryClient: TelemetryClient,
 ) {
 
   @PostMapping(
     "/global-search",
     produces = [MediaType.APPLICATION_JSON_VALUE],
-    consumes = [MediaType.APPLICATION_JSON_VALUE]
+    consumes = [MediaType.APPLICATION_JSON_VALUE],
   )
   @PreAuthorize("hasAnyRole('ROLE_GLOBAL_SEARCH', 'ROLE_PRISONER_SEARCH')")
   @Operation(
     summary = "Match prisoners by criteria",
-    description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role"
+    description = "Requires ROLE_GLOBAL_SEARCH role or ROLE_PRISONER_SEARCH role",
   )
   @Tag(name = "Global search")
   @Tag(name = "Popular")
   fun globalFindByCriteria(
     @RequestBody globalSearchCriteria: GlobalSearchCriteria,
-    @ParameterObject @PageableDefault pageable: Pageable
+    @ParameterObject @PageableDefault
+    pageable: Pageable,
   ) = globalSearchService.findByGlobalSearchCriteria(globalSearchCriteria, pageable)
 
   @GetMapping("/prisoner/{id}")
@@ -71,9 +72,9 @@ class GlobalSearchResource(
         firstName = null,
         lastName = "Smith",
         gender = null,
-        location = null
+        location = null,
       ),
-      PageRequest.of(0, 10)
+      PageRequest.of(0, 10),
     )
     val mid = System.currentTimeMillis()
     val totalIndexNumber = prisonerIndexService.countIndex(indexStatusService.getCurrentIndex().currentIndex)
@@ -89,7 +90,7 @@ class GlobalSearchResource(
         "totalIndex" to totalIndexNumber.toString(),
         "totalNumberTimeMs" to (end - mid).toString(),
       ),
-      null
+      null,
     )
   }
 

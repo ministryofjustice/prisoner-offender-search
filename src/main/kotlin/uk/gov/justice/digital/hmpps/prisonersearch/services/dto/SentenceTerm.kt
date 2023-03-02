@@ -19,5 +19,5 @@ data class SentenceTerm(
   val years: Int?,
   val months: Int?,
   val weeks: Int?,
-  val days: Int?
+  val days: Int?,
 )

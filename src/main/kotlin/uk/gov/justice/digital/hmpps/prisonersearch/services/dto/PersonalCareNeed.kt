@@ -9,5 +9,5 @@ data class PersonalCareNeed(
   val problemDescription: String?,
   val commentText: String?,
   val startDate: LocalDate?,
-  val endDate: LocalDate?
+  val endDate: LocalDate?,
 )

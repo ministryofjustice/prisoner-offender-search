@@ -113,6 +113,7 @@ internal class PrisonerMovementsEventServiceTest {
       )
     }
   }
+
   @Nested
   inner class OutOnTAP {
     private val previousPrisonerSnapshot = prisonerOutOnTAP()
@@ -174,6 +175,7 @@ internal class PrisonerMovementsEventServiceTest {
       )
     }
   }
+
   @Nested
   inner class ReleasedOffender {
     private val previousPrisonerSnapshot = releasedPrisoner()
@@ -190,6 +192,7 @@ internal class PrisonerMovementsEventServiceTest {
         prisonId = "BXI",
       )
     }
+
     @Test
     internal fun `will emit receive event with reason of readmission for existing booking`() {
       val prisoner = recalledPrisoner("BXI")
@@ -203,6 +206,7 @@ internal class PrisonerMovementsEventServiceTest {
       )
     }
   }
+
   @Nested
   inner class MergedOffender {
     private val previousPrisonerSnapshot = newPrisoner()
@@ -216,15 +220,15 @@ internal class PrisonerMovementsEventServiceTest {
           type = "CRO",
           value = "1234",
           issuedAuthorityText = null,
-          issuedDate = null
+          issuedDate = null,
         ),
         OffenderIdentifier(
           whenCreated = LocalDateTime.now().minusMinutes(70),
           type = "MERGED",
           value = "1234",
           issuedAuthorityText = null,
-          issuedDate = null
-        )
+          issuedDate = null,
+        ),
       )
 
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking(identifiers))
@@ -245,15 +249,15 @@ internal class PrisonerMovementsEventServiceTest {
           type = "CRO",
           value = "1234",
           issuedAuthorityText = null,
-          issuedDate = null
+          issuedDate = null,
         ),
         OffenderIdentifier(
           whenCreated = LocalDateTime.now().minusMinutes(95),
           type = "MERGED",
           value = "1234",
           issuedAuthorityText = null,
-          issuedDate = null
-        )
+          issuedDate = null,
+        ),
       )
 
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking(identifiers))
@@ -274,15 +278,15 @@ internal class PrisonerMovementsEventServiceTest {
           type = "CRO",
           value = "1234",
           issuedAuthorityText = null,
-          issuedDate = null
+          issuedDate = null,
         ),
         OffenderIdentifier(
           whenCreated = LocalDateTime.now().minusMinutes(45),
           type = "MERGED",
           value = "1234",
           issuedAuthorityText = null,
-          issuedDate = null
-        )
+          issuedDate = null,
+        ),
       )
 
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking(identifiers))
@@ -324,6 +328,7 @@ internal class PrisonerMovementsEventServiceTest {
         prisonId = "BXI",
       )
     }
+
     @Test
     internal fun `will emit release event with reason of sent to court when moved to court`() {
       val prisoner = prisonerOutAtCourt()
@@ -336,6 +341,7 @@ internal class PrisonerMovementsEventServiceTest {
         prisonId = "BXI",
       )
     }
+
     @Test
     internal fun `will emit release event with reason of TAP when released on TAP`() {
       val prisoner = prisonerOutOnTAP()
@@ -348,6 +354,7 @@ internal class PrisonerMovementsEventServiceTest {
         prisonId = "BXI",
       )
     }
+
     @Test
     internal fun `will emit release event with reason of released when released from prison`() {
       val prisoner = releasedPrisoner()
@@ -398,7 +405,7 @@ internal class PrisonerMovementsEventServiceTest {
     LocalDate.of(1976, 5, 15),
     false,
     bookingId = 123456L,
-    identifiers = identifiers
+    identifiers = identifiers,
   )
 }
 

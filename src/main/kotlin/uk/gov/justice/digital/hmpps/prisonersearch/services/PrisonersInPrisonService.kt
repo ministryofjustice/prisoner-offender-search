@@ -64,7 +64,7 @@ class PrisonersInPrisonService(
 
   private fun createSourceBuilder(
     prisonId: String,
-    searchRequest: PrisonersInPrisonRequest
+    searchRequest: PrisonersInPrisonRequest,
   ): SearchSourceBuilder {
     val pageable = PageRequest.of(searchRequest.pagination.page, searchRequest.pagination.size)
     val sorting = searchRequest.sort.toList()
@@ -74,7 +74,7 @@ class PrisonersInPrisonService(
             Sort.Direction.DESC -> SortOrder.DESC
             Sort.Direction.ASC -> SortOrder.ASC
             else -> throw IllegalArgumentException("Invalid sort direction: ${sort.direction}")
-          }
+          },
         )
       }
     return SearchSourceBuilder().apply {
@@ -94,11 +94,10 @@ class PrisonersInPrisonService(
     val sanitisedSearchRequest = searchRequest.copy(term = convertTokensToSearchTerms(searchRequest.term))
 
     with(sanitisedSearchRequest) {
-
       term.takeIf { !it.isNullOrBlank() }?.let {
         // Will include the prisoner document if any of the words specified match in any of the fields
         query.must().add(
-          generateMatchQuery(it)
+          generateMatchQuery(it),
         )
       }
 
@@ -142,7 +141,7 @@ class PrisonersInPrisonService(
     val prefixNameQuery = QueryBuilders.boolQuery().mustAll(
       termsList.map {
         QueryBuilders.boolQuery().shouldAll(nameFields.map { name -> QueryBuilders.prefixQuery(name, it) })
-      }
+      },
     )
 
     val maybeWildcardNameQuery = termsList.takeIf { it.size > 1 }?.let {
@@ -153,13 +152,13 @@ class PrisonersInPrisonService(
     return QueryBuilders.boolQuery().shouldAll(
       keywordQuery,
       prefixNameQuery,
-      maybeWildcardNameQuery
+      maybeWildcardNameQuery,
     )
   }
 
   private fun createSearchResponse(
     paginationRequest: PaginationRequest,
-    searchResponse: SearchResponse
+    searchResponse: SearchResponse,
   ): Page<Prisoner> {
     val pageable = PageRequest.of(paginationRequest.page, paginationRequest.size)
     val prisoners = getSearchResult(searchResponse)
@@ -207,7 +206,7 @@ class PrisonersInPrisonService(
       "size" to searchRequest.pagination.size.toString(),
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSPrisonersInPrison", propertiesMap, metricsMap)
   }

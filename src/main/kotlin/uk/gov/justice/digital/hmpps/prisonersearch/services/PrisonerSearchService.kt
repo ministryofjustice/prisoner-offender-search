@@ -29,7 +29,7 @@ class PrisonerSearchService(
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
-  private val authenticationHolder: AuthenticationHolder
+  private val authenticationHolder: AuthenticationHolder,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -91,7 +91,7 @@ class PrisonerSearchService(
   fun findByPrison(prisonId: String, pageable: Pageable, includeRestrictedPatients: Boolean = false): Page<Prisoner> {
     queryBy(
       prisonId,
-      pageable
+      pageable,
     ) { if (includeRestrictedPatients) includeRestricted(it) else locationMatch(it) } onMatch {
       customEventForFindByPrisonId(prisonId, it.matches.size)
       return PageImpl(it.matches, pageable, it.totalHits)
@@ -108,7 +108,7 @@ class PrisonerSearchService(
 
   private fun queryBy(
     searchCriteria: SearchCriteria,
-    queryBuilder: (searchCriteria: SearchCriteria) -> BoolQueryBuilder?
+    queryBuilder: (searchCriteria: SearchCriteria) -> BoolQueryBuilder?,
   ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
@@ -124,7 +124,7 @@ class PrisonerSearchService(
 
   private fun <T> queryBy(
     searchCriteria: T,
-    queryBuilder: (searchCriteria: T) -> BoolQueryBuilder?
+    queryBuilder: (searchCriteria: T) -> BoolQueryBuilder?,
   ): Result {
     val query = queryBuilder(searchCriteria)
     return query?.let {
@@ -141,7 +141,7 @@ class PrisonerSearchService(
   private fun queryBy(
     searchCriteria: ReleaseDateSearch,
     pageable: Pageable,
-    queryBuilder: (searchCriteria: ReleaseDateSearch) -> BoolQueryBuilder?
+    queryBuilder: (searchCriteria: ReleaseDateSearch) -> BoolQueryBuilder?,
   ): GlobalResult {
     val query = queryBuilder(searchCriteria)
     return query?.let {
@@ -156,17 +156,21 @@ class PrisonerSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(
-        prisonerMatches,
-        searchResults.hits.totalHits?.value ?: 0
-      )
+      return if (prisonerMatches.isEmpty()) {
+        GlobalResult.NoMatch
+      } else {
+        GlobalResult.Match(
+          prisonerMatches,
+          searchResults.hits.totalHits?.value ?: 0,
+        )
+      }
     } ?: GlobalResult.NoMatch
   }
 
   private fun queryBy(
     prisonId: String,
     pageable: Pageable,
-    queryBuilder: (prisonId: String) -> BoolQueryBuilder?
+    queryBuilder: (prisonId: String) -> BoolQueryBuilder?,
   ): GlobalResult {
     val query = queryBuilder(prisonId)
     return query?.let {
@@ -181,10 +185,14 @@ class PrisonerSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(
-        prisonerMatches,
-        searchResults.hits.totalHits?.value ?: 0
-      )
+      return if (prisonerMatches.isEmpty()) {
+        GlobalResult.NoMatch
+      } else {
+        GlobalResult.Match(
+          prisonerMatches,
+          searchResults.hits.totalHits?.value ?: 0,
+        )
+      }
     } ?: GlobalResult.NoMatch
   }
 
@@ -206,7 +214,7 @@ class PrisonerSearchService(
           "pncNumberCanonicalShort",
           "pncNumberCanonicalLong",
           "croNumber",
-          "bookNumber"
+          "bookNumber",
         )
     }
   }
@@ -230,7 +238,7 @@ class PrisonerSearchService(
           earliestReleaseDate,
           latestReleaseDate,
           "conditionalReleaseDate",
-          "confirmedReleaseDate"
+          "confirmedReleaseDate",
         )
         .filterWhenPresent("prisonId", searchCriteria.prisonIds?.toList())
     }
@@ -251,8 +259,8 @@ class PrisonerSearchService(
             .should(
               QueryBuilders.boolQuery()
                 .mustWhenPresent("lastName", lastName)
-                .mustWhenPresent("firstName", firstName)
-            )
+                .mustWhenPresent("firstName", firstName),
+            ),
         )
     }
   }
@@ -265,7 +273,7 @@ class PrisonerSearchService(
             .should(
               QueryBuilders.boolQuery()
                 .mustWhenPresent("lastName", lastName)
-                .mustWhenPresent("firstName", firstName)
+                .mustWhenPresent("firstName", firstName),
             )
             .should(
               QueryBuilders.nestedQuery(
@@ -274,11 +282,11 @@ class PrisonerSearchService(
                   .should(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
-                      .mustWhenPresent("aliases.firstName", firstName)
+                      .mustWhenPresent("aliases.firstName", firstName),
                   ),
-                ScoreMode.Max
-              )
-            )
+                ScoreMode.Max,
+              ),
+            ),
         )
     }
   }
@@ -292,7 +300,7 @@ class PrisonerSearchService(
               QueryBuilders.boolQuery()
                 .mustWhenPresent("lastName", lastName)
                 .mustWhenPresent("firstName", firstName)
-                .mustWhenPresent("dateOfBirth", dateOfBirth)
+                .mustWhenPresent("dateOfBirth", dateOfBirth),
             )
             .should(
               QueryBuilders.nestedQuery(
@@ -302,11 +310,11 @@ class PrisonerSearchService(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
                       .mustWhenPresent("aliases.firstName", firstName)
-                      .mustWhenPresent("dateOfBirth", dateOfBirth)
+                      .mustWhenPresent("dateOfBirth", dateOfBirth),
                   ),
-                ScoreMode.Max
-              )
-            )
+                ScoreMode.Max,
+              ),
+            ),
         )
     }
   }
@@ -344,10 +352,10 @@ class PrisonerSearchService(
       "firstname" to searchCriteria.firstName,
       "prisonId" to searchCriteria.prisonIds.toString(),
       "prisonerIdentifier" to searchCriteria.prisonerIdentifier,
-      "includeAliases" to searchCriteria.includeAliases.toString()
+      "includeAliases" to searchCriteria.includeAliases.toString(),
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }
@@ -361,7 +369,7 @@ class PrisonerSearchService(
       "prisonId" to searchCriteria.prisonIds.toString(),
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByReleaseDate", propertiesMap, metricsMap)
   }
@@ -370,24 +378,24 @@ class PrisonerSearchService(
     val logMap = mapOf(
       "username" to authenticationHolder.currentUsername(),
       "clientId" to authenticationHolder.currentClientId(),
-      "numberOfPrisonerIds" to prisonerListNumber.toString()
+      "numberOfPrisonerIds" to prisonerListNumber.toString(),
     )
 
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByListOf$type", logMap, metricsMap)
   }
 
   private fun customEventForFindByPrisonId(
     prisonId: String,
-    numberOfResults: Int
+    numberOfResults: Int,
   ) {
     val propertiesMap = mapOf(
-      "prisonId" to prisonId
+      "prisonId" to prisonId,
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByPrisonId", propertiesMap, metricsMap)
   }

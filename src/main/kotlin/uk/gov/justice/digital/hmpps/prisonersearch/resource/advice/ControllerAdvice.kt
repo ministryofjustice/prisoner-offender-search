@@ -122,7 +122,7 @@ class ControllerAdvice {
     return ResponseEntity
       .status(HttpStatus.CONFLICT)
       .body(
-        ErrorResponse(status = HttpStatus.CONFLICT.value(), developerMessage = e.message)
+        ErrorResponse(status = HttpStatus.CONFLICT.value(), developerMessage = e.message),
       )
   }
 

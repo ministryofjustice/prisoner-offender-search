@@ -14,5 +14,5 @@ data class Alias(
   val gender: String?,
   val ethnicity: String?,
   val nameType: String?,
-  val createDate: LocalDate
+  val createDate: LocalDate,
 )

@@ -102,7 +102,7 @@ class PrisonerDifferenceService(
   internal fun generateDiffTelemetry(
     previousPrisonerSnapshot: Prisoner?,
     offenderBooking: OffenderBooking,
-    prisoner: Prisoner
+    prisoner: Prisoner,
   ) {
     if (!diffProperties.telemetry) return
 
@@ -124,7 +124,7 @@ class PrisonerDifferenceService(
   internal fun generateDiffEvent(
     previousPrisonerSnapshot: Prisoner?,
     offenderBooking: OffenderBooking,
-    prisoner: Prisoner
+    prisoner: Prisoner,
   ) {
     if (!diffProperties.events) return
     previousPrisonerSnapshot?.also {
@@ -154,7 +154,7 @@ class PrisonerDifferenceService(
         "nomsNumber" to offenderNo,
         "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
       ),
-      null
+      null,
     )
 
   private fun raiseNoDifferencesTelemetry(offenderNo: String, previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) =
@@ -165,7 +165,7 @@ class PrisonerDifferenceService(
         "nomsNumber" to offenderNo,
         "hasChanges" to (previousPrisonerSnapshot.asJson() != prisoner.asJson()).toString(),
       ),
-      null
+      null,
     )
 
   private fun Prisoner?.asJson(): String = this?.let { objectMapper.writeValueAsString(this) } ?: ""
@@ -176,7 +176,7 @@ class PrisonerDifferenceService(
         "processedTime" to LocalDateTime.now().toString(),
         "nomsNumber" to offenderNo,
       ),
-      null
+      null,
     )
 
   private fun raiseCreatedTelemetry(offenderNo: String) =

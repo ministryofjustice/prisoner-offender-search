@@ -75,8 +75,8 @@ class PrisonerIndexServiceTest {
           SyncIndex.INDEX_A,
           null,
           null,
-          true
-        )
+          true,
+        ),
       )
 
       prisonerIndexService.indexingComplete(true)
@@ -93,8 +93,8 @@ class PrisonerIndexServiceTest {
           SyncIndex.INDEX_A,
           null,
           null,
-          true
-        )
+          true,
+        ),
       )
 
       prisonerIndexService.indexingComplete(true)
@@ -174,6 +174,7 @@ class PrisonerIndexServiceTest {
 
       verifyNoInteractions(incentivesService)
     }
+
     @Test
     internal fun `will update index with current incentive level`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
@@ -183,7 +184,7 @@ class PrisonerIndexServiceTest {
           iepLevel = "Standard",
           iepTime = LocalDateTime.parse("2021-01-01T10:00:00.169539"),
           nextReviewDate = LocalDate.parse("2021-03-01"),
-        )
+        ),
       )
 
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
@@ -193,9 +194,10 @@ class PrisonerIndexServiceTest {
           assertThat(it.currentIncentive?.level?.description).isEqualTo("Standard")
           assertThat(it.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T10:00:00"))
           assertThat(it.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2021-03-01"))
-        }
+        },
       )
     }
+
     @Test
     internal fun `will update index even if it can't get the current incentive level`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
@@ -233,9 +235,10 @@ class PrisonerIndexServiceTest {
       verify(prisonerARepository).save(
         check {
           assertThat(it.restrictedPatient).isFalse()
-        }
+        },
       )
     }
+
     @Test
     internal fun `OUT prisoners might have restrictive patients data`() {
       val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
@@ -250,8 +253,8 @@ class PrisonerIndexServiceTest {
           supportingPrison = prison,
           hospitalLocation = hospital,
           dischargeTime = now,
-          commentText = "Getting worse"
-        )
+          commentText = "Getting worse",
+        ),
       )
 
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
@@ -265,10 +268,11 @@ class PrisonerIndexServiceTest {
           assertThat(it.dischargeDate).isEqualTo(now.toLocalDate())
           assertThat(it.dischargeDetails).isEqualTo("Getting worse")
           assertThat(it.locationDescription).isEqualTo("OUT - discharged to Hazelwood Hospital")
-        }
+        },
       )
     }
   }
+
   @Nested
   inner class IndexPrisoner {
     @BeforeEach
@@ -304,16 +308,16 @@ private fun anOffenderBooking(bookingId: Long) = OffenderBooking(
     agencyId = "MDI",
     locationId = 1,
     description = "Moorland",
-    agencyName = "Moorland"
+    agencyName = "Moorland",
   ),
-  activeFlag = true
+  activeFlag = true,
 )
 private fun anOffenderWithNoBooking() = OffenderBooking(
   offenderNo = "A1234AA",
   firstName = "Fred",
   lastName = "Bloggs",
   dateOfBirth = LocalDate.of(1976, 5, 15),
-  activeFlag = false
+  activeFlag = false,
 )
 
 private fun anOffenderThatIsOut(
@@ -321,8 +325,8 @@ private fun anOffenderThatIsOut(
     agencyId = "OUT",
     locationId = 1,
     description = "OUT",
-    agencyName = "OUT"
-  )
+    agencyName = "OUT",
+  ),
 ) = OffenderBooking(
   "A1234AA",
   "Fred",
@@ -330,15 +334,15 @@ private fun anOffenderThatIsOut(
   LocalDate.of(1976, 5, 15),
   false,
   assignedLivingUnit = assignedLivingUnit,
-  locationDescription = "OUT"
+  locationDescription = "OUT",
 )
 private fun anOffenderThatIsIn(
   assignedLivingUnit: AssignedLivingUnit = AssignedLivingUnit(
     agencyName = "MDI",
     agencyId = "MDI",
     description = "Moorland",
-    locationId = 2
-  )
+    locationId = 2,
+  ),
 ) = OffenderBooking(
   "A1234AA",
   "Fred",

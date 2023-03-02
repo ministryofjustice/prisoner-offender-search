@@ -88,25 +88,26 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       ApiResponse(
         responseCode = "400",
         description = "Incorrect information provided to perform prisoner match",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to search for prisoner data",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   @GetMapping("/prison/{prisonId}/prisoners", produces = [MediaType.APPLICATION_JSON_VALUE])
   @Tag(name = "Establishment search")
   @Tag(name = "Popular")
   fun search(
-    @PathVariable("prisonId") @Parameter(required = true)
+    @PathVariable("prisonId")
+    @Parameter(required = true)
     prisonId: String,
     @RequestParam(value = "term", required = false, defaultValue = "")
     @Parameter(description = "The primary search term. Whe absent all prisoners will be returned at the prison", example = "john smith")
@@ -124,7 +125,9 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     @RequestParam(value = "cellLocationPrefix", required = false)
     @Parameter(description = "Filter for the prisoners cell location. A block wing or cell can be specified. With prison id can be included or absent so HEI-3-1 and 3-1 are equivalent when the prison id is HEI", example = "3-1")
     cellLocationPrefix: String?,
-    @ParameterObject @PageableDefault(sort = ["lastName", "firstName", "prisonerNumber"], direction = Sort.Direction.ASC) pageable: Pageable
+    @ParameterObject
+    @PageableDefault(sort = ["lastName", "firstName", "prisonerNumber"], direction = Sort.Direction.ASC)
+    pageable: Pageable,
   ) = searchService.search(
     prisonId,
     PrisonersInPrisonRequest(
@@ -134,7 +137,7 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       fromDob = fromDob,
       toDob = toDob,
       cellLocationPrefix = cellLocationPrefix,
-      sort = pageable.sort
-    )
+      sort = pageable.sort,
+    ),
   )
 }

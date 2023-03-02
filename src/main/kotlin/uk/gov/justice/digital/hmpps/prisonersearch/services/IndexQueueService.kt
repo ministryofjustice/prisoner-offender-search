@@ -12,7 +12,7 @@ import uk.gov.justice.hmpps.sqs.MissingQueueException
 @Service
 class IndexQueueService(
   hmppsQueueService: HmppsQueueService,
-  private val gson: Gson
+  private val gson: Gson,
 ) {
 
   private val indexQueue = hmppsQueueService.findByQueueId("indexqueue") ?: throw MissingQueueException("HmppsQueue indexqueue not found")
@@ -57,7 +57,7 @@ class IndexQueueService(
 data class PrisonerIndexRequest(
   val requestType: IndexRequestType?,
   val prisonerNumber: String? = null,
-  val pageRequest: PageRequest? = null
+  val pageRequest: PageRequest? = null,
 )
 
 data class IndexQueueStatus(val messagesOnQueue: Int, val messagesOnDlq: Int, val messagesInFlight: Int) {

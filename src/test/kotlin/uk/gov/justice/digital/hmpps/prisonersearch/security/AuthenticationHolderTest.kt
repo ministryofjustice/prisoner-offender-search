@@ -28,7 +28,7 @@ class AuthenticationHolderTest {
       Mockito.mock(Jwt::class.java),
       "UserName",
       "clientID",
-      emptySet()
+      emptySet(),
     )
     SecurityContextHolder.getContext().authentication = auth
   }

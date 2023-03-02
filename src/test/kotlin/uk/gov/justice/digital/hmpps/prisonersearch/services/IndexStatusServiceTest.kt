@@ -30,6 +30,7 @@ class IndexStatusServiceTest {
 
       assertThat(indexStatusService.markRebuildComplete()).isFalse
     }
+
     @Test
     fun `doesn't generate a telemetry event if not in progress`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
@@ -86,27 +87,32 @@ class IndexStatusServiceTest {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = true)))
       assertThat(indexStatusService.markRebuildStarting()).isFalse
     }
+
     @Test
     fun `start index rebuild fails if there is an error`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
       assertThat(indexStatusService.markRebuildStarting()).isFalse
     }
+
     @Test
     fun `start index doesn't generate telemetry if there is an error`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
       assertThat(indexStatusService.markRebuildStarting()).isFalse
       verifyNoInteractions(telemetryClient)
     }
+
     @Test
     fun `start index rebuild fails if indexing already in progress`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = false)))
       assertThat(indexStatusService.markRebuildStarting()).isFalse
     }
+
     @Test
     fun `start index rebuild successfully completes`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
       assertThat(indexStatusService.markRebuildStarting()).isTrue
     }
+
     @Test
     fun `start index rebuild generates telemetry if successful`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
@@ -123,16 +129,19 @@ class IndexStatusServiceTest {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = true)))
       assertThat(indexStatusService.switchIndex()).isFalse
     }
+
     @Test
     fun `switch index fails if there is an error`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = true)))
       assertThat(indexStatusService.switchIndex()).isFalse
     }
+
     @Test
     fun `switch index fails if indexing already in progress`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = true, inError = false)))
       assertThat(indexStatusService.switchIndex()).isFalse
     }
+
     @Test
     fun `switch index successfully completes`() {
       whenever(indexStatusRepository.findById("STATUS")).thenReturn(Optional.of(anIndexStatus(inProgress = false, inError = false)))
@@ -201,5 +210,5 @@ fun anIndexStatus(inProgress: Boolean = true, inError: Boolean = false) =
     startIndexTime = LocalDateTime.now().minusHours(1L),
     endIndexTime = LocalDateTime.now().minusMinutes(1L),
     inProgress = inProgress,
-    inError = inError
+    inError = inError,
   )

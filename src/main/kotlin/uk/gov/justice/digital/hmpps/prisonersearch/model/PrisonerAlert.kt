@@ -10,5 +10,5 @@ data class PrisonerAlert(
   @Schema(description = "Active", example = "true")
   val active: Boolean,
   @Schema(description = "Expired", example = "true")
-  val expired: Boolean
+  val expired: Boolean,
 )

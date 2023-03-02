@@ -33,7 +33,7 @@ class MatchService(
     matchBy(matchRequest) { fullMatchAlias(it) } onPrisonerMatch {
       return PrisonerMatches(
         it.matches,
-        MatchedBy.ALL_SUPPLIED_ALIAS
+        MatchedBy.ALL_SUPPLIED_ALIAS,
       )
     }
     matchBy(matchRequest) { nomsNumber(it) } onPrisonerMatch { return PrisonerMatches(it.matches, MatchedBy.HMPPS_KEY) }
@@ -43,13 +43,13 @@ class MatchService(
     matchBy(matchRequest) { partialNameMatch(it) } onPrisonerMatch {
       return PrisonerMatches(
         it.matches,
-        MatchedBy.PARTIAL_NAME
+        MatchedBy.PARTIAL_NAME,
       )
     }
     matchBy(matchRequest) { partialNameMatchDateOfBirthLenient(it) } onPrisonerMatch {
       return PrisonerMatches(
         it.matches,
-        MatchedBy.PARTIAL_NAME_DOB_LENIENT
+        MatchedBy.PARTIAL_NAME_DOB_LENIENT,
       )
     }
     return PrisonerMatches()
@@ -71,7 +71,7 @@ class MatchService(
           .must(
             QueryBuilders.boolQuery()
               .shouldMultiMatch(lastName, "lastName", "aliases.lastName")
-              .shouldMultiMatch(dateOfBirth, "dateOfBirth", "aliases.dateOfBirth")
+              .shouldMultiMatch(dateOfBirth, "dateOfBirth", "aliases.dateOfBirth"),
           )
       }
     }
@@ -85,7 +85,7 @@ class MatchService(
           .must(
             QueryBuilders.boolQuery()
               .shouldMultiMatch(lastName, "lastName", "aliases.lastName")
-              .shouldMultiMatch(dateOfBirth, "dateOfBirth", "aliases.dateOfBirth")
+              .shouldMultiMatch(dateOfBirth, "dateOfBirth", "aliases.dateOfBirth"),
           )
       }
     }
@@ -121,7 +121,7 @@ class MatchService(
         .must(
           QueryBuilders.boolQuery()
             .should(nameQuery(matchRequest))
-            .should(aliasQuery(matchRequest))
+            .should(aliasQuery(matchRequest)),
         )
     }
   }
@@ -133,7 +133,7 @@ class MatchService(
           QueryBuilders.boolQuery()
             .mustWhenPresent("lastName", lastName)
             .mustWhenPresent("firstName", firstName)
-            .mustWhenPresent("dateOfBirth", dateOfBirth)
+            .mustWhenPresent("dateOfBirth", dateOfBirth),
         )
     }
   }
@@ -148,8 +148,8 @@ class MatchService(
               .mustWhenPresent("aliases.lastName", lastName)
               .mustWhenPresent("aliases.firstName", firstName)
               .mustWhenPresent("aliases.dateOfBirth", dateOfBirth),
-            ScoreMode.Max
-          )
+            ScoreMode.Max,
+          ),
         )
     }
   }

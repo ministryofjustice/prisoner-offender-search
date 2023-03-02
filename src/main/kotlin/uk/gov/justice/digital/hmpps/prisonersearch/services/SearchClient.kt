@@ -19,7 +19,7 @@ private const val ONE_MINUTE = 60000
 @Service
 class SearchClient(
   private val elasticsearchClient: RestHighLevelClient,
-  @param:Qualifier("elasticsearchOperations") private val elasticsearchOperations: ElasticsearchOperations
+  @param:Qualifier("elasticsearchOperations") private val elasticsearchOperations: ElasticsearchOperations,
 ) {
   private val requestOptions =
     RequestOptions.DEFAULT.toBuilder().setRequestConfig(RequestConfig.custom().setSocketTimeout(ONE_MINUTE).build()).build()

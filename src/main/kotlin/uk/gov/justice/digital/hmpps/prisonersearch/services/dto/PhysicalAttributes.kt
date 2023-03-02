@@ -11,5 +11,5 @@ data class PhysicalAttributes(
   val heightMetres: BigDecimal?,
   val heightCentimetres: Int?,
   val weightPounds: Int?,
-  val weightKilograms: Int?
+  val weightKilograms: Int?,
 )

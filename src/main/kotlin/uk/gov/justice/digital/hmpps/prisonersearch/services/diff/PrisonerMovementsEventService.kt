@@ -36,7 +36,7 @@ class PrisonerMovementsEventService(
   fun generateAnyEvents(
     previousPrisonerSnapshot: Prisoner?,
     prisoner: Prisoner,
-    offenderBooking: OffenderBooking
+    offenderBooking: OffenderBooking,
   ) {
     when (val movementChange = calculateMovementChange(previousPrisonerSnapshot, prisoner, offenderBooking)) {
       PossibleMovementChange.None -> {}
@@ -57,7 +57,7 @@ class PrisonerMovementsEventService(
   private fun calculateMovementChange(
     previousPrisonerSnapshot: Prisoner?,
     prisoner: Prisoner,
-    offenderBooking: OffenderBooking
+    offenderBooking: OffenderBooking,
   ): PossibleMovementChange {
     return previousPrisonerSnapshot.let {
       val prisonerNumber = prisoner.prisonerNumber!!
@@ -95,7 +95,7 @@ class PrisonerMovementsEventService(
           telemetryClient.trackEvent(
             "POSPrisonerUpdatedEventsUnknownMovement",
             mapOf("offenderNo" to prisonerNumber),
-            null
+            null,
           )
         }
       } else {
@@ -181,7 +181,7 @@ sealed class PossibleMovementChange {
   sealed class MovementInChange(
     val offenderNo: String,
     val prisonId: String,
-    val reason: HmppsDomainEventEmitter.PrisonerReceiveReason
+    val reason: HmppsDomainEventEmitter.PrisonerReceiveReason,
   ) :
     PossibleMovementChange() {
     class TransferIn(offenderNo: String, prisonId: String) : MovementInChange(offenderNo, prisonId, TRANSFERRED)

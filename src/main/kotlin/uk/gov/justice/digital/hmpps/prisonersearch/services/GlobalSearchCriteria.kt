@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class GlobalSearchCriteria(
   @Schema(
     description = "Prisoner identifier, one of prisoner number, book number, booking ID or PNC",
-    example = "A1234AA"
+    example = "A1234AA",
   )
   val prisonerIdentifier: String?,
   @Schema(description = "First Name", example = "John")
@@ -16,7 +16,7 @@ data class GlobalSearchCriteria(
   val lastName: String?,
   @Schema(
     description = "Gender, F - Female, M - Male, NK - Not Known / Not Recorded or NS - Not Specified (Indeterminate)",
-    example = "M"
+    example = "M",
   )
   val gender: Gender?,
   @Schema(description = "Location, All or Inside or Outside", example = "IN")
@@ -24,7 +24,7 @@ data class GlobalSearchCriteria(
   @Schema(description = "Date of birth", example = "1970-02-28")
   val dateOfBirth: LocalDate? = null,
   @Schema(description = "Include aliases in search", example = "false", required = false, defaultValue = "false")
-  val includeAliases: Boolean = false
+  val includeAliases: Boolean = false,
 ) {
 
   @Schema(hidden = true)
@@ -39,5 +39,6 @@ enum class Gender(val value: String?) {
   F("Female"),
   NK("known"),
   NS("specified"),
-  ALL("ALL");
+  ALL("ALL"),
+  ;
 }

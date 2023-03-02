@@ -18,7 +18,7 @@ class RestResponsePage<T> : PageImpl<T> {
     @JsonProperty("totalPages") totalPages: Int,
     @JsonProperty("sort") sort: JsonNode,
     @JsonProperty("first") first: Boolean,
-    @JsonProperty("numberOfElements") numberOfElements: Int
+    @JsonProperty("numberOfElements") numberOfElements: Int,
   ) : super(content, PageRequest.of(number, size.coerceAtLeast(1)), totalElements!!)
 
   constructor(content: List<T>, pageable: Pageable, total: Long) : super(content, pageable, total) {}

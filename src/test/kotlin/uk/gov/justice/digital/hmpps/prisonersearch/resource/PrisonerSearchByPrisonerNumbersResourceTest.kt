@@ -31,7 +31,6 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
 
   @Test
   fun `prisoner number search returns bad request when no prison numbers provided`() {
-
     webTestClient.post().uri("/prisoner-search/prisoner-numbers")
       .body(BodyInserters.fromValue("{\"prisonerNumbers\":[]}"))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))

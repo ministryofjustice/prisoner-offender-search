@@ -61,5 +61,5 @@ data class KeywordRequest(
 
 enum class SearchType {
   DEFAULT,
-  ESTABLISHMENT
+  ESTABLISHMENT,
 }
