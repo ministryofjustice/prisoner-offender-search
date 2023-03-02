@@ -13,10 +13,10 @@ data class ErrorResponse(
   @Schema(
     required = true,
     description = "Error message information",
-    example = "Prisoner Not Found"
+    example = "Prisoner Not Found",
   ) val userMessage: String? = null,
   @Schema(
     description = "Additional information about the error",
-    example = "Hard disk failure"
-  ) val moreInfo: String? = null
+    example = "Hard disk failure",
+  ) val moreInfo: String? = null,
 )

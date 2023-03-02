@@ -38,37 +38,40 @@ class PrisonerMatchResource(private val matchService: MatchService) {
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = MatchRequest::class)
-        )
-      ]
+          schema = Schema(implementation = MatchRequest::class),
+        ),
+      ],
     ),
 
     responses = [
       ApiResponse(
         responseCode = "200",
         description = "Search successfully performed",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = PrisonerMatches::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = PrisonerMatches::class))],
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect information provided to perform prisoner match",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to search for prisoner data",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   @Tag(name = "Deprecated")
   @PostMapping
-  fun matchPrisoners(@Valid @RequestBody matchRequest: MatchRequest): PrisonerMatches {
+  fun matchPrisoners(
+    @Valid @RequestBody
+    matchRequest: MatchRequest,
+  ): PrisonerMatches {
     log.info("Match called with {}", matchRequest)
     return matchService.match(matchRequest)
   }

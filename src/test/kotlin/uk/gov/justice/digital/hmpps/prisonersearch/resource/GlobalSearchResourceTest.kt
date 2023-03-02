@@ -19,7 +19,6 @@ import java.time.LocalDate
 class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
   fun `access forbidden when no authority`() {
-
     webTestClient.post().uri("/global-search")
       .header("Content-Type", "application/json")
       .exchange()
@@ -28,7 +27,6 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `access forbidden when no role`() {
-
     webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
       .headers(setAuthorisation())
@@ -39,7 +37,6 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `bad request when no criteria provided`() {
-
     webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria(null, null, null, null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -50,7 +47,6 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a match for ROLE_GLOBAL_SEARCH role`() {
-
     webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -61,7 +57,6 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a match for ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
@@ -72,7 +67,6 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
 
   @Test
   fun `can perform a match for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
-
     webTestClient.post().uri("/global-search")
       .body(BodyInserters.fromValue(gson.toJson(GlobalSearchCriteria("A7089EY", "john", "smith", null, null, null))))
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
@@ -85,7 +79,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on prisoner number`() {
     globalSearch(
       GlobalSearchCriteria("A7089EY", null, null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -116,7 +110,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on prisoner number lowercase prisoner number uppercased before search`() {
     globalSearch(
       GlobalSearchCriteria("a7089ey", null, null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -124,7 +118,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match wrong prisoner number but correct name`() {
     globalSearch(
       GlobalSearchCriteria("X7089EY", "JOHN", "SMITH", null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -132,7 +126,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number`() {
     globalSearch(
       GlobalSearchCriteria("12/394773H", null, null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -140,7 +134,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number short year`() {
     globalSearch(
       GlobalSearchCriteria("15/1234S", null, null, null, null, null),
-      "/results/globalSearch/search_results_pnc.json"
+      "/results/globalSearch/search_results_pnc.json",
     )
   }
 
@@ -148,7 +142,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number long year`() {
     globalSearch(
       GlobalSearchCriteria("2015/1234S", null, null, null, null, null),
-      "/results/globalSearch/search_results_pnc.json"
+      "/results/globalSearch/search_results_pnc.json",
     )
   }
 
@@ -156,7 +150,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number long year extra zeros`() {
     globalSearch(
       GlobalSearchCriteria("2015/001234S", null, null, null, null, null),
-      "/results/globalSearch/search_results_pnc.json"
+      "/results/globalSearch/search_results_pnc.json",
     )
   }
 
@@ -164,7 +158,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number short year 19 century`() {
     globalSearch(
       GlobalSearchCriteria("89/4444S", null, null, null, null, null),
-      "/results/globalSearch/search_results_pnc2.json"
+      "/results/globalSearch/search_results_pnc2.json",
     )
   }
 
@@ -172,7 +166,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number long year 19 century`() {
     globalSearch(
       GlobalSearchCriteria("1989/4444S", null, null, null, null, null),
-      "/results/globalSearch/search_results_pnc2.json"
+      "/results/globalSearch/search_results_pnc2.json",
     )
   }
 
@@ -180,7 +174,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on PNC number long year 19 century extra zeros`() {
     globalSearch(
       GlobalSearchCriteria("1989/0004444S", null, null, null, null, null),
-      "/results/globalSearch/search_results_pnc2.json"
+      "/results/globalSearch/search_results_pnc2.json",
     )
   }
 
@@ -188,7 +182,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on CRO number`() {
     globalSearch(
       GlobalSearchCriteria("29906/12J", null, null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -196,7 +190,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on book number`() {
     globalSearch(
       GlobalSearchCriteria("V61585", null, null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -204,7 +198,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on booking Id`() {
     globalSearch(
       GlobalSearchCriteria("1900836", null, null, null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -227,7 +221,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name only`() {
     globalSearch(
       GlobalSearchCriteria(null, "john", null, null, null, null),
-      "/results/globalSearch/search_results_john.json"
+      "/results/globalSearch/search_results_john.json",
     )
   }
 
@@ -235,7 +229,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a last name only`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "smith", null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -243,7 +237,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name only single hit`() {
     globalSearch(
       GlobalSearchCriteria(null, "john", "smith", null, null, null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -251,7 +245,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first and last name only multiple hits`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", null, null, null),
-      "/results/globalSearch/search_results_sams.json"
+      "/results/globalSearch/search_results_sams.json",
     )
   }
 
@@ -259,7 +253,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first and last name only multiple hits include aliases`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", null, null, null, true),
-      "/results/globalSearch/search_results_sams_aliases.json"
+      "/results/globalSearch/search_results_sams_aliases.json",
     )
   }
 
@@ -267,7 +261,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name,last name and gender as male`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", Gender.F, null, null),
-      "/results/globalSearch/search_results_sam1.json"
+      "/results/globalSearch/search_results_sam1.json",
     )
   }
 
@@ -275,7 +269,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name,last name and gender as female`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", Gender.F, null, null),
-      "/results/globalSearch/search_results_sam2.json"
+      "/results/globalSearch/search_results_sam2.json",
     )
   }
 
@@ -283,7 +277,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name,last name and gender as Not Known`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", Gender.NK, null, null),
-      "/results/globalSearch/search_results_sam4.json"
+      "/results/globalSearch/search_results_sam4.json",
     )
   }
 
@@ -291,7 +285,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name,last name and gender as not specified`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", Gender.NS, null, null),
-      "/results/globalSearch/search_results_sam3.json"
+      "/results/globalSearch/search_results_sam3.json",
     )
   }
 
@@ -299,7 +293,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name,last name and all genders`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", Gender.ALL, null, null),
-      "/results/globalSearch/search_results_sams.json"
+      "/results/globalSearch/search_results_sams.json",
     )
   }
 
@@ -307,7 +301,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first, last name and date of birth`() {
     globalSearch(
       GlobalSearchCriteria(null, "sam", "jones", null, null, LocalDate.of(1975, 5, 15)),
-      "/results/globalSearch/search_results_sam4.json"
+      "/results/globalSearch/search_results_sam4.json",
     )
   }
 
@@ -315,7 +309,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name only in wrong date of birth`() {
     globalSearch(
       GlobalSearchCriteria(null, "john", "smith", null, null, LocalDate.of(1970, 12, 25)),
-      "/results/globalSearch/empty.json"
+      "/results/globalSearch/empty.json",
     )
   }
 
@@ -323,7 +317,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a first name only filter by all locations`() {
     globalSearch(
       GlobalSearchCriteria(null, "john", null, null, "ALL", null),
-      "/results/globalSearch/search_results_johns_in.json"
+      "/results/globalSearch/search_results_johns_in.json",
     )
   }
 
@@ -331,7 +325,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name only in specific location`() {
     globalSearch(
       GlobalSearchCriteria(null, "john", "smith", null, "IN", null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -344,7 +338,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name in alias`() {
     globalSearch(
       GlobalSearchCriteria(null, "master", "cordian", null, null, null, true),
-      "/results/globalSearch/search_results_smyth.json"
+      "/results/globalSearch/search_results_smyth.json",
     )
   }
 
@@ -352,7 +346,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name in alias but they must be from the same record`() {
     globalSearch(
       GlobalSearchCriteria(null, "master", "stark", null, null, null, true),
-      "/results/globalSearch/empty.json"
+      "/results/globalSearch/empty.json",
     )
   }
 
@@ -360,7 +354,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name in alias but they must be from the same record matches`() {
     globalSearch(
       GlobalSearchCriteria(null, "tony", "stark", null, null, null, true),
-      "/results/globalSearch/search_results_smyth.json"
+      "/results/globalSearch/search_results_smyth.json",
     )
   }
 
@@ -368,7 +362,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on firstname only in alias`() {
     globalSearch(
       GlobalSearchCriteria(null, "master", null, null, null, null, true),
-      "/results/globalSearch/search_results_smyth.json"
+      "/results/globalSearch/search_results_smyth.json",
     )
   }
 
@@ -376,7 +370,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on last name only in alias`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "cordian", null, null, null, true),
-      "/results/globalSearch/search_results_smyth.json"
+      "/results/globalSearch/search_results_smyth.json",
     )
   }
 
@@ -384,7 +378,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on last name and gender in alias`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "orange", Gender.F, null, null, true),
-      "/results/globalSearch/search_results_sam5.json"
+      "/results/globalSearch/search_results_sam5.json",
     )
   }
 
@@ -392,7 +386,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on last name and ALL genders in alias`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "Colin", Gender.ALL, null, null, true),
-      "/results/globalSearch/search_results_sam5.json"
+      "/results/globalSearch/search_results_sam5.json",
     )
   }
 
@@ -400,7 +394,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on last name and date of birth in alias`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "orange", null, null, LocalDate.of(1991, 7, 5), true),
-      "/results/globalSearch/search_results_sam5.json"
+      "/results/globalSearch/search_results_sam5.json",
     )
   }
 
@@ -408,7 +402,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first and last name in alias but with alias search off`() {
     globalSearch(
       GlobalSearchCriteria(null, "master", "cordian", null, null, null, false),
-      "/results/globalSearch/empty.json"
+      "/results/globalSearch/empty.json",
     )
   }
 
@@ -416,7 +410,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on first name only in alias but with alias search off`() {
     globalSearch(
       GlobalSearchCriteria(null, "master", null, null, null, null, false),
-      "/results/globalSearch/empty.json"
+      "/results/globalSearch/empty.json",
     )
   }
 
@@ -424,7 +418,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on last name only in alias but with alias search off`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "cordian", null, null, null, false),
-      "/results/globalSearch/empty.json"
+      "/results/globalSearch/empty.json",
     )
   }
 
@@ -432,7 +426,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a match on a last name and specific location`() {
     globalSearch(
       GlobalSearchCriteria(null, null, "smyth", null, "IN", null),
-      "/results/globalSearch/search_results_smyth.json"
+      "/results/globalSearch/search_results_smyth.json",
     )
   }
 
@@ -445,7 +439,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
   fun `can perform a which returns result for ID search as in correct location`() {
     globalSearch(
       GlobalSearchCriteria("A7089EY", null, null, null, "IN", null),
-      "/results/globalSearch/search_results_smith.json"
+      "/results/globalSearch/search_results_smith.json",
     )
   }
 
@@ -460,7 +454,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
       GlobalSearchCriteria(null, "sam", "jones", null, null, null, true),
       100,
       0,
-      "/results/globalSearch/search_results_sam_pagination1.json"
+      "/results/globalSearch/search_results_sam_pagination1.json",
     )
   }
 
@@ -470,7 +464,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
       GlobalSearchCriteria(null, "sam", "jones", null, null, null),
       1,
       1,
-      "/results/globalSearch/search_results_sam_pagination2.json"
+      "/results/globalSearch/search_results_sam_pagination2.json",
     )
   }
 
@@ -480,7 +474,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
       GlobalSearchCriteria(null, "sam", "jones", null, null, null),
       2,
       2,
-      "/results/globalSearch/search_results_sam_pagination3.json"
+      "/results/globalSearch/search_results_sam_pagination3.json",
     )
   }
 
@@ -511,7 +505,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
           assertThat(it["totalIndex"]?.toInt()).isEqualTo(25)
           assertThat(it["totalNumberTimeMs"]?.toInt()).isGreaterThan(0)
         },
-        isNull()
+        isNull(),
       )
     }
 
@@ -523,8 +517,8 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
             WireMock.aResponse()
               .withHeader("Content-Type", "application/json")
               .withHeader("Total-Records", "26") // Now there is another prisoner in Nomis but not the index
-              .withBody("[]")
-          )
+              .withBody("[]"),
+          ),
       )
 
       webTestClient.get().uri("/synthetic-monitor")
@@ -538,7 +532,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
           assertThat(it["totalNomis"]?.toInt()).isEqualTo(26)
           assertThat(it["totalIndex"]?.toInt()).isEqualTo(25)
         },
-        isNull()
+        isNull(),
       )
     }
   }
@@ -564,9 +558,9 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
                 { "offenderNumber": "A7089EY" },
                 { "offenderNumber": "A7089EZ" },
                 { "offenderNumber": "A1234SR" },
-                { "offenderNumber": "A7089FA" }]"""
-              )
-          )
+                { "offenderNumber": "A7089FA" }]""",
+              ),
+          ),
       )
       webTestClient.get().uri("/compare-index")
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
@@ -580,7 +574,7 @@ class GlobalSearchResourceTest : AbstractSearchDataIntegrationTest() {
           assertThat(it["onlyInNomis"]).isEqualTo("[A1234SR]")
           assertThat(it["timeMs"]?.toInt()).isGreaterThan(0)
         },
-        isNull()
+        isNull(),
       )
     }
   }

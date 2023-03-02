@@ -30,9 +30,9 @@ class OAuthMockServer : WireMockServer(8090) {
                  "access_token": "ABCDE", 
                  "token_type": "bearer"
               }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 }
@@ -40,7 +40,7 @@ class OAuthMockServer : WireMockServer(8090) {
 class RestrictedPatientMockServer : WireMockServer(8095) {
   fun verifyGetRestrictedPatientRequest(prisonerNumber: String) {
     verify(
-      getRequestedFor(urlEqualTo("/restricted-patient/prison-number/$prisonerNumber"))
+      getRequestedFor(urlEqualTo("/restricted-patient/prison-number/$prisonerNumber")),
     )
   }
 }
@@ -73,15 +73,15 @@ class IncentivesMockServer : WireMockServer(8096) {
                   "nextReviewDate": "$nextReviewDate",
                   "daysSinceReview": 12
               }
-              """.trimIndent()
-            )
-        )
+              """.trimIndent(),
+            ),
+        ),
     )
   }
 
   fun verifyGetCurrentIncentiveRequest(bookingId: Long) {
     verify(
-      getRequestedFor(urlEqualTo("/iep/reviews/booking/$bookingId?with-details=false"))
+      getRequestedFor(urlEqualTo("/iep/reviews/booking/$bookingId?with-details=false")),
     )
   }
 }

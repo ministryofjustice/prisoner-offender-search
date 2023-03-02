@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 class IndexStatusService(
   private val indexStatusRepository: IndexStatusRepository,
   private val telemetryClient: TelemetryClient,
-  private val indexQueueService: IndexQueueService
+  private val indexQueueService: IndexQueueService,
 ) {
 
   companion object {
@@ -46,7 +46,7 @@ class IndexStatusService(
     telemetryClient.trackEvent(
       "POSIndexRebuildStarting",
       mapOf("indexName" to currentIndexStatus.currentIndex.indexName),
-      null
+      null,
     )
 
     return true

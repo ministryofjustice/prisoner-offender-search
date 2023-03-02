@@ -11,8 +11,8 @@ import java.time.Clock
 @SpringBootApplication(
   exclude = [
     ReactiveElasticsearchRestClientAutoConfiguration::class,
-    ReactiveElasticsearchRepositoriesAutoConfiguration::class
-  ]
+    ReactiveElasticsearchRepositoriesAutoConfiguration::class,
+  ],
 )
 @ConfigurationPropertiesScan
 class PrisonerOffenderSearch {

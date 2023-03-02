@@ -24,7 +24,7 @@ internal class CanonicalPncKtTest {
     "03/0000567a,           03/567A",
     "03/0000067a,           03/67A",
     "03/0000007a,           03/7A",
-    "03/0000000a,           03/0A"
+    "03/0000000a,           03/0A",
   )
   internal fun `will convert to canonical form of PNC when it is valid`(input: String, expected: String) {
     assertThat(input.canonicalPNCNumber()).isEqualTo(expected)
@@ -90,8 +90,8 @@ internal class CanonicalPncKtTest {
       "SF68/945674U",
       "",
       "2010/BBBBBBBA",
-      " - 20/0009n "
-    ]
+      " - 20/0009n ",
+    ],
   )
   internal fun `will return null and not convert to canonical form of PNC with short year when it is not valid`(input: String?) {
     assertThat(input?.canonicalPNCNumberShort()).isNull()
@@ -136,8 +136,8 @@ internal class CanonicalPncKtTest {
       "SF68/945674U",
       "",
       "2010/BBBBBBBA",
-      " - 20/0009n "
-    ]
+      " - 20/0009n ",
+    ],
   )
   internal fun `will return null and not convert to canonical form of PNC with long year when it is not valid`(input: String?) {
     assertThat(input?.canonicalPNCNumberLong()).isNull()

@@ -85,7 +85,6 @@ class PrisonerDetailService(
     val fuzzyMatch = detailRequest.fuzzyMatch ?: false
 
     with(detailRequest) {
-
       // Match by firstName, exact or by wildcard and include aliases if set - reduce score for alias matches
       firstName.takeIf { !it.isNullOrBlank() }?.let {
         detailQuery.must(
@@ -99,7 +98,7 @@ class PrisonerDetailService(
             QueryBuilders.boolQuery()
               .should(QueryBuilders.matchQuery("firstName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
               .should(QueryBuilders.wildcardQuery("firstName", it.lowercase()).boost(5f))
-          }
+          },
         )
       }
 
@@ -116,7 +115,7 @@ class PrisonerDetailService(
             QueryBuilders.boolQuery()
               .should(QueryBuilders.matchQuery("lastName", it.lowercase()).fuzzyTranspositions(fuzzyMatch).boost(5f))
               .should(QueryBuilders.wildcardQuery("lastName", it.lowercase()).boost(5f))
-          }
+          },
         )
       }
 
@@ -125,7 +124,7 @@ class PrisonerDetailService(
         detailQuery.must(
           QueryBuilders.boolQuery()
             .should(QueryBuilders.matchQuery("prisonerNumber", it.uppercase()).boost(5f))
-            .should(QueryBuilders.wildcardQuery("prisonerNumber", it.uppercase()).boost(2f))
+            .should(QueryBuilders.wildcardQuery("prisonerNumber", it.uppercase()).boost(2f)),
         )
       }
 
@@ -138,7 +137,7 @@ class PrisonerDetailService(
             .should(QueryBuilders.matchQuery("pncNumberCanonicalShort", it.uppercase()).boost(5f))
             .should(QueryBuilders.wildcardQuery("pncNumber", it.uppercase()).boost(2f))
             .should(QueryBuilders.wildcardQuery("pncNumberCanonicalLong", it.uppercase()).boost(2f))
-            .should(QueryBuilders.wildcardQuery("pncNumberCanonicalShort", it.uppercase()).boost(2f))
+            .should(QueryBuilders.wildcardQuery("pncNumberCanonicalShort", it.uppercase()).boost(2f)),
         )
       }
 
@@ -147,7 +146,7 @@ class PrisonerDetailService(
         detailQuery.must(
           QueryBuilders.boolQuery()
             .should(QueryBuilders.matchQuery("croNumber", it.uppercase()).boost(5f))
-            .should(QueryBuilders.wildcardQuery("croNumber", it.uppercase()).boost(2f))
+            .should(QueryBuilders.wildcardQuery("croNumber", it.uppercase()).boost(2f)),
         )
       }
 
@@ -210,10 +209,10 @@ class PrisonerDetailService(
       "croNumber" to detailRequest.croNumber,
       "fuzzyMatch" to detailRequest.fuzzyMatch.toString(),
       "prisonIds" to detailRequest.prisonIds.toString(),
-      "includeAliases" to detailRequest.includeAliases.toString()
+      "includeAliases" to detailRequest.includeAliases.toString(),
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }

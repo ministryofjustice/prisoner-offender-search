@@ -40,7 +40,7 @@ class IndexQueueStatusTest {
       Arguments.of(1, 1, 0, true),
       Arguments.of(0, 1, 1, true),
       Arguments.of(1, 0, 1, true),
-      Arguments.of(1, 1, 1, true)
+      Arguments.of(1, 1, 1, true),
     )
   }
 
@@ -50,7 +50,7 @@ class IndexQueueStatusTest {
     messagesOnQueue: Int,
     messagesOnDlq: Int,
     messagesInFlight: Int,
-    expectedActive: Boolean
+    expectedActive: Boolean,
   ) {
     assertThat(IndexQueueStatus(messagesOnQueue, messagesOnDlq, messagesInFlight).active).isEqualTo(expectedActive)
   }
@@ -67,9 +67,9 @@ class IndexQueueStatusTest {
         "arn:eu-west-1:index-queue",
         listOf(
           "ApproximateNumberOfMessages",
-          "ApproximateNumberOfMessagesNotVisible"
-        )
-      )
+          "ApproximateNumberOfMessagesNotVisible",
+        ),
+      ),
     ).thenReturn(futureQueueAttributesResult)
 
     val indexDlqResult = GetQueueAttributesResult()

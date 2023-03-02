@@ -47,36 +47,37 @@ class PrisonerKeywordResource(private val keywordService: KeywordService) {
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = KeywordRequest::class)
-        )
-      ]
+          schema = Schema(implementation = KeywordRequest::class),
+        ),
+      ],
     ),
 
     responses = [
       ApiResponse(
         responseCode = "200",
         description = "Search successfully performed",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = KeywordResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = KeywordResponse::class))],
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect information provided to perform prisoner match",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to search for prisoner data",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   @PostMapping
   fun keywordSearch(
-    @Valid @RequestBody keywordRequest: KeywordRequest
+    @Valid @RequestBody
+    keywordRequest: KeywordRequest,
   ): Page<Prisoner> = keywordService.findByKeyword(keywordRequest)
 }

@@ -20,7 +20,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.RestrictedPatientSea
 @RequestMapping(
   "/restricted-patient-search",
   produces = [MediaType.APPLICATION_JSON_VALUE],
-  consumes = [MediaType.APPLICATION_JSON_VALUE]
+  consumes = [MediaType.APPLICATION_JSON_VALUE],
 )
 class RestrictedPatientSearchResource(private val restrictedPatientSearchService: RestrictedPatientSearchService) {
 
@@ -29,7 +29,8 @@ class RestrictedPatientSearchResource(private val restrictedPatientSearchService
   @Tag(name = "Specific use case")
   fun findByCriteria(
     @Parameter(required = true) @RequestBody searchCriteria: RestrictedPatientSearchCriteria,
-    @ParameterObject @PageableDefault pageable: Pageable
+    @ParameterObject @PageableDefault
+    pageable: Pageable,
   ) =
     restrictedPatientSearchService.findBySearchCriteria(searchCriteria, pageable)
 }

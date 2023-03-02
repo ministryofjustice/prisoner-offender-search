@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableAsync
 class WebClientConfiguration(
   @Value("\${api.base.url.nomis}") val nomisBaseUri: String,
-  @Value("\${api.base.url.incentives}") val incentivesBaseUri: String
+  @Value("\${api.base.url.incentives}") val incentivesBaseUri: String,
 ) {
 
   @Bean
@@ -42,7 +42,7 @@ class WebClientConfiguration(
   @ConditionalOnProperty(value = ["api.base.url.restricted-patients"])
   fun restrictedPatientsWebClient(
     @Value("\${api.base.url.restricted-patients}") restrictedPatientBaseUrl: String,
-    authorizedClientManager: OAuth2AuthorizedClientManager?
+    authorizedClientManager: OAuth2AuthorizedClientManager?,
   ): WebClient? {
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId("restricted-patients-api")
@@ -82,7 +82,7 @@ class WebClientConfiguration(
   @Bean
   fun authorizedClientManager(
     clientRegistrationRepository: ClientRegistrationRepository?,
-    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?
+    oAuth2AuthorizedClientService: OAuth2AuthorizedClientService?,
   ): OAuth2AuthorizedClientManager? {
     val authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build()
     val authorizedClientManager =

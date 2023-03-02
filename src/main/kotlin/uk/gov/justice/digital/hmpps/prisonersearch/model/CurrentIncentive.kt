@@ -15,7 +15,7 @@ data class CurrentIncentive(
   val dateTime: LocalDateTime,
   @Field(type = FieldType.Date, format = [DateFormat.date])
   @Schema(required = true, description = "Schedule new review date", example = "2022-11-10")
-  val nextReviewDate: LocalDate? = null
+  val nextReviewDate: LocalDate? = null,
 )
 
 data class IncentiveLevel(

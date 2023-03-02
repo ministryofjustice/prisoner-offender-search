@@ -119,7 +119,7 @@ class PrisonerDiffServiceTest {
         .extracting("fieldName", "left", "right")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", "somePnc1", "somePnc2"),
-          Tuple("croNumber", "someCro1", "someCro2")
+          Tuple("croNumber", "someCro1", "someCro2"),
         )
     }
 
@@ -132,7 +132,7 @@ class PrisonerDiffServiceTest {
         .extracting("fieldName", "left", "right")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", "somePnc1", "somePnc2"),
-          Tuple("firstName", "firstName1", "firstName2")
+          Tuple("firstName", "firstName1", "firstName2"),
         )
     }
 
@@ -281,7 +281,7 @@ class PrisonerDiffServiceTest {
         .extracting("property", "categoryChanged", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
           Tuple("pncNumber", DiffCategory.IDENTIFIERS, "somePnc1", "somePnc2"),
-          Tuple("croNumber", DiffCategory.IDENTIFIERS, "someCro1", "someCro2")
+          Tuple("croNumber", DiffCategory.IDENTIFIERS, "someCro1", "someCro2"),
         )
       assertThat(personalDetailDiffs)
         .extracting("property", "categoryChanged", "oldValue", "newValue")
@@ -303,9 +303,10 @@ class PrisonerDiffServiceTest {
       assertThat(alertsDiffs)
         .extracting("property", "categoryChanged", "oldValue", "newValue")
         .containsExactlyInAnyOrder(
-          (Tuple("alerts", DiffCategory.ALERTS, listOf(alert()), listOf(alert(active = false))))
+          (Tuple("alerts", DiffCategory.ALERTS, listOf(alert()), listOf(alert(active = false)))),
         )
     }
+
     @Test
     fun `should report incentive differences`() {
       val prisoner1 = Prisoner().apply {
@@ -351,7 +352,7 @@ class PrisonerDiffServiceTest {
           assertThat(LocalDateTime.parse(it["processedTime"]).toLocalDate()).isEqualTo(LocalDate.now())
           assertThat(it["nomsNumber"]).isEqualTo("someOffenderNo")
         },
-        isNull()
+        isNull(),
       )
     }
 
@@ -367,7 +368,7 @@ class PrisonerDiffServiceTest {
         check<Map<String, String>> {
           assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
         },
-        isNull()
+        isNull(),
       )
     }
 
@@ -383,7 +384,7 @@ class PrisonerDiffServiceTest {
         check<Map<String, String>> {
           assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
         },
-        isNull()
+        isNull(),
       )
     }
 
@@ -400,7 +401,7 @@ class PrisonerDiffServiceTest {
           check<Map<String, String>> {
             assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS, PERSONAL_DETAILS]")
           },
-          isNull()
+          isNull(),
         )
     }
 
@@ -466,7 +467,7 @@ class PrisonerDiffServiceTest {
         eq("someOffenderNo"),
         check {
           assertThat(it.keys).containsExactly(DiffCategory.IDENTIFIERS)
-        }
+        },
       )
     }
 
@@ -481,7 +482,7 @@ class PrisonerDiffServiceTest {
         eq("someOffenderNo"),
         check {
           assertThat(it.keys).containsExactly(DiffCategory.IDENTIFIERS)
-        }
+        },
       )
     }
 
@@ -496,7 +497,7 @@ class PrisonerDiffServiceTest {
         eq("someOffenderNo"),
         check {
           assertThat(it.keys).containsExactlyInAnyOrder(DiffCategory.IDENTIFIERS, DiffCategory.PERSONAL_DETAILS)
-        }
+        },
       )
     }
 
@@ -540,6 +541,6 @@ class PrisonerDiffServiceTest {
       firstName = "someFirstName",
       lastName = "someLastName",
       dateOfBirth = LocalDate.now(),
-      activeFlag = true
+      activeFlag = true,
     )
 }

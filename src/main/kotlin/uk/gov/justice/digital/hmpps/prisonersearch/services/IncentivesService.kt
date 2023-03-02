@@ -13,7 +13,7 @@ import java.time.LocalDateTime
 class IncentivesService(
   val incentivesWebClient: WebClient,
   @Value("\${api.incentives.timeout:20s}") val timeout: Duration,
-  @Value("\${index.incentives:true}") val indexIncentives: Boolean
+  @Value("\${index.incentives:true}") val indexIncentives: Boolean,
 ) {
   fun getCurrentIncentive(bookingId: Long): IncentiveLevel? = if (indexIncentives) {
     incentivesWebClient.get().uri("/iep/reviews/booking/{bookingId}?with-details=false", bookingId)
@@ -23,7 +23,9 @@ class IncentivesService(
         Mono.empty()
       }
       .block(timeout)
-  } else null
+  } else {
+    null
+  }
 }
 
 data class IncentiveLevel(

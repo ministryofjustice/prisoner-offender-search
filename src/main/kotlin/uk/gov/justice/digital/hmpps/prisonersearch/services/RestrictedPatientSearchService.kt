@@ -25,7 +25,7 @@ class RestrictedPatientSearchService(
   private val indexStatusService: IndexStatusService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
-  private val authenticationHolder: AuthenticationHolder
+  private val authenticationHolder: AuthenticationHolder,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -58,7 +58,7 @@ class RestrictedPatientSearchService(
   private fun queryBy(
     searchCriteria: RestrictedPatientSearchCriteria,
     pageable: Pageable,
-    queryBuilder: (searchCriteria: RestrictedPatientSearchCriteria) -> BoolQueryBuilder?
+    queryBuilder: (searchCriteria: RestrictedPatientSearchCriteria) -> BoolQueryBuilder?,
   ): RestrictedPatientResult {
     val query = queryBuilder(searchCriteria)
     return query?.let {
@@ -71,10 +71,14 @@ class RestrictedPatientSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) RestrictedPatientResult.NoMatch else RestrictedPatientResult.Match(
-        prisonerMatches,
-        searchResults.hits.totalHits?.value ?: 0
-      )
+      return if (prisonerMatches.isEmpty()) {
+        RestrictedPatientResult.NoMatch
+      } else {
+        RestrictedPatientResult.Match(
+          prisonerMatches,
+          searchResults.hits.totalHits?.value ?: 0,
+        )
+      }
     } ?: RestrictedPatientResult.NoMatch
   }
 
@@ -89,7 +93,7 @@ class RestrictedPatientSearchService(
           "pncNumberCanonicalShort",
           "pncNumberCanonicalLong",
           "croNumber",
-          "bookNumber"
+          "bookNumber",
         )
     }
   }
@@ -102,7 +106,7 @@ class RestrictedPatientSearchService(
             .should(
               QueryBuilders.boolQuery()
                 .mustWhenPresent("lastName", lastName)
-                .mustWhenPresent("firstName", firstName)
+                .mustWhenPresent("firstName", firstName),
             )
             .should(
               QueryBuilders.nestedQuery(
@@ -111,11 +115,11 @@ class RestrictedPatientSearchService(
                   .should(
                     QueryBuilders.boolQuery()
                       .mustWhenPresent("aliases.lastName", lastName)
-                      .mustWhenPresent("aliases.firstName", firstName)
+                      .mustWhenPresent("aliases.firstName", firstName),
                   ),
-                ScoreMode.Max
-              )
-            )
+                ScoreMode.Max,
+              ),
+            ),
         )
     }
   }
@@ -136,7 +140,7 @@ class RestrictedPatientSearchService(
 
   private fun customEventForFindBySearchCriteria(
     searchCriteria: RestrictedPatientSearchCriteria,
-    numberOfResults: Int
+    numberOfResults: Int,
   ) {
     val propertiesMap = mapOf(
       "username" to authenticationHolder.currentUsername(),
@@ -146,7 +150,7 @@ class RestrictedPatientSearchService(
       "prisonerIdentifier" to searchCriteria.prisonerIdentifier,
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindRestrictedPatientsByCriteria", propertiesMap, metricsMap)
   }

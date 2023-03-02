@@ -190,7 +190,7 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
         "A7090BB",
         "A7090BC",
         "A7090AF",
-        "A7090AA"
+        "A7090AA",
       ),
     )
   }
@@ -201,7 +201,7 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
       keywordRequest = KeywordRequest(
         andWords = "jones",
         prisonIds = listOf("MDI", "AGI", "LEI"),
-        type = SearchType.DEFAULT
+        type = SearchType.DEFAULT,
       ),
       expectedCount = 9,
       expectedPrisoners = listOf(
@@ -213,7 +213,7 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
         "A7090BB",
         "A7090BC",
         "A7090AF",
-        "A7090AA"
+        "A7090AA",
       ),
     )
   }
@@ -224,26 +224,27 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
       keywordRequest = KeywordRequest(
         andWords = "JONES",
         prisonIds = listOf("LEI"),
-        type = SearchType.DEFAULT
+        type = SearchType.DEFAULT,
       ),
       expectedCount = 2,
       expectedPrisoners = listOf(
         "A7090AF", // Alias
-        "A7090BA"
+        "A7090BA",
       ),
     )
   }
+
   @Test
   fun `ESTABLISHMENT will not search alias`() {
     keywordSearch(
       keywordRequest = KeywordRequest(
         andWords = "JONES",
         prisonIds = listOf("LEI"),
-        type = SearchType.ESTABLISHMENT
+        type = SearchType.ESTABLISHMENT,
       ),
       expectedCount = 1,
       expectedPrisoners = listOf(
-        "A7090BA"
+        "A7090BA",
       ),
     )
   }
@@ -254,7 +255,7 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
       keywordRequest = KeywordRequest(
         andWords = "jones",
         prisonIds = listOf("MDI", "AGI", "LEI"),
-        type = SearchType.ESTABLISHMENT
+        type = SearchType.ESTABLISHMENT,
       ),
       expectedCount = 8,
       expectedPrisoners = listOf(
@@ -265,7 +266,7 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
         "A7090BA", // JONES, SAM
         "A7090BB", // JONES, SAM
         "A7090BC", // JONES, SAM
-        "A1090AA" // JONES, ZAC
+        "A1090AA", // JONES, ZAC
       ),
     )
   }
@@ -303,7 +304,7 @@ class KeywordSearchResourceTest : AbstractSearchDataIntegrationTest() {
         "A7090BB",
         "A7090BC",
         "A7090AA",
-        "A7090AF"
+        "A7090AF",
       ),
     )
   }

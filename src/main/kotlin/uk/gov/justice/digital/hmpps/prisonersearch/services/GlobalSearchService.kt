@@ -32,7 +32,7 @@ class GlobalSearchService(
   private val prisonerIndexService: PrisonerIndexService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
-  private val authenticationHolder: AuthenticationHolder
+  private val authenticationHolder: AuthenticationHolder,
 ) {
   companion object {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -82,7 +82,7 @@ class GlobalSearchService(
           "onlyInNomis" to toLogMessage(onlyInNomis),
           "timeMs" to (end - start).toString(),
         ),
-        null
+        null,
       )
       log.info("End of doCompare()")
     } catch (e: Exception) {
@@ -96,7 +96,6 @@ class GlobalSearchService(
     if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
 
   fun compareIndex(): Pair<List<String>, List<String>> {
-
     val allNomis =
       prisonerIndexService.getAllNomisOffenders(0, Int.MAX_VALUE)
         .offenderIds!!
@@ -134,7 +133,6 @@ class GlobalSearchService(
   }
 
   private fun setupIndexSearch(scroll: Scroll): SearchResponse {
-
     val searchSourceBuilder = SearchSourceBuilder().apply {
       fetchSource(FetchSourceContext.DO_NOT_FETCH_SOURCE)
       size(2000)
@@ -147,7 +145,7 @@ class GlobalSearchService(
   private fun queryBy(
     globalSearchCriteria: GlobalSearchCriteria,
     pageable: Pageable,
-    queryBuilder: (globalSearchCriteria: GlobalSearchCriteria) -> BoolQueryBuilder?
+    queryBuilder: (globalSearchCriteria: GlobalSearchCriteria) -> BoolQueryBuilder?,
   ): GlobalResult {
     val query = queryBuilder(globalSearchCriteria)
     return query?.let {
@@ -162,10 +160,14 @@ class GlobalSearchService(
       val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
       val searchResults = searchClient.search(searchRequest)
       val prisonerMatches = getSearchResult(searchResults)
-      return if (prisonerMatches.isEmpty()) GlobalResult.NoMatch else GlobalResult.Match(
-        prisonerMatches,
-        searchResults.hits.totalHits?.value ?: 0
-      )
+      return if (prisonerMatches.isEmpty()) {
+        GlobalResult.NoMatch
+      } else {
+        GlobalResult.Match(
+          prisonerMatches,
+          searchResults.hits.totalHits?.value ?: 0,
+        )
+      }
     } ?: GlobalResult.NoMatch
   }
 
@@ -180,7 +182,7 @@ class GlobalSearchService(
           "pncNumberCanonicalShort",
           "pncNumberCanonicalLong",
           "croNumber",
-          "bookNumber"
+          "bookNumber",
         )
     }
   }
@@ -195,8 +197,8 @@ class GlobalSearchService(
                 .mustWhenPresent("lastName", lastName)
                 .mustWhenPresent("firstName", firstName)
                 .mustWhenPresentGender("gender", gender?.value)
-                .mustWhenPresent("dateOfBirth", dateOfBirth)
-            )
+                .mustWhenPresent("dateOfBirth", dateOfBirth),
+            ),
         )
     }
   }
@@ -211,7 +213,7 @@ class GlobalSearchService(
                 .mustWhenPresent("lastName", lastName)
                 .mustWhenPresent("firstName", firstName)
                 .mustWhenPresentGender("gender", gender?.value)
-                .mustWhenPresent("dateOfBirth", dateOfBirth)
+                .mustWhenPresent("dateOfBirth", dateOfBirth),
             )
             .should(
               QueryBuilders.nestedQuery(
@@ -222,11 +224,11 @@ class GlobalSearchService(
                       .mustWhenPresent("aliases.lastName", lastName)
                       .mustWhenPresent("aliases.firstName", firstName)
                       .mustWhenPresentGender("aliases.gender", gender?.value)
-                      .mustWhenPresent("aliases.dateOfBirth", dateOfBirth)
+                      .mustWhenPresent("aliases.dateOfBirth", dateOfBirth),
                   ),
-                ScoreMode.Max
-              )
-            )
+                ScoreMode.Max,
+              ),
+            ),
         )
     }
   }
@@ -241,7 +243,7 @@ class GlobalSearchService(
 
   private fun customEventForFindBySearchCriteria(
     globalSearchCriteria: GlobalSearchCriteria,
-    numberOfResults: Int
+    numberOfResults: Int,
   ) {
     val propertiesMap = mapOf(
       "username" to authenticationHolder.currentUsername(),
@@ -252,10 +254,10 @@ class GlobalSearchService(
       "prisonId" to globalSearchCriteria.location,
       "dateOfBirth" to globalSearchCriteria.dateOfBirth.toString(),
       "prisonerIdentifier" to globalSearchCriteria.prisonerIdentifier,
-      "includeAliases" to globalSearchCriteria.includeAliases.toString()
+      "includeAliases" to globalSearchCriteria.includeAliases.toString(),
     )
     val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble()
+      "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByCriteria", propertiesMap, metricsMap)
   }

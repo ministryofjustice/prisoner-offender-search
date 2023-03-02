@@ -37,7 +37,7 @@ internal class IncentivesServiceTest {
 
       incentivesApi.verify(
         getRequestedFor(urlEqualTo("/iep/reviews/booking/123456?with-details=false"))
-          .withHeader("Authorization", equalTo("Bearer ABCDE"))
+          .withHeader("Authorization", equalTo("Bearer ABCDE")),
 
       )
     }
@@ -61,6 +61,7 @@ internal class IncentivesServiceTest {
     }
   }
 }
+
 @SpringAPIServiceTest
 @Import(IncentivesService::class, WebClientConfiguration::class)
 @TestPropertySource(properties = ["index.incentives=false"])
@@ -84,7 +85,7 @@ internal class IncentivesServiceFeatureOffTest {
       incentivesApi.verify(
         exactly(0),
         getRequestedFor(urlEqualTo("/iep/reviews/booking/123456?with-details=false"))
-          .withHeader("Authorization", equalTo("Bearer ABCDE"))
+          .withHeader("Authorization", equalTo("Bearer ABCDE")),
       )
     }
 

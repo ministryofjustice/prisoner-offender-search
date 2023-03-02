@@ -6,7 +6,7 @@ data class PrisonerMatches(
   @Schema(required = true, description = "List of prisoners that share the same possibility of being the match")
   val matches: List<PrisonerMatch> = listOf(),
   @Schema(required = true, description = "How the match was performed")
-  val matchedBy: MatchedBy = MatchedBy.NOTHING
+  val matchedBy: MatchedBy = MatchedBy.NOTHING,
 )
 
 @Schema
@@ -18,5 +18,5 @@ enum class MatchedBy {
   NAME,
   PARTIAL_NAME,
   PARTIAL_NAME_DOB_LENIENT,
-  NOTHING
+  NOTHING,
 }

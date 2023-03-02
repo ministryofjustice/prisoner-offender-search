@@ -31,5 +31,5 @@ data class SentenceDetail(
   val nonDtoReleaseDate: LocalDate? = null,
   val nonDtoReleaseDateType: String? = null,
   val confirmedReleaseDate: LocalDate? = null,
-  val releaseDate: LocalDate? = null
+  val releaseDate: LocalDate? = null,
 )

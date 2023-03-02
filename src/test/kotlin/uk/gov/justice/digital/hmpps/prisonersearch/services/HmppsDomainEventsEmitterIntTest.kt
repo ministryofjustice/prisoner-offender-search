@@ -44,7 +44,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
   fun `sends prisoner differences to the domain topic`() {
     hmppsDomainEventEmitter.emitPrisonerDifferenceEvent(
       "some_offender",
-      mapOf(IDENTIFIERS to listOf(), LOCATION to listOf())
+      mapOf(IDENTIFIERS to listOf(), LOCATION to listOf()),
     )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
@@ -58,7 +58,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     assertThatJson(message).node("additionalInformation.nomsNumber").isEqualTo("some_offender")
     assertThatJson(message).node("additionalInformation.categoriesChanged").isArray.containsExactlyInAnyOrder(
       "IDENTIFIERS",
-      "LOCATION"
+      "LOCATION",
     )
   }
 
@@ -85,7 +85,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     hmppsDomainEventEmitter.emitPrisonerReceiveEvent(
       "some_offender",
       HmppsDomainEventEmitter.PrisonerReceiveReason.TRANSFERRED,
-      "MDI"
+      "MDI",
     )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
@@ -110,7 +110,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     hmppsDomainEventEmitter.emitPrisonerReleaseEvent(
       "some_offender",
       HmppsDomainEventEmitter.PrisonerReleaseReason.TRANSFERRED,
-      "MDI"
+      "MDI",
     )
 
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
@@ -140,8 +140,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
-        )
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking()),
+        ),
     )
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
 
@@ -165,12 +165,12 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = true).toOffenderBooking())
-        )
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = true).toOffenderBooking()),
+        ),
     )
     eventQueueSqsClient.sendMessage(
       eventQueueUrl,
-      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD"),
     )
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
@@ -191,12 +191,12 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = false).toOffenderBooking())
-        )
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = false).toOffenderBooking()),
+        ),
     )
     eventQueueSqsClient.sendMessage(
       eventQueueUrl,
-      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
+      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD"),
     )
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
@@ -221,14 +221,14 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withBody(
               PrisonerBuilder(
                 prisonerNumber = "A1239DD",
-                alertCodes = listOf("X" to "XTACT", "W" to "WO")
-              ).toOffenderBooking()
-            )
-        )
+                alertCodes = listOf("X" to "XTACT", "W" to "WO"),
+              ).toOffenderBooking(),
+            ),
+        ),
     )
     eventQueueSqsClient.sendMessage(
       eventQueueUrl,
-      "/messages/offenderAlertsChanged.json".readResourceAsText()
+      "/messages/offenderAlertsChanged.json".readResourceAsText(),
     )
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
@@ -252,10 +252,11 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withHeader("Content-Type", "application/json")
             .withBody(
               PrisonerBuilder(
-                prisonerNumber = "A1239DD", heightCentimetres = 190
-              ).toOffenderBooking()
-            )
-        )
+                prisonerNumber = "A1239DD",
+                heightCentimetres = 190,
+              ).toOffenderBooking(),
+            ),
+        ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, offenderPhysicalDetailsChanged("A1239DD"))
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
@@ -278,14 +279,14 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withBody(
               PrisonerBuilder(
                 prisonerNumber = "A1239DD",
-                alertCodes = listOf("W" to "WO")
-              ).toOffenderBooking()
-            ) // technically the alert should be end dated but this will work equally well
-        )
+                alertCodes = listOf("W" to "WO"),
+              ).toOffenderBooking(),
+            ), // technically the alert should be end dated but this will work equally well
+        ),
     )
     eventQueueSqsClient.sendMessage(
       eventQueueUrl,
-      "/messages/offenderAlertsChanged.json".readResourceAsText()
+      "/messages/offenderAlertsChanged.json".readResourceAsText(),
     )
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
@@ -308,8 +309,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
-        )
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking()),
+        ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
@@ -353,8 +354,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking())
-        )
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking()),
+        ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
     await untilCallTo { getNumberOfMessagesCurrentlyOnEventQueue() } matches { it == 0 }
@@ -375,12 +376,12 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(builder.toOffenderBooking())
-        )
+            .withBody(builder.toOffenderBooking()),
+        ),
     )
     eventQueueSqsClient.sendMessage(
       eventQueueUrl,
-      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", prisonerNumber)
+      "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", prisonerNumber),
     )
 
     // create the prisoner in ES
@@ -409,8 +410,8 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber).toOffenderBooking())
-        )
+            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber).toOffenderBooking()),
+        ),
     )
   }
 

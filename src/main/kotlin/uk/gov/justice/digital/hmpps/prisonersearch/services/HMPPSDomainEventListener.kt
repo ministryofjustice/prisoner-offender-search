@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 class HMPPSDomainEventListener(
   private val prisonerSyncService: PrisonerSyncService,
   @Qualifier("gson") private val gson: Gson,
-  private val telemetryClient: TelemetryClient
+  private val telemetryClient: TelemetryClient,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -37,7 +37,7 @@ class HMPPSDomainEventListener(
       telemetryClient.trackEvent(
         "POSProcessHMPPSDomainEventRequestError",
         mapOf("requestPayload" to requestJson, "message" to e.message),
-        null
+        null,
       )
 
       throw e

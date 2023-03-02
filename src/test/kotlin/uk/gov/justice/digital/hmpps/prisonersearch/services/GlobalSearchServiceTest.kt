@@ -51,7 +51,7 @@ class GlobalSearchServiceTest {
 
     private fun setupIndex(vararg prisonerNumbers: String) {
       whenever(indexStatusService.getCurrentIndex()).thenReturn(
-        IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false)
+        IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false),
       )
       whenever(searchClient.search(any())).thenReturn(resultsOf(prisonerNumbers.asList()))
       whenever(searchClient.scroll(any())).thenReturn(resultsOf(emptyList()))
@@ -61,8 +61,8 @@ class GlobalSearchServiceTest {
     private fun setupNomis(vararg prisonerNumbers: String) {
       whenever(prisonerIndexService.getAllNomisOffenders(0, Int.MAX_VALUE)).thenReturn(
         OffenderResponse(
-          prisonerNumbers.map { OffenderId(it) }
-        )
+          prisonerNumbers.map { OffenderId(it) },
+        ),
       )
     }
 

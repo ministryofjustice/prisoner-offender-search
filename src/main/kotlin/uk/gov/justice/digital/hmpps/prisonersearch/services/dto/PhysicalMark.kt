@@ -6,5 +6,5 @@ data class PhysicalMark(
   val bodyPart: String?,
   val orientation: String?,
   val comment: String?,
-  val imageId: Long?
+  val imageId: Long?,
 )

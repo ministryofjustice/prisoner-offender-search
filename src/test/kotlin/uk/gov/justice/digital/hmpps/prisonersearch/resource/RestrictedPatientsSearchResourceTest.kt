@@ -17,7 +17,6 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
   inner class Authorisation {
     @Test
     fun `access forbidden when no authority`() {
-
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .header("Content-Type", "application/json")
         .exchange()
@@ -26,7 +25,6 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
 
     @Test
     fun `access forbidden when no role`() {
-
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .body(BodyInserters.fromValue(gson.toJson(RestrictedPatientSearchCriteria(null, null, null))))
         .headers(setAuthorisation())
@@ -37,7 +35,6 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
 
     @Test
     fun `can perform a match for ROLE_GLOBAL_SEARCH role`() {
-
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .body(BodyInserters.fromValue(gson.toJson(RestrictedPatientSearchCriteria(null, null, null))))
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
@@ -48,7 +45,6 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
 
     @Test
     fun `can perform a match for ROLE_PRISONER_SEARCH role`() {
-
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .body(BodyInserters.fromValue(gson.toJson(RestrictedPatientSearchCriteria(null, null, null))))
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_SEARCH")))
@@ -59,7 +55,6 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
 
     @Test
     fun `can perform a match for ROLE_GLOBAL_SEARCH and ROLE_PRISONER_SEARCH role`() {
-
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .body(BodyInserters.fromValue(gson.toJson(RestrictedPatientSearchCriteria(null, null, null))))
         .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH", "ROLE_PRISONER_SEARCH")))
@@ -75,7 +70,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `finds all restricted patients when no criteria provided`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, null, null),
-        "/results/restrictedPatientsSearch/search_results_all.json"
+        "/results/restrictedPatientsSearch/search_results_all.json",
       )
     }
   }
@@ -86,7 +81,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `does not match when number is of active prisoner`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("A7089EY", null, null),
-        "/results/restrictedPatientsSearch/empty.json"
+        "/results/restrictedPatientsSearch/empty.json",
       )
     }
 
@@ -94,7 +89,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on prisoner number`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("A9999RB", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
 
@@ -102,7 +97,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on prisoner number lowercase`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("a9999rb", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
 
@@ -110,7 +105,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match wrong prisoner number but correct name`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("X7089EY", "HOSP", "PATIENTONE"),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
   }
@@ -121,7 +116,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on PNC number`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("2014/009773W", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
 
@@ -129,7 +124,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on PNC number short year`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("14/9773W", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
 
@@ -137,7 +132,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on PNC number long year`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("2014/9773W", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
   }
@@ -148,7 +143,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on CRO number`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("29913/12L", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
   }
@@ -159,7 +154,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on book number`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("V69687", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
 
@@ -167,7 +162,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on booking Id`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria("1999992", null, null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
   }
@@ -188,7 +183,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on a first name only`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, "hosp", null),
-        "/results/restrictedPatientsSearch/search_results_hosp.json"
+        "/results/restrictedPatientsSearch/search_results_hosp.json",
       )
     }
 
@@ -196,7 +191,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on a last name only`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, null, "patienttwo"),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_two.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_two.json",
       )
     }
 
@@ -204,7 +199,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on first and last name only`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, "hosp", "patienttwo"),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_two.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_two.json",
       )
     }
   }
@@ -215,7 +210,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `does not match aliases from active prisoners`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, "master", null),
-        "/results/restrictedPatientsSearch/empty.json"
+        "/results/restrictedPatientsSearch/empty.json",
       )
     }
 
@@ -223,7 +218,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on a first and last name only multiple hits include aliases`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, "PSYHOSP", "PATIENTONE"),
-        "/results/restrictedPatientsSearch/search_results_patient_one_aliases.json"
+        "/results/restrictedPatientsSearch/search_results_patient_one_aliases.json",
       )
     }
 
@@ -231,7 +226,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on first and last name in alias but they must be from the same record`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, "PSYHOSP", "OTHERALIAS"),
-        "/results/restrictedPatientsSearch/empty.json"
+        "/results/restrictedPatientsSearch/empty.json",
       )
     }
 
@@ -239,7 +234,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on firstname only in alias`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, "AN", null),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
 
@@ -247,7 +242,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `can perform a match on last name only in alias`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, null, "OTHERALIAS"),
-        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_patient_one.json",
       )
     }
   }
@@ -258,7 +253,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `finds restricted patients with a single supporting prison`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, null, null, listOf("DNI")),
-        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI.json"
+        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI.json",
       )
     }
 
@@ -266,7 +261,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `finds restricted patients with a multiple supporting prisons`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, null, null, listOf("DNI", "MDI", "NONE")),
-        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI_MDI.json"
+        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI_MDI.json",
       )
     }
 
@@ -274,7 +269,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     fun `finds restricted patients filtered by name and supporting prison`() {
       restrictedPatientSearch(
         RestrictedPatientSearchCriteria(null, null, "patientone", listOf("DNI")),
-        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI.json"
+        "/results/restrictedPatientsSearch/search_results_supporting_prison_DNI.json",
       )
     }
   }
@@ -287,7 +282,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
         RestrictedPatientSearchCriteria(null, "HOSP", null),
         1,
         0,
-        "/results/restrictedPatientsSearch/search_results_hosp_pagination1.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_pagination1.json",
       )
     }
 
@@ -297,7 +292,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
         RestrictedPatientSearchCriteria(null, "HOSP", null),
         1,
         1,
-        "/results/restrictedPatientsSearch/search_results_hosp_pagination2.json"
+        "/results/restrictedPatientsSearch/search_results_hosp_pagination2.json",
       )
     }
   }
@@ -316,7 +311,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
       any(),
       check<Map<String, Double>> {
         assertThat(it["numberOfResults"]).isCloseTo(4.0, withinPercentage(1))
-      }
+      },
     )
   }
 }

@@ -45,7 +45,7 @@ class HmppsDomainEventEmitter(
   fun <T : PrisonerAdditionalInformation> defaultFailureHandler(event: PrisonerDomainEvent<T>, exception: Throwable) {
     log.error(
       "Failed to send event ${event.eventType} for offenderNo= ${event.additionalInformation.nomsNumber}. Event must be manually created",
-      exception
+      exception,
     )
     telemetryClient.trackEvent("POSPrisonerDomainEventSendFailure", event.asMap(), null)
   }
@@ -53,12 +53,12 @@ class HmppsDomainEventEmitter(
   fun <T : PrisonerAdditionalInformation> PrisonerDomainEvent<T>.publish(
     onFailure: (error: Throwable) -> Unit = {
       defaultFailureHandler(this, it)
-    }
+    },
   ) {
     val request = PublishRequest(topicArn, objectMapper.writeValueAsString(this))
       .addMessageAttributesEntry(
         "eventType",
-        MessageAttributeValue().withDataType("String").withStringValue(this.eventType)
+        MessageAttributeValue().withDataType("String").withStringValue(this.eventType),
       )
 
     runCatching {
@@ -74,7 +74,7 @@ class HmppsDomainEventEmitter(
     PrisonerUpdatedDomainEvent(
       PrisonerUpdatedEvent(offenderNo, differences.keys.toList().sorted()),
       Instant.now(clock),
-      diffProperties.host
+      diffProperties.host,
     ).publish {
       log.error("Failed to send event $UPDATED_EVENT_TYPE for offenderNo=$offenderNo, differences=$differences. Event will be retried")
       throw it
@@ -96,7 +96,7 @@ class HmppsDomainEventEmitter(
     PrisonerReceivedDomainEvent(
       PrisonerReceivedEvent(offenderNo, reason, prisonId),
       Instant.now(clock),
-      diffProperties.host
+      diffProperties.host,
     ).publish()
   }
 
@@ -125,7 +125,7 @@ class HmppsDomainEventEmitter(
     PrisonerReleasedDomainEvent(
       PrisonerReleasedEvent(offenderNo, reason, prisonId),
       Instant.now(clock),
-      diffProperties.host
+      diffProperties.host,
     ).publish()
   }
 
@@ -138,7 +138,7 @@ class HmppsDomainEventEmitter(
     PrisonerAlertsUpdatedDomainEvent(
       PrisonerAlertsUpdatedEvent(offenderNo, bookingId, alertsAdded, alertsRemoved),
       Instant.now(clock),
-      diffProperties.host
+      diffProperties.host,
     ).publish()
   }
 
@@ -170,7 +170,7 @@ open class PrisonerDomainEvent<T : PrisonerAdditionalInformation>(
     occurredAt: Instant = Instant.now(),
     host: String,
     description: String,
-    eventType: String
+    eventType: String,
   ) :
     this(
       additionalInformation = additionalInformation,
@@ -194,7 +194,7 @@ class PrisonerUpdatedDomainEvent(additionalInformation: PrisonerUpdatedEvent, oc
     host = host,
     occurredAt = occurredAt,
     description = "A prisoner record has been updated",
-    eventType = UPDATED_EVENT_TYPE
+    eventType = UPDATED_EVENT_TYPE,
   )
 
 data class PrisonerCreatedEvent(override val nomsNumber: String) : PrisonerAdditionalInformation()
@@ -204,7 +204,7 @@ class PrisonerCreatedDomainEvent(additionalInformation: PrisonerCreatedEvent, oc
     host = host,
     occurredAt = occurredAt,
     description = "A prisoner record has been created",
-    eventType = CREATED_EVENT_TYPE
+    eventType = CREATED_EVENT_TYPE,
   )
 
 data class PrisonerReceivedEvent(
@@ -219,7 +219,7 @@ class PrisonerReceivedDomainEvent(additionalInformation: PrisonerReceivedEvent, 
     occurredAt = occurredAt,
     host = host,
     description = "A prisoner has been received into a prison with reason: ${additionalInformation.reason.description}",
-    eventType = PRISONER_RECEIVED_EVENT_TYPE
+    eventType = PRISONER_RECEIVED_EVENT_TYPE,
   )
 
 data class PrisonerReleasedEvent(
@@ -234,7 +234,7 @@ class PrisonerReleasedDomainEvent(additionalInformation: PrisonerReleasedEvent, 
     occurredAt = occurredAt,
     host = host,
     description = "A prisoner has been released from a prison with reason: ${additionalInformation.reason.description}",
-    eventType = PRISONER_RELEASED_EVENT_TYPE
+    eventType = PRISONER_RELEASED_EVENT_TYPE,
   )
 
 data class PrisonerAlertsUpdatedEvent(
@@ -250,7 +250,7 @@ class PrisonerAlertsUpdatedDomainEvent(additionalInformation: PrisonerAlertsUpda
     occurredAt = occurredAt,
     host = host,
     description = "A prisoner had their alerts updated, added: ${additionalInformation.alertsAdded.size}, removed: ${additionalInformation.alertsRemoved.size}",
-    eventType = PRISONER_ALERTS_UPDATED_EVENT_TYPE
+    eventType = PRISONER_ALERTS_UPDATED_EVENT_TYPE,
   )
 
 fun <T : PrisonerAdditionalInformation> PrisonerDomainEvent<T>.asMap(): Map<String, String> {
@@ -259,7 +259,7 @@ fun <T : PrisonerAdditionalInformation> PrisonerDomainEvent<T>.asMap(): Map<Stri
     "eventType" to eventType,
     "version" to version.toString(),
     "description" to description,
-    "detailUrl" to detailUrl
+    "detailUrl" to detailUrl,
   ).also { it.putAll(additionalInformation.asMap()) }
 }
 

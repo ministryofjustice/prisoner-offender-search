@@ -8,5 +8,5 @@ data class OffenderIdentifier(
   val value: String,
   val issuedAuthorityText: String?,
   val issuedDate: LocalDate?,
-  val whenCreated: LocalDateTime
+  val whenCreated: LocalDateTime,
 )

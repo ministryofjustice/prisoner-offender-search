@@ -26,7 +26,7 @@ class IndexStatus(
   var inProgress: Boolean,
 
   @Field(type = FieldType.Boolean)
-  var inError: Boolean = false
+  var inError: Boolean = false,
 
 ) {
 

@@ -42,36 +42,37 @@ class PrisonerDetailResource(private val prisonerDetailService: PrisonerDetailSe
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = PrisonerDetailRequest::class)
-        )
-      ]
+          schema = Schema(implementation = PrisonerDetailRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "200",
         description = "Search successfully performed",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = PrisonerDetailResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = PrisonerDetailResponse::class))],
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect information provided to perform prisoner match",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to search for prisoner data",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   @PostMapping
   @Tag(name = "Global search")
   fun prisonerDetailSearch(
-    @Valid @RequestBody prisonerDetailRequest: PrisonerDetailRequest
+    @Valid @RequestBody
+    prisonerDetailRequest: PrisonerDetailRequest,
   ): Page<Prisoner> = prisonerDetailService.findByPrisonerDetail(prisonerDetailRequest)
 }

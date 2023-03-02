@@ -72,14 +72,14 @@ internal class AlertsUpdatedEventServiceTest {
       this.alerts = listOf(
         PrisonerAlert(alertType = "X", alertCode = "XA", active = true, expired = false),
         PrisonerAlert(alertType = "X", alertCode = "XT", active = true, expired = false),
-        PrisonerAlert(alertType = "X", alertCode = "AA", active = true, expired = false)
+        PrisonerAlert(alertType = "X", alertCode = "AA", active = true, expired = false),
       )
     }
     val prisoner = prisoner().apply {
       this.alerts = listOf(
         PrisonerAlert(alertType = "X", alertCode = "XA", active = true, expired = false),
         PrisonerAlert(alertType = "X", alertCode = "XK", active = true, expired = false),
-        PrisonerAlert(alertType = "X", alertCode = "BB", active = true, expired = false)
+        PrisonerAlert(alertType = "X", alertCode = "BB", active = true, expired = false),
       )
     }
 
@@ -96,6 +96,6 @@ internal class AlertsUpdatedEventServiceTest {
   private fun prisoner(): Prisoner =
     objectMapper.readValue(
       AlertsUpdatedEventService::class.java.getResource("/receive-state-changes/first-new-booking.json")!!.readText(),
-      Prisoner::class.java
+      Prisoner::class.java,
     )
 }

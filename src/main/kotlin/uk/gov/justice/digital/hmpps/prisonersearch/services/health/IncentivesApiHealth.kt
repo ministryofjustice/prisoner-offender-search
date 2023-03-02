@@ -9,6 +9,6 @@ import java.time.Duration
 class IncentivesApiHealth(
   webClient: WebClient,
   @Value("\${api.base.url.incentives}") baseUri: String,
-  @Value("\${api.health-timeout:2s}") timeout: Duration
+  @Value("\${api.health-timeout:2s}") timeout: Duration,
 ) :
   HealthCheck(webClient, baseUri, timeout)

@@ -12,7 +12,7 @@ import java.time.Duration
 @Service
 class NomisService(
   val prisonWebClient: WebClient,
-  @Value("\${api.offender.timeout:20s}") val offenderTimeout: Duration
+  @Value("\${api.offender.timeout:20s}") val offenderTimeout: Duration,
 ) {
 
   private val ids = object : ParameterizedTypeReference<List<OffenderId>>() {}
@@ -27,7 +27,7 @@ class NomisService(
       .block(Duration.ofMinutes(10))?.let {
         OffenderResponse(
           it.bodyToMono(ids).block(),
-          it.headers().header("Total-Records").first().toLongOrNull() ?: 0
+          it.headers().header("Total-Records").first().toLongOrNull() ?: 0,
         )
       } ?: OffenderResponse()
   }
@@ -62,15 +62,15 @@ class NomisService(
 }
 
 data class OffenderId(
-  val offenderNumber: String
+  val offenderNumber: String,
 )
 
 data class OffenderResponse(
   val offenderIds: List<OffenderId>? = emptyList(),
-  val totalRows: Long = 0
+  val totalRows: Long = 0,
 )
 
 data class BookingIdentifier(
   val type: String,
-  val value: String
+  val value: String,
 )

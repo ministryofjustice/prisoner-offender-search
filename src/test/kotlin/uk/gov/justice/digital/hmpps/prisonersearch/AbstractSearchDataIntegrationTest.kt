@@ -16,7 +16,6 @@ abstract class AbstractSearchDataIntegrationTest : QueueIntegrationTest() {
   @BeforeEach
   fun setup() {
     if (initialiseSearchData) {
-
       setupIndexes()
       indexPrisoners()
 

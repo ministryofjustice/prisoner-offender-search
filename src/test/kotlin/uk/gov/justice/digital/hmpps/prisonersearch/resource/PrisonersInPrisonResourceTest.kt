@@ -31,92 +31,153 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     if (initialiseSearchData) {
       val prisonerData = listOf(
         PrisonerBuilder(
-          prisonerNumber = "A7089EY", firstName = "SMITH", lastName = "JONES", agencyId = "MDI"
+          prisonerNumber = "A7089EY",
+          firstName = "SMITH",
+          lastName = "JONES",
+          agencyId = "MDI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1809JK", firstName = "SMITH", lastName = "JONES", agencyId = "HEI"
+          prisonerNumber = "A1809JK",
+          firstName = "SMITH",
+          lastName = "JONES",
+          agencyId = "HEI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A9809BB", firstName = "AKAN", lastName = "OBENG", agencyId = "HEI"
+          prisonerNumber = "A9809BB",
+          firstName = "AKAN",
+          lastName = "OBENG",
+          agencyId = "HEI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1921BH", firstName = "SMITH", lastName = "JONES", released = true
+          prisonerNumber = "A1921BH",
+          firstName = "SMITH",
+          lastName = "JONES",
+          released = true,
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1819AA", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "PEI"
+          prisonerNumber = "A1819AA",
+          firstName = "MARIANA",
+          lastName = "RODRÍGUEZ",
+          agencyId = "PEI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1809AB", firstName = "MARIANA", lastName = "RODRÍGUEZ", agencyId = "PEI"
+          prisonerNumber = "A1809AB",
+          firstName = "MARIANA",
+          lastName = "RODRÍGUEZ",
+          agencyId = "PEI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1809AC", firstName = "CAMILA", lastName = "RODRÍGUEZ", agencyId = "PEI"
+          prisonerNumber = "A1809AC",
+          firstName = "CAMILA",
+          lastName = "RODRÍGUEZ",
+          agencyId = "PEI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1809AD", firstName = "CAMILA", lastName = "MORALES", agencyId = "PEI"
+          prisonerNumber = "A1809AD",
+          firstName = "CAMILA",
+          lastName = "MORALES",
+          agencyId = "PEI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1810AA", firstName = "YAW", lastName = "BOATENG", agencyId = "WWI"
+          prisonerNumber = "A1810AA",
+          firstName = "YAW",
+          lastName = "BOATENG",
+          agencyId = "WWI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1810AC", firstName = "EKOW", lastName = "BOATENG", agencyId = "WWI"
+          prisonerNumber = "A1810AC",
+          firstName = "EKOW",
+          lastName = "BOATENG",
+          agencyId = "WWI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1810AB", firstName = "EKOW", lastName = "BOATENG", agencyId = "WWI"
+          prisonerNumber = "A1810AB",
+          firstName = "EKOW",
+          lastName = "BOATENG",
+          agencyId = "WWI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1810AD", firstName = "EKOW", lastName = "MENSAH", agencyId = "WWI"
+          prisonerNumber = "A1810AD",
+          firstName = "EKOW",
+          lastName = "MENSAH",
+          agencyId = "WWI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1810AE", firstName = "EKOW", lastName = "ADJEI", agencyId = "WWI"
+          prisonerNumber = "A1810AE",
+          firstName = "EKOW",
+          lastName = "ADJEI",
+          agencyId = "WWI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1810AF", firstName = "ADJEI", lastName = "BOATENG", agencyId = "WWI"
+          prisonerNumber = "A1810AF",
+          firstName = "ADJEI",
+          lastName = "BOATENG",
+          agencyId = "WWI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1820AA", firstName = "MOHAMMED", lastName = "HUSSAIN", agencyId = "BXI"
+          prisonerNumber = "A1820AA",
+          firstName = "MOHAMMED",
+          lastName = "HUSSAIN",
+          agencyId = "BXI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1820AB", firstName = "MOHAMMAD", lastName = "HUSSAIN", agencyId = "BXI"
+          prisonerNumber = "A1820AB",
+          firstName = "MOHAMMAD",
+          lastName = "HUSSAIN",
+          agencyId = "BXI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1820AC", firstName = "MOHAMAD", lastName = "HUSAIN", agencyId = "BXI"
+          prisonerNumber = "A1820AC",
+          firstName = "MOHAMAD",
+          lastName = "HUSAIN",
+          agencyId = "BXI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1820AD", firstName = "JOHN", lastName = "HUSAIN", agencyId = "BXI"
+          prisonerNumber = "A1820AD",
+          firstName = "JOHN",
+          lastName = "HUSAIN",
+          agencyId = "BXI",
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1820AE", firstName = "JOHN", lastName = "BLATHERINGTON-SMYTHE", agencyId = "BXI"
+          prisonerNumber = "A1820AE",
+          firstName = "JOHN",
+          lastName = "BLATHERINGTON-SMYTHE",
+          agencyId = "BXI",
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AA",
           firstName = "SMITH",
           lastName = "JONES",
           agencyId = "ACI",
-          alertCodes = listOf("X" to "XTACT")
+          alertCodes = listOf("X" to "XTACT"),
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AB",
           firstName = "SMITH",
           lastName = "JACK",
           agencyId = "ACI",
-          alertCodes = listOf("X" to "XTACT", "W" to "WO")
+          alertCodes = listOf("X" to "XTACT", "W" to "WO"),
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AC",
           firstName = "MOHAMAD",
           lastName = "HUSAIN",
           agencyId = "ACI",
-          alertCodes = listOf("W" to "WO")
+          alertCodes = listOf("W" to "WO"),
         ),
         PrisonerBuilder(
-          prisonerNumber = "A1830AD", firstName = "ADJEI", lastName = "BOATENG", agencyId = "ACI", alertCodes = listOf()
+          prisonerNumber = "A1830AD",
+          firstName = "ADJEI",
+          lastName = "BOATENG",
+          agencyId = "ACI",
+          alertCodes = listOf(),
         ),
         PrisonerBuilder(
           prisonerNumber = "A1830AE",
           firstName = "KWEKU",
           lastName = "BOATENG",
           agencyId = "ACI",
-          alertCodes = listOf("V" to "VIP")
+          alertCodes = listOf("V" to "VIP"),
         ),
         PrisonerBuilder(
           prisonerNumber = "A1840AA",
@@ -589,7 +650,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
       search(
         request = PrisonersInPrisonRequest(
           fromDob = LocalDate.parse("1965-07-20"),
-          toDob = LocalDate.parse("1975-07-19")
+          toDob = LocalDate.parse("1975-07-19"),
         ),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AB", "A1840AC"),
@@ -597,7 +658,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
       search(
         request = PrisonersInPrisonRequest(
           fromDob = LocalDate.parse("1900-01-01"),
-          toDob = LocalDate.parse("2020-07-19")
+          toDob = LocalDate.parse("2020-07-19"),
         ),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AA", "A1840AB", "A1840AC", "A1840AD", "A1840AE"),
@@ -610,7 +671,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(
           fromDob = LocalDate.parse("1965-07-20"),
           toDob = LocalDate.parse("1975-07-20"),
-          term = "RODRÍGUEZ"
+          term = "RODRÍGUEZ",
         ),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AB", "A1840AD"),
@@ -619,7 +680,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(
           fromDob = LocalDate.parse("1965-07-19"),
           toDob = LocalDate.parse("1975-07-20"),
-          term = "CAMILA"
+          term = "CAMILA",
         ),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AC", "A1840AD"),
@@ -628,7 +689,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(
           fromDob = LocalDate.parse("1975-07-20"),
           toDob = LocalDate.parse("1975-07-20"),
-          term = "CAMILA"
+          term = "CAMILA",
         ),
         prisonId = "TEI",
         expectedPrisoners = listOf("A1840AD"),
@@ -664,6 +725,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         checkOrder = true,
       )
     }
+
     @Test
     internal fun `can order by firstName, prisonerNumber descending`() {
       search(
@@ -810,6 +872,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         any(),
       )
     }
+
     @Test
     internal fun `will audit minimal request supplied`() {
       webTestClient.get().uri {
@@ -845,7 +908,6 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     expectedPrisoners: List<String> = emptyList(),
     checkOrder: Boolean = false,
   ) {
-
     val responseType = object : ParameterizedTypeReference<RestResponsePage<Prisoner>>() {}
 
     val response =

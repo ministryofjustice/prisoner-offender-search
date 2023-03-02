@@ -30,12 +30,12 @@ class PrisonerIndexResource(
   @PutMapping("/build-index")
   @Operation(
     summary = "Start building a new index",
-    description = "Old index is left untouched and will be maintained whilst new index is built, requires PRISONER_INDEX role"
+    description = "Old index is left untouched and will be maintained whilst new index is built, requires PRISONER_INDEX role",
   )
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "409", description = "Unable to build index - it is marked as in progress or in error"),
-    ]
+    ],
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun buildIndex() = prisonerIndexService.buildIndex()
@@ -43,7 +43,7 @@ class PrisonerIndexResource(
   @PutMapping("/cancel-index")
   @Operation(
     summary = "Cancels a building index",
-    description = "Only cancels if indexing is in progress, requires PRISONER_INDEX role"
+    description = "Only cancels if indexing is in progress, requires PRISONER_INDEX role",
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun cancelIndex() = prisonerIndexService.cancelIndex()
@@ -51,25 +51,25 @@ class PrisonerIndexResource(
   @PutMapping("/mark-complete")
   @Operation(
     summary = "Mark index as complete and swap",
-    description = "Swaps to the newly built index, requires PRISONER_INDEX role"
+    description = "Swaps to the newly built index, requires PRISONER_INDEX role",
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "409", description = "Unable to marked index complete as it is in error"),
-    ]
+    ],
   )
   fun indexComplete(@RequestParam(name = "ignoreThreshold", required = false) ignoreThreshold: Boolean = false) = prisonerIndexService.indexingComplete(ignoreThreshold)
 
   @PutMapping("/switch-index")
   @Operation(
     summary = "Switch index without rebuilding",
-    description = "current index will be switched both indexed have to be complete, requires PRISONER_INDEX role"
+    description = "current index will be switched both indexed have to be complete, requires PRISONER_INDEX role",
   )
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "409", description = "Unable to switch indexes - one is marked as in progress or in error"),
-    ]
+    ],
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun switchIndex() = prisonerIndexService.switchIndex()
@@ -77,14 +77,18 @@ class PrisonerIndexResource(
   @PutMapping("/index/prisoner/{prisonerNumber}")
   @Operation(
     summary = "Index/Refresh Data for Prisoner with specified prisoner Number",
-    description = "Requires PRISONER_INDEX role"
+    description = "Requires PRISONER_INDEX role",
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun indexPrisoner(
     @Parameter(
       required = true,
-      example = "A1234AA"
-    ) @NotNull @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}") @PathVariable("prisonerNumber") prisonerNumber: String
+      example = "A1234AA",
+    )
+    @NotNull
+    @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}")
+    @PathVariable("prisonerNumber")
+    prisonerNumber: String,
   ): Prisoner {
     val indexedPrisoner = prisonerIndexService.syncPrisoner(prisonerNumber)
     return indexedPrisoner.takeIf { it != null } ?: throw NotFoundException("$prisonerNumber not found")
@@ -93,13 +97,14 @@ class PrisonerIndexResource(
   @PutMapping("/queue-housekeeping")
   @Operation(
     summary = "Performs automated housekeeping tasks such as marking builds completed",
-    description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`"
+    description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `index-housekeeping-cronjob`",
   )
   @ApiResponses(
     value = [
       ApiResponse(responseCode = "409", description = "Unable to marked index complete as it is in error"),
-    ]
-  ) fun indexQueueHousekeeping() {
+    ],
+  )
+  fun indexQueueHousekeeping() {
     prisonerIndexService.indexingComplete(ignoreThreshold = false)
   }
 }

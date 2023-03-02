@@ -48,36 +48,37 @@ class PhysicalDetailResource(private val physicalDetailService: PhysicalDetailSe
       content = [
         Content(
           mediaType = "application/json",
-          schema = Schema(implementation = PhysicalDetailRequest::class)
-        )
-      ]
+          schema = Schema(implementation = PhysicalDetailRequest::class),
+        ),
+      ],
     ),
     responses = [
       ApiResponse(
         responseCode = "200",
         description = "Search successfully performed",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = PhysicalDetailResponse ::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = PhysicalDetailResponse::class))],
       ),
       ApiResponse(
         responseCode = "400",
         description = "Incorrect information provided to perform prisoner match",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "401",
         description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
       ApiResponse(
         responseCode = "403",
         description = "Incorrect permissions to search for prisoner data",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))]
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-    ]
+    ],
   )
   @PostMapping
   @Tag(name = "Physical detail search")
   fun prisonerDetailSearch(
-    @Valid @RequestBody physicalDetailRequest: PhysicalDetailRequest
+    @Valid @RequestBody
+    physicalDetailRequest: PhysicalDetailRequest,
   ): Page<Prisoner> = physicalDetailService.findByPhysicalDetail(physicalDetailRequest)
 }
