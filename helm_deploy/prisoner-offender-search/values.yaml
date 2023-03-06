@@ -44,11 +44,20 @@ generic-service:
     requests:
       memory: 856Mi
 
-  livenessProbe:
-    failureThreshold: 20
+  startupProbe:
+    httpGet:
+      path: /health/liveness
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 30
 
-  readinessProbe:
-    failureThreshold: 20
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 3
 
   env:
     SERVER_PORT: "8080"
