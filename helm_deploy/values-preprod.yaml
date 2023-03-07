@@ -22,6 +22,12 @@ generic-service:
     prum-test-platform-2: "18.133.201.123/32"
     prum-test-platform-3: "52.56.76.34/32"
 
+  resources:
+    limits:
+      cpu: 2000m
+    requests:
+      cpu: 1000m
+
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
   alertSeverity: syscon
