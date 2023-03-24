@@ -30,6 +30,9 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
+  // override version to prevent json-smart vulnerability (CVE-2023-1370)
+  implementation("com.nimbusds:oauth2-oidc-sdk:9.43.1")
+
   implementation("org.springdoc:springdoc-openapi-webmvc-core:1.6.15")
   implementation("org.springdoc:springdoc-openapi-ui:1.6.15")
   implementation("org.springdoc:springdoc-openapi-kotlin:1.6.15")
