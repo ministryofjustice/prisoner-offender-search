@@ -41,8 +41,10 @@ generic-service:
   resources:
     limits:
       memory: 2Gi
+      cpu: 2000m
     requests:
       memory: 856Mi
+      cpu: 128m
 
   startupProbe:
     httpGet:
