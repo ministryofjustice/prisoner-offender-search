@@ -34,7 +34,7 @@ class PrisonersInPrisonService(
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
   private val authenticationHolder: AuthenticationHolder,
-  @Value("\${search.keyword.max-results}") private val maxSearchResults: Int = 200,
+  @Value("\${search.prisoner.max-results}") private val maxSearchResults: Int = 3000,
   @Value("\${search.keyword.timeout-seconds}") private val searchTimeoutSeconds: Long = 10L,
 ) {
   companion object {
