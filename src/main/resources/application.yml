@@ -119,6 +119,9 @@ search:
   keyword:
     timeout-seconds: 10
     max-results: 200
+  prisoner:
+    timeout-seconds: 10
+    max-results: 3000
   detailed:
     timeout-seconds: 10
     max-results: 100
