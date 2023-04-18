@@ -139,6 +139,9 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun loadPrisoners(prisoner: List<PrisonerBuilder>) {
+
+    incentivesMockServer.stubCurrentIncentive()
+
     setupIndexes()
     val prisonerNumbers = prisoner.map { it.prisonerNumber }
     assertThat(prisonerNumbers.groupingBy { it }.eachCount().filter { it.value != 1 }).hasSize(0)
