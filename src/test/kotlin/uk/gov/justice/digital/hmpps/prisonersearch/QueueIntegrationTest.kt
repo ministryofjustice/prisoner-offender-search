@@ -139,7 +139,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun loadPrisoners(prisoner: List<PrisonerBuilder>) {
-
     incentivesMockServer.stubCurrentIncentive()
 
     setupIndexes()
