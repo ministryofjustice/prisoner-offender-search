@@ -342,16 +342,17 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
-  fun prisonSearch(prisonId: String, incentiveLevelCode: String, fileAssert: String) {
-    webTestClient.get().uri("/prisoner-search/prison/$prisonId/incentive-level/$incentiveLevelCode")
+  fun prisonSearchPagination(prisonId: String, size: Long, page: Long, fileAssert: String) {
+    webTestClient.get().uri("/prisoner-search/prison/$prisonId?size=$size&page=$page")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
       .expectStatus().isOk
       .expectBody().json(fileAssert.readResourceAsText())
+  }
 
-  fun prisonSearchPagination(prisonId: String, size: Long, page: Long, fileAssert: String) {
-    webTestClient.get().uri("/prisoner-search/prison/$prisonId?size=$size&page=$page")
+  fun prisonSearchByIncentive(prisonId: String, incentiveLevelCode: String, fileAssert: String) {
+    webTestClient.get().uri("/prisoner-search/prison/$prisonId/incentive-level/$incentiveLevelCode")
       .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
       .header("Content-Type", "application/json")
       .exchange()
