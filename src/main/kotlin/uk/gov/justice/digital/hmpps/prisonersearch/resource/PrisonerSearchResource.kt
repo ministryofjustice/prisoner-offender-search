@@ -93,4 +93,17 @@ class PrisonerSearchResource(private val prisonerSearchService: PrisonerSearchSe
     @ParameterObject @PageableDefault
     pageable: Pageable,
   ) = prisonerSearchService.findByPrison(prisonId.uppercase(), pageable, includeRestrictedPatients)
+
+  @GetMapping("/prison/{prisonId}/incentive-level/{incentiveLevelCode}")
+  @Operation(summary = "Get all prisoners in a prison, on a specified incentive level", description = "Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role")
+  @Tag(name = "Batch")
+  @Tag(name = "Popular")
+  fun findByPrisonAndIncentiveLevel(
+    @Valid @PathVariable
+    prisonId: String,
+    @Valid @PathVariable
+    incentiveLevelCode: String,
+    @ParameterObject @PageableDefault
+    pageable: Pageable,
+  ) = prisonerSearchService.findByPrisonAndIncentiveLevel(prisonId.uppercase(), incentiveLevelCode, pageable)
 }
