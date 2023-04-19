@@ -125,6 +125,9 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
     @RequestParam(value = "cellLocationPrefix", required = false)
     @Parameter(description = "Filter for the prisoners cell location. A block wing or cell can be specified. With prison id can be included or absent so HEI-3-1 and 3-1 are equivalent when the prison id is HEI", example = "3-1")
     cellLocationPrefix: String?,
+    @RequestParam(value = "incentiveLevelCode", required = false)
+    @Parameter(description = "Filter for the prisoners on an incentive level.", example = "STD")
+    incentiveLevelCode: String?,
     @ParameterObject
     @PageableDefault(sort = ["lastName", "firstName", "prisonerNumber"], direction = Sort.Direction.ASC)
     pageable: Pageable,
@@ -137,6 +140,7 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       fromDob = fromDob,
       toDob = toDob,
       cellLocationPrefix = cellLocationPrefix,
+      incentiveLevelCode = incentiveLevelCode,
       sort = pageable.sort,
     ),
   )

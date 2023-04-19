@@ -25,6 +25,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.model.CurrentIncentive
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
@@ -351,15 +352,6 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
-  fun prisonSearchByIncentive(prisonId: String, incentiveLevelCode: String, fileAssert: String) {
-    webTestClient.get().uri("/prisoner-search/prison/$prisonId/incentive-level/$incentiveLevelCode")
-      .headers(setAuthorisation(roles = listOf("ROLE_GLOBAL_SEARCH")))
-      .header("Content-Type", "application/json")
-      .exchange()
-      .expectStatus().isOk
-      .expectBody().json(fileAssert.readResourceAsText())
-  }
-
   protected fun getOffenderBookingTemplate(): OffenderBooking {
     return gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
   }
@@ -490,6 +482,7 @@ data class PrisonerBuilder(
   val aliases: List<AliasBuilder> = listOf(),
   val physicalCharacteristics: PhysicalCharacteristicBuilder? = null,
   val physicalMarks: PhysicalMarkBuilder? = null,
+  val currentIncentive: CurrentIncentive? = null,
 )
 
 data class PhysicalCharacteristicBuilder(

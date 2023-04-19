@@ -99,17 +99,6 @@ class PrisonerSearchService(
     return PageImpl(listOf(), pageable, 0L)
   }
 
-  fun findByPrisonAndIncentiveLevel(prisonId: String, incentiveLevelCode: String, pageable: Pageable): Page<Prisoner> {
-    queryBy(
-      prisonId,
-      pageable,
-    ) { locationMatchAndLevel(it, incentiveLevelCode) } onMatch {
-      customEventForFindByPrisonIdAndIncentiveLevelCode(prisonId, incentiveLevelCode, it.matches.size)
-      return PageImpl(it.matches, pageable, it.totalHits)
-    }
-    return PageImpl(listOf(), pageable, 0L)
-  }
-
   private fun validateSearchForm(searchCriteria: SearchCriteria) {
     if (!searchCriteria.isValid()) {
       log.warn("Invalid search  - no criteria provided")
@@ -262,9 +251,6 @@ class PrisonerSearchService(
   private fun locationMatch(prisonId: String): BoolQueryBuilder =
     QueryBuilders.boolQuery().must("prisonId", prisonId)
 
-  private fun locationMatchAndLevel(prisonId: String, incentiveLevelCode: String): BoolQueryBuilder =
-    QueryBuilders.boolQuery().must("prisonId", prisonId).must("currentIncentive.level.code", incentiveLevelCode)
-
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
       return QueryBuilders.boolQuery()
@@ -399,21 +385,6 @@ class PrisonerSearchService(
       "numberOfResults" to numberOfResults.toDouble(),
     )
     telemetryClient.trackEvent("POSFindByListOf$type", logMap, metricsMap)
-  }
-
-  private fun customEventForFindByPrisonIdAndIncentiveLevelCode(
-    prisonId: String,
-    incentiveLevelCode: String,
-    numberOfResults: Int,
-  ) {
-    val propertiesMap = mapOf(
-      "prisonId" to prisonId,
-      "incentiveLevelCode" to incentiveLevelCode,
-    )
-    val metricsMap = mapOf(
-      "numberOfResults" to numberOfResults.toDouble(),
-    )
-    telemetryClient.trackEvent("POSFindByPrisonIdAndIncentiveLevelCode", propertiesMap, metricsMap)
   }
 
   private fun customEventForFindByPrisonId(

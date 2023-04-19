@@ -13,10 +13,13 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.TestPropertySource
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
+import uk.gov.justice.digital.hmpps.prisonersearch.model.CurrentIncentive
+import uk.gov.justice.digital.hmpps.prisonersearch.model.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @TestPropertySource(properties = ["index.page-size=1000"])
@@ -186,6 +189,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           agencyId = "TEI",
           dateOfBirth = "1965-07-19",
           cellLocation = "3-1-C-016",
+          currentIncentive = CurrentIncentive(level = IncentiveLevel(code = "STD", description = "Standard"), dateTime = LocalDateTime.of(2022, 1, 1, 12, 0, 0)),
         ),
         PrisonerBuilder(
           prisonerNumber = "A1840AB",
@@ -194,6 +198,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           agencyId = "TEI",
           dateOfBirth = "1965-07-20",
           cellLocation = "3-1-D-017",
+          currentIncentive = CurrentIncentive(level = IncentiveLevel(code = "ENH", description = "Enhanced"), dateTime = LocalDateTime.of(2023, 1, 1, 12, 0, 0)),
         ),
         PrisonerBuilder(
           prisonerNumber = "A1840AC",
@@ -834,6 +839,47 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
     }
   }
 
+  @DisplayName("When filtering by incentive level")
+  @Nested
+  inner class IncentiveLevelFilter {
+    @Test
+    internal fun `can filter by incentive level`() {
+      search(
+        request = PrisonersInPrisonRequest(incentiveLevelCode = "STD"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(incentiveLevelCode = "ENH"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AB"),
+      )
+    }
+
+    @Test
+    internal fun `can filter by block and wing and incentive code`() {
+      search(
+        request = PrisonersInPrisonRequest(cellLocationPrefix = "3-1", incentiveLevelCode = "ENH"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AB"),
+      )
+    }
+
+    @Test
+    internal fun `incentive filter can be combined with other filters`() {
+      search(
+        request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1975-07-20"), cellLocationPrefix = "TEI-3-1", incentiveLevelCode = "STD"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA"),
+      )
+      search(
+        request = PrisonersInPrisonRequest(toDob = LocalDate.parse("1965-07-19"), cellLocationPrefix = "TEI-3-1", term = "RODRÍGUEZ", incentiveLevelCode = "STD"),
+        prisonId = "TEI",
+        expectedPrisoners = listOf("A1840AA"),
+      )
+    }
+  }
+
   @Nested
   inner class Auditing {
     @Test
@@ -849,6 +895,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("fromDob", "1975-07-20")
           .queryParam("toDob", "1975-07-21")
           .queryParam("cellLocationPrefix", "MDI-1-A")
+          .queryParam("incentiveLevelCode", "STD")
           .build()
       }
         .headers(setAuthorisation(user = "JILL.BEANS", roles = listOf("ROLE_PRISONER_SEARCH"))).header("Content-Type", "application/json")
@@ -891,6 +938,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           assertThat(it["fromDob"]).isEqualTo("")
           assertThat(it["toDob"]).isEqualTo("")
           assertThat(it["cellLocationPrefix"]).isEqualTo("")
+          assertThat(it["incentiveLevelCode"]).isEqualTo("")
           assertThat(it["sort"]).isEqualTo("lastName: ASC,firstName: ASC,prisonerNumber: ASC")
           assertThat(it["page"]).isEqualTo("0")
           assertThat(it["size"]).isEqualTo("10")
@@ -921,6 +969,7 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
           .queryParam("fromDob", request.fromDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
           .queryParam("toDob", request.toDob?.format(DateTimeFormatter.ISO_DATE) ?: "")
           .queryParam("cellLocationPrefix", request.cellLocationPrefix)
+          .queryParam("incentiveLevelCode", request.incentiveLevelCode)
           .build()
       }
         .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_IN_PRISON_SEARCH"))).header("Content-Type", "application/json")

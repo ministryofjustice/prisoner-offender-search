@@ -103,6 +103,8 @@ class PrisonersInPrisonService(
 
       query.filterWhenPresent("prisonId", prisonId)
       query.filterWhenPresent("alerts.alertCode", alertCodes)
+      query.filterWhenPresent("currentIncentive.level.code", incentiveLevelCode)
+
       // when they are null ES will just ignore the range
       query.filter(QueryBuilders.rangeQuery("dateOfBirth").from(fromDob).to(toDob))
       cellLocationPrefix?.removePrefix("$prisonId-")
@@ -201,6 +203,7 @@ class PrisonersInPrisonService(
       "alertCodes" to searchRequest.alertCodes.joinToString(","),
       "fromDob" to (searchRequest.fromDob?.toString() ?: ""),
       "toDob" to (searchRequest.toDob?.toString() ?: ""),
+      "incentiveLevelCode" to (searchRequest.incentiveLevelCode?.toString() ?: ""),
       "sort" to searchRequest.sort.toString(),
       "page" to searchRequest.pagination.page.toString(),
       "size" to searchRequest.pagination.size.toString(),

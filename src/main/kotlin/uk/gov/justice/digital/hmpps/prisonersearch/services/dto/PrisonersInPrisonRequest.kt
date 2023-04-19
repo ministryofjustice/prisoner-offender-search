@@ -10,5 +10,6 @@ data class PrisonersInPrisonRequest(
   val fromDob: LocalDate? = null,
   val toDob: LocalDate? = null,
   val cellLocationPrefix: String? = null,
+  val incentiveLevelCode: String? = null,
   val sort: Sort = Sort.by(Sort.Direction.ASC, "lastName", "firstName", "prisonNumber"),
 )
