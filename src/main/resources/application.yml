@@ -6,6 +6,9 @@ spring:
   application:
     name: prisoner-offender-search
 
+  data.web.pageable:
+    max-page-size: 3000
+
   jackson:
     date-format: "yyyy-MM-dd HH:mm:ss"
     serialization:
