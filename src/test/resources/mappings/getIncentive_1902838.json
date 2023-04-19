@@ -1,0 +1,41 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/iep/reviews/booking/1902838"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": 1212121,
+      "iepCode": "STD",
+      "iepLevel": "Standard",
+      "prisonerNumber": "A7089FC",
+      "bookingId": 1902838,
+      "iepDate": "2021-07-05",
+      "iepTime": "2021-07-05T10:35:17",
+      "iepDetails": [
+        {
+          "id": 1212121,
+          "iepLevel": "Standard",
+          "iepCode": "STD",
+          "comments": "A review took place",
+          "prisonerNumber": "A7089FC",
+          "bookingId": 1902838,
+          "iepDate": "2021-07-05",
+          "iepTime": "2021-07-05T10:35:17",
+          "agencyId": "LEI",
+          "locationId": "1-2-003",
+          "userId": "USER_1_GEN",
+          "reviewType": "REVIEW",
+          "auditModuleName": "INCENTIVES_API",
+          "realReview": true
+        }
+      ],
+      "nextReviewDate": "2022-11-10",
+      "daysSinceReview": 532
+    }
+  }
+}

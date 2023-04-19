@@ -186,7 +186,7 @@ class PrisonerSearchBySinglePrisonResourceTest : AbstractSearchDataIntegrationTe
 
   @Test
   fun `can perform a match on prisonId and incentive level`() {
-    prisonSearchByIncentive("LNI", "STD", "/results/search_results_lni.json")
+    prisonSearchByIncentive("LEI", "STD", "/results/search_results_incentives.json")
   }
 
   @Test

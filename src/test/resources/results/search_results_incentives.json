@@ -1,0 +1,63 @@
+{
+  "content": [
+    {
+      "prisonerNumber": "A7089FC",
+      "pncNumber": "12/394773I",
+      "pncNumberCanonicalShort": "12/394773I",
+      "pncNumberCanonicalLong": "2012/394773I",
+      "croNumber": "29906/12P",
+      "bookingId": "1902838",
+      "bookNumber": "V61588",
+      "firstName": "JIM",
+      "lastName": "BORROWER",
+      "dateOfBirth": "1990-02-02",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+      "youthOffender": true,
+      "religion": "Christian",
+      "status": "ACTIVE IN",
+      "lastMovementTypeCode": "ADM",
+      "lastMovementReasonCode": "24",
+      "inOutStatus": "IN",
+      "prisonId": "LEI",
+      "prisonName": "Leeds Prison",
+      "cellLocation": "H-1-005",
+      "legalStatus": "REMAND",
+      "restrictedPatient": false,
+      "currentIncentive": {
+        "level": {
+          "code": "STD",
+          "description": "Standard"
+        },
+        "dateTime": "2021-07-05T10:35:17",
+        "nextReviewDate": "2022-11-10"
+      },
+      "shoeSize": 10
+    }
+  ],
+  "pageable": {
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "offset": 0,
+    "pageSize": 10,
+    "pageNumber": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "last": true,
+  "totalPages": 1,
+  "totalElements": 1,
+  "number": 0,
+  "first": true,
+  "sort": {
+    "empty": true,
+    "sorted": false,
+    "unsorted": true
+  },
+  "size": 10,
+  "numberOfElements": 1,
+  "empty": false
+}

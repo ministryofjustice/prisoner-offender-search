@@ -263,9 +263,7 @@ class PrisonerSearchService(
     QueryBuilders.boolQuery().must("prisonId", prisonId)
 
   private fun locationMatchAndLevel(prisonId: String, incentiveLevelCode: String): BoolQueryBuilder =
-    QueryBuilders.boolQuery()
-      .must(prisonId, "prisonId")
-      .must(incentiveLevelCode, "currentIncentive.level.code")
+    QueryBuilders.boolQuery().must("prisonId", prisonId).must("currentIncentive.level.code", incentiveLevelCode)
 
   private fun nameMatch(searchCriteria: SearchCriteria): BoolQueryBuilder? {
     with(searchCriteria) {
