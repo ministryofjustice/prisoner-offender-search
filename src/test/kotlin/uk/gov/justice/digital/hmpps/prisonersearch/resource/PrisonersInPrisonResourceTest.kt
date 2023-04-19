@@ -1,3 +1,5 @@
+@file:Suppress("ClassName")
+
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import org.assertj.core.api.Assertions.assertThat
@@ -9,18 +11,24 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.TestPropertySource
 import uk.gov.justice.digital.hmpps.prisonersearch.PrisonerBuilder
 import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
+import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonersInPrisonService
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PaginationRequest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonersInPrisonRequest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @TestPropertySource(properties = ["index.page-size=1000"])
 class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
+
+  @SpyBean
+  private lateinit var searchService: PrisonersInPrisonService
 
   companion object {
     var initialiseSearchData = true
@@ -301,6 +309,25 @@ class PrisonersInPrisonResourceTest : QueueIntegrationTest() {
         request = PrisonersInPrisonRequest(term = ""),
         prisonId = "PEI",
         expectedPrisoners = listOf("A1819AA", "A1809AB", "A1809AC", "A1809AD"),
+      )
+    }
+  }
+
+  @Nested
+  inner class `Page limits` {
+    @Test
+    internal fun `will apply the spring data limit`() {
+      search(
+        request = PrisonersInPrisonRequest(pagination = PaginationRequest(0, 5000)),
+        prisonId = "PEI",
+        expectedPrisoners = listOf("A1819AA", "A1809AB", "A1809AC", "A1809AD"),
+      )
+      // note that even though we've requested 5,000 results, spring.data.web.pageable.max-page-size will limit to 3,000
+      verify(searchService).search(
+        eq("PEI"),
+        check {
+          assertThat(it.pagination.size).isEqualTo(3000)
+        },
       )
     }
   }
