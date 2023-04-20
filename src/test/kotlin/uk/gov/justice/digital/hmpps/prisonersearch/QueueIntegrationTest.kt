@@ -490,7 +490,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
 data class PrisonerBuilder(
   val prisonerNumber: String = generatePrisonerNumber(),
-  val bookingId: Long = generateBookingId(),
+  val bookingId: Long? = generateBookingId(),
   val firstName: String = "LUCAS",
   val lastName: String = "MORALES",
   val agencyId: String = "MDI",
