@@ -132,7 +132,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner updated event to the domain topic`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null))
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
@@ -140,7 +140,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBooking()),
         ),
     )
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
@@ -157,7 +157,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner release event to the domain topic`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null))
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
@@ -165,7 +165,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = true).toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = true).toOffenderBooking()),
         ),
     )
     eventQueueSqsClient.sendMessage(
@@ -183,7 +183,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner received event to the domain topic`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", released = true))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = true))
 
     // update the prisoner on ES
     prisonMockServer.stubFor(
@@ -191,7 +191,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", released = false).toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = false).toOffenderBooking()),
         ),
     )
     eventQueueSqsClient.sendMessage(
@@ -209,7 +209,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner alerts change event to the domain topic when an alert is added`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", alertCodes = listOf("X" to "XTACT")))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, alertCodes = listOf("X" to "XTACT")))
 
     // update the prisoner on ES
     prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
@@ -221,6 +221,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withBody(
               PrisonerBuilder(
                 prisonerNumber = "A1239DD",
+                bookingId = null,
                 alertCodes = listOf("X" to "XTACT", "W" to "WO"),
               ).toOffenderBooking(),
             ),
@@ -241,7 +242,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner physical details change event to the domain topic when changes are made`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", heightCentimetres = 200))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, heightCentimetres = 200))
 
     // update the prisoner on ES
     prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
@@ -253,6 +254,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withBody(
               PrisonerBuilder(
                 prisonerNumber = "A1239DD",
+                bookingId = null,
                 heightCentimetres = 190,
               ).toOffenderBooking(),
             ),
@@ -267,7 +269,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send prisoner alerts change event to the domain topic when an alert is removed`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", alertCodes = listOf("X" to "XTACT", "W" to "WO")))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, alertCodes = listOf("X" to "XTACT", "W" to "WO")))
 
     // update the prisoner on ES
     prisonMockServer.stubOffenderNoFromBookingId("A1239DD")
@@ -279,6 +281,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
             .withBody(
               PrisonerBuilder(
                 prisonerNumber = "A1239DD",
+                bookingId = null,
                 alertCodes = listOf("W" to "WO"),
               ).toOffenderBooking(),
             ), // technically the alert should be end dated but this will work equally well
@@ -299,7 +302,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
   @Test
   fun `e2e - will send single prisoner updated event for 2 identical updates`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null))
 
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
 
@@ -309,7 +312,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBooking()),
         ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
@@ -339,7 +342,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
    */
   @Test
   fun `e2e - should not update prisoner hash if there is an exception when sending the event`() {
-    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD"))
+    recreatePrisoner(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null))
 
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
 
@@ -354,7 +357,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", firstName = "NEW_NAME").toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBooking()),
         ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
@@ -410,7 +413,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber).toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber, bookingId = null).toOffenderBooking()),
         ),
     )
   }
