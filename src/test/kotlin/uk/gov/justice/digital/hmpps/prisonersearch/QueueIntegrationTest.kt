@@ -4,6 +4,7 @@ import com.amazonaws.services.sqs.AmazonSQS
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.commons.lang3.RandomStringUtils
@@ -33,6 +34,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.resource.PrisonerSearchByPrisonerNumbersResourceTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 import uk.gov.justice.digital.hmpps.prisonersearch.services.ReleaseDateSearch
@@ -159,6 +161,14 @@ abstract class QueueIntegrationTest : IntegrationTest() {
             WireMock.aResponse()
               .withHeader("Content-Type", "application/json")
               .withBody(it.toOffenderBooking()),
+          ),
+      )
+      incentivesMockServer.stubFor(
+        WireMock.get(urlPathEqualTo("/iep/reviews/booking/${it.bookingId}"))
+          .willReturn(
+            WireMock.aResponse()
+              .withHeader("Content-Type", "application/json")
+              .withBody(it.toIncentiveLevel()),
           ),
       )
     }
@@ -356,9 +366,21 @@ abstract class QueueIntegrationTest : IntegrationTest() {
     return gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
   }
 
+  fun PrisonerBuilder.toIncentiveLevel(): String = gson.toJson(
+    this.currentIncentive?.let {
+      IncentiveLevel(
+        iepCode = it.level.code ?: "",
+        iepLevel = it.level.description,
+        iepTime = it.dateTime,
+        nextReviewDate = it.nextReviewDate,
+      )
+    },
+  )
+
   fun PrisonerBuilder.toOffenderBooking(): String = gson.toJson(
     getOffenderBookingTemplate().copy(
       offenderNo = this.prisonerNumber,
+      bookingId = this.bookingId,
       firstName = this.firstName,
       lastName = this.lastName,
       agencyId = this.agencyId,
@@ -468,6 +490,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
 
 data class PrisonerBuilder(
   val prisonerNumber: String = generatePrisonerNumber(),
+  val bookingId: Long = generateBookingId(),
   val firstName: String = "LUCAS",
   val lastName: String = "MORALES",
   val agencyId: String = "MDI",
@@ -518,6 +541,10 @@ fun generatePrisonerNumber(): String {
   return "${letters(1)}${numbers(4)}${letters(2)}"
 }
 
+fun generateBookingId(): Long {
+  // generate random string starting with a letter, followed by 4 numbers and 2 letters
+  return numbers(8).toLong()
+}
 fun letters(length: Int): String {
   return RandomStringUtils.random(length, true, true)
 }
