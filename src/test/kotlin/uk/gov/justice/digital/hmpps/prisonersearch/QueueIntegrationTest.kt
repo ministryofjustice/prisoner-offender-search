@@ -542,7 +542,7 @@ fun generatePrisonerNumber(): String {
 }
 
 fun generateBookingId(): Long {
-  // generate random string starting with a letter, followed by 4 numbers and 2 letters
+  // generate random number 8 digits
   return numbers(8).toLong()
 }
 fun letters(length: Int): String {
