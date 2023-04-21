@@ -20,7 +20,7 @@ services:
       - $PWD/src/test/resources/localstack:/docker-entrypoint-initaws.d
 
   pos-db:
-    image: postgres:14
+    image: postgres:15
     networks:
       - hmpps
     container_name: pos-db
