@@ -32,7 +32,7 @@ class HmppsDomainEventEmitter(
   private val objectMapper: ObjectMapper,
   private val hmppsQueueService: HmppsQueueService,
   private val diffProperties: DiffProperties,
-  private val clock: Clock,
+  private val clock: Clock?,
   private val telemetryClient: TelemetryClient,
 ) {
 
@@ -92,11 +92,11 @@ class HmppsDomainEventEmitter(
     offenderNo: String,
     reason: PrisonerReceiveReason,
     prisonId: String,
-    occurredAt: Instant = Instant.now(clock),
+    occurredAt: Instant? = null,
   ) {
     PrisonerReceivedDomainEvent(
       PrisonerReceivedEvent(offenderNo, reason, prisonId),
-      occurredAt,
+      occurredAt ?: Instant.now(clock),
       diffProperties.host,
     ).publish()
   }
