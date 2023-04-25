@@ -92,10 +92,11 @@ class HmppsDomainEventEmitter(
     offenderNo: String,
     reason: PrisonerReceiveReason,
     prisonId: String,
+    occurredAt: Instant = Instant.now(clock),
   ) {
     PrisonerReceivedDomainEvent(
       PrisonerReceivedEvent(offenderNo, reason, prisonId),
-      Instant.now(clock),
+      occurredAt,
       diffProperties.host,
     ).publish()
   }
