@@ -68,6 +68,73 @@ class DomainEventsResourceTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `reason code must be valid`() {
+    webTestClient
+      .put()
+      .uri("/events/prisoner/received/A2483AA")
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(
+        BodyInserters.fromValue(
+          """
+        {
+          "reason": "BANANAS",
+          "prisonId": "WWI",
+          "occurredAt": "2020-07-19T12:30:12"
+        }
+      """,
+        ),
+      )
+      .headers(setAuthorisation(roles = listOf("ROLE_EVENTS_ADMIN")))
+      .exchange()
+      .expectStatus()
+      .isBadRequest
+  }
+
+  @Test
+  fun `occurredAt must be present`() {
+    webTestClient
+      .put()
+      .uri("/events/prisoner/received/A2483AA")
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(
+        BodyInserters.fromValue(
+          """
+        {
+          "reason": "TRANSFERRED",
+          "prisonId": "WWI"
+        }
+      """,
+        ),
+      )
+      .headers(setAuthorisation(roles = listOf("ROLE_EVENTS_ADMIN")))
+      .exchange()
+      .expectStatus()
+      .isBadRequest
+  }
+
+  @Test
+  fun `prisonId must be present`() {
+    webTestClient
+      .put()
+      .uri("/events/prisoner/received/A2483AA")
+      .contentType(MediaType.APPLICATION_JSON)
+      .body(
+        BodyInserters.fromValue(
+          """
+        {
+          "reason": "TRANSFERRED",
+          "occurredAt": "2020-07-19T12:30:12"
+        }
+      """,
+        ),
+      )
+      .headers(setAuthorisation(roles = listOf("ROLE_EVENTS_ADMIN")))
+      .exchange()
+      .expectStatus()
+      .isBadRequest
+  }
+
+  @Test
   fun `sends prisoner receive event to the domain topic`() {
     webTestClient
       .put()
