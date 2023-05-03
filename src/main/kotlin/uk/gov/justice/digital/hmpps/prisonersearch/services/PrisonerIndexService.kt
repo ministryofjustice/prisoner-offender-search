@@ -71,15 +71,26 @@ class PrisonerIndexService(
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
       reindex(offenderBooking = it)
-    } ?: run {
-      telemetryClient.trackEvent(
-        "POSOffenderNotFoundForIndexing",
-        mapOf("prisonerID" to prisonerId),
-        null,
-      )
-      log.error("POSOffenderNotFoundForIndexing {}", prisonerId)
-      return null
     }
+      ?: get(prisonerId)?.run {
+        delete(prisonerId)
+        telemetryClient.trackEvent(
+          "POSOffenderRemovedFromIndex",
+          mapOf("prisonerID" to prisonerId),
+          null,
+        )
+        log.info("POSOffenderRemovedFromIndex prisoner not in Nomis but was in index: {}", prisonerId)
+        return this
+      }
+      ?: run {
+        telemetryClient.trackEvent(
+          "POSOffenderNotFoundForIndexing",
+          mapOf("prisonerID" to prisonerId),
+          null,
+        )
+        log.error("POSOffenderNotFoundForIndexing {}", prisonerId)
+        return null
+      }
 
   fun delete(prisonerNumber: String) {
     log.info("Delete Prisoner {}", prisonerNumber)

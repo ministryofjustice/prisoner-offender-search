@@ -90,7 +90,7 @@ class GlobalSearchService(
     } ?: GlobalResult.NoMatch
   }
 
-  private fun idMatch(globalSearchCriteria: GlobalSearchCriteria): BoolQueryBuilder? {
+  private fun idMatch(globalSearchCriteria: GlobalSearchCriteria): BoolQueryBuilder {
     with(globalSearchCriteria) {
       return QueryBuilders.boolQuery()
         .mustMultiMatchKeyword(
@@ -187,7 +187,7 @@ sealed class GlobalResult {
   data class Match(val matches: List<Prisoner>, val totalHits: Long) : GlobalResult()
 }
 
-inline infix fun GlobalResult.onMatch(block: (GlobalResult.Match) -> Nothing): Unit? {
+inline infix fun GlobalResult.onMatch(block: (GlobalResult.Match) -> Nothing) {
   return when (this) {
     is GlobalResult.NoMatch -> {
     }

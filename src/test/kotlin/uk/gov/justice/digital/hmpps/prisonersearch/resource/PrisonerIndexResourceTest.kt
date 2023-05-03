@@ -18,6 +18,8 @@ import uk.gov.justice.digital.hmpps.prisonersearch.QueueIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
+import java.time.LocalDate
 
 class PrisonerIndexResourceTest : QueueIntegrationTest() {
 
@@ -146,7 +148,7 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `can index a new prisoner`() {
+  fun `can index a prisoner`() {
     indexPrisoners()
 
     webTestClient.put().uri("/prisoner-index/mark-complete")
@@ -179,6 +181,29 @@ class PrisonerIndexResourceTest : QueueIntegrationTest() {
       .jsonPath("index-status.currentIndex").isEqualTo(SyncIndex.INDEX_B.name)
       .jsonPath("index-size.${SyncIndex.INDEX_A.name}").isEqualTo(0)
       .jsonPath("index-size.${SyncIndex.INDEX_B.name}").isEqualTo(indexCount + 1)
+
+    webTestClient.put().uri("/prisoner-index/index/prisoner/A0000AA")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isNotFound
+
+    // Add a non-existent prisoner to the index
+    prisonerIndexService.reindex(
+      OffenderBooking(
+        "B0001AA",
+        "JOE",
+        "NOTINNOMIS",
+        LocalDate.parse("1975-01-01"),
+        true,
+        12345678,
+        "B1234",
+      ),
+    )
+
+    webTestClient.put().uri("/prisoner-index/index/prisoner/B0001AA")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
   }
 
   @Test
