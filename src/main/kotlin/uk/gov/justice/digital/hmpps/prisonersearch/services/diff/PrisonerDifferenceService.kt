@@ -15,7 +15,6 @@ import org.springframework.util.DigestUtils
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
-import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerIndexService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Instant
 import java.time.LocalDateTime
@@ -50,8 +49,8 @@ class PrisonerDifferenceService(
   private val prisonerMovementsEventService: PrisonerMovementsEventService,
   private val alertsUpdatedEventService: AlertsUpdatedEventService,
 ) {
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  private companion object {
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
@@ -117,7 +116,7 @@ class PrisonerDifferenceService(
       }
         ?: raiseCreatedTelemetry(offenderBooking.offenderNo)
     }.onFailure {
-      PrisonerIndexService.log.error("Prisoner difference telemetry failed with error", it)
+      log.error("Prisoner difference telemetry failed with error", it)
     }
   }
 

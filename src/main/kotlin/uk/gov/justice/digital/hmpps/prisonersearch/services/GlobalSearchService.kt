@@ -2,24 +2,17 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
-import org.apache.commons.lang3.ArrayUtils
 import org.apache.lucene.search.join.ScoreMode
-import org.elasticsearch.action.search.ClearScrollRequest
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
-import org.elasticsearch.action.search.SearchScrollRequest
-import org.elasticsearch.common.unit.TimeValue
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.fetch.subphase.FetchSourceContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
@@ -29,7 +22,6 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.exceptions.BadReques
 class GlobalSearchService(
   private val searchClient: SearchClient,
   private val indexStatusService: IndexStatusService,
-  private val prisonerIndexService: PrisonerIndexService,
   private val gson: Gson,
   private val telemetryClient: TelemetryClient,
   private val authenticationHolder: AuthenticationHolder,
@@ -67,79 +59,6 @@ class GlobalSearchService(
       log.warn("Invalid search  - no criteria provided")
       throw BadRequestException("Invalid search  - please provide at least 1 search parameter")
     }
-  }
-
-  @Async
-  fun doCompare() {
-    try {
-      val start = System.currentTimeMillis()
-      val (onlyInIndex, onlyInNomis) = compareIndex()
-      val end = System.currentTimeMillis()
-      telemetryClient.trackEvent(
-        "index-report",
-        mapOf(
-          "onlyInIndex" to toLogMessage(onlyInIndex),
-          "onlyInNomis" to toLogMessage(onlyInNomis),
-          "timeMs" to (end - start).toString(),
-        ),
-        null,
-      )
-      log.info("End of doCompare()")
-    } catch (e: Exception) {
-      log.error("compare failed", e)
-    }
-  }
-
-  private val cutoff = 50
-
-  private fun toLogMessage(onlyList: List<String>): String =
-    if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
-
-  fun compareIndex(): Pair<List<String>, List<String>> {
-    val allNomis =
-      prisonerIndexService.getAllNomisOffenders(0, Int.MAX_VALUE)
-        .offenderIds!!
-        .map { it.offenderNumber }
-        .sorted()
-
-    val scroll = Scroll(TimeValue.timeValueMinutes(1L))
-    val searchResponse = setupIndexSearch(scroll)
-
-    var scrollId = searchResponse.scrollId
-    var searchHits = searchResponse.hits.hits
-
-    val allIndex = mutableListOf<String>()
-
-    while (ArrayUtils.isNotEmpty(searchHits)) {
-      allIndex.addAll(searchHits.map { it.id })
-
-      val scrollRequest = SearchScrollRequest(scrollId)
-      scrollRequest.scroll(scroll)
-      val scrollResponse = searchClient.scroll(scrollRequest)
-      scrollId = scrollResponse.scrollId
-      searchHits = scrollResponse.hits.hits
-    }
-    val clearScrollRequest = ClearScrollRequest()
-    clearScrollRequest.addScrollId(scrollId)
-    val clearScrollResponse = searchClient.clearScroll(clearScrollRequest)
-    log.info("clearScroll isSucceeded=${clearScrollResponse.isSucceeded}, numFreed=${clearScrollResponse.numFreed}")
-
-    allIndex.sort()
-
-    val onlyInIndex = allIndex - allNomis.toSet()
-    val onlyInNomis = allNomis - allIndex.toSet()
-
-    return Pair(onlyInIndex, onlyInNomis)
-  }
-
-  private fun setupIndexSearch(scroll: Scroll): SearchResponse {
-    val searchSourceBuilder = SearchSourceBuilder().apply {
-      fetchSource(FetchSourceContext.DO_NOT_FETCH_SOURCE)
-      size(2000)
-    }
-    val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
-    searchRequest.scroll(scroll)
-    return searchClient.search(searchRequest)
   }
 
   private fun queryBy(
