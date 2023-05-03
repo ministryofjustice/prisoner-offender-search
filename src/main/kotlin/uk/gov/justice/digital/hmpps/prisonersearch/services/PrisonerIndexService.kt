@@ -7,12 +7,21 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.ElasticsearchException
+import org.elasticsearch.action.search.ClearScrollRequest
+import org.elasticsearch.action.search.SearchRequest
+import org.elasticsearch.action.search.SearchResponse
+import org.elasticsearch.action.search.SearchScrollRequest
 import org.elasticsearch.client.Request
+import org.elasticsearch.common.unit.TimeValue
+import org.elasticsearch.search.Scroll
+import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.elasticsearch.UncategorizedElasticsearchException
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
@@ -42,8 +51,9 @@ class PrisonerIndexService(
   private val prisonerDifferenceService: PrisonerDifferenceService,
   private val incentivesService: IncentivesService,
 ) {
-  companion object {
-    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  private companion object {
+    private val log: Logger = LoggerFactory.getLogger(this::class.java)
+    private const val cutoff = 50
   }
 
   fun indexPrisoner(prisonerId: String) {
@@ -285,12 +295,82 @@ class PrisonerIndexService(
       }
     }
 
-  open class IndexBuildException(val error: String) :
-    Exception("Unable to build index reason: $error")
+  @Async
+  fun doCompare() {
+    try {
+      val start = System.currentTimeMillis()
+      val (onlyInIndex, onlyInNomis) = compareIndex()
+      val end = System.currentTimeMillis()
+      telemetryClient.trackEvent(
+        "POSIndexReport",
+        mapOf(
+          "onlyInIndex" to toLogMessage(onlyInIndex),
+          "onlyInNomis" to toLogMessage(onlyInNomis),
+          "timeMs" to (end - start).toString(),
+        ),
+        null,
+      )
+      log.info("End of doCompare()")
+    } catch (e: Exception) {
+      log.error("compare failed", e)
+    }
+  }
 
-  open class SwitchIndexException(val error: String) :
-    Exception("Unable to switch indexes: $error")
+  private fun toLogMessage(onlyList: List<String>): String =
+    if (onlyList.size <= cutoff) onlyList.toString() else onlyList.slice(IntRange(0, cutoff)).toString() + "..."
 
-  open class MarkIndexCompleteException(val error: String) :
-    Exception("Unable mark index as complete: $error")
+  fun compareIndex(): Pair<List<String>, List<String>> {
+    val allNomis =
+      getAllNomisOffenders(0, Int.MAX_VALUE)
+        .offenderIds!!
+        .map { it.offenderNumber }
+        .sorted()
+
+    val scroll = Scroll(TimeValue.timeValueMinutes(1L))
+    val searchResponse = setupIndexSearch(scroll)
+
+    var scrollId = searchResponse.scrollId
+    var searchHits = searchResponse.hits.hits
+
+    val allIndex = mutableListOf<String>()
+
+    while (!searchHits.isNullOrEmpty()) {
+      allIndex.addAll(searchHits.map { it.id })
+
+      val scrollRequest = SearchScrollRequest(scrollId)
+      scrollRequest.scroll(scroll)
+      val scrollResponse = searchClient.scroll(scrollRequest)
+      scrollId = scrollResponse.scrollId
+      searchHits = scrollResponse.hits.hits
+    }
+    val clearScrollRequest = ClearScrollRequest()
+    clearScrollRequest.addScrollId(scrollId)
+    val clearScrollResponse = searchClient.clearScroll(clearScrollRequest)
+    log.info("clearScroll isSucceeded=${clearScrollResponse.isSucceeded}, numFreed=${clearScrollResponse.numFreed}")
+
+    allIndex.sort()
+
+    val onlyInIndex = allIndex - allNomis.toSet()
+    val onlyInNomis = allNomis - allIndex.toSet()
+
+    return Pair(onlyInIndex, onlyInNomis)
+  }
+
+  private fun setupIndexSearch(scroll: Scroll): SearchResponse {
+    val searchSourceBuilder = SearchSourceBuilder().apply {
+      fetchSource(FetchSourceContext.DO_NOT_FETCH_SOURCE)
+      size(2000)
+    }
+    val searchRequest = SearchRequest(arrayOf(getIndex()), searchSourceBuilder)
+    searchRequest.scroll(scroll)
+    return searchClient.search(searchRequest)
+  }
+
+  private fun getIndex() = indexStatusService.getCurrentIndex().currentIndex.indexName
+
+  open class IndexBuildException(val error: String) : Exception("Unable to build index reason: $error")
+
+  open class SwitchIndexException(val error: String) : Exception("Unable to switch indexes: $error")
+
+  open class MarkIndexCompleteException(val error: String) : Exception("Unable mark index as complete: $error")
 }

@@ -1,6 +1,7 @@
+@file:Suppress("ClassName")
+
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
-import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.lucene.search.TotalHits
 import org.assertj.core.api.Assertions.assertThat
@@ -15,27 +16,41 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.security.AuthenticationHolder
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
+import uk.gov.justice.digital.hmpps.prisonersearch.services.diff.PrisonerDifferenceService
 
 private const val dummyDocId = 100
 
-class GlobalSearchServiceTest {
+class PrisonerIndexService_compareIndexTest {
 
-  private val prisonerIndexService = mock<PrisonerIndexService>()
+  private val nomisService = mock<NomisService>()
+  private val prisonerARepository = mock<PrisonerARepository>()
+  private val prisonerBRepository = mock<PrisonerBRepository>()
+  private val indexQueueService = mock<IndexQueueService>()
   private val indexStatusService = mock<IndexStatusService>()
   private val searchClient = mock<SearchClient>()
   private val telemetryClient = mock<TelemetryClient>()
-  private val authenticationHolder = mock<AuthenticationHolder>()
+  private val indexProperties = mock<IndexProperties>()
+  private val restrictedPatientService = mock<RestrictedPatientService>()
+  private val prisonerDifferenceService = mock<PrisonerDifferenceService>()
+  private val incentivesService = mock<IncentivesService>()
 
-  private val globalSearchService = GlobalSearchService(
-    searchClient,
+  private val prisonerIndexService = PrisonerIndexService(
+    nomisService,
+    prisonerARepository,
+    prisonerBRepository,
+    indexQueueService,
     indexStatusService,
-    prisonerIndexService,
-    Gson(),
+    searchClient,
     telemetryClient,
-    authenticationHolder,
+    indexProperties,
+    restrictedPatientService,
+    prisonerDifferenceService,
+    incentivesService,
   )
 
   private fun resultsOf(offenders: List<String>): SearchResponse {
@@ -71,7 +86,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB")
       setupNomis("A1234AB", "A1234AA") // this is sorted
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).isEmpty()
@@ -82,7 +97,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AB", "A1234AC")
       setupNomis("A1234AA", "A1234AC")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AB")
       assertThat(onlyInNomis).containsExactly("A1234AA")
@@ -93,7 +108,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB")
       setupNomis("A1234AA", "A1234AC")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AB")
       assertThat(onlyInNomis).containsExactly("A1234AC")
@@ -104,7 +119,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB", "A1234AZ")
       setupNomis("A1234AA", "A1234AC", "A1234AZ")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AB")
       assertThat(onlyInNomis).containsExactly("A1234AC")
@@ -115,7 +130,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB", "A1234AD", "A1234AZ")
       setupNomis("A1234AA", "A1234AC", "A1234AE", "A1234AZ")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AB", "A1234AD")
       assertThat(onlyInNomis).containsExactly("A1234AC", "A1234AE")
@@ -126,7 +141,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AZ")
       setupNomis("A1234AA", "A1234AC", "A1234AZ")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).containsExactly("A1234AC")
@@ -137,7 +152,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AC", "A1234AZ")
       setupNomis("A1234AA", "A1234AZ")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AC")
       assertThat(onlyInNomis).isEmpty()
@@ -148,7 +163,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AZ")
       setupNomis("A1234AA", "A1234AC", "A1234AD", "A1234AZ")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).containsExactly("A1234AC", "A1234AD")
@@ -159,7 +174,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AC", "A1234AD", "A1234AZ")
       setupNomis("A1234AA", "A1234AZ")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AC", "A1234AD")
       assertThat(onlyInNomis).isEmpty()
@@ -170,7 +185,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB")
       setupNomis("A0001AA", "A0002AA", "A1234AA", "A1234AB")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).containsExactly("A0001AA", "A0002AA")
@@ -181,7 +196,7 @@ class GlobalSearchServiceTest {
       setupIndex("A0001AA", "A0002AA", "A1234AA", "A1234AB")
       setupNomis("A1234AA", "A1234AB")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A0001AA", "A0002AA")
       assertThat(onlyInNomis).isEmpty()
@@ -192,7 +207,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB", "A9999AA", "A9999AB")
       setupNomis("A1234AA", "A1234AB")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A9999AA", "A9999AB")
       assertThat(onlyInNomis).isEmpty()
@@ -203,7 +218,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB")
       setupNomis("A1234AA", "A1234AB", "A9999AA", "A9999AB")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).containsExactly("A9999AA", "A9999AB")
@@ -214,7 +229,7 @@ class GlobalSearchServiceTest {
       setupIndex()
       setupNomis("A1234AA", "A1234AB")
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).containsExactly("A1234AA", "A1234AB")
@@ -225,7 +240,7 @@ class GlobalSearchServiceTest {
       setupIndex("A1234AA", "A1234AB")
       setupNomis()
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).containsExactly("A1234AA", "A1234AB")
       assertThat(onlyInNomis).isEmpty()
@@ -236,7 +251,7 @@ class GlobalSearchServiceTest {
       setupIndex()
       setupNomis()
 
-      val (onlyInIndex, onlyInNomis) = globalSearchService.compareIndex()
+      val (onlyInIndex, onlyInNomis) = prisonerIndexService.compareIndex()
 
       assertThat(onlyInIndex).isEmpty()
       assertThat(onlyInNomis).isEmpty()
