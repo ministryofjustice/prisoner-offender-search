@@ -73,6 +73,7 @@ class PrisonerIndexService(
 
   fun delete(prisonerNumber: String) {
     log.info("Delete Prisoner {}", prisonerNumber)
+    telemetryClient.trackEvent("POSPrisonerDeleted", mapOf("nomsNumber" to prisonerNumber), null)
 
     prisonerARepository.deleteById(prisonerNumber)
     prisonerBRepository.deleteById(prisonerNumber)
