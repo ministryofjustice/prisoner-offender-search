@@ -13,6 +13,10 @@ abstract class AbstractSearchDataIntegrationTest : QueueIntegrationTest() {
     private var initialiseSearchData = true
   }
 
+  fun resetSearchData() {
+    initialiseSearchData = true
+  }
+
   @BeforeEach
   fun setup() {
     if (initialiseSearchData) {

@@ -118,4 +118,13 @@ class PrisonerIndexResource(
   fun compareIndex() {
     prisonerIndexService.doCompare()
   }
+
+  @GetMapping("/reconcile-index")
+  @Operation(
+    summary = "Start a full index comparison",
+    description = "Existing index is compared in detail with current Nomis data, requires ROLE_PRISONER_INDEX. This is a heavyweight operation, like a full index rebuild",
+  )
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  fun startIndexReconciliation() = prisonerIndexService.startIndexReconciliation()
 }

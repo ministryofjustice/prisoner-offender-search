@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.jms.annotation.JmsListener
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.COMPARE
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER_COMPARISON
+import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER_COMPARISON_LIST
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.OFFENDER_LIST
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexRequestType.REBUILD
 
@@ -31,10 +34,16 @@ class PrisonerIndexListener(
       when (indexRequest.requestType) {
         REBUILD -> {
           msg.acknowledge() // ack before processing
-          prisonerIndexService.addIndexRequestToQueue()
+          prisonerIndexService.addIndexRequestToQueue(OFFENDER_LIST)
         }
-        OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeIndexed(it) }
+        COMPARE -> {
+          msg.acknowledge() // ack before processing
+          prisonerIndexService.addIndexRequestToQueue(OFFENDER_COMPARISON_LIST)
+        }
+        OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeProcessed(it, OFFENDER) }
         OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
+        OFFENDER_COMPARISON_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeProcessed(it, OFFENDER_COMPARISON) }
+        OFFENDER_COMPARISON -> indexRequest.prisonerNumber?.let { prisonerIndexService.comparePrisoner(it) }
         else -> log.warn("Unexpected Message {}", requestJson)
       }
       log.trace("Finished index message request {}", indexRequest)

@@ -66,7 +66,7 @@ class PrisonerDifferenceService(
 
   @Transactional
   fun handleDifferences(previousPrisonerSnapshot: Prisoner?, offenderBooking: OffenderBooking, prisoner: Prisoner) {
-    if (prisonerHasChanged(previousPrisonerSnapshot, offenderBooking.offenderNo, prisoner)) {
+    if (prisonerHasChangedAndUpdateHash(previousPrisonerSnapshot, offenderBooking.offenderNo, prisoner)) {
       generateDiffEvent(previousPrisonerSnapshot, offenderBooking, prisoner)
       generateDiffTelemetry(previousPrisonerSnapshot, offenderBooking, prisoner)
       prisonerMovementsEventService.generateAnyEvents(previousPrisonerSnapshot, prisoner, offenderBooking)
@@ -76,13 +76,27 @@ class PrisonerDifferenceService(
     }
   }
 
-  fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, nomsNumber: String, prisoner: Prisoner): Boolean {
+  fun reportDifferences(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): List<Diff<Prisoner>> =
+    if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
+      reportDiffTelemetry(previousPrisonerSnapshot, prisoner)
+    } else {
+      emptyList()
+    }
+
+  private fun prisonerHasChangedAndUpdateHash(
+    previousPrisonerSnapshot: Prisoner?,
+    nomsNumber: String,
+    prisoner: Prisoner,
+  ): Boolean {
     val oldHash = previousPrisonerSnapshot?.hash() ?: ""
     val newHash = prisoner.hash()
     if (oldHash == newHash) return false
 
     return updateHash(nomsNumber, newHash) > 0
   }
+
+  private fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): Boolean =
+    previousPrisonerSnapshot == null || previousPrisonerSnapshot.hash() != prisoner.hash()
 
   fun updateHash(nomsNumber: String, prisonerHash: String) =
     prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
@@ -118,6 +132,44 @@ class PrisonerDifferenceService(
     }.onFailure {
       log.error("Prisoner difference telemetry failed with error", it)
     }
+  }
+
+  fun reportDiffTelemetry(
+    previousPrisonerSnapshot: Prisoner?,
+    prisoner: Prisoner,
+  ): List<Diff<Prisoner>> {
+    val exemptedMethods = listOf("diff", "equals", "toString", "hashCode")
+    previousPrisonerSnapshot?.also {
+      val differences = DiffBuilder<Prisoner>(it, prisoner, ToStringStyle.JSON_STYLE).apply<DiffBuilder<Prisoner>> {
+        Prisoner::class.members
+          .filterNot { exemptedMethods.contains(it.name) }
+          .forEach { property ->
+            append(
+              property.name,
+              property.call(it),
+              property.call(prisoner),
+            )
+          }
+      }.build().diffs
+      if (differences.isNotEmpty()) {
+        telemetryClient.trackEvent(
+          "POSPrisonerDifferenceReported",
+          mapOf(
+            "nomsNumber" to previousPrisonerSnapshot.prisonerNumber,
+            "differences" to differences.toString(),
+          ),
+          null,
+        )
+      }
+      return differences as List<Diff<Prisoner>>
+    } ?: telemetryClient.trackEvent(
+      "POSPrisonerDifferenceReportedMissing",
+      mapOf(
+        "nomsNumber" to prisoner.prisonerNumber,
+      ),
+      null,
+    )
+    return emptyList()
   }
 
   internal fun generateDiffEvent(

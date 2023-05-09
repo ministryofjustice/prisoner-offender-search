@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.services
 import com.amazonaws.util.IOUtils
 import com.google.gson.JsonParser
 import com.microsoft.applicationinsights.TelemetryClient
+import org.apache.commons.lang3.builder.Diff
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -68,6 +69,18 @@ class PrisonerIndexService(
     }
   }
 
+  fun comparePrisoner(prisonerId: String) {
+    nomisService.getOffender(prisonerId)?.let {
+      compare(offenderBooking = it)
+    } ?: run {
+      telemetryClient.trackEvent(
+        "POSOffenderNotFoundForComparing",
+        mapOf("prisonerID" to prisonerId),
+        null,
+      )
+    }
+  }
+
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
       reindex(offenderBooking = it)
@@ -126,7 +139,7 @@ class PrisonerIndexService(
     // return message to DLQ since we have only done a partial update
     incentiveLevel.exceptionOrNull()?.run { throw this }
 
-    log.trace("finished sync() {}", offenderBooking)
+    log.trace("finished reindex() {}", offenderBooking)
     return storedPrisoner
   }
 
@@ -143,8 +156,18 @@ class PrisonerIndexService(
       prisonerARepository.save(PrisonerA(offenderBooking, incentiveLevel, restrictivePatient))
     }
 
-    log.trace("finished reIndex() {}", offenderBooking)
+    log.trace("finished index() {}", offenderBooking)
     return storedPrisoner
+  }
+
+  fun compare(offenderBooking: OffenderBooking): List<Diff<Prisoner>> {
+    val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
+    val incentiveLevel = offenderBooking.getIncentiveLevel()
+
+    val calculated = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
+    val existing = get(offenderBooking.offenderNo)
+
+    return prisonerDifferenceService.reportDifferences(existing, calculated)
   }
 
   private fun checkIfIndexExists(indexName: String): Boolean {
@@ -188,6 +211,11 @@ class PrisonerIndexService(
     }
   }
 
+  fun startIndexReconciliation() {
+    log.info("Sending compare request")
+    indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.COMPARE))
+  }
+
   internal fun checkExistsAndReset(prisonerIndex: SyncIndex) {
     if (checkIfIndexExists(prisonerIndex.indexName)) {
       searchClient.lowLevelClient().performRequest(Request("DELETE", "/${prisonerIndex.indexName}"))
@@ -219,7 +247,7 @@ class PrisonerIndexService(
     return currentIndex
   }
 
-  fun addOffendersToBeIndexed(pageRequest: PageRequest) {
+  fun addOffendersToBeProcessed(pageRequest: PageRequest, operation: IndexRequestType) {
     var count = 0
     log.debug(
       "Sending offender indexing requests row {} --> {}",
@@ -227,7 +255,7 @@ class PrisonerIndexService(
       pageRequest.offset + pageRequest.pageSize,
     )
     nomisService.getOffendersIds(pageRequest.offset, pageRequest.pageSize).offenderIds?.forEach {
-      indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(IndexRequestType.OFFENDER, it.offenderNumber))
+      indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(operation, it.offenderNumber))
       count += 1
     }
     log.debug("Requested {} offender index syncs", count)
@@ -254,7 +282,7 @@ class PrisonerIndexService(
     return indexStatusService.getCurrentIndex()
   }
 
-  fun addIndexRequestToQueue(): Long {
+  fun addIndexRequestToQueue(operation: IndexRequestType): Long {
     log.debug("Sending list of offender requests")
     var page = 0
     val totalRows = nomisService.getOffendersIds(0, 1).totalRows
@@ -262,7 +290,7 @@ class PrisonerIndexService(
       do {
         indexQueueService.sendIndexRequestMessage(
           PrisonerIndexRequest(
-            IndexRequestType.OFFENDER_LIST,
+            operation,
             null,
             PageRequest.of(page, indexProperties.pageSize),
           ),
