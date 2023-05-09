@@ -382,6 +382,8 @@ class PrisonerIndexService(
       scrollId = scrollResponse.scrollId
       searchHits = scrollResponse.hits.hits
     }
+    log.info("compareIndex(): allIndex=${allIndex.size}, allNomis=${allNomis.size}")
+
     val clearScrollRequest = ClearScrollRequest()
     clearScrollRequest.addScrollId(scrollId)
     val clearScrollResponse = searchClient.clearScroll(clearScrollRequest)
