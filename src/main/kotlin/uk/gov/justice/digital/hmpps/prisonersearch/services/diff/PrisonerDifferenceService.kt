@@ -51,6 +51,7 @@ class PrisonerDifferenceService(
 ) {
   private companion object {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
+    private val exemptedMethods = listOf("diff", "equals", "toString", "hashCode")
   }
 
   internal val propertiesByDiffCategory: Map<DiffCategory, List<String>> =
@@ -76,9 +77,15 @@ class PrisonerDifferenceService(
     }
   }
 
-  fun reportDifferences(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): List<Diff<Prisoner>> =
+  fun handleDifferencesForReport(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) {
     if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
       reportDiffTelemetry(previousPrisonerSnapshot, prisoner)
+    }
+  }
+
+  fun reportDifferencesDetails(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) =
+    if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
+      reportDiffTelemetryDetails(previousPrisonerSnapshot, prisoner)
     } else {
       emptyList()
     }
@@ -137,8 +144,33 @@ class PrisonerDifferenceService(
   fun reportDiffTelemetry(
     previousPrisonerSnapshot: Prisoner?,
     prisoner: Prisoner,
+  ) {
+    previousPrisonerSnapshot?.also {
+      val differences = getDifferencesByCategory(it, prisoner)
+      if (differences.isNotEmpty()) {
+        telemetryClient.trackEvent(
+          "POSPrisonerDifferenceReported",
+          mapOf(
+            "nomsNumber" to previousPrisonerSnapshot.prisonerNumber,
+            "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
+          ),
+          null,
+        )
+      }
+    }
+      ?: telemetryClient.trackEvent(
+        "POSPrisonerDifferenceReportedMissing",
+        mapOf(
+          "nomsNumber" to prisoner.prisonerNumber,
+        ),
+        null,
+      )
+  }
+
+  fun reportDiffTelemetryDetails(
+    previousPrisonerSnapshot: Prisoner?,
+    prisoner: Prisoner,
   ): List<Diff<Prisoner>> {
-    val exemptedMethods = listOf("diff", "equals", "toString", "hashCode")
     previousPrisonerSnapshot?.also {
       val differences = DiffBuilder<Prisoner>(it, prisoner, ToStringStyle.JSON_STYLE).apply<DiffBuilder<Prisoner>> {
         Prisoner::class.members
@@ -151,24 +183,8 @@ class PrisonerDifferenceService(
             )
           }
       }.build().diffs
-      if (differences.isNotEmpty()) {
-        telemetryClient.trackEvent(
-          "POSPrisonerDifferenceReported",
-          mapOf(
-            "nomsNumber" to previousPrisonerSnapshot.prisonerNumber,
-            "differences" to differences.toString(),
-          ),
-          null,
-        )
-      }
       return differences as List<Diff<Prisoner>>
-    } ?: telemetryClient.trackEvent(
-      "POSPrisonerDifferenceReportedMissing",
-      mapOf(
-        "nomsNumber" to prisoner.prisonerNumber,
-      ),
-      null,
-    )
+    }
     return emptyList()
   }
 

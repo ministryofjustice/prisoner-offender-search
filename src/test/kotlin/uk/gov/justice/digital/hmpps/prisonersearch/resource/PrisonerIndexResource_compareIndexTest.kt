@@ -14,6 +14,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.test.web.reactive.server.expectBody
 import uk.gov.justice.digital.hmpps.prisonersearch.AbstractSearchDataIntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
@@ -151,23 +152,40 @@ class PrisonerIndexResource_compareIndexTest : AbstractSearchDataIntegrationTest
       eq("POSPrisonerDifferenceReported"),
       check<Map<String, String>> {
         assertThat(it["nomsNumber"]).isEqualTo("A9999AA")
-        assertThat(it["differences"]).isEqualTo("[[releaseDate: 2023-01-02, null]]")
+        assertThat(it["categoriesChanged"]).isEqualTo("[SENTENCE]")
       },
       isNull(),
     )
+
+    val detailsForA9999AA = webTestClient.get().uri("/prisoner-index/reconcile-prisoner/A9999AA")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody<String>()
+      .returnResult().responseBody
+
+    assertThat(detailsForA9999AA).isEqualTo("""[[releaseDate: 2023-01-02, null]]""")
 
     verify(telemetryClient, timeout(2000)).trackEvent(
       eq("POSPrisonerDifferenceReported"),
       check<Map<String, String>> {
         assertThat(it["nomsNumber"]).isEqualTo("A7089EY")
-        assertThat(it["differences"]).contains(
-          "[active: false, true]",
-          "[bookingId: null, 1900836]",
-          "[alerts: null, [PrisonerAlert(alertType=P, alertCode=PL1, active=true, expired=false),",
-          "[nonDtoReleaseDate: null, 2023-05-16]",
-        )
+        assertThat(it["categoriesChanged"]).isEqualTo("[ALERTS, IDENTIFIERS, LOCATION, PERSONAL_DETAILS, PHYSICAL_DETAILS, SENTENCE, STATUS]")
       },
       isNull(),
+    )
+
+    val detailsForA7089EY = webTestClient.get().uri("/prisoner-index/reconcile-prisoner/A7089EY")
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
+      .exchange()
+      .expectStatus().isOk
+      .expectBody<String>()
+      .returnResult().responseBody
+
+    assertThat(detailsForA7089EY).contains( "[active: false, true]",
+      "[bookingId: null, 1900836]",
+      "[alerts: null, [PrisonerAlert(alertType=P, alertCode=PL1, active=true, expired=false),",
+      "[nonDtoReleaseDate: null, 2023-05-16]",
     )
 
     verify(telemetryClient, never()).trackEvent(

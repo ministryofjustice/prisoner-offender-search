@@ -470,10 +470,13 @@ class PrisonerDiffServiceTest {
         eq("POSPrisonerDifferenceReported"),
         check<Map<String, String>> {
           assertThat(it["nomsNumber"]).isEqualTo("A1234ZZ")
-          assertThat(it["differences"]).isEqualTo("[[pncNumber: somePnc1, somePnc2], [prisonerNumber: A1234ZZ, null]]")
+          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
         },
         isNull(),
       )
+
+      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()). isEqualTo(
+        "[[pncNumber: somePnc1, somePnc2], [prisonerNumber: A1234ZZ, null]]")
     }
 
     @Test
@@ -486,10 +489,13 @@ class PrisonerDiffServiceTest {
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerDifferenceReported"),
         check<Map<String, String>> {
-          assertThat(it["differences"]).isEqualTo("[[croNumber: null, someCro], [pncNumber: somePnc, null]]")
+          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
         },
         isNull(),
       )
+
+      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()). isEqualTo(
+        "[[croNumber: null, someCro], [pncNumber: somePnc, null]]")
     }
 
     @Test
@@ -521,17 +527,21 @@ class PrisonerDiffServiceTest {
         .trackEvent(
           eq("POSPrisonerDifferenceReported"),
           check<Map<String, String>> {
-            assertThat(it["differences"]).isEqualTo(
-              "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
-                " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
-                " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
-                " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
-                " [sentenceStartDate: null, 2023-05-09]," +
-                " [shoeSize: 10, 11]]",
+            assertThat(it["categoriesChanged"]).isEqualTo(
+              "[ALERTS, IDENTIFIERS, INCENTIVE_LEVEL, PERSONAL_DETAILS, PHYSICAL_DETAILS, SENTENCE]",
             )
           },
           isNull(),
         )
+
+      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()). isEqualTo(
+        "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
+          " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
+          " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
+          " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
+          " [sentenceStartDate: null, 2023-05-09]," +
+          " [shoeSize: 10, 11]]",
+      )
     }
 
     @Test

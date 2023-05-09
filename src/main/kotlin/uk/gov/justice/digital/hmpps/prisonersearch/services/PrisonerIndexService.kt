@@ -81,6 +81,11 @@ class PrisonerIndexService(
     }
   }
 
+  fun comparePrisonerDetail(prisonerId: String) =
+    nomisService.getOffender(prisonerId)?.let {
+      compareDetail(offenderBooking = it)
+    }
+
   fun syncPrisoner(prisonerId: String): Prisoner? =
     nomisService.getOffender(prisonerId)?.let {
       reindex(offenderBooking = it)
@@ -160,14 +165,24 @@ class PrisonerIndexService(
     return storedPrisoner
   }
 
-  fun compare(offenderBooking: OffenderBooking): List<Diff<Prisoner>> {
+  fun compare(offenderBooking: OffenderBooking) {
+    val restrictivePatient = offenderBooking.getRestrictedPatientData()
+    val incentiveLevel = offenderBooking.getIncentiveLevel()
+
+    val calculated = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
+    val existing = get(offenderBooking.offenderNo)
+
+    prisonerDifferenceService.handleDifferencesForReport(existing, calculated)
+  }
+
+  fun compareDetail(offenderBooking: OffenderBooking): List<Diff<Prisoner>> {
     val restrictivePatient: RestrictivePatient? = offenderBooking.getRestrictedPatientData()
     val incentiveLevel = offenderBooking.getIncentiveLevel()
 
     val calculated = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
     val existing = get(offenderBooking.offenderNo)
 
-    return prisonerDifferenceService.reportDifferences(existing, calculated)
+    return prisonerDifferenceService.reportDifferencesDetails(existing, calculated)
   }
 
   private fun checkIfIndexExists(indexName: String): Boolean {
