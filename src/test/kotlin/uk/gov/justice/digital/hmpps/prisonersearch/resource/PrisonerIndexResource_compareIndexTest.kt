@@ -182,7 +182,8 @@ class PrisonerIndexResource_compareIndexTest : AbstractSearchDataIntegrationTest
       .expectBody<String>()
       .returnResult().responseBody
 
-    assertThat(detailsForA7089EY).contains( "[active: false, true]",
+    assertThat(detailsForA7089EY).contains(
+      "[active: false, true]",
       "[bookingId: null, 1900836]",
       "[alerts: null, [PrisonerAlert(alertType=P, alertCode=PL1, active=true, expired=false),",
       "[nonDtoReleaseDate: null, 2023-05-16]",
