@@ -118,4 +118,27 @@ class PrisonerIndexResource(
   fun compareIndex() {
     prisonerIndexService.doCompare()
   }
+
+  @GetMapping("/reconcile-index")
+  @Operation(
+    summary = "Start a full index comparison",
+    description = """The whole existing index is compared in detail with current Nomis data, requires ROLE_PRISONER_INDEX.
+      Results are written as customEvents. Nothing is written where a prisoner's data matches.
+      Note this is a heavyweight operation, like a full index rebuild""",
+  )
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  fun startIndexReconciliation() = prisonerIndexService.startIndexReconciliation()
+
+  @GetMapping("/reconcile-prisoner/{prisonerNumber}")
+  @Operation(
+    summary = "Compare a prisoner's index with Nomis",
+    description = "Existing index is compared in detail with current Nomis data for a specific prisoner, requires ROLE_PRISONER_INDEX.",
+  )
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
+  fun reconcilePrisoner(
+    @Pattern(regexp = "[a-zA-Z][0-9]{4}[a-zA-Z]{2}")
+    @PathVariable("prisonerNumber")
+    prisonerNumber: String,
+  ): String = prisonerIndexService.comparePrisonerDetail(prisonerNumber).toString()
 }

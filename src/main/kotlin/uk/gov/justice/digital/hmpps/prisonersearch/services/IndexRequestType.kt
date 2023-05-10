@@ -1,5 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.services
 
 enum class IndexRequestType {
-  REBUILD, OFFENDER_LIST, OFFENDER
+  REBUILD, COMPARE, OFFENDER_LIST, OFFENDER, OFFENDER_COMPARISON_LIST, OFFENDER_COMPARISON
 }

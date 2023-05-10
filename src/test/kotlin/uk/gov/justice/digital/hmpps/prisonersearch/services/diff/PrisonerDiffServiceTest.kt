@@ -41,7 +41,15 @@ class PrisonerDiffServiceTest {
   private val prisonerMovementsEventService = mock<PrisonerMovementsEventService>()
   private val alertsUpdatedEventService = mock<AlertsUpdatedEventService>()
 
-  private val prisonerDifferenceService = PrisonerDifferenceService(telemetryClient, domainEventsEmitter, diffProperties, prisonerEventHashRepository, objectMapper, prisonerMovementsEventService, alertsUpdatedEventService)
+  private val prisonerDifferenceService = PrisonerDifferenceService(
+    telemetryClient,
+    domainEventsEmitter,
+    diffProperties,
+    prisonerEventHashRepository,
+    objectMapper,
+    prisonerMovementsEventService,
+    alertsUpdatedEventService,
+  )
 
   @Nested
   inner class HandleDifferences {
@@ -52,7 +60,13 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should send event if prisoner hash has changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(1)
+      whenever(
+        prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
+          anyString(),
+          anyString(),
+          any(),
+        ),
+      ).thenReturn(1)
       whenever(objectMapper.writeValueAsString(any()))
         .thenReturn("hash1")
         .thenReturn("hash2")
@@ -67,7 +81,13 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should not send event if prisoner hash not changed`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
+      whenever(
+        prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
+          anyString(),
+          anyString(),
+          any(),
+        ),
+      ).thenReturn(0)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("hash1")
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc1" }
@@ -80,7 +100,13 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should raise no-change telemetry if there are no changes using hash`() {
-      whenever(prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(anyString(), anyString(), any())).thenReturn(0)
+      whenever(
+        prisonerEventHashRepository.upsertPrisonerEventHashIfChanged(
+          anyString(),
+          anyString(),
+          any(),
+        ),
+      ).thenReturn(0)
       whenever(objectMapper.writeValueAsString(any())).thenReturn("a_string")
       val prisoner = Prisoner().apply { pncNumber = "somePnc1" }
 
@@ -167,15 +193,30 @@ class PrisonerDiffServiceTest {
     @Test
     fun `should handle list difference`() {
       val prisoner1 = Prisoner().apply { aliases = listOf() }
-      val prisoner2 = Prisoner().apply { aliases = listOf(alias(firstName = "aliasFirstName", lastName = "aliasLastName", dateOfBirth = LocalDate.now())) }
+      val prisoner2 = Prisoner().apply {
+        aliases = listOf(alias(firstName = "aliasFirstName", lastName = "aliasLastName", dateOfBirth = LocalDate.now()))
+      }
 
       assertThat(getDiffResult(prisoner1, prisoner2).diffs)
         .extracting("fieldName", "left", "right")
-        .containsExactly(Tuple("aliases", listOf<PrisonerAlias>(), listOf(alias(firstName = "aliasFirstName", lastName = "aliasLastName", dateOfBirth = LocalDate.now()))))
+        .containsExactly(
+          Tuple(
+            "aliases",
+            listOf<PrisonerAlias>(),
+            listOf(alias(firstName = "aliasFirstName", lastName = "aliasLastName", dateOfBirth = LocalDate.now())),
+          ),
+        )
     }
 
     fun alias(firstName: String, lastName: String, dateOfBirth: LocalDate) =
-      PrisonerAlias(firstName = firstName, middleNames = null, lastName = lastName, dateOfBirth = dateOfBirth, gender = null, ethnicity = null)
+      PrisonerAlias(
+        firstName = firstName,
+        middleNames = null,
+        lastName = lastName,
+        dateOfBirth = dateOfBirth,
+        gender = null,
+        ethnicity = null,
+      )
 
     @Test
     fun `should handle LocalDate difference`() {
@@ -192,7 +233,10 @@ class PrisonerDiffServiceTest {
   inner class Groupings {
     @Test
     fun `groups properties by property type`() {
-      assertThat(prisonerDifferenceService.propertiesByDiffCategory[DiffCategory.IDENTIFIERS]).contains("pncNumber", "croNumber")
+      assertThat(prisonerDifferenceService.propertiesByDiffCategory[DiffCategory.IDENTIFIERS]).contains(
+        "pncNumber",
+        "croNumber",
+      )
       assertThat(prisonerDifferenceService.propertiesByDiffCategory[DiffCategory.PERSONAL_DETAILS]).contains("firstName")
     }
 
@@ -328,7 +372,12 @@ class PrisonerDiffServiceTest {
       assertThat(diffsByType.keys).containsExactlyInAnyOrder(DiffCategory.INCENTIVE_LEVEL)
     }
 
-    private fun alert(alertType: String = "SOME_TYPE", alertCode: String = "SOME_CODE", active: Boolean = true, expired: Boolean = false) =
+    private fun alert(
+      alertType: String = "SOME_TYPE",
+      alertCode: String = "SOME_CODE",
+      active: Boolean = true,
+      expired: Boolean = false,
+    ) =
       PrisonerAlert(alertType, alertCode, active, expired)
   }
 
@@ -438,7 +487,7 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should swallow exceptions when raising telemetry`() {
-      whenever(telemetryClient.trackEvent(anyString(), anyMap(), anyMap())).thenThrow(RuntimeException::class.java)
+      whenever(telemetryClient.trackEvent(anyString(), anyMap(), isNull())).thenThrow(RuntimeException::class.java)
 
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
@@ -446,6 +495,130 @@ class PrisonerDiffServiceTest {
       assertDoesNotThrow {
         prisonerDifferenceService.generateDiffTelemetry(prisoner1, someOffenderBooking(), prisoner2)
       }
+    }
+  }
+
+  @Nested
+  inner class ReportDiffTelemetry {
+    @BeforeEach
+    fun setUp() {
+      whenever(diffProperties.telemetry).thenReturn(true)
+    }
+
+    @Test
+    fun `should report a single difference`() {
+      val prisoner1 = Prisoner().apply {
+        pncNumber = "somePnc1"
+        prisonerNumber = "A1234ZZ"
+      }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+
+      prisonerDifferenceService.reportDiffTelemetry(prisoner1, prisoner2)
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerDifferenceReported"),
+        check<Map<String, String>> {
+          assertThat(it["nomsNumber"]).isEqualTo("A1234ZZ")
+          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
+        },
+        isNull(),
+      )
+
+      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
+        "[[pncNumber: somePnc1, somePnc2], [prisonerNumber: A1234ZZ, null]]",
+      )
+    }
+
+    @Test
+    fun `should report null differences`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null }
+      val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro" }
+
+      prisonerDifferenceService.reportDiffTelemetry(prisoner1, prisoner2)
+
+      verify(telemetryClient).trackEvent(
+        eq("POSPrisonerDifferenceReported"),
+        check<Map<String, String>> {
+          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
+        },
+        isNull(),
+      )
+
+      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
+        "[[croNumber: null, someCro], [pncNumber: somePnc, null]]",
+      )
+    }
+
+    @Test
+    fun `should report multiple differences of multiple types`() {
+      val prisoner1 = Prisoner().apply {
+        pncNumber = "somePnc1"
+        alerts = listOf(
+          PrisonerAlert(alertType = "X", alertCode = "X1", expired = false, active = true),
+        )
+        currentIncentive = CurrentIncentive(
+          level = IncentiveLevel("STANDARD", "Standard"),
+          dateTime = LocalDateTime.parse("2021-05-09T10:00:00"),
+        )
+        shoeSize = 10
+      }
+      val prisoner2 = Prisoner().apply {
+        pncNumber = "somePnc2"
+        alerts = listOf(
+          PrisonerAlert(alertType = "Y", alertCode = "X1", expired = false, active = true),
+        )
+        firstName = "someFirstName2"
+        sentenceStartDate = LocalDate.parse("2023-05-09")
+        shoeSize = 11
+      }
+
+      prisonerDifferenceService.reportDiffTelemetry(prisoner1, prisoner2)
+
+      verify(telemetryClient)
+        .trackEvent(
+          eq("POSPrisonerDifferenceReported"),
+          check<Map<String, String>> {
+            assertThat(it["categoriesChanged"]).isEqualTo(
+              "[ALERTS, IDENTIFIERS, INCENTIVE_LEVEL, PERSONAL_DETAILS, PHYSICAL_DETAILS, SENTENCE]",
+            )
+          },
+          isNull(),
+        )
+
+      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
+        "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
+          " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
+          " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
+          " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
+          " [sentenceStartDate: null, 2023-05-09]," +
+          " [shoeSize: 10, 11]]",
+      )
+    }
+
+    @Test
+    fun `should raise no telemetry if there are no changes`() {
+      val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
+      val prisoner2 = Prisoner().apply { pncNumber = "somePnc1" }
+
+      prisonerDifferenceService.reportDiffTelemetry(prisoner1, prisoner2)
+
+      verifyNoInteractions(telemetryClient)
+    }
+
+    @Test
+    fun `prisoner does not exist in index`() {
+      val prisoner2 = Prisoner().apply { prisonerNumber = "B1234YY" }
+
+      prisonerDifferenceService.reportDiffTelemetry(null, prisoner2)
+
+      verify(telemetryClient)
+        .trackEvent(
+          eq("POSPrisonerDifferenceReportedMissing"),
+          check<Map<String, String>> {
+            assertThat(it["nomsNumber"]).isEqualTo("B1234YY")
+          },
+          isNull(),
+        )
     }
   }
 
@@ -524,7 +697,12 @@ class PrisonerDiffServiceTest {
 
     @Test
     fun `should NOT swallow exceptions when sending domain events`() {
-      whenever(domainEventsEmitter.emitPrisonerDifferenceEvent(anyString(), any())).thenThrow(RuntimeException::class.java)
+      whenever(
+        domainEventsEmitter.emitPrisonerDifferenceEvent(
+          anyString(),
+          any(),
+        ),
+      ).thenThrow(RuntimeException::class.java)
 
       val prisoner1 = Prisoner().apply { pncNumber = "somePnc1" }
       val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }

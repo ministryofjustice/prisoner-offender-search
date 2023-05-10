@@ -261,8 +261,7 @@
         "heightMetres": 1.65,
         "heightCentimetres": 165,
         "weightPounds": 125,
-        "weightKilograms": 57,
-        "sexCode": "M"
+        "weightKilograms": 57
       },
       "physicalCharacteristics": [
         {
@@ -552,7 +551,6 @@
           "sentenceStartDate": "2020-05-05"
         }
       ]
-    }
     }
   }
 }
