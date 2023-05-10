@@ -4,6 +4,9 @@ package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.check
 import org.mockito.kotlin.eq
@@ -83,56 +86,19 @@ class PrisonerIndexResource_compareIndexTest : AbstractSearchDataIntegrationTest
 
   @Test
   fun `Reconciliation - no differences`() {
-    prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/ids"))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", "10")
-            .withBody(
-              """[
-                { "offenderNumber": "A9999AA" },
-                { "offenderNumber": "A9999AB" },
-                { "offenderNumber": "A9999AC" },
-                { "offenderNumber": "A9999RA" },
-                { "offenderNumber": "A9999RB" },
-                { "offenderNumber": "A9999RC" },
-                { "offenderNumber": "A7089EY" },
-                { "offenderNumber": "A7089EZ" },
-                { "offenderNumber": "A7089FA" }]""",
-            ),
-        ),
-    )
     webTestClient.get().uri("/prisoner-index/reconcile-index")
       .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
       .exchange()
       .expectStatus().isAccepted
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it!! > 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
 
     verifyNoInteractions(telemetryClient)
   }
 
   @Test
   fun `Reconciliation - differences`() {
-    prisonMockServer.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/api/offenders/ids"))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", "10")
-            .withBody(
-              """[
-                { "offenderNumber": "A9999AA" },
-                { "offenderNumber": "A9999AB" },
-                { "offenderNumber": "A9999AC" },
-                { "offenderNumber": "A9999RA" },
-                { "offenderNumber": "A9999RB" },
-                { "offenderNumber": "A9999RC" },
-                { "offenderNumber": "A7089EY" },
-                { "offenderNumber": "A7089EZ" },
-                { "offenderNumber": "A7089FA" }]""",
-            ),
-        ),
-    )
     // Modify index record A9999AA a little
     val record1 = prisonerBRepository.findByIdOrNull("A9999AA")!!
     record1.releaseDate = LocalDate.parse("2023-01-02")
@@ -148,7 +114,10 @@ class PrisonerIndexResource_compareIndexTest : AbstractSearchDataIntegrationTest
       .exchange()
       .expectStatus().isAccepted
 
-    verify(telemetryClient, timeout(5000)).trackEvent(
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it!! > 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+
+    verify(telemetryClient).trackEvent(
       eq("POSPrisonerDifferenceReported"),
       check<Map<String, String>> {
         assertThat(it["nomsNumber"]).isEqualTo("A9999AA")
@@ -166,7 +135,7 @@ class PrisonerIndexResource_compareIndexTest : AbstractSearchDataIntegrationTest
 
     assertThat(detailsForA9999AA).isEqualTo("""[[releaseDate: 2023-01-02, null]]""")
 
-    verify(telemetryClient, timeout(2000)).trackEvent(
+    verify(telemetryClient).trackEvent(
       eq("POSPrisonerDifferenceReported"),
       check<Map<String, String>> {
         assertThat(it["nomsNumber"]).isEqualTo("A7089EY")
