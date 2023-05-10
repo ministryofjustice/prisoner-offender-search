@@ -273,7 +273,7 @@ class PrisonerIndexService(
       indexQueueService.sendIndexRequestMessage(PrisonerIndexRequest(operation, it.offenderNumber))
       count += 1
     }
-    log.debug("Requested {} offender index syncs", count)
+    log.debug("Requested {} offender operations of type {}", count, operation)
   }
 
   @Throws(MarkIndexCompleteException::class)
@@ -297,7 +297,7 @@ class PrisonerIndexService(
     return indexStatusService.getCurrentIndex()
   }
 
-  fun addIndexRequestToQueue(operation: IndexRequestType): Long {
+  fun addIndexRequestToQueue(): Long {
     log.debug("Sending list of offender requests")
     var page = 0
     val totalRows = nomisService.getOffendersIds(0, 1).totalRows
@@ -305,7 +305,7 @@ class PrisonerIndexService(
       do {
         indexQueueService.sendIndexRequestMessage(
           PrisonerIndexRequest(
-            operation,
+            IndexRequestType.OFFENDER_LIST,
             null,
             PageRequest.of(page, indexProperties.pageSize),
           ),
@@ -314,6 +314,26 @@ class PrisonerIndexService(
       } while ((page) * indexProperties.pageSize < totalRows && indexStatusService.getCurrentIndex().inProgress && indexStatusService.getCurrentIndex().inError.not())
     }
     log.debug("Offender lists have been sent: {} requests for a total of {} offenders", page, totalRows)
+    return totalRows
+  }
+
+  fun addCompareRequestToQueue(): Long {
+    log.debug("Sending list of offender requests")
+    var page = 0
+    val totalRows = nomisService.getOffendersIds(0, 1).totalRows
+    if (totalRows > 0) {
+      do {
+        indexQueueService.sendIndexRequestMessage(
+          PrisonerIndexRequest(
+            IndexRequestType.OFFENDER_COMPARISON_LIST,
+            null,
+            PageRequest.of(page, indexProperties.pageSize),
+          ),
+        )
+        page += 1
+      } while (page * indexProperties.pageSize < totalRows)
+    }
+    log.debug("addCompareRequestToQueue(): Offender lists have been sent: {} requests for a total of {} offenders", page, totalRows)
     return totalRows
   }
 

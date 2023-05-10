@@ -34,11 +34,11 @@ class PrisonerIndexListener(
       when (indexRequest.requestType) {
         REBUILD -> {
           msg.acknowledge() // ack before processing
-          prisonerIndexService.addIndexRequestToQueue(OFFENDER_LIST)
+          prisonerIndexService.addIndexRequestToQueue()
         }
         COMPARE -> {
           msg.acknowledge() // ack before processing
-          prisonerIndexService.addIndexRequestToQueue(OFFENDER_COMPARISON_LIST)
+          prisonerIndexService.addCompareRequestToQueue()
         }
         OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeProcessed(it, OFFENDER) }
         OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
