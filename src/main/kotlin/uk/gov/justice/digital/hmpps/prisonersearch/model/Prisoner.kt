@@ -116,7 +116,7 @@ open class Prisoner : Diffable<Prisoner> {
   @DiffableProperty(DiffCategory.LOCATION)
   var lastMovementReasonCode: String? = null
 
-  @Schema(description = "In/Out Status", example = "IN", allowableValues = ["IN", "OUT"])
+  @Schema(description = "In/Out Status", example = "IN", allowableValues = ["IN", "OUT", "TRN"])
   @DiffableProperty(DiffCategory.STATUS)
   var inOutStatus: String? = null
 
