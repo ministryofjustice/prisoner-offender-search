@@ -18,6 +18,7 @@ generic-service:
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 generic-prometheus-alerts:
+  businessHoursOnly: true
   alertSeverity: syscon
   rdsAlertsDatabases:
     cloud-platform-f87c215b217ed2b5: "prisoner search"
