@@ -109,6 +109,30 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `will sync offender when an assessment changes`() {
+    val response = """
+              {
+                "offenderNo": "A7089FD",
+                "bookingId": 1234,
+                "csra": "VeryHigh",
+                "firstName": "Altered",
+                "lastName": "Csra",
+                "dateOfBirth": "1980-01-01",
+                "agencyId": "MDI",
+                "activeFlag": true
+              }
+              """
+    prisonMockServer.stubGetOffender(response)
+
+    eventQueueSqsClient.sendMessage(eventQueueUrl, "/messages/assessmentUpdated.json".readResourceAsText())
+
+    await untilAsserted {
+      search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].csra").isEqualTo("VeryHigh")
+    }
+  }
+
+  @Test
   fun `will make a request for restricted patient data`() {
     val message = "/messages/offenderDetailsChangedForRP.json".readResourceAsText()
 

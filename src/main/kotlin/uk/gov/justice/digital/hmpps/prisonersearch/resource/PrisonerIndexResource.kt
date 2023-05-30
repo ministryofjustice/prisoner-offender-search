@@ -133,7 +133,8 @@ class PrisonerIndexResource(
   @GetMapping("/reconcile-prisoner/{prisonerNumber}")
   @Operation(
     summary = "Compare a prisoner's index with Nomis",
-    description = "Existing index is compared in detail with current Nomis data for a specific prisoner, requires ROLE_PRISONER_INDEX.",
+    description = """Existing index is compared in detail with current Nomis data for a specific prisoner,
+      with the index value coming first, Nomis second in the returned details. Requires ROLE_PRISONER_INDEX.""",
   )
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun reconcilePrisoner(
