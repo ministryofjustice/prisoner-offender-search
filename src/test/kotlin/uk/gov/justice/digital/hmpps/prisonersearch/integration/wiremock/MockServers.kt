@@ -4,17 +4,23 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching
-import com.github.tomakehurst.wiremock.http.HttpHeader
-import com.github.tomakehurst.wiremock.http.HttpHeaders
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 
-class PrisonMockServer : WireMockServer(8093)
+class PrisonMockServer : WireMockServer(8093) {
+  fun stubGetOffender(response: String) {
+    stubFor(
+      get(urlEqualTo("/api/offenders/A7089FD"))
+        .willReturn(okJson(response.trimIndent())),
+    )
+  }
+}
 
 class OAuthMockServer : WireMockServer(8090) {
 
@@ -22,9 +28,7 @@ class OAuthMockServer : WireMockServer(8090) {
     stubFor(
       post(urlEqualTo("/auth/oauth/token"))
         .willReturn(
-          aResponse()
-            .withHeaders(HttpHeaders(HttpHeader("Content-Type", "application/json")))
-            .withBody(
+          okJson(
               """
               {
                  "access_token": "ABCDE", 
