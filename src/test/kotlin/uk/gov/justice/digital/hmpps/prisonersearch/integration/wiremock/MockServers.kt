@@ -29,13 +29,13 @@ class OAuthMockServer : WireMockServer(8090) {
       post(urlEqualTo("/auth/oauth/token"))
         .willReturn(
           okJson(
-              """
+            """
               {
                  "access_token": "ABCDE", 
                  "token_type": "bearer"
               }
-              """.trimIndent(),
-            ),
+            """.trimIndent(),
+          ),
         ),
     )
   }

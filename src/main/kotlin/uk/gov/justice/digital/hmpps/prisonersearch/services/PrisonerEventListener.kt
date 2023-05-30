@@ -26,23 +26,25 @@ class PrisonerEventListener(
       log.debug("Received message {} type {}", messageId, eventType)
 
       when (eventType) {
-        "EXTERNAL_MOVEMENT_RECORD-INSERTED", "EXTERNAL_MOVEMENT-CHANGED"
+        "EXTERNAL_MOVEMENT_RECORD-INSERTED", "EXTERNAL_MOVEMENT-CHANGED",
         -> prisonerSyncService.externalMovement(fromJson(message))
+
         "OFFENDER_BOOKING-CHANGED", "OFFENDER_BOOKING-REASSIGNED", "IMPRISONMENT_STATUS-CHANGED",
         "BED_ASSIGNMENT_HISTORY-INSERTED", "SENTENCE_DATES-CHANGED", "CONFIRMED_RELEASE_DATE-CHANGED",
         "ASSESSMENT-CHANGED", "OFFENDER_PROFILE_DETAILS-INSERTED", "OFFENDER_PROFILE_DETAILS-UPDATED", "SENTENCING-CHANGED",
-        "ALERT-INSERTED", "ALERT-UPDATED"
+        "ALERT-INSERTED", "ALERT-UPDATED",
         -> prisonerSyncService.offenderBookingChange(fromJson(message))
-        "BOOKING_NUMBER-CHANGED"
+
+        "BOOKING_NUMBER-CHANGED",
         -> prisonerSyncService.offenderBookNumberChange(fromJson(message))
+
         "OFFENDER-INSERTED", "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED",
         "OFFENDER_ALIAS-CHANGED", "OFFENDER_PHYSICAL_DETAILS-CHANGED",
-        "ASSESSMENT-UPDATED"
+        "ASSESSMENT-UPDATED",
         -> prisonerSyncService.offenderChange(fromJson(message))
-        "DATA_COMPLIANCE_DELETE-OFFENDER"
-        -> prisonerSyncService.deleteOffender(fromJson(message))
-        "OFFENDER-DELETED"
-        -> prisonerSyncService.maybeDeleteOffender(fromJson(message))
+
+        "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
+        "OFFENDER-DELETED" -> prisonerSyncService.maybeDeleteOffender(fromJson(message))
 
         else -> log.warn("We received a message of event type {} which I really wasn't expecting", eventType)
       }
