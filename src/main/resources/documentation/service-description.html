@@ -1,13 +1,15 @@
 <div>
-  <h2>Overview</h2>
+  <h2 id="overview">Overview</h2>
   <p>This service provides a number of endpoints for searching and reading prisoners that have been registered with the
     HMPPS prison service. This may be current or previous prisoners or other people that might be in secure hospitals.</p>
-  <h2>Data provided</h2>
+  <h2 id="data-provided">Data provided</h2>
   <p>The vast majority of the data is sourced from the NOMIS system though in the future this is likely to change as
     more HMPPS prison data is held outside NOMIS.</p>
   <p>The data for a person is stored in Elastic Search and is updated after a record in NOMIS is changed. This is
     typically about a minute after the data is changed in NOMIS. In the unlikely circumstance that your service needs
-    data that is 100% up to date with NOMIS then the <b>prison-api</b> might be a better service to use.
+    data that is 100% up to date with NOMIS then the
+    <a href="https://api-dev.prison.service.justice.gov.uk/swagger-ui/index.html">prison-api</a>
+    might be a better service to use.
     One use case this might be appropriate for is if you need up-to-date data at the point a NOMIS prisoner event
     is received; this service also updates its records as a result of NOMIS prisoner events, so you might encounter a race
     condition if your read is triggered from the same event.
@@ -23,7 +25,38 @@
   </ul>
   See the schema definition for the API for full details.
   </div>
-  <h2>Types of endpoints</h2>
+  <h2 id="role-restrictions">Role restrictions</h2>
+  The following roles are currently in use in this service:
+  <ul>
+    <li>
+      ROLE_PRISONER_SEARCH.  This role grants access to all of the search endpoints.
+    </li>
+    <li>
+      ROLE_PRISONER_IN_PRISON_SEARCH. This role is limited to protect the "/prison/{prisonId}/prisoners" endpoint for
+      clients that only need access to this endpoint in prisoner offender search.  For more general access the
+      ROLE_PRISONER_SEARCH would be more suitable.
+    </li>
+    <li>
+      ROLE_VIEW_PRISONER_DATA.  This role is only needed at present for the "/prisoner/{id}" endpoint to retrieve
+      detailed information about a particular prisoner, as opposed to the rest of the search endpoints in this service
+      that can return multiple matches.
+    </li>
+    <li>
+      ROLE_GLOBAL_SEARCH.  This role is deprecated and replaced by the ROLE_PRISONER_SEARCH.  All of the endpoints in
+      this service that accept this role also accept ROLE_PRISONER_SEARCH so the latter should be used in preference.
+      It was originally created for Prison API and is still in use there.
+    </li>
+    <li>
+      ROLE_PRISONER_INDEX.  This role is for internal use only - it is used to maintain the Elastic Search indexes that
+      are used to hold the prisoner data.
+    </li>
+    <li>
+      ROLE_EVENTS_ADMIN.  This role is only needed for the "/events/prisoner/received/{prisonerNumber}" endpoint
+      and is only required in the event that a prisoner event wasn't raised by the service when their data in the service
+      had changed.
+    </li>
+  </ul>
+  <h2 id="types-of-endpoints">Types of endpoints</h2>
   <h3>Searching for a specific prisoner based on criteria</h3>
   <p>
     These are endpoints that use the core Elastic Search features to locate a prisoner record based on a set of criteria;
