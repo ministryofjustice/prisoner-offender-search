@@ -26,6 +26,16 @@
   See the schema definition for the API for full details.
   </div>
   <h2 id="role-restrictions">Role restrictions</h2>
+  <p>
+    Role restrictions in this service are applied by a `@PreAuthorize` annotation at either resource or service level.
+  Furthermore the annotation can be applied at individual method level or class level.
+  </p>
+  <p>
+  Each endpoint in this API documentation should normally include what restrictions are applied.  If there is any doubt
+  then it is worth looking at the github repository at
+  https://github.com/ministryofjustice/prisoner-offender-search/ and looking at the endpoint in question.
+  </p>
+
   The following roles are currently in use in this service:
   <ul>
     <li>
