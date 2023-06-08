@@ -1,0 +1,14 @@
+name: Check all (and only) roles in use are documented
+run-name:
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  check-github-repo-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Check all roles are documented
+        run: ./check-roles.bash
