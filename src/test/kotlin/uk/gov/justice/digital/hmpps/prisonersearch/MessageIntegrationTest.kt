@@ -162,6 +162,34 @@ class MessageIntegrationTest : QueueIntegrationTest() {
   }
 
   @Test
+  fun `will sync offender when a cro changes`() {
+    val response = """
+              {
+                "offenderNo": "A7089FD",
+                "bookingId": 1234,
+                "firstName": "Altered",
+                "lastName": "CRO",
+                "dateOfBirth": "1980-01-01",
+                "activeFlag": true,
+                "identifiers": [
+                  {
+                    "type": "CRO",
+                    "value": "CRO789",
+                    "whenCreated": "2021-01-01T10:00:00"
+                  }]
+              }
+              """
+    prisonMockServer.stubGetOffender(response)
+
+    eventQueueSqsClient.sendMessage(eventQueueUrl, "/messages/identifiersChanged.json".readResourceAsText())
+
+    await untilAsserted {
+      search(SearchCriteria("A7089FD", null, null))
+        .jsonPath("$.[0].croNumber").isEqualTo("CRO789")
+    }
+  }
+
+  @Test
   fun `will consume a delete request and remove`() {
     search(SearchCriteria("A7089FC", null, null), "/results/search_results_to_delete.json")
 
