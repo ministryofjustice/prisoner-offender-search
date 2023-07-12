@@ -187,7 +187,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectStatus().isOk
   }
 
-  private fun createIndexStatusIndex() {
+  internal fun createIndexStatusIndex(syncIndex: SyncIndex = SyncIndex.INDEX_A) {
     val response = elasticsearchClient.lowLevelClient.performRequest(Request("HEAD", "/offender-index-status"))
     if (response.statusLine.statusCode == 404) {
       val indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of("offender-index-status"))
@@ -195,11 +195,11 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       indexOperations.putMapping(indexOperations.createMapping(IndexStatus::class.java))
     }
     val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
-    resetIndexStatus.setJsonEntity(gson.toJson(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false)))
+    resetIndexStatus.setJsonEntity(gson.toJson(IndexStatus("STATUS", syncIndex, null, null, false)))
     elasticsearchClient.lowLevelClient.performRequest(resetIndexStatus)
   }
 
-  private fun createPrisonerIndex(prisonerIndex: SyncIndex) {
+  internal fun createPrisonerIndex(prisonerIndex: SyncIndex) {
     val response = elasticsearchClient.lowLevelClient.performRequest(Request("HEAD", "/${prisonerIndex.indexName}"))
     if (response.statusLine.statusCode == 404) {
       val indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(prisonerIndex.indexName))

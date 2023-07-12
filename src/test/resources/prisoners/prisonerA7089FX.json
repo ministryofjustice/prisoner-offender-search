@@ -1,0 +1,9 @@
+{
+  "_class": "uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB",
+  "prisonerNumber": "A7089FX",
+  "firstName": "DAVID",
+  "lastName": "DOE",
+  "dateOfBirth": "1930-02-02",
+  "youthOffender": false,
+  "restrictedPatient": false
+}

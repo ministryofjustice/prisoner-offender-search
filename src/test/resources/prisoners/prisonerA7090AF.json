@@ -1,0 +1,50 @@
+{
+  "_class": "uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB",
+  "prisonerNumber": "A7090AF",
+  "pncNumber": "12/394773I",
+  "pncNumberCanonicalShort": "12/394773I",
+  "pncNumberCanonicalLong": "2012/394773I",
+  "croNumber": "29906/12P",
+  "bookingId": "1903834",
+  "bookNumber": "V63584",
+  "firstName": "JIMBOB",
+  "lastName": "JACKS",
+  "dateOfBirth": "1990-08-15",
+  "gender": "Male",
+  "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+  "youthOffender": false,
+  "religion": "Christian",
+  "status": "ACTIVE IN",
+  "lastMovementTypeCode": "ADM",
+  "lastMovementReasonCode": "24",
+  "inOutStatus": "IN",
+  "prisonId": "LEI",
+  "prisonName": "HMP Leeds",
+  "cellLocation": "B-C1-010",
+  "aliases": [
+    {
+      "firstName": "DANNY",
+      "lastName": "COLIN",
+      "dateOfBirth": "1990-08-15",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+    },
+    {
+      "firstName": "SAM",
+      "lastName": "ORANGE",
+      "dateOfBirth": "1991-07-05",
+      "gender": "Female",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+    },
+    {
+      "firstName": "SAM",
+      "middleNames": "JAMES",
+      "lastName": "JONES",
+      "dateOfBirth": "1983-06-17",
+      "gender": "Male"
+    }
+  ],
+  "legalStatus": "REMAND",
+  "restrictedPatient": false,
+  "shoeSize": 11
+}
