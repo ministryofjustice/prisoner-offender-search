@@ -1,0 +1,92 @@
+{
+  "_class": "uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB",
+  "prisonerNumber": "A7089EZ",
+  "pncNumber": "08/359381C",
+  "pncNumberCanonicalShort": "08/359381C",
+  "pncNumberCanonicalLong": "2008/359381C",
+  "croNumber": "400862/08W",
+  "bookingId": "1900837",
+  "bookNumber": "38339C",
+  "firstName": "JOHN",
+  "lastName": "SMYTH",
+  "dateOfBirth": "1981-01-01",
+  "gender": "Male",
+  "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British",
+  "youthOffender": false,
+  "maritalStatus": "Single-not married/in civil partnership",
+  "religion": "Church of England (Anglican)",
+  "nationality": "British",
+  "status": "ACTIVE IN",
+  "lastMovementTypeCode": "ADM",
+  "lastMovementReasonCode": "24",
+  "inOutStatus": "IN",
+  "prisonId": "LEI",
+  "prisonName": "HMP Leeds",
+  "cellLocation": "B-C1-010",
+  "aliases": [
+    {
+      "firstName": "MASTER",
+      "lastName": "CORDIAN",
+      "dateOfBirth": "1990-08-15",
+      "gender": "Male",
+      "ethnicity": "White: Eng./Welsh/Scot./N.Irish/British"
+    },
+    {
+      "firstName": "MASTER",
+      "middleNames": "J117",
+      "lastName": "CHIEF",
+      "dateOfBirth": "1983-06-17",
+      "gender": "Male"
+    },
+    {
+      "firstName": "MASTER",
+      "middleNames": "J117",
+      "lastName": "CHEIF",
+      "dateOfBirth": "1983-06-17",
+      "gender": "Male"
+    },
+    {
+      "firstName": "TONY",
+      "middleNames": "IRONMAN",
+      "lastName": "STARK",
+      "dateOfBirth": "1970-05-29",
+      "gender": "Male"
+    }
+  ],
+  "alerts": [],
+  "csra": "High",
+  "category": "C",
+  "legalStatus": "SENTENCED",
+  "imprisonmentStatus": "LR_HDC",
+  "mostSeriousOffence": "Burglary dwelling - with intent to steal",
+  "releaseDate": "2020-04-28",
+  "nonDtoReleaseDate": "2020-04-28",
+  "nonDtoReleaseDateType": "CRD",
+  "conditionalReleaseDate": "2020-04-28",
+  "restrictedPatient": false,
+  "heightCentimetres": 188,
+  "weightKilograms": 99,
+  "hairColour": "Brown",
+  "rightEyeColour": "Blue",
+  "leftEyeColour": "Blue",
+  "facialHair": "Clean Shaven",
+  "shapeOfFace": "Angular",
+  "build": "Proportional",
+  "shoeSize": 10,
+  "tattoos": [
+    {
+      "bodyPart": "Arm",
+      "comment": "Monster drink logo"
+    }
+  ],
+  "otherMarks": [
+    {
+      "bodyPart": "Torso",
+      "comment": "Red bull Logo"
+    },
+    {
+      "bodyPart": "Torso",
+      "comment": "Mr Dizzy"
+    }
+  ]
+}
