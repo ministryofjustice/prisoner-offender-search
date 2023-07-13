@@ -1,10 +1,8 @@
 package uk.gov.justice.digital.hmpps.prisonersearch
 
 import com.amazonaws.services.sqs.AmazonSQS
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import com.google.gson.Gson
 import com.microsoft.applicationinsights.TelemetryClient
 import org.apache.commons.lang3.RandomStringUtils
@@ -13,11 +11,14 @@ import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
+import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.client.core.CountRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
@@ -28,11 +29,11 @@ import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.prisonersearch.model.CurrentIncentive
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerB
 import uk.gov.justice.digital.hmpps.prisonersearch.model.RestResponsePage
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
-import uk.gov.justice.digital.hmpps.prisonersearch.resource.PrisonerSearchByPrisonerNumbersResourceTest
 import uk.gov.justice.digital.hmpps.prisonersearch.services.GlobalSearchCriteria
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.services.IndexQueueService
@@ -56,6 +57,7 @@ import java.time.LocalDate
 import kotlin.random.Random
 
 @ActiveProfiles(profiles = ["test", "test-queue", "stdout"])
+@AutoConfigureWebTestClient(timeout = "PT30S")
 abstract class QueueIntegrationTest : IntegrationTest() {
 
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -142,69 +144,36 @@ abstract class QueueIntegrationTest : IntegrationTest() {
   }
 
   fun loadPrisoners(prisoner: List<PrisonerBuilder>) {
-    setupIndexes()
-    val prisonerNumbers = prisoner.map { it.prisonerNumber }
-    assertThat(prisonerNumbers.groupingBy { it }.eachCount().filter { it.value != 1 }).hasSize(0)
-    prisonMockServer.stubFor(
-      WireMock.get(urlEqualTo("/api/offenders/ids"))
-        .willReturn(
-          WireMock.aResponse()
-            .withHeader("Content-Type", "application/json")
-            .withHeader("Total-Records", prisonerNumbers.size.toString())
-            .withBody(gson.toJson(prisonerNumbers.map { PrisonerSearchByPrisonerNumbersResourceTest.IDs(it) })),
-        ),
-    )
+    createIndexStatusIndex(SyncIndex.INDEX_B)
+    createPrisonerIndex(SyncIndex.INDEX_B)
+
     prisoner.forEach {
-      prisonMockServer.stubFor(
-        WireMock.get(urlEqualTo("/api/offenders/${it.prisonerNumber}"))
-          .willReturn(
-            WireMock.aResponse()
-              .withHeader("Content-Type", "application/json")
-              .withBody(it.toOffenderBooking()),
-          ),
-      )
-      incentivesMockServer.stubFor(
-        WireMock.get(urlPathEqualTo("/iep/reviews/booking/${it.bookingId}"))
-          .willReturn(
-            WireMock.aResponse()
-              .withHeader("Content-Type", "application/json")
-              .withBody(it.toIncentiveLevel()),
-          ),
-      )
+      val prisonerRequest = Request("PUT", "/${SyncIndex.INDEX_B.indexName}/_doc/${it.prisonerNumber}").apply {
+        setJsonEntity(gson.toJson(it.toPrisoner()))
+      }
+      elasticsearchClient.lowLevelClient.performRequest(prisonerRequest)
     }
 
-    webTestClient.put().uri("/prisoner-index/build-index")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-      .exchange()
-      .expectStatus().isOk
-
-    await.atMost(Duration.ofSeconds(60)) untilCallTo { prisonRequestCountFor("/api/offenders/${prisonerNumbers.last()}") } matches { it == 1 }
-    await.atMost(Duration.ofSeconds(60)) untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
-
-    webTestClient.put().uri("/prisoner-index/mark-complete")
-      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_INDEX")))
-      .exchange()
-      .expectStatus().isOk
+    await untilCallTo { elasticsearchClient.count(CountRequest(SyncIndex.INDEX_B.indexName), RequestOptions.DEFAULT).count } matches { it == prisoner.size.toLong() }
   }
 
   internal fun createIndexStatusIndex(syncIndex: SyncIndex = SyncIndex.INDEX_A) {
-    val response = elasticsearchClient.lowLevelClient.performRequest(Request("HEAD", "/offender-index-status"))
-    if (response.statusLine.statusCode == 404) {
-      val indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of("offender-index-status"))
-      indexOperations.create()
-      indexOperations.putMapping(indexOperations.createMapping(IndexStatus::class.java))
+    elasticsearchClient.lowLevelClient.performRequest(Request("DELETE", "/offender-index-status"))
+    elasticsearchOperations.indexOps(IndexCoordinates.of("offender-index-status")).apply {
+      create()
+      putMapping(createMapping(IndexStatus::class.java))
     }
-    val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS")
-    resetIndexStatus.setJsonEntity(gson.toJson(IndexStatus("STATUS", syncIndex, null, null, false)))
+    val resetIndexStatus = Request("PUT", "/offender-index-status/_doc/STATUS").apply {
+      setJsonEntity(gson.toJson(IndexStatus("STATUS", syncIndex, null, null, false)))
+    }
     elasticsearchClient.lowLevelClient.performRequest(resetIndexStatus)
   }
 
   internal fun createPrisonerIndex(prisonerIndex: SyncIndex) {
-    val response = elasticsearchClient.lowLevelClient.performRequest(Request("HEAD", "/${prisonerIndex.indexName}"))
-    if (response.statusLine.statusCode == 404) {
-      val indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(prisonerIndex.indexName))
-      indexOperations.create()
-      indexOperations.putMapping(indexOperations.createMapping(if (prisonerIndex == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java))
+    elasticsearchClient.lowLevelClient.performRequest(Request("DELETE", "/${prisonerIndex.indexName}"))
+    elasticsearchOperations.indexOps(IndexCoordinates.of(prisonerIndex.indexName)).apply {
+      create()
+      putMapping(createMapping(if (prisonerIndex == SyncIndex.INDEX_A) PrisonerA::class.java else PrisonerB::class.java))
     }
   }
 
@@ -362,11 +331,12 @@ abstract class QueueIntegrationTest : IntegrationTest() {
       .expectBody().json(fileAssert.readResourceAsText())
   }
 
-  protected fun getOffenderBookingTemplate(): OffenderBooking {
-    return gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
-  }
+  protected fun getOffenderBookingTemplate(): OffenderBooking =
+    gson.fromJson("/templates/booking.json".readResourceAsText(), OffenderBooking::class.java)
 
-  fun PrisonerBuilder.toIncentiveLevel(): String = gson.toJson(
+  fun PrisonerBuilder.toPrisoner(): Prisoner = PrisonerB(ob = toOffenderBooking(), incentiveLevel = toIncentiveLevel(), null)
+
+  fun PrisonerBuilder.toIncentiveLevel(): IncentiveLevel? =
     this.currentIncentive?.let {
       IncentiveLevel(
         iepCode = it.level.code ?: "",
@@ -374,10 +344,11 @@ abstract class QueueIntegrationTest : IntegrationTest() {
         iepTime = it.dateTime,
         nextReviewDate = it.nextReviewDate,
       )
-    },
-  )
+    }
 
-  fun PrisonerBuilder.toOffenderBooking(): String = gson.toJson(
+  fun PrisonerBuilder.toOffenderBookingJson(): String = gson.toJson(toOffenderBooking())
+
+  fun PrisonerBuilder.toOffenderBooking(): OffenderBooking =
     getOffenderBookingTemplate().copy(
       offenderNo = this.prisonerNumber,
       bookingId = this.bookingId,
@@ -480,8 +451,7 @@ abstract class QueueIntegrationTest : IntegrationTest() {
           lastMovementReasonCode = "I",
         )
       }
-    },
-  )
+    }
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
