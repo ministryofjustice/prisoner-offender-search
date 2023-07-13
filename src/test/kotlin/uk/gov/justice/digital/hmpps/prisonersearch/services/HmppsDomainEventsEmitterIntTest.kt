@@ -140,7 +140,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBookingJson()),
         ),
     )
     val message = "/messages/offenderDetailsChanged.json".readResourceAsText().replace("A7089FD", "A1239DD")
@@ -165,7 +165,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = true).toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = true).toOffenderBookingJson()),
         ),
     )
     eventQueueSqsClient.sendMessage(
@@ -191,7 +191,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = false).toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, released = false).toOffenderBookingJson()),
         ),
     )
     eventQueueSqsClient.sendMessage(
@@ -223,7 +223,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
                 prisonerNumber = "A1239DD",
                 bookingId = null,
                 alertCodes = listOf("X" to "XTACT", "W" to "WO"),
-              ).toOffenderBooking(),
+              ).toOffenderBookingJson(),
             ),
         ),
     )
@@ -256,7 +256,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
                 prisonerNumber = "A1239DD",
                 bookingId = null,
                 heightCentimetres = 190,
-              ).toOffenderBooking(),
+              ).toOffenderBookingJson(),
             ),
         ),
     )
@@ -283,7 +283,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
                 prisonerNumber = "A1239DD",
                 bookingId = null,
                 alertCodes = listOf("W" to "WO"),
-              ).toOffenderBooking(),
+              ).toOffenderBookingJson(),
             ), // technically the alert should be end dated but this will work equally well
         ),
     )
@@ -312,7 +312,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBookingJson()),
         ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
@@ -357,7 +357,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = "A1239DD", bookingId = null, firstName = "NEW_NAME").toOffenderBookingJson()),
         ),
     )
     eventQueueSqsClient.sendMessage(eventQueueUrl, message)
@@ -379,7 +379,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(builder.toOffenderBooking()),
+            .withBody(builder.toOffenderBookingJson()),
         ),
     )
     eventQueueSqsClient.sendMessage(
@@ -413,7 +413,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
-            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber, bookingId = null).toOffenderBooking()),
+            .withBody(PrisonerBuilder(prisonerNumber = prisonerNumber, bookingId = null).toOffenderBookingJson()),
         ),
     )
   }
