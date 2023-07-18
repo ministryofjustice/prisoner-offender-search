@@ -1,5 +1,8 @@
 package uk.gov.justice.digital.hmpps.prisonersearch
 
+import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
+import org.awaitility.kotlin.untilCallTo
 import org.elasticsearch.client.Request
 import org.junit.jupiter.api.BeforeEach
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
@@ -43,5 +46,6 @@ abstract class AbstractSearchDataIntegrationTest : QueueIntegrationTest() {
       }
       elasticsearchClient.lowLevelClient.performRequest(prisonerRequest)
     }
+    await untilCallTo { prisonerIndexService.countIndex(SyncIndex.INDEX_B) } matches { it == prisoners.size }
   }
 }
