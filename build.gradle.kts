@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.9.1"
-  kotlin("plugin.spring") version "1.8.22"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "5.2.4"
+  kotlin("plugin.spring") version "1.9.0"
 }
 
 configurations {
@@ -45,17 +45,17 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:$hmppsSqsVersion")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.497")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.507")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.6.0")
   runtimeOnly("org.flywaydb:flyway-core")
 
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.15")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.16")
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:5.2.0")
-  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:2.38.0")
+  testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.0.0")
   testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 
