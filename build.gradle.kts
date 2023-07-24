@@ -1,6 +1,6 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.9.3"
-  kotlin("plugin.spring") version "1.8.22"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "4.10.0-beta"
+  kotlin("plugin.spring") version "1.9.0"
 }
 
 configurations {
@@ -45,13 +45,13 @@ dependencies {
   implementation("com.google.code.gson:gson:2.10.1")
 
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:$hmppsSqsVersion")
-  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.507")
+  implementation("com.amazonaws:aws-java-sdk-elasticsearch:1.12.512")
   implementation("org.awaitility:awaitility-kotlin:4.2.0")
 
   runtimeOnly("org.postgresql:postgresql:42.6.0")
   runtimeOnly("org.flywaydb:flyway-core")
 
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.15") // Unable to upgrade to 2.1.16 as attempting to use the parser caused a 500 from /v3/api-docs. It seems there's an incorrect dependency on an OAS3.1 type but I couldn't work out which project is wrong - so hopefully this will get sorted by the maintainers in due course.
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.16") // Unable to upgrade to 2.1.16 as attempting to use the parser caused a 500 from /v3/api-docs. It seems there's an incorrect dependency on an OAS3.1 type but I couldn't work out which project is wrong - so hopefully this will get sorted by the maintainers in due course.
   testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
   testImplementation("io.jsonwebtoken:jjwt:0.9.1")
   testImplementation("org.mockito:mockito-inline:5.2.0")
