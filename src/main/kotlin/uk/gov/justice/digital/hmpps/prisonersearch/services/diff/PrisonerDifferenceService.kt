@@ -77,12 +77,6 @@ class PrisonerDifferenceService(
     }
   }
 
-  fun handleDifferencesForReport(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) {
-    if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
-      reportDiffTelemetry(previousPrisonerSnapshot, prisoner)
-    }
-  }
-
   fun reportDifferencesDetails(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) =
     if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
       reportDiffTelemetryDetails(previousPrisonerSnapshot, prisoner)
@@ -102,7 +96,7 @@ class PrisonerDifferenceService(
     return updateHash(nomsNumber, newHash) > 0
   }
 
-  private fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): Boolean =
+  fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): Boolean =
     previousPrisonerSnapshot == null || previousPrisonerSnapshot.hash() != prisoner.hash()
 
   fun updateHash(nomsNumber: String, prisonerHash: String) =
@@ -146,13 +140,13 @@ class PrisonerDifferenceService(
     prisoner: Prisoner,
   ) {
     previousPrisonerSnapshot?.also {
-      val differences = getDifferencesByCategory(it, prisoner)
+      val differences = reportDiffTelemetryDetails(previousPrisonerSnapshot, prisoner)
       if (differences.isNotEmpty()) {
         telemetryClient.trackEvent(
           "POSPrisonerDifferenceReported",
           mapOf(
             "nomsNumber" to previousPrisonerSnapshot.prisonerNumber,
-            "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
+            "differences" to differences.toString(),
           ),
           null,
         )

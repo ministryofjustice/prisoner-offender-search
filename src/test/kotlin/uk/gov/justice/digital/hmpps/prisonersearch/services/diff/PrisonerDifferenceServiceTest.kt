@@ -31,7 +31,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class PrisonerDiffServiceTest {
+class PrisonerDifferenceServiceTest {
 
   private val telemetryClient = mock<TelemetryClient>()
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
@@ -519,13 +519,9 @@ class PrisonerDiffServiceTest {
         eq("POSPrisonerDifferenceReported"),
         check<Map<String, String>> {
           assertThat(it["nomsNumber"]).isEqualTo("A1234ZZ")
-          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
+          assertThat(it["differences"]).isEqualTo("[[pncNumber: somePnc1, somePnc2], [prisonerNumber: A1234ZZ, null]]")
         },
         isNull(),
-      )
-
-      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
-        "[[pncNumber: somePnc1, somePnc2], [prisonerNumber: A1234ZZ, null]]",
       )
     }
 
@@ -539,13 +535,9 @@ class PrisonerDiffServiceTest {
       verify(telemetryClient).trackEvent(
         eq("POSPrisonerDifferenceReported"),
         check<Map<String, String>> {
-          assertThat(it["categoriesChanged"]).isEqualTo("[IDENTIFIERS]")
+          assertThat(it["differences"]).isEqualTo("[[croNumber: null, someCro], [pncNumber: somePnc, null]]")
         },
         isNull(),
-      )
-
-      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
-        "[[croNumber: null, someCro], [pncNumber: somePnc, null]]",
       )
     }
 
@@ -578,21 +570,17 @@ class PrisonerDiffServiceTest {
         .trackEvent(
           eq("POSPrisonerDifferenceReported"),
           check<Map<String, String>> {
-            assertThat(it["categoriesChanged"]).isEqualTo(
-              "[ALERTS, IDENTIFIERS, INCENTIVE_LEVEL, PERSONAL_DETAILS, PHYSICAL_DETAILS, SENTENCE]",
+            assertThat(it["differences"]).isEqualTo(
+              "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
+                " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
+                " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
+                " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
+                " [sentenceStartDate: null, 2023-05-09]," +
+                " [shoeSize: 10, 11]]",
             )
           },
           isNull(),
         )
-
-      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
-        "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
-          " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
-          " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
-          " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
-          " [sentenceStartDate: null, 2023-05-09]," +
-          " [shoeSize: 10, 11]]",
-      )
     }
 
     @Test
