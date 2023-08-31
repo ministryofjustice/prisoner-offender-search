@@ -213,7 +213,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `will get restrictive patients data is prisoner OUT`() {
+    internal fun `will get restricted patients data is prisoner OUT`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
 
@@ -229,7 +229,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `OUT prisoners do not need to have restrictive patients data`() {
+    internal fun `OUT prisoners do not need to have restricted patients data`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
       whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(null)
 
@@ -243,7 +243,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `OUT prisoners might have restrictive patients data`() {
+    internal fun `OUT prisoners might have restricted patients data`() {
       val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
       val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true, description = "Hazelwood Hospital")
       val now = LocalDateTime.now()
@@ -376,7 +376,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `will get restrictive patients data is prisoner OUT`() {
+    internal fun `will get restricted patients data is prisoner OUT`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
       prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
 
@@ -392,7 +392,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `OUT prisoners do not need to have restrictive patients data`() {
+    internal fun `OUT prisoners do not need to have restricted patients data`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
       whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(null)
       whenever(prisonerDifferenceService.prisonerHasChanged(any(), any())).thenReturn(true)
@@ -408,7 +408,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `OUT prisoners might have restrictive patients data`() {
+    internal fun `OUT prisoners might have restricted patients data`() {
       val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
       val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true, description = "Hazelwood Hospital")
       val now = LocalDateTime.now()
