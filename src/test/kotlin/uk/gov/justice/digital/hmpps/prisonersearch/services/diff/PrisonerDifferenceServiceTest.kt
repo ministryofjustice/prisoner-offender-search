@@ -26,17 +26,19 @@ import uk.gov.justice.digital.hmpps.prisonersearch.model.IncentiveLevel
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlert
 import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerAlias
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerDifferencesRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class PrisonerDiffServiceTest {
+class PrisonerDifferenceServiceTest {
 
   private val telemetryClient = mock<TelemetryClient>()
   private val domainEventsEmitter = mock<HmppsDomainEventEmitter>()
   private val diffProperties = mock<DiffProperties>()
   private val prisonerEventHashRepository = mock<PrisonerEventHashRepository>()
+  private val prisonerDifferencesRepository = mock<PrisonerDifferencesRepository>()
   private val objectMapper = mock<ObjectMapper>()
   private val prisonerMovementsEventService = mock<PrisonerMovementsEventService>()
   private val alertsUpdatedEventService = mock<AlertsUpdatedEventService>()
@@ -49,6 +51,7 @@ class PrisonerDiffServiceTest {
     objectMapper,
     prisonerMovementsEventService,
     alertsUpdatedEventService,
+    prisonerDifferencesRepository,
   )
 
   @Nested
@@ -511,7 +514,7 @@ class PrisonerDiffServiceTest {
         pncNumber = "somePnc1"
         prisonerNumber = "A1234ZZ"
       }
-      val prisoner2 = Prisoner().apply { pncNumber = "somePnc2" }
+      val prisoner2 = Prisoner().apply { prisonerNumber = "A1234ZZ"; pncNumber = "somePnc2" }
 
       prisonerDifferenceService.reportDiffTelemetry(prisoner1, prisoner2)
 
@@ -524,15 +527,19 @@ class PrisonerDiffServiceTest {
         isNull(),
       )
 
-      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
-        "[[pncNumber: somePnc1, somePnc2], [prisonerNumber: A1234ZZ, null]]",
+      verify(prisonerDifferencesRepository).save(
+        check {
+          assertThat(it.differences).isEqualTo(
+            "[[pncNumber: somePnc1, somePnc2]]",
+          )
+        },
       )
     }
 
     @Test
     fun `should report null differences`() {
-      val prisoner1 = Prisoner().apply { pncNumber = "somePnc"; croNumber = null }
-      val prisoner2 = Prisoner().apply { pncNumber = null; croNumber = "someCro" }
+      val prisoner1 = Prisoner().apply { prisonerNumber = "A1234BC"; pncNumber = "somePnc"; croNumber = null }
+      val prisoner2 = Prisoner().apply { prisonerNumber = "A1234BC"; pncNumber = null; croNumber = "someCro" }
 
       prisonerDifferenceService.reportDiffTelemetry(prisoner1, prisoner2)
 
@@ -544,14 +551,19 @@ class PrisonerDiffServiceTest {
         isNull(),
       )
 
-      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
-        "[[croNumber: null, someCro], [pncNumber: somePnc, null]]",
+      verify(prisonerDifferencesRepository).save(
+        check {
+          assertThat(it.differences).isEqualTo(
+            "[[croNumber: null, someCro], [pncNumber: somePnc, null]]",
+          )
+        },
       )
     }
 
     @Test
     fun `should report multiple differences of multiple types`() {
       val prisoner1 = Prisoner().apply {
+        prisonerNumber = "A1234BC"
         pncNumber = "somePnc1"
         alerts = listOf(
           PrisonerAlert(alertType = "X", alertCode = "X1", expired = false, active = true),
@@ -563,6 +575,7 @@ class PrisonerDiffServiceTest {
         shoeSize = 10
       }
       val prisoner2 = Prisoner().apply {
+        prisonerNumber = "A1234BC"
         pncNumber = "somePnc2"
         alerts = listOf(
           PrisonerAlert(alertType = "Y", alertCode = "X1", expired = false, active = true),
@@ -585,13 +598,17 @@ class PrisonerDiffServiceTest {
           isNull(),
         )
 
-      assertThat(prisonerDifferenceService.reportDiffTelemetryDetails(prisoner1, prisoner2).toString()).isEqualTo(
-        "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
-          " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
-          " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
-          " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
-          " [sentenceStartDate: null, 2023-05-09]," +
-          " [shoeSize: 10, 11]]",
+      verify(prisonerDifferencesRepository).save(
+        check {
+          assertThat(it.differences).isEqualTo(
+            "[[alerts: [PrisonerAlert(alertType=X, alertCode=X1, active=true, expired=false)]," +
+              " [PrisonerAlert(alertType=Y, alertCode=X1, active=true, expired=false)]]," +
+              " [currentIncentive: CurrentIncentive(level=IncentiveLevel(code=STANDARD, description=Standard), dateTime=2021-05-09T10:00, nextReviewDate=null), null]," +
+              " [firstName: null, someFirstName2], [pncNumber: somePnc1, somePnc2]," +
+              " [sentenceStartDate: null, 2023-05-09]," +
+              " [shoeSize: 10, 11]]",
+          )
+        },
       )
     }
 

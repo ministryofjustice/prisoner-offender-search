@@ -43,7 +43,7 @@ class PrisonerIndexListener(
         OFFENDER_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeProcessed(it, OFFENDER) }
         OFFENDER -> indexRequest.prisonerNumber?.let { prisonerIndexService.indexPrisoner(it) }
         OFFENDER_COMPARISON_LIST -> indexRequest.pageRequest?.let { prisonerIndexService.addOffendersToBeProcessed(it, OFFENDER_COMPARISON) }
-        OFFENDER_COMPARISON -> indexRequest.prisonerNumber?.let { prisonerIndexService.comparePrisoner(it) }
+        OFFENDER_COMPARISON -> indexRequest.prisonerNumber?.let { prisonerIndexService.compareAndMaybeIndexPrisoner(it) }
         else -> log.warn("Unexpected Message {}", requestJson)
       }
       log.trace("Finished index message request {}", indexRequest)

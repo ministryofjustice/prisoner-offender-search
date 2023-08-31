@@ -14,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.DigestUtils
 import uk.gov.justice.digital.hmpps.prisonersearch.config.DiffProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.Prisoner
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerDifferencesRepository
 import uk.gov.justice.digital.hmpps.prisonersearch.services.HmppsDomainEventEmitter
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.OffenderBooking
 import java.time.Instant
 import java.time.LocalDateTime
 import kotlin.reflect.full.findAnnotations
+import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerDifferences as PrisonerDiffs
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
@@ -48,6 +50,7 @@ class PrisonerDifferenceService(
   private val objectMapper: ObjectMapper,
   private val prisonerMovementsEventService: PrisonerMovementsEventService,
   private val alertsUpdatedEventService: AlertsUpdatedEventService,
+  private val prisonerDifferencesRepository: PrisonerDifferencesRepository,
 ) {
   private companion object {
     private val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -77,12 +80,6 @@ class PrisonerDifferenceService(
     }
   }
 
-  fun handleDifferencesForReport(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) {
-    if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
-      reportDiffTelemetry(previousPrisonerSnapshot, prisoner)
-    }
-  }
-
   fun reportDifferencesDetails(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner) =
     if (prisonerHasChanged(previousPrisonerSnapshot, prisoner)) {
       reportDiffTelemetryDetails(previousPrisonerSnapshot, prisoner)
@@ -102,7 +99,7 @@ class PrisonerDifferenceService(
     return updateHash(nomsNumber, newHash) > 0
   }
 
-  private fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): Boolean =
+  fun prisonerHasChanged(previousPrisonerSnapshot: Prisoner?, prisoner: Prisoner): Boolean =
     previousPrisonerSnapshot == null || previousPrisonerSnapshot.hash() != prisoner.hash()
 
   fun updateHash(nomsNumber: String, prisonerHash: String) =
@@ -145,17 +142,21 @@ class PrisonerDifferenceService(
     previousPrisonerSnapshot: Prisoner?,
     prisoner: Prisoner,
   ) {
-    previousPrisonerSnapshot?.also {
-      val differences = getDifferencesByCategory(it, prisoner)
-      if (differences.isNotEmpty()) {
+    previousPrisonerSnapshot?.also { _ ->
+      getDifferencesByCategory(previousPrisonerSnapshot, prisoner).takeIf { it.isNotEmpty() }?.also {
+        // we store a summary of the differences in app insights
         telemetryClient.trackEvent(
           "POSPrisonerDifferenceReported",
           mapOf(
             "nomsNumber" to previousPrisonerSnapshot.prisonerNumber,
-            "categoriesChanged" to differences.keys.map { it.name }.toList().sorted().toString(),
+            "categoriesChanged" to it.keys.map { it.name }.toList().sorted().toString(),
           ),
           null,
         )
+      }
+      // and the sensitive full differences in our postgres database
+      reportDiffTelemetryDetails(previousPrisonerSnapshot, prisoner).takeIf { it.isNotEmpty() }?.also {
+        prisonerDifferencesRepository.save(PrisonerDiffs(nomsNumber = prisoner.prisonerNumber!!, differences = it.toString()))
       }
     }
       ?: telemetryClient.trackEvent(

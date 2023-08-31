@@ -69,9 +69,9 @@ class PrisonerIndexService(
     }
   }
 
-  fun comparePrisoner(prisonerId: String) {
+  fun compareAndMaybeIndexPrisoner(prisonerId: String) {
     nomisService.getOffender(prisonerId)?.let {
-      compare(offenderBooking = it)
+      compareAndMaybeIndex(offenderBooking = it)
     } ?: run {
       telemetryClient.trackEvent(
         "POSOffenderNotFoundForComparing",
@@ -165,14 +165,21 @@ class PrisonerIndexService(
     return storedPrisoner
   }
 
-  fun compare(offenderBooking: OffenderBooking) {
+  private fun compareAndMaybeIndex(offenderBooking: OffenderBooking) {
     val restrictivePatient = offenderBooking.getRestrictedPatientData()
     val incentiveLevel = offenderBooking.getIncentiveLevel()
 
-    val calculated = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
-    val existing = get(offenderBooking.offenderNo)
+    val prisonerA = PrisonerA(offenderBooking, incentiveLevel, restrictivePatient)
+    val existingPrisoner = get(offenderBooking.offenderNo)
 
-    prisonerDifferenceService.handleDifferencesForReport(existing, calculated)
+    if (prisonerDifferenceService.prisonerHasChanged(existingPrisoner, prisonerA)) {
+      prisonerDifferenceService.reportDiffTelemetry(existingPrisoner, prisonerA)
+
+      val prisonerB = PrisonerB(offenderBooking, incentiveLevel, restrictivePatient)
+      val storedPrisoner = saveToRepository(indexStatusService.getCurrentIndex(), prisonerA, prisonerB)
+
+      prisonerDifferenceService.handleDifferences(existingPrisoner, offenderBooking, storedPrisoner)
+    }
   }
 
   fun compareDetail(offenderBooking: OffenderBooking): List<Diff<Prisoner>> {

@@ -17,12 +17,14 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.IndexOperations
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import uk.gov.justice.digital.hmpps.prisonersearch.config.IndexProperties
 import uk.gov.justice.digital.hmpps.prisonersearch.model.IndexStatus
+import uk.gov.justice.digital.hmpps.prisonersearch.model.PrisonerA
 import uk.gov.justice.digital.hmpps.prisonersearch.model.SyncIndex
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerARepository
 import uk.gov.justice.digital.hmpps.prisonersearch.repository.PrisonerBRepository
@@ -34,6 +36,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.RestrictedPatien
 import java.lang.RuntimeException
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Optional
 
 class PrisonerIndexServiceTest {
 
@@ -210,7 +213,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `will get restrictive patients data is prisoner OUT`() {
+    internal fun `will get restricted patients data is prisoner OUT`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
       prisonerIndexService.syncPrisoner(prisonerId = "A1234AA")
 
@@ -226,7 +229,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `OUT prisoners do not need to have restrictive patients data`() {
+    internal fun `OUT prisoners do not need to have restricted patients data`() {
       whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
       whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(null)
 
@@ -240,7 +243,7 @@ class PrisonerIndexServiceTest {
     }
 
     @Test
-    internal fun `OUT prisoners might have restrictive patients data`() {
+    internal fun `OUT prisoners might have restricted patients data`() {
       val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
       val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true, description = "Hazelwood Hospital")
       val now = LocalDateTime.now()
@@ -295,6 +298,148 @@ class PrisonerIndexServiceTest {
       prisonerIndexService.indexPrisoner(prisonerId = "A1234AA")
 
       verifyNoInteractions(incentivesService)
+    }
+  }
+
+  @Nested
+  inner class CompareAndMaybeIndexPrisoner {
+    @BeforeEach
+    internal fun setUp() {
+      whenever(indexStatusService.getCurrentIndex()).thenReturn(IndexStatus("STATUS", SyncIndex.INDEX_A, null, null, false))
+      whenever(prisonerARepository.save(any())).thenAnswer { it.arguments[0] }
+    }
+
+    @Test
+    internal fun `will get incentive level if booking present`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(incentivesService).getCurrentIncentive(123456L)
+    }
+
+    @Test
+    internal fun `will not get incentive if there is no booking`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderWithNoBooking())
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verifyNoInteractions(incentivesService)
+    }
+
+    @Test
+    internal fun `will do nothing if no differences found`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      whenever(prisonerDifferenceService.prisonerHasChanged(any(), any())).thenReturn(false)
+      whenever(prisonerARepository.findById(any())).thenReturn(Optional.of(PrisonerA()))
+
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(prisonerARepository, never()).save(any())
+      verify(prisonerDifferenceService).prisonerHasChanged(any(), any())
+      verifyNoMoreInteractions(prisonerDifferenceService)
+    }
+
+    @Test
+    internal fun `will report differences if found`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      whenever(prisonerDifferenceService.prisonerHasChanged(any(), any())).thenReturn(true)
+      whenever(prisonerARepository.findById(any())).thenReturn(Optional.of(PrisonerA()))
+
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(prisonerDifferenceService).reportDiffTelemetry(any(), any())
+      verify(prisonerDifferenceService).handleDifferences(any(), any(), any())
+    }
+
+    @Test
+    internal fun `will update index with current incentive level`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderBooking(123456L))
+      whenever(incentivesService.getCurrentIncentive(123456L)).thenReturn(
+        IncentiveLevel(
+          iepCode = "STD",
+          iepLevel = "Standard",
+          iepTime = LocalDateTime.parse("2021-01-01T10:00:00.169539"),
+          nextReviewDate = LocalDate.parse("2021-03-01"),
+        ),
+      )
+      whenever(prisonerARepository.findById(any())).thenReturn(Optional.of(PrisonerA()))
+      whenever(prisonerDifferenceService.prisonerHasChanged(any(), any())).thenReturn(true)
+
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+      verify(prisonerARepository).save(
+        check {
+          assertThat(it.currentIncentive?.level?.code).isEqualTo("STD")
+          assertThat(it.currentIncentive?.level?.description).isEqualTo("Standard")
+          assertThat(it.currentIncentive?.dateTime).isEqualTo(LocalDateTime.parse("2021-01-01T10:00:00"))
+          assertThat(it.currentIncentive?.nextReviewDate).isEqualTo(LocalDate.parse("2021-03-01"))
+        },
+      )
+    }
+
+    @Test
+    internal fun `will get restricted patients data is prisoner OUT`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(restrictedPatientService).getRestrictedPatient("A1234AA")
+    }
+
+    @Test
+    fun `skip call to restricted patient service when the offender is not currently out`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsIn())
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(restrictedPatientService, never()).getRestrictedPatient("A1234AA")
+    }
+
+    @Test
+    internal fun `OUT prisoners do not need to have restricted patients data`() {
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
+      whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(null)
+      whenever(prisonerDifferenceService.prisonerHasChanged(any(), any())).thenReturn(true)
+      whenever(prisonerARepository.findById(any())).thenReturn(Optional.of(PrisonerA()))
+
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(prisonerARepository).save(
+        check {
+          assertThat(it.restrictedPatient).isFalse()
+        },
+      )
+    }
+
+    @Test
+    internal fun `OUT prisoners might have restricted patients data`() {
+      val prison = Agency(agencyId = "LEI", agencyType = "INST", active = true)
+      val hospital = Agency(agencyId = "HAZLWD", agencyType = "HSHOSP", active = true, description = "Hazelwood Hospital")
+      val now = LocalDateTime.now()
+
+      whenever(nomisService.getOffender("A1234AA")).thenReturn(anOffenderThatIsOut())
+      whenever(restrictedPatientService.getRestrictedPatient("A1234AA")).thenReturn(
+        RestrictedPatientDto(
+          id = 1,
+          prisonerNumber = "A1234AA",
+          supportingPrison = prison,
+          hospitalLocation = hospital,
+          dischargeTime = now,
+          commentText = "Getting worse",
+        ),
+      )
+      whenever(prisonerARepository.findById(any())).thenReturn(Optional.of(PrisonerA()))
+      whenever(prisonerDifferenceService.prisonerHasChanged(any(), any())).thenReturn(true)
+
+      prisonerIndexService.compareAndMaybeIndexPrisoner(prisonerId = "A1234AA")
+
+      verify(prisonerARepository).save(
+        check {
+          assertThat(it.restrictedPatient).isTrue
+          assertThat(it.supportingPrisonId).isEqualTo("LEI")
+          assertThat(it.dischargedHospitalId).isEqualTo("HAZLWD")
+          assertThat(it.dischargedHospitalDescription).isEqualTo("Hazelwood Hospital")
+          assertThat(it.dischargeDate).isEqualTo(now.toLocalDate())
+          assertThat(it.dischargeDetails).isEqualTo("Getting worse")
+          assertThat(it.locationDescription).isEqualTo("OUT - discharged to Hazelwood Hospital")
+        },
+      )
     }
   }
 }
