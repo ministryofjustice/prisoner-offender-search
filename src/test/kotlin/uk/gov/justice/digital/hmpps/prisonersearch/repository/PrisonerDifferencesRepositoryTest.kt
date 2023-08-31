@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonersearch.repository
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.groups.Tuple
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -17,6 +18,11 @@ import java.time.Instant
 class PrisonerDifferencesRepositoryTest {
   @Autowired
   lateinit var repository: PrisonerDifferencesRepository
+
+  @BeforeEach
+  fun clearPreviousDifferenceData() {
+    repository.deleteAll()
+  }
 
   @Test
   @Transactional
@@ -53,5 +59,17 @@ class PrisonerDifferencesRepositoryTest {
       .hasSize(1)
       .extracting(PrisonerDifferences::differences)
       .containsExactlyInAnyOrder(Tuple("[second]"))
+  }
+
+  @Test
+  @Transactional
+  fun `should delete all records before given date`() {
+    val now = Instant.now()
+    repository.save(PrisonerDifferences(nomsNumber = "A1111AA", differences = "[first]", dateTime = now.minusSeconds(60)))
+    repository.save(PrisonerDifferences(nomsNumber = "A1111AA", differences = "[second]", dateTime = now))
+
+    val deleted = repository.deleteByDateTimeBefore(now.minusSeconds(1))
+    assertThat(deleted).isEqualTo(1)
+    assertThat(repository.findByNomsNumber("A1111AA")).hasSize(1)
   }
 }
