@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -10,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -18,11 +20,11 @@ import uk.gov.justice.digital.hmpps.prisonersearch.resource.advice.ErrorResponse
 import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonerDifferencesService
 import uk.gov.justice.digital.hmpps.prisonersearch.services.dto.PrisonerDetailRequest
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @RestController
 @Validated
 @RequestMapping(value = ["/prisoner-differences"], produces = [MediaType.APPLICATION_JSON_VALUE])
-@PreAuthorize("hasRole('PRISONER_INDEX')")
 class PrisonerDifferencesResource(private val prisonerDifferencesService: PrisonerDifferencesService) {
 
   @Operation(
@@ -63,11 +65,16 @@ class PrisonerDifferencesResource(private val prisonerDifferencesService: Prison
     ],
   )
   @GetMapping
+  @PreAuthorize("hasRole('PRISONER_INDEX')")
   fun prisonerDifferences(
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Parameter(description = "Report on differences that have been generated. Defaults to the last 24 hours", example = "2023-01-02T02:23:45")
+    @Parameter(description = "Report on differences that have been generated. Defaults to the last one day", example = "2023-01-02T02:23:45")
     from: Instant?,
     to: Instant?,
   ): List<PrisonerDifferences> =
-    prisonerDifferencesService.retrieveDifferences(from ?: Instant.now().minusSeconds(60 * 60 * 24), to ?: Instant.now())
+    prisonerDifferencesService.retrieveDifferences(from ?: Instant.now().minus(1, ChronoUnit.DAYS), to ?: Instant.now())
+
+  @Hidden
+  @DeleteMapping("/delete")
+  fun deleteOldData(): Int = prisonerDifferencesService.deleteOldData()
 }

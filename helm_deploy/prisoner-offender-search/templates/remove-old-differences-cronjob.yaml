@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "app.fullname" . }}-index-housekeeping
+  name: {{ include "app.fullname" . }}-remove-old-differences
   labels:
     {{- include "app.labels" . | nindent 4 }}
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "45 22 * * *"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 5
   startingDeadlineSeconds: 600
@@ -17,16 +17,10 @@ spec:
       template:
         spec:
           containers:
-            - name: housekeeping
+            - name: remove-differences
               image: ghcr.io/ministryofjustice/hmpps-devops-tools
               args:
                 - /bin/sh
                 - -c
-                - curl --retry 2 -XPUT http://prisoner-offender-search/prisoner-index/queue-housekeeping
-            - name: retryalldlqs
-              image: ghcr.io/ministryofjustice/hmpps-devops-tools
-              args:
-                - /bin/sh
-                - -c
-                - curl --retry 2 -XPUT http://prisoner-offender-search/queue-admin/retry-all-dlqs
+                - curl --retry 2 -XDELETE http://prisoner-offender-search/prisoner-differences/delete
           restartPolicy: Never

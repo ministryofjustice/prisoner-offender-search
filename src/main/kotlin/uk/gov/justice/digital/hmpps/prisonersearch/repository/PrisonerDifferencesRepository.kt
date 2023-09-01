@@ -14,6 +14,7 @@ import javax.persistence.Table
 interface PrisonerDifferencesRepository : JpaRepository<PrisonerDifferences, UUID> {
   fun findByNomsNumber(nomsNumber: String): List<PrisonerDifferences>
   fun findByDateTimeBetween(from: Instant, to: Instant): List<PrisonerDifferences>
+  fun deleteByDateTimeBefore(to: Instant): Int
 }
 
 @Entity

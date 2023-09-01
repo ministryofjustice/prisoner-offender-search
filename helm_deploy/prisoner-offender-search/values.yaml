@@ -36,6 +36,10 @@ generic-service:
           deny all;
           return 401;
         }
+        location /prisoner-differences/delete {
+          deny all;
+          return 401;
+        }
     tlsSecretName: prisoner-offender-search-cert
 
   resources:
