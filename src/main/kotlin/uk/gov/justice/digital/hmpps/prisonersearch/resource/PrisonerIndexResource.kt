@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.prisonersearch.resource
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -129,6 +130,17 @@ class PrisonerIndexResource(
   @PreAuthorize("hasRole('PRISONER_INDEX')")
   @ResponseStatus(HttpStatus.ACCEPTED)
   fun startIndexReconciliation() = prisonerIndexService.startIndexReconciliation()
+
+  @Hidden
+  @GetMapping("/automated-reconcile")
+  @Operation(
+    summary = "Automated full index comparison",
+    description = """Same as /reconcile-index, but this is an internal only endpoint called from the 
+      full-index-comparison cronjob.
+    """,
+  )
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  fun automatedIndexReconciliation() = prisonerIndexService.startIndexReconciliation()
 
   @GetMapping("/reconcile-prisoner/{prisonerNumber}")
   @Operation(

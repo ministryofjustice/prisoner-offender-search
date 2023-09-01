@@ -101,6 +101,18 @@ class PrisonerIndexResource_compareIndexTest : AbstractSearchDataIntegrationTest
   }
 
   @Test
+  fun `Automated reconciliation - endpoint unprotected`() {
+    webTestClient.get().uri("/prisoner-index/automated-reconcile")
+      .exchange()
+      .expectStatus().isAccepted
+
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it!! > 0 }
+    await untilCallTo { getNumberOfMessagesCurrentlyOnIndexQueue() } matches { it == 0 }
+
+    verifyNoInteractions(telemetryClient)
+  }
+
+  @Test
   fun `Reconciliation - differences`() {
     val eventCaptor = argumentCaptor<Map<String, String>>()
     val startOfTest = Instant.now()

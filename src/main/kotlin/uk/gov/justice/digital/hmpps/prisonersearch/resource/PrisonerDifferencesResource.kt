@@ -76,5 +76,9 @@ class PrisonerDifferencesResource(private val prisonerDifferencesService: Prison
 
   @Hidden
   @DeleteMapping("/delete")
+  @Operation(
+    summary = "Deletes differences data that is over a month old",
+    description = "This is an internal service which isn't exposed to the outside world. It is called from a Kubernetes CronJob named `remove-old-differences`",
+  )
   fun deleteOldData(): Int = prisonerDifferencesService.deleteOldData()
 }
