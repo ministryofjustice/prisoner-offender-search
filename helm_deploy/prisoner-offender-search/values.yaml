@@ -9,6 +9,7 @@ alertManagerReceiver: digital-prison-service-dev
 
 generic-service:
   nameOverride: prisoner-offender-search
+  productId: DPS072
 
   image:
     repository: quay.io/hmpps/prisoner-offender-search
