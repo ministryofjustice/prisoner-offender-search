@@ -40,8 +40,7 @@ class PrisonerEventListener(
 
         "OFFENDER-INSERTED", "OFFENDER-UPDATED", "OFFENDER_DETAILS-CHANGED",
         "OFFENDER_ALIAS-CHANGED", "OFFENDER_PHYSICAL_DETAILS-CHANGED",
-        "OFFENDER_IDENTIFIER-UPDATED",
-        "ASSESSMENT-UPDATED",
+        "OFFENDER_IDENTIFIER-UPDATED", "ASSESSMENT-UPDATED", "OFFENDER_CHARGES-UPDATED",
         -> prisonerSyncService.offenderChange(fromJson(message))
 
         "DATA_COMPLIANCE_DELETE-OFFENDER" -> prisonerSyncService.deleteOffender(fromJson(message))
