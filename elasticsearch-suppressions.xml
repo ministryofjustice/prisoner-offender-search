@@ -21,4 +21,18 @@
     <packageUrl regex="true">^pkg:maven/org\.elasticsearch/elasticsearch@.*$</packageUrl>
     <vulnerabilityName>CVE-2021-22144</vulnerabilityName>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+    file name: elasticsearch-7.12.1.jar
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.elasticsearch/elasticsearch@.*$</packageUrl>
+    <vulnerabilityName>CVE-2023-31418</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    file name: elasticsearch-7.12.1.jar
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.elasticsearch/elasticsearch@.*$</packageUrl>
+    <vulnerabilityName>CVE-2023-31419</vulnerabilityName>
+  </suppress>
 </suppressions>
