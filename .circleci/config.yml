@@ -64,29 +64,13 @@ workflows:
               ignore: /.*/
       - hmpps/helm_lint:
           name: helm_lint
+          env: preprod
       - hmpps/build_multiplatform_docker:
           name: build_docker
           filters:
             branches:
               only:
                 - main
-      - hmpps/deploy_env:
-          name: deploy_dev
-          env: "dev"
-          jira_update: true
-          context: hmpps-common-vars
-          filters:
-            branches:
-              only:
-                - main
-          requires:
-            - validate
-            - helm_lint
-            - build_docker
-      - request-preprod-approval:
-          type: approval
-          requires:
-            - deploy_dev
       - hmpps/deploy_env:
           name: deploy_preprod
           env: "preprod"
@@ -95,8 +79,14 @@ workflows:
           context:
             - hmpps-common-vars
             - prisoner-offender-search-preprod
+          filters:
+            branches:
+              only:
+                - main
           requires:
-            - request-preprod-approval
+            - validate
+            - helm_lint
+            - build_docker
       - request-prod-approval:
           type: approval
           requires:
