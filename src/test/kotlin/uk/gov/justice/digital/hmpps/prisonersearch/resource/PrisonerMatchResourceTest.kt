@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
-  fun `access forbidden when no authority`() {
+  fun `access unauthorised when no authority`() {
     webTestClient.post().uri("/match-prisoners")
       .header("Content-Type", "application/json")
       .exchange()
@@ -16,7 +16,7 @@ class PrisonerMatchResourceTest : AbstractSearchDataIntegrationTest() {
   }
 
   @Test
-  fun `access forbidden when no role`() {
+  fun `access forbidden for endpoint POST #prisoner-search#match-prisoners when no role`() {
     webTestClient.post().uri("/match-prisoners")
       .body(BodyInserters.fromValue(gson.toJson(MatchRequest("john", "smith", null, null, null, "A7089EY"))))
       .headers(setAuthorisation())

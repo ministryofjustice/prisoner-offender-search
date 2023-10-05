@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 class PrisonerSearchByReleaseDateResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
-  fun `access forbidden when no authority`() {
+  fun `access unauthorised when no authority`() {
     webTestClient.post().uri("/prisoner-search/release-date-by-prison")
       .header("Content-Type", "application/json")
       .exchange()
@@ -16,7 +16,7 @@ class PrisonerSearchByReleaseDateResourceTest : AbstractSearchDataIntegrationTes
   }
 
   @Test
-  fun `access forbidden when no role`() {
+  fun `access forbidden for endpoint POST #prisoner-search#release-date-by-prison when no role`() {
     webTestClient.post().uri("/prisoner-search/release-date-by-prison")
       .body(BodyInserters.fromValue(gson.toJson(ReleaseDateSearch(latestReleaseDate = LocalDate.now()))))
       .headers(setAuthorisation())

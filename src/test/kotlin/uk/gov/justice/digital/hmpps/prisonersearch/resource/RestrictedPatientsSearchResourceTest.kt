@@ -16,7 +16,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
   @Nested
   inner class Authorisation {
     @Test
-    fun `access forbidden when no authority`() {
+    fun `access unauthorised when no authority`() {
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .header("Content-Type", "application/json")
         .exchange()
@@ -24,7 +24,7 @@ class RestrictedPatientsSearchResourceTest : AbstractSearchDataIntegrationTest()
     }
 
     @Test
-    fun `access forbidden when no role`() {
+    fun `access forbidden for endpoint POST #restricted-patient-search#match-restricted-patients when no role`() {
       webTestClient.post().uri("/restricted-patient-search/match-restricted-patients")
         .body(BodyInserters.fromValue(gson.toJson(RestrictedPatientSearchCriteria(null, null, null))))
         .headers(setAuthorisation())

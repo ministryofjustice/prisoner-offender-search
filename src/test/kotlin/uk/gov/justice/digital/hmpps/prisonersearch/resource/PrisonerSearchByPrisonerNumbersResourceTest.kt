@@ -94,7 +94,7 @@ class PrisonerSearchByPrisonerNumbersResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `access forbidden for prison number search when no role`() {
+  fun `access forbidden for endpoint POST #prisoner-search#prisoner-numbers when no role`() {
     webTestClient.post().uri("/prisoner-search/prisoner-numbers")
       .body(BodyInserters.fromValue(gson.toJson(PrisonerNumbers(arrayListOf("ABC")))))
       .headers(setAuthorisation())
