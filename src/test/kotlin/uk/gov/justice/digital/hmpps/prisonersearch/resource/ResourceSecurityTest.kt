@@ -62,7 +62,6 @@ class ResourceSecurityTest : IntegrationTest() {
       mapping.handlerMethods.forEach { (mappingInfo, method) ->
         val classAnnotation = method.beanType.getAnnotation(PreAuthorize::class.java)
         val annotation = method.getMethodAnnotation(PreAuthorize::class.java)
-        println("Found $mappingInfo with class annotation $classAnnotation and annotation $annotation")
         if (classAnnotation == null && annotation == null) {
           mappingInfo.getMappings().forEach {
             assertThat(exclusions.contains(it)).withFailMessage {
