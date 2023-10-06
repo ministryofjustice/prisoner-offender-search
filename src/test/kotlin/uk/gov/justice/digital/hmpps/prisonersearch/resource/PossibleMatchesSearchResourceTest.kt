@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 class PossibleMatchesSearchResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
-  fun `search for possible matches access forbidden when no authority`() {
+  fun `search for possible matches access unauthorised when no authority`() {
     webTestClient.post().uri("/prisoner-search/possible-matches")
       .header("Content-Type", "application/json")
       .exchange()
@@ -16,7 +16,7 @@ class PossibleMatchesSearchResourceTest : AbstractSearchDataIntegrationTest() {
   }
 
   @Test
-  fun `search for possible matches access forbidden when no role`() {
+  fun `search for possible matches access forbidden for endpoint POST #prisoner-search#possible-matches when no role`() {
     webTestClient.post().uri("/prisoner-search/possible-matches")
       .body(BodyInserters.fromValue(gson.toJson(PossibleMatchCriteria(null, null, null, null, "A1234AB"))))
       .headers(setAuthorisation())

@@ -41,6 +41,10 @@ generic-service:
           deny all;
           return 401;
         }
+        location /prisoner-index/automated-reconcile {
+          deny all;
+          return 401;
+        }
     tlsSecretName: prisoner-offender-search-cert
 
   resources:

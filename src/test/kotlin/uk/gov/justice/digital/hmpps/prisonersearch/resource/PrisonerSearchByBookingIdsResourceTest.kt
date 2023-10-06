@@ -134,7 +134,7 @@ class PrisonerSearchByBookingIdsResourceTest : QueueIntegrationTest() {
   }
 
   @Test
-  fun `access forbidden for ids search when no role`() {
+  fun `access forbidden for endpoint POST #prisoner-search#booking-ids when no role`() {
     webTestClient.post().uri("/prisoner-search/booking-ids")
       .body(BodyInserters.fromValue(gson.toJson(BookingIds(listOf(1)))))
       .headers(setAuthorisation())

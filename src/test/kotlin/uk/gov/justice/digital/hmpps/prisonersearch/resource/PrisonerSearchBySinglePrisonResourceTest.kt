@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.prisonersearch.services.PrisonSearch
 
 class PrisonerSearchBySinglePrisonResourceTest : AbstractSearchDataIntegrationTest() {
   @Test
-  fun `access forbidden when no authority`() {
+  fun `access unauthorised when no authority`() {
     webTestClient.post().uri("/prisoner-search/match")
       .header("Content-Type", "application/json")
       .exchange()
@@ -15,7 +15,7 @@ class PrisonerSearchBySinglePrisonResourceTest : AbstractSearchDataIntegrationTe
   }
 
   @Test
-  fun `access forbidden when no role`() {
+  fun `access forbidden for endpoint POST #prisoner-search#match when no role`() {
     webTestClient.post().uri("/prisoner-search/match")
       .body(BodyInserters.fromValue(gson.toJson(PrisonSearch("A7089EY", "john", "smith", "MDI"))))
       .headers(setAuthorisation())

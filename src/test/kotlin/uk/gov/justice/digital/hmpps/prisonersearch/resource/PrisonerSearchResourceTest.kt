@@ -35,7 +35,7 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
   }
 
   @Test
-  fun `search by prisonId access forbidden when no authority`() {
+  fun `search by prisonId access unauthorised when no authority`() {
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .header("Content-Type", "application/json")
       .exchange()
@@ -43,7 +43,7 @@ class PrisonerSearchResourceTest : AbstractSearchDataIntegrationTest() {
   }
 
   @Test
-  fun `search by prisonId access forbidden when no role`() {
+  fun `search by prisonId access forbidden for endpoint GET #prisoner-search#prison#{prisonId} when no role`() {
     webTestClient.get().uri("/prisoner-search/prison/MDI")
       .headers(setAuthorisation())
       .header("Content-Type", "application/json")
