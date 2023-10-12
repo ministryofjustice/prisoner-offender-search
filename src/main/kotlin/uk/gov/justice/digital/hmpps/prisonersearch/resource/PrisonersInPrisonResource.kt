@@ -78,7 +78,7 @@ class PrisonersInPrisonResource(private val searchService: PrisonersInPrisonServ
       This will return all people in HMP Wandsworth. With the alerts TACT or PEEP.
 
       """,
-    security = [SecurityRequirement(name = "ROLE_PRISONER_IN_PRISON_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
+    security = [SecurityRequirement(name = "prisoner-in-prison-search-role"), SecurityRequirement(name = "prisoner-search-role")],
 
     responses = [
       ApiResponse(

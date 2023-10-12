@@ -43,7 +43,7 @@ class PhysicalDetailResource(private val physicalDetailService: PhysicalDetailSe
       prisoner number.
       Requires ROLE_GLOBAL_SEARCH or ROLE_PRISONER_SEARCH role.
       """,
-    security = [SecurityRequirement(name = "ROLE_GLOBAL_SEARCH"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
+    security = [SecurityRequirement(name = "global-search-role"), SecurityRequirement(name = "prisoner-search-role")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(

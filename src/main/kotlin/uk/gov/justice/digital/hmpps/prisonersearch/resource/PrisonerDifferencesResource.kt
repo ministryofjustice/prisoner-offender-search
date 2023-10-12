@@ -33,7 +33,7 @@ class PrisonerDifferencesResource(private val prisonerDifferencesService: Prison
       Find all prisoner differences since a given date time.  This defaults to within the last 24 hours.
       Requires PRISONER_INDEX role.
       """,
-    security = [SecurityRequirement(name = "PRISONER_INDEX")],
+    security = [SecurityRequirement(name = "prisoner-index-role")],
     requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
       content = [
         Content(

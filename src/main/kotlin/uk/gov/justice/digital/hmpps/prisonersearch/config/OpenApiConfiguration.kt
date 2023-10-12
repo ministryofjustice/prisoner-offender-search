@@ -57,16 +57,57 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     )
     .components(
       Components().addSecuritySchemes(
-        "bearer-jwt",
+        "view-prisoner-data-role",
         SecurityScheme()
           .type(SecurityScheme.Type.HTTP)
           .scheme("bearer")
           .bearerFormat("JWT")
           .`in`(SecurityScheme.In.HEADER)
-          .name("Authorization"),
+          .name("Authorization")
+          .description("A HMPPS Auth access token with the `ROLE_VIEW_PRISONER_DATA` role."),
+      ).addSecuritySchemes(
+        "prisoner-search-role",
+        SecurityScheme()
+          .type(SecurityScheme.Type.HTTP)
+          .scheme("bearer")
+          .bearerFormat("JWT")
+          .`in`(SecurityScheme.In.HEADER)
+          .name("Authorization")
+          .description("A HMPPS Auth access token with the `ROLE_PRISONER_SEARCH` role."),
+      ).addSecuritySchemes(
+        "global-search-role",
+        SecurityScheme()
+          .type(SecurityScheme.Type.HTTP)
+          .scheme("bearer")
+          .bearerFormat("JWT")
+          .`in`(SecurityScheme.In.HEADER)
+          .name("Authorization")
+          .description("A HMPPS Auth access token with the `ROLE_GLOBAL_SEARCH` role."),
+      ).addSecuritySchemes(
+        "prisoner-in-prison-search-role",
+        SecurityScheme()
+          .type(SecurityScheme.Type.HTTP)
+          .scheme("bearer")
+          .bearerFormat("JWT")
+          .`in`(SecurityScheme.In.HEADER)
+          .name("Authorization")
+          .description("A HMPPS Auth access token with the `ROLE_PRISONER_IN_PRISON_SEARCH` role."),
+      ).addSecuritySchemes(
+        "prisoner-index-role",
+        SecurityScheme()
+          .type(SecurityScheme.Type.HTTP)
+          .scheme("bearer")
+          .bearerFormat("JWT")
+          .`in`(SecurityScheme.In.HEADER)
+          .name("Authorization")
+          .description("A HMPPS Auth access token with the `PRISONER_INDEX` role."),
       ),
     )
-    .addSecurityItem(SecurityRequirement().addList("bearer-jwt", listOf("read", "write")))
+    .addSecurityItem(SecurityRequirement().addList("view-prisoner-data-role", listOf("read")))
+    .addSecurityItem(SecurityRequirement().addList("prisoner-search-role", listOf("read")))
+    .addSecurityItem(SecurityRequirement().addList("global-search-role", listOf("read")))
+    .addSecurityItem(SecurityRequirement().addList("prisoner-in-prison-search-role", listOf("read")))
+    .addSecurityItem(SecurityRequirement().addList("prisoner-index-role", listOf("read", "write")))
 
   @Bean
   fun openAPICustomiser(): OpenApiCustomiser = OpenApiCustomiser {
