@@ -1,0 +1,37 @@
+{{- $sqsLabelQueueName := printf "{{ $labels.queue_name }}"}}
+{{- $targetNamespace := .Release.Namespace }}
+{{- $targetApplicationBusinessHours := printf "and ON() %s:business_hours" ( index .Values "generic-prometheus-alerts" "targetApplication") | replace "-" "_" }}
+{{- $businessOrAllHoursExpression := ternary $targetApplicationBusinessHours "" ( index .Values "generic-prometheus-alerts" "businessHoursOnly") }}
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "app.fullname" . }}-sqs-index
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: prisoner-offender-search-sqs
+      rules:
+        - alert: SQS-oldest-message
+          annotations:
+            dashboard_url: {{ $.Values.grafanaUrl }}/d/AWSSQS000/aws-sqs?orgId=1&var-datasource=Cloudwatch&var-region=default&var-queue={{ $sqsLabelQueueName }}&from=now-6h&to=now
+            message: "SQS - {{ $sqsLabelQueueName }} has message older than 3 hours, check consumers are healthy. This alert configured by app {{ $targetNamespace }}/{{ include "app.name" . }}."
+            runbook_url: {{ $.Values.runbookUrl }}sqs-oldest-message
+          expr: |-
+            (sum(aws_sqs_approximate_age_of_oldest_message_maximum{queue_name=~"{{ join "|" .Values.indexQueueNames}}"} offset 5m) by (queue_name) > 10 * 60)
+            {{ $businessOrAllHoursExpression }}
+          for: 3h
+          labels:
+            severity: syscon
+        - alert: SQS-number-of-messages
+          annotations:
+            dashboard_url: {{ $.Values.grafanaUrl }}/d/AWSSQS000/aws-sqs?orgId=1&var-datasource=Cloudwatch&var-region=default&var-queue={{ $sqsLabelQueueName }}&from=now-6h&to=now
+            message: "SQS - {{ $sqsLabelQueueName }} - number of messages={{`{{`}} $value {{`}}`}} (exceeds 1), check consumers are healthy."
+            runbook_url: {{ $.Values.runbookUrl }}sqs-number-of-messages
+          expr: |-
+            (sum(aws_sqs_approximate_number_of_messages_visible_maximum{queue_name=~"{{ join "|" .Values.indexQueueNames}}"} offset 5m) by (queue_name) > 1)
+            {{ $businessOrAllHoursExpression }}
+          for: 3h
+          labels:
+            severity: syscon

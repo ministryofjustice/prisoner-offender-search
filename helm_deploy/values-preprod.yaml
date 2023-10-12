@@ -33,10 +33,12 @@ generic-prometheus-alerts:
     - "Digital-Prison-Services-preprod-prisoner_offender_search_queue_dl"
     - "Digital-Prison-Services-preprod-prisoner_offender_search_domain_queue"
     - "Digital-Prison-Services-preprod-prisoner_offender_search_domain_dlq"
-    - "dps-preprod-prisoner_offender_index_queue"
-    - "dps-preprod-prisoner_offender_index_queue_dl"
   sqsAlertsOldestThreshold: 10
   sqsAlertsTotalMessagesThreshold: 1
+
+indexQueueNames:
+  - "dps-preprod-prisoner_offender_index_queue"
+  - "dps-preprod-prisoner_offender_index_queue_dl"
 
 cron:
   snapshotNamespace: prisoner-offender-search-prod
