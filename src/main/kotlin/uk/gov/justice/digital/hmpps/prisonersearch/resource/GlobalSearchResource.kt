@@ -54,7 +54,7 @@ class GlobalSearchResource(
   @Operation(
     summary = "Get prisoner by prisoner number (AKA NOMS number)",
     description = "Requires ROLE_PRISONER_SEARCH or ROLE_VIEW_PRISONER_DATA role",
-    security = [SecurityRequirement(name = "ROLE_VIEW_PRISONER_DATA"), SecurityRequirement(name = "ROLE_PRISONER_SEARCH")],
+    security = [SecurityRequirement(name = "view-prisoner-data-role"), SecurityRequirement(name = "prisoner-search-role")],
   )
   @Tag(name = "Popular")
   fun findByPrisonNumber(@PathVariable id: String) =
