@@ -20,7 +20,7 @@ class RestrictedPatientServiceImpl(@Qualifier("restrictedPatientsWebClient") val
   RestrictedPatientService {
   override fun getRestrictedPatient(prisonerNumber: String): RestrictedPatientDto? {
     try {
-      return webClient.get().uri("/restricted-patient/prison-number/$prisonerNumber")
+      return webClient.get().uri("/restricted-patient/prison-number/{prisonerNumber}", prisonerNumber)
         .retrieve()
         .bodyToMono(RestrictedPatientDto::class.java)
         .block()
