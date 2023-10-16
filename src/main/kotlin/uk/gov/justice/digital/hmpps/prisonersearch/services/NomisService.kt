@@ -34,7 +34,7 @@ class NomisService(
 
   fun getNomsNumberForBooking(bookingId: Long): String? {
     return prisonWebClient.get()
-      .uri("/api/bookings/$bookingId?basicInfo=true")
+      .uri("/api/bookings/{bookingId}?basicInfo=true", bookingId)
       .retrieve()
       .bodyToMono(OffenderBooking::class.java)
       .onErrorResume(NotFound::class.java) { Mono.empty() }
@@ -44,7 +44,7 @@ class NomisService(
 
   fun getOffender(offenderNo: String): OffenderBooking? {
     return prisonWebClient.get()
-      .uri("/api/offenders/$offenderNo")
+      .uri("/api/offenders/{offenderNo}", offenderNo)
       .retrieve()
       .bodyToMono(OffenderBooking::class.java)
       .onErrorResume(NotFound::class.java) { Mono.empty() }
@@ -53,7 +53,7 @@ class NomisService(
 
   fun getMergedIdentifiersByBookingId(bookingId: Long): List<BookingIdentifier>? {
     return prisonWebClient.get()
-      .uri("/api/bookings/$bookingId/identifiers?type=MERGED")
+      .uri("/api/bookings/{bookingId}/identifiers?type=MERGED", bookingId)
       .retrieve()
       .bodyToMono(identifiers)
       .onErrorResume(NotFound::class.java) { Mono.empty() }
