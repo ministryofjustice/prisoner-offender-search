@@ -160,7 +160,7 @@ class DomainEventsResourceTest : QueueIntegrationTest() {
 
     val message = readNextDomainEventMessage()
 
-    assertThatJson(message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.received")
+    assertThatJson(message).node("eventType").isEqualTo("test.prisoner-offender-search.prisoner.received")
     assertThatJson(message).node("version").isEqualTo(1)
     assertThatJson(message).node("occurredAt").isEqualTo("2020-07-19T12:30:12+01:00")
     assertThatJson(message).node("additionalInformation.nomsNumber").isEqualTo("A2483AA")

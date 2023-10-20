@@ -68,3 +68,4 @@ index:
 
 diff:
   events: true
+  prefix: test.

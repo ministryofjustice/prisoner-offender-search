@@ -32,7 +32,12 @@ class HmppsDomainEventsEmitterTest {
 
   private val objectMapper = ObjectMapper()
   private val hmppsQueueService = mock<HmppsQueueService>()
-  private val diffProperties = mock<DiffProperties>()
+  private val diffProperties = DiffProperties(
+    telemetry = true,
+    events = true,
+    host = "some_host",
+    prefix = "test.",
+  )
   private val clock = mock<Clock>()
   private val telemetryClient = mock<TelemetryClient>()
   private val hmppsDomainEventEmitter =
@@ -47,7 +52,6 @@ class HmppsDomainEventsEmitterTest {
       whenever(clock.instant()).thenReturn(it.instant())
       whenever(clock.zone).thenReturn(it.zone)
     }
-    whenever(diffProperties.host).thenReturn("some_host")
   }
 
   @Nested
@@ -58,7 +62,7 @@ class HmppsDomainEventsEmitterTest {
 
       verify(topicSnsClient).publish(
         check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.updated")
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("test.prisoner-offender-search.prisoner.updated")
         },
       )
     }
@@ -81,7 +85,7 @@ class HmppsDomainEventsEmitterTest {
 
       verify(topicSnsClient).publish(
         check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.created")
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("test.prisoner-offender-search.prisoner.created")
         },
       )
     }
@@ -104,7 +108,7 @@ class HmppsDomainEventsEmitterTest {
 
       verify(topicSnsClient).publish(
         check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.received")
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("test.prisoner-offender-search.prisoner.received")
         },
       )
     }
@@ -114,9 +118,9 @@ class HmppsDomainEventsEmitterTest {
       hmppsDomainEventEmitter.emitPrisonerReceiveEvent("some_offender", READMISSION, "MDI")
 
       verify(telemetryClient).trackEvent(
-        eq("prisoner-offender-search.prisoner.received"),
+        eq("test.prisoner-offender-search.prisoner.received"),
         check {
-          assertThat(it["eventType"]).isEqualTo("prisoner-offender-search.prisoner.received")
+          assertThat(it["eventType"]).isEqualTo("test.prisoner-offender-search.prisoner.received")
           assertThat(it["version"]).isEqualTo("1")
           assertThat(it["description"]).isEqualTo("A prisoner has been received into a prison with reason: re-admission on an existing booking")
           assertThat(it["additionalInformation.nomsNumber"]).isEqualTo("some_offender")
@@ -153,7 +157,7 @@ class HmppsDomainEventsEmitterTest {
 
       verify(topicSnsClient).publish(
         check {
-          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
+          assertThat(it.messageAttributes["eventType"]?.stringValue).isEqualTo("test.prisoner-offender-search.prisoner.alerts-updated")
         },
       )
     }
@@ -163,9 +167,9 @@ class HmppsDomainEventsEmitterTest {
       hmppsDomainEventEmitter.emitPrisonerAlertsUpdatedEvent("some_offender", "1234567", setOf("XA", "XT"), setOf("ZZ"))
 
       verify(telemetryClient).trackEvent(
-        eq("prisoner-offender-search.prisoner.alerts-updated"),
+        eq("test.prisoner-offender-search.prisoner.alerts-updated"),
         check {
-          assertThat(it["eventType"]).isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
+          assertThat(it["eventType"]).isEqualTo("test.prisoner-offender-search.prisoner.alerts-updated")
           assertThat(it["version"]).isEqualTo("1")
           assertThat(it["description"]).isEqualTo("A prisoner had their alerts updated, added: 2, removed: 1")
           assertThat(it["additionalInformation.nomsNumber"]).isEqualTo("some_offender")
