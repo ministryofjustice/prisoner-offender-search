@@ -51,7 +51,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     val message = readNextDomainEventMessage()
 
-    assertThatJson(message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
+    assertThatJson(message).node("eventType").isEqualTo("test.prisoner-offender-search.prisoner.updated")
     assertThatJson(message).node("version").isEqualTo(1)
     assertThatJson(message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
@@ -73,7 +73,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
 
     val message: MsgBody = objectMapper.readValue(result.body)
 
-    assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.created")
+    assertThatJson(message.Message).node("eventType").isEqualTo("test.prisoner-offender-search.prisoner.created")
     assertThatJson(message.Message).node("version").isEqualTo(1)
     assertThatJson(message.Message).node("occurredAt").isEqualTo("2022-09-16T11:40:34+01:00")
     assertThatJson(message.Message).node("detailUrl").isEqualTo("http://localhost:8080/prisoner/some_offender")
@@ -94,7 +94,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
     val message: MsgBody = objectMapper.readValue(result.body)
 
-    assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.received")
+    assertThatJson(message.Message).node("eventType").isEqualTo("test.prisoner-offender-search.prisoner.received")
     assertThatJson(message.Message).node("version").isEqualTo(1)
     assertThatJson(message.Message).node("description")
       .isEqualTo("A prisoner has been received into a prison with reason: transfer from another prison")
@@ -119,7 +119,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     hmppsEventsQueue.sqsClient.deleteMessage(hmppsEventsQueue.queueUrl, result.receiptHandle)
     val message: MsgBody = objectMapper.readValue(result.body)
 
-    assertThatJson(message.Message).node("eventType").isEqualTo("prisoner-offender-search.prisoner.released")
+    assertThatJson(message.Message).node("eventType").isEqualTo("test.prisoner-offender-search.prisoner.released")
     assertThatJson(message.Message).node("version").isEqualTo(1)
     assertThatJson(message.Message).node("description")
       .isEqualTo("A prisoner has been released from a prison with reason: transfer to another prison")
@@ -150,7 +150,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
     val updateMsgBody = readNextDomainEventMessage()
-    assertThatJson(updateMsgBody).node("eventType").isEqualTo("prisoner-offender-search.prisoner.updated")
+    assertThatJson(updateMsgBody).node("eventType").isEqualTo("test.prisoner-offender-search.prisoner.updated")
     assertThatJson(updateMsgBody).node("additionalInformation.nomsNumber").isEqualTo("A1239DD")
     assertThatJson(updateMsgBody).node("additionalInformation.categoriesChanged").isArray.containsExactlyInAnyOrder("PERSONAL_DETAILS")
   }
@@ -175,10 +175,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.updated")
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.released")
+      .isEqualTo("test.prisoner-offender-search.prisoner.released")
   }
 
   @Test
@@ -201,10 +201,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.updated")
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.received")
+      .isEqualTo("test.prisoner-offender-search.prisoner.received")
   }
 
   @Test
@@ -234,10 +234,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.updated")
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.alerts-updated")
   }
 
   @Test
@@ -264,7 +264,7 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 1 }
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.updated")
   }
 
   @Test
@@ -294,10 +294,10 @@ class HmppsDomainEventsEmitterIntTest : QueueIntegrationTest() {
     await untilCallTo { getNumberOfMessagesCurrentlyOnDomainQueue() } matches { it == 2 }
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.updated")
 
     assertThatJson(readNextDomainEventMessage()).node("eventType")
-      .isEqualTo("prisoner-offender-search.prisoner.alerts-updated")
+      .isEqualTo("test.prisoner-offender-search.prisoner.alerts-updated")
   }
 
   @Test

@@ -14,6 +14,7 @@ generic-service:
     DIFF_TELEMETRY: true
     DIFF_EVENTS: true
     INDEX_INCENTIVES: true
+    DIFF_PREFIX: "ignored."
 
   # Additional allowlist rules
   # See also allowlist values helm_deploy/prisoner-offender-search/values.yaml

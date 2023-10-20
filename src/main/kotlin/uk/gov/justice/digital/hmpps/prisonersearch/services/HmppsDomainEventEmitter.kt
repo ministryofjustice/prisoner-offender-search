@@ -55,15 +55,24 @@ class HmppsDomainEventEmitter(
       defaultFailureHandler(this, it)
     },
   ) {
-    val request = PublishRequest(topicArn, objectMapper.writeValueAsString(this))
+    val event = PrisonerDomainEvent(
+      additionalInformation = this.additionalInformation,
+      eventType = "${diffProperties.prefix}${this.eventType}",
+      occurredAt = this.occurredAt,
+      version = this.version,
+      description = this.description,
+      detailUrl = this.detailUrl,
+    )
+
+    val request = PublishRequest(topicArn, objectMapper.writeValueAsString(event))
       .addMessageAttributesEntry(
         "eventType",
-        MessageAttributeValue().withDataType("String").withStringValue(this.eventType),
+        MessageAttributeValue().withDataType("String").withStringValue(event.eventType),
       )
 
     runCatching {
       topicSnsClient.publish(request)
-      telemetryClient.trackEvent(this.eventType, this.asMap(), null)
+      telemetryClient.trackEvent(event.eventType, event.asMap(), null)
     }.onFailure(onFailure)
   }
 
