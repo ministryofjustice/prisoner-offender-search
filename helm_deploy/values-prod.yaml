@@ -13,8 +13,8 @@ generic-service:
     INDEX_COMPLETE_THRESHOLD: 500000
     DIFF_TELEMETRY: true
     DIFF_EVENTS: true
-    DIFF_PREFIX: ""
     INDEX_INCENTIVES: true
+    DIFF_PREFIX: "ignored."
 
   # Additional allowlist rules
   # See also allowlist values helm_deploy/prisoner-offender-search/values.yaml
